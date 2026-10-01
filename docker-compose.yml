@@ -1,0 +1,68 @@
+# Fixed project name: the database volume is "obesity-trials-platform-ctgov_pgdata"
+# whatever folder this file is unzipped into, so upgrades keep your data.
+name: obesity-trials-platform-ctgov
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: obesity_trials
+    ports:
+      - "55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d obesity_trials"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: apply the schema, then exit. Runs on every start; every migration is
+  # idempotent. On an OLDER database it converts it to the lean schema (keeping
+  # phase, sponsor, indication, interventions and location; dropping the rest).
+  migrate:
+    image: node:22-bookworm
+    depends_on:
+      db: { condition: service_healthy }
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/obesity_trials
+    entrypoint: ["bash", "-lc"]
+    command:
+      - "apt-get update -qq && apt-get install -y -qq postgresql-client >/dev/null && bash db/run-migrations.sh"
+
+  # Daily auto-update. On first boot (empty DB) it runs a FULL backfill of every
+  # obesity trial with StartDate >= 2000; thereafter it runs an incremental sync
+  # every day at midnight (SYNC_TZ), upserting edited trials and new postings.
+  # It also (re)builds the drug products after an upgrade. Manual product info
+  # entered on the drug pages is never overwritten.
+  scheduler:
+    build: ./sync
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/obesity_trials
+      CTGOV_CONDITION: obesity
+      CTGOV_START_DATE_FROM: "2000-01-01"
+      CTGOV_STATUSES: ""            # empty => all statuses (full history)
+      CTGOV_INTERVENTION_TYPES: "DRUG"   # drug/capsule studies only; "" => all study types
+      SYNC_CRON: "0 0 * * *"        # midnight
+      SYNC_TZ: "Asia/Kolkata"       # change to your timezone
+      SYNC_BACKFILL_ON_START: "true"
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/obesity_trials
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

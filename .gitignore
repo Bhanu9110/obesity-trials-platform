@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# builds
+.next/
+dist/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+
+# logs / os
+*.log
+.DS_Store
+
+# local postgres data (docker volume is separate)
+pgdata/
+obesity_trials_backup.sql
+_old_build/

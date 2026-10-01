@@ -1,0 +1,10 @@
+# Example crontab for the obesity-trials platform (only needed if you are NOT
+# using docker compose, whose scheduler service already does this).
+# Install with:  crontab scripts/crontab.example   (edit paths/env first)
+
+# Nightly incremental sync from ClinicalTrials.gov at 02:00
+0 2 * * *  cd /opt/obesity-trials-platform/sync && DATABASE_URL=... npm run sync >> /var/log/obesity-sync.log 2>&1
+
+# Weekly full reconciliation sync on Sunday 03:00 (catches anything the
+# incremental window missed)
+0 3 * * 0  cd /opt/obesity-trials-platform/sync && DATABASE_URL=... npm run sync:full >> /var/log/obesity-sync.log 2>&1
