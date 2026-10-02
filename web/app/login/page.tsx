@@ -1,10 +1,9 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -27,8 +26,9 @@ function LoginForm() {
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      router.replace(next);
-      router.refresh();
+      // Full page load (not client-side navigation): the router may still hold the
+      // pre-login "redirect to /login" for this page, which would leave us here.
+      window.location.assign(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setBusy(false);

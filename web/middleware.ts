@@ -8,6 +8,15 @@ export async function middleware(req: NextRequest) {
   if (authDisabled()) return NextResponse.next();
 
   const { pathname, search } = req.nextUrl;
+
+  // Already signed in? The login page sends you on to where you were going.
+  if (pathname === "/login" && authConfigured()) {
+    if (await verifySession(req.cookies.get(SESSION_COOKIE)?.value)) {
+      const raw = req.nextUrl.searchParams.get("next") || "/";
+      const dest = raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/login") ? raw : "/";
+      return NextResponse.redirect(new URL(dest, req.url));
+    }
+  }
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
   // Fail closed: a hosted site with no login configured must not be open.
