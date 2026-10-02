@@ -8,7 +8,7 @@ export const config = {
     baseUrl: process.env.CTGOV_BASE_URL ?? "https://clinicaltrials.gov/api/v2",
     // The condition keyword that scopes this platform. Only "obesity" trials.
     condition: process.env.CTGOV_CONDITION ?? "obesity",
-    pageSize: Number(process.env.CTGOV_PAGE_SIZE ?? 100),
+    pageSize: Number(process.env.CTGOV_PAGE_SIZE ?? 1000),
     // Statuses to include. Empty string => ALL statuses (used for the full
     // backfill so historical/terminated trials since 2000 are included).
     statuses: (process.env.CTGOV_STATUSES ?? "")

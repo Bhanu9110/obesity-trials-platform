@@ -150,4 +150,5 @@ Open the file in Notepad, copy everything, and add it as `DATABASE_CA_CERT` in V
 | *"password authentication failed"* | Wrong password, or it contains special characters → reset it (Supabase → *Project Settings → Database*) using letters and numbers only, update both strings. |
 | *"Network is unreachable"* / timeout | You used the Direct connection (`db.xxxx.supabase.co`) — use the pooler strings. |
 | Site was working, now errors / HTTP 540 | Supabase project paused → dashboard → **Restore project**. |
+| First full run was cut off (time limit) | Just run it again — trials already stored are skipped. A daily run also finishes an incomplete first download by itself. |
 | Daily runs stopped | GitHub → Actions → *Daily CT.gov sync* → **Enable workflow**. |

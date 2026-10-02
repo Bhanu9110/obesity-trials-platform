@@ -244,6 +244,43 @@ test("lineage: raw_trials, trial_sources, timestamps, parser version, change det
   assert.equal((await pool.query("SELECT count(*)::int c FROM trial_sources WHERE source_id=$1", [id])).rows[0].c, 0);
 });
 
+test("batched sync: many trials, duplicates, mixed new / unchanged / filtered", async () => {
+  const ids = Array.from({ length: 600 }, (_, i) => `NCT9988${String(i).padStart(4, "0")}`);
+  await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [ids]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = ANY($1)", [ids]);
+  const drugs = ["Semaglutide 2.4 mg", "Tirzepatide", "Orforglipron", "Retatrutide"];
+  const mk = (id: string, i: number, over: any = {}) =>
+    study(id, { interventions: [{ type: "DRUG", name: drugs[i % 4] }, { type: "DRUG", name: "Placebo" }], ...over });
+
+  // 600 trials (crosses the batch size) + a duplicate of the first one.
+  const r1 = await runSyncForStudies([...ids.map((id, i) => mk(id, i)), mk(ids[0], 0)]);
+  assert.equal(r1.failed, 0);
+  assert.equal(r1.upserted, 600);
+  const c = (await pool.query(
+    `SELECT (SELECT count(*)::int FROM trials WHERE nct_id = ANY($1)) t,
+            (SELECT count(*)::int FROM raw_trials WHERE source_id = ANY($1)) r,
+            (SELECT count(*)::int FROM trial_sources WHERE source_id = ANY($1)) s,
+            (SELECT count(*)::int FROM trial_quality WHERE trial_id = ANY($1)) q,
+            (SELECT count(*)::int FROM trial_products WHERE nct_id = ANY($1)) tp`, [ids])).rows[0];
+  assert.deepEqual(c, { t: 600, r: 600, s: 600, q: 600, tp: 600 });
+  const sema = (await pool.query(
+    `SELECT count(*)::int c FROM trial_products tp JOIN products p ON p.id = tp.product_id
+      WHERE p.slug = 'semaglutide' AND tp.nct_id = ANY($1)`, [ids])).rows[0].c;
+  assert.equal(sema, 150);
+  assert.deepEqual((await pool.query("SELECT continents FROM trials WHERE nct_id=$1", [ids[5]])).rows[0].continents.sort(),
+    ["Europe", "North America"]);
+
+  // Second pass: 1 changed, 1 now out of scope, the rest unchanged.
+  const r2 = await runSyncForStudies(ids.map((id, i) =>
+    i === 1 ? mk(id, i, { phase: ["PHASE2"] }) : i === 2 ? mk(id, i, { conditions: ["Type 2 Diabetes"] }) : mk(id, i)));
+  assert.deepEqual([r2.upserted, r2.filtered, r2.unchanged, r2.failed], [1, 1, 598, 0]);
+  assert.equal((await pool.query("SELECT version FROM trials WHERE nct_id=$1", [ids[1]])).rows[0].version, 2);
+  assert.equal((await pool.query("SELECT count(*)::int c FROM trials WHERE nct_id=$1", [ids[2]])).rows[0].c, 0);
+
+  await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [ids]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = ANY($1)", [ids]);
+});
+
 test("re-parse from raw_trials without downloading", async () => {
   const id = "NCT99999030";
   await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);

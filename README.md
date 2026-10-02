@@ -126,6 +126,10 @@ Every ingested record is traceable:
 | `sync_runs` | + mode (full / incremental / reparse), parser version, unchanged and filtered counts. |
 
 Unchanged records (same content hash and parser) are skipped — only `last_seen_at` moves.
+Records are written in batches (`SYNC_BATCH_SIZE`, default 250) with a few set-based
+statements per batch, so a full download stays quick even when the database is far away
+(GitHub's US runners → a Supabase project in Mumbai: ~2 minutes instead of hours).
+If a first full download is ever cut off, the next run finishes it automatically.
 When the parser changes (`PARSER_VERSION` in `sync/src/mapper.ts`), stored raw records are
 re-parsed automatically on the next start — no re-download. A database upgraded from the
 previous version gets one automatic full sync to fill in its lineage.

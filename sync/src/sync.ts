@@ -75,74 +75,97 @@ export async function loadProductContext(): Promise<ProductContext> {
   return { aliases, known };
 }
 
-/** Link one trial to its products (inside the caller's transaction). */
-async function linkProducts(client: Client, nctId: string, products: ProductRef[]): Promise<void> {
-  await client.query("DELETE FROM trial_products WHERE nct_id = $1", [nctId]);
-  for (const p of products) {
-    // Insert the product if new; never touch an existing product's manual fields.
-    await client.query(
-      `WITH p AS (
-         INSERT INTO products (slug, name) VALUES ($1, $2)
-         ON CONFLICT (slug) DO UPDATE SET slug = EXCLUDED.slug
-         RETURNING id
-       )
-       INSERT INTO trial_products (nct_id, product_id)
-       SELECT $3, id FROM p
-       ON CONFLICT DO NOTHING`,
-      [p.slug, p.name, nctId],
-    );
-  }
+// --------------------------------------------------------------------------- #
+// Batched writes
+//
+// The hosted database can be far away (GitHub's runners are in the US, the
+// Supabase project may be in Mumbai: ~200 ms per round trip). So trials are
+// written in batches — a handful of set-based statements per batch of a few
+// hundred trials — instead of ~10 statements per trial.
+// --------------------------------------------------------------------------- #
+const BATCH_SIZE = Math.max(1, Number(process.env.SYNC_BATCH_SIZE ?? 250));
+
+type Db = Client | typeof pool;
+
+function chunks<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
 }
 
-// --------------------------------------------------------------------------- #
-// Data quality
-// --------------------------------------------------------------------------- #
-async function writeQuality(
-  client: Client,
-  mapped: MappedTrial,
-  kept: string[],
-  productCount: number,
-): Promise<void> {
-  const geo = await client.query<{ continents: string[]; unknown: string[] }>(
-    `SELECT continents,
+interface QualityInput {
+  mapped: MappedTrial;
+  kept: string[];
+  productCount: number;
+}
+
+/** Compute and store trial_quality for a set of stored trials (two round trips). */
+async function writeQualityBatch(db: Db, items: QualityInput[]): Promise<void> {
+  if (!items.length) return;
+  const geo = await db.query<{ nct_id: string; continents: string[]; unknown: string[] }>(
+    `SELECT nct_id, continents,
             ARRAY(SELECT c FROM unnest(countries) c WHERE continent_of(c) = 'Other') AS unknown
-       FROM trials WHERE nct_id = $1`,
-    [mapped.nct_id],
+       FROM trials WHERE nct_id = ANY($1)`,
+    [items.map((i) => i.mapped.nct_id)],
   );
-  const q = assessQuality(mapped, kept, productCount, geo.rows[0]?.continents ?? [], geo.rows[0]?.unknown ?? []);
-  await client.query(
+  const geoOf = new Map(geo.rows.map((g) => [g.nct_id, g]));
+  const rows = items
+    .filter((i) => geoOf.has(i.mapped.nct_id))
+    .map((i) => {
+      const g = geoOf.get(i.mapped.nct_id)!;
+      const q = assessQuality(i.mapped, i.kept, i.productCount, g.continents ?? [], g.unknown ?? []);
+      return {
+        trial_id: i.mapped.nct_id, score: q.score, error_count: q.error_count,
+        warning_count: q.warning_count, info_count: q.info_count, issues: q.issues,
+      };
+    });
+  if (!rows.length) return;
+  await db.query(
     `INSERT INTO trial_quality (trial_id, score, error_count, warning_count, info_count, issues, parser_version, checked_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, now())
+     SELECT x.trial_id, x.score, x.error_count, x.warning_count, x.info_count, x.issues, $2, now()
+       FROM jsonb_to_recordset($1::jsonb)
+         AS x(trial_id text, score numeric, error_count int, warning_count int, info_count int, issues jsonb)
      ON CONFLICT (trial_id) DO UPDATE SET
        score = EXCLUDED.score, error_count = EXCLUDED.error_count, warning_count = EXCLUDED.warning_count,
        info_count = EXCLUDED.info_count, issues = EXCLUDED.issues, parser_version = EXCLUDED.parser_version,
        checked_at = now()`,
-    [mapped.nct_id, q.score, q.error_count, q.warning_count, q.info_count, JSON.stringify(q.issues), PARSER_VERSION],
+    [JSON.stringify(rows), PARSER_VERSION],
   );
 }
 
-// --------------------------------------------------------------------------- #
-// Writing one trial (shared by live sync and re-parse)
-// --------------------------------------------------------------------------- #
+/** Keep the last occurrence of each trial (a statement can't upsert one row twice). */
+function dedupe<T>(items: T[], key: (t: T) => string): T[] {
+  const m = new Map<string, T>();
+  for (const it of items) m.set(key(it), it);
+  return [...m.values()];
+}
+
 /**
- * Write the canonical trial row, its source link, product links and quality
- * record (inside the caller's transaction). The trial's `version` and
- * `last_changed_at` only move when the mapped record actually changed.
+ * Write canonical trial rows, their source links, product links and quality
+ * records for a batch of mapped trials (inside the caller's transaction).
+ * A trial's `version` / `last_changed_at` only move when its record really changed.
  */
-async function writeTrial(
-  client: Client,
-  mapped: MappedTrial,
+async function writeTrialsBatch(
+  c: Client,
+  trials: MappedTrial[],
   ctx: ProductContext,
   runId: string | null,
 ): Promise<void> {
-  const recordHash = contentHash(mapped);
-  const { kept, products } = deriveTrialProducts(mapped.interventions, ctx.aliases, ctx.known);
+  const list = dedupe(trials, (t) => t.nct_id);
+  if (!list.length) return;
+  const derived = list.map((m) => ({ m, ...deriveTrialProducts(m.interventions, ctx.aliases, ctx.known) }));
+  const ids = list.map((m) => m.nct_id);
 
-  await client.query(
+  await c.query(
     `INSERT INTO trials (nct_id, phase, sponsor, lead_sponsor_class, conditions, interventions,
                          countries, continents, source_updated_at, is_active, record_hash, version,
                          parser_version, last_run_id, first_seen_at, last_seen_at, last_changed_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, continents_of($7::text[]), $8, true, $9, 1, $10, $11, now(), now(), now())
+     SELECT x.nct_id, x.phase, x.sponsor, x.lead_sponsor_class, x.conditions, x.interventions,
+            x.countries, continents_of(x.countries), x.source_updated_at, true, x.record_hash, 1,
+            $2, $3, now(), now(), now()
+       FROM jsonb_to_recordset($1::jsonb)
+         AS x(nct_id text, phase text, sponsor text, lead_sponsor_class text, conditions text[],
+              interventions text[], countries text[], source_updated_at date, record_hash text)
      ON CONFLICT (nct_id) DO UPDATE SET
         phase              = EXCLUDED.phase,
         sponsor            = EXCLUDED.sponsor,
@@ -163,64 +186,73 @@ async function writeTrial(
                                   THEN EXCLUDED.last_run_id ELSE trials.last_run_id END,
         record_hash        = EXCLUDED.record_hash`,
     [
-      mapped.nct_id, mapped.phase, mapped.sponsor, mapped.lead_sponsor_class, mapped.conditions,
-      kept, mapped.countries, mapped.source_updated_at, recordHash, PARSER_VERSION, runId,
+      JSON.stringify(derived.map(({ m, kept }) => ({
+        nct_id: m.nct_id, phase: m.phase, sponsor: m.sponsor, lead_sponsor_class: m.lead_sponsor_class,
+        conditions: m.conditions, interventions: kept, countries: m.countries,
+        source_updated_at: m.source_updated_at, record_hash: contentHash(m),
+      }))),
+      PARSER_VERSION,
+      runId,
     ],
   );
-  await client.query(
+
+  await c.query(
     `INSERT INTO trial_sources (source, source_id, trial_id, source_url, is_primary, source_updated_at, first_seen_at, last_seen_at)
-     VALUES ($1, $2, $2, $3, true, $4, now(), now())
+     SELECT $1, x.id, x.id, x.url, true, x.updated, now(), now()
+       FROM jsonb_to_recordset($2::jsonb) AS x(id text, url text, updated date)
      ON CONFLICT (source, source_id) DO UPDATE SET
        trial_id = EXCLUDED.trial_id, source_url = EXCLUDED.source_url,
        source_updated_at = EXCLUDED.source_updated_at, last_seen_at = now()`,
-    [SOURCE, mapped.nct_id, ctgovUrl(mapped.nct_id), mapped.source_updated_at],
+    [SOURCE, JSON.stringify(list.map((m) => ({ id: m.nct_id, url: ctgovUrl(m.nct_id), updated: m.source_updated_at })))],
   );
-  await linkProducts(client, mapped.nct_id, products);
-  await writeQuality(client, mapped, kept, products.length);
-}
 
-/** Remove a stored trial (and its raw record): it is no longer in scope. */
-async function deleteTrial(client: Client | typeof pool, nctId: string): Promise<void> {
-  await client.query("DELETE FROM trials WHERE nct_id = $1", [nctId]); // cascades sources/products/quality
-  await client.query("DELETE FROM raw_trials WHERE source = $1 AND source_id = $2", [SOURCE, nctId]);
-}
-
-type IngestOutcome = "upserted" | "unchanged" | "filtered";
-
-/**
- * Ingest one CT.gov record: trim to the fields we use, hash, and skip it when
- * the content hash and parser version are unchanged (only `last_seen_at` moves).
- */
-async function ingestStudy(client: Client, raw: RawStudy, ctx: ProductContext, runId: string | null): Promise<IngestOutcome> {
-  const payload = trimPayload(raw);
-  const mapped = mapStudy(payload);
-  if (!mapped.nct_id) throw new Error("missing nct_id");
-
-  // Keep only primary-obesity-indication trials; drop one that stopped qualifying.
-  if (config.ctgov.obesityIndicationOnly && !isObesityIndication(mapped.conditions)) {
-    await deleteTrial(client, mapped.nct_id);
-    return "filtered";
+  // Product links: replace this batch's links. New products are inserted; an
+  // existing product's name and manual fields are never touched here.
+  await c.query("DELETE FROM trial_products WHERE nct_id = ANY($1)", [ids]);
+  const links = derived.flatMap(({ m, products }) => products.map((p) => ({ nct_id: m.nct_id, slug: p.slug, name: p.name })));
+  if (links.length) {
+    const firstName = dedupe([...links].reverse(), (l) => l.slug); // first spelling seen per slug
+    await c.query(
+      `INSERT INTO products (slug, name)
+       SELECT x.slug, x.name FROM jsonb_to_recordset($1::jsonb) AS x(slug text, name text)
+       ON CONFLICT (slug) DO NOTHING`,
+      [JSON.stringify(firstName.map((l) => ({ slug: l.slug, name: l.name })))],
+    );
+    await c.query(
+      `INSERT INTO trial_products (nct_id, product_id)
+       SELECT x.nct_id, p.id
+         FROM jsonb_to_recordset($1::jsonb) AS x(nct_id text, slug text)
+         JOIN products p ON p.slug = x.slug
+       ON CONFLICT DO NOTHING`,
+      [JSON.stringify(links.map((l) => ({ nct_id: l.nct_id, slug: l.slug })))],
+    );
   }
 
-  const hash = contentHash(payload);
-  const prev = await client.query<{ content_hash: string; parser_version: string; has_trial: boolean }>(
-    `SELECT r.content_hash, r.parser_version,
-            EXISTS (SELECT 1 FROM trials t WHERE t.nct_id = r.source_id) AS has_trial
-       FROM raw_trials r WHERE r.source = $1 AND r.source_id = $2`,
-    [SOURCE, mapped.nct_id],
-  );
-  const p = prev.rows[0];
-  if (p && p.content_hash === hash && p.parser_version === PARSER_VERSION && p.has_trial) {
-    await client.query("UPDATE raw_trials SET last_seen_at = now() WHERE source = $1 AND source_id = $2", [SOURCE, mapped.nct_id]);
-    await client.query("UPDATE trial_sources SET last_seen_at = now() WHERE source = $1 AND source_id = $2", [SOURCE, mapped.nct_id]);
-    await client.query("UPDATE trials SET last_seen_at = now() WHERE nct_id = $1", [mapped.nct_id]);
-    return "unchanged";
-  }
+  await writeQualityBatch(c, derived.map(({ m, kept, products }) => ({ mapped: m, kept, productCount: products.length })));
+}
 
-  await client.query(
+/** Remove stored trials (and their raw records): they are no longer in scope. */
+async function deleteTrials(db: Db, nctIds: string[]): Promise<void> {
+  if (!nctIds.length) return;
+  await db.query("DELETE FROM trials WHERE nct_id = ANY($1)", [nctIds]); // cascades sources/products/quality
+  await db.query("DELETE FROM raw_trials WHERE source = $1 AND source_id = ANY($2)", [SOURCE, nctIds]);
+}
+
+interface Prepared {
+  nct_id: string;
+  payload: RawStudy;
+  mapped: MappedTrial;
+  hash: string;
+}
+
+/** Upsert raw records (content hash, parser version, timestamps) for a batch. */
+async function upsertRawBatch(c: Client, items: Prepared[], runId: string | null): Promise<void> {
+  if (!items.length) return;
+  await c.query(
     `INSERT INTO raw_trials (source, source_id, payload, content_hash, parser_version, source_updated_at,
                              first_seen_at, last_seen_at, last_changed_at, last_run_id)
-     VALUES ($1, $2, $3, $4, $5, $6, now(), now(), now(), $7)
+     SELECT $1, x.id, x.payload, x.hash, $2, x.updated, now(), now(), now(), $3
+       FROM jsonb_to_recordset($4::jsonb) AS x(id text, payload jsonb, hash text, updated date)
      ON CONFLICT (source, source_id) DO UPDATE SET
        payload           = EXCLUDED.payload,
        parser_version    = EXCLUDED.parser_version,
@@ -231,10 +263,11 @@ async function ingestStudy(client: Client, raw: RawStudy, ctx: ProductContext, r
        last_run_id       = CASE WHEN raw_trials.content_hash IS DISTINCT FROM EXCLUDED.content_hash
                                 THEN EXCLUDED.last_run_id ELSE raw_trials.last_run_id END,
        content_hash      = EXCLUDED.content_hash`,
-    [SOURCE, mapped.nct_id, JSON.stringify(payload), hash, PARSER_VERSION, mapped.source_updated_at, runId],
+    [
+      SOURCE, PARSER_VERSION, runId,
+      JSON.stringify(items.map((p) => ({ id: p.nct_id, payload: p.payload, hash: p.hash, updated: p.mapped.source_updated_at }))),
+    ],
   );
-  await writeTrial(client, mapped, ctx, runId);
-  return "upserted";
 }
 
 // --------------------------------------------------------------------------- #
@@ -265,6 +298,103 @@ async function finishRun(runId: string, res: Omit<SyncResult, "runId" | "duratio
   );
 }
 
+type Counts = { fetched: number; upserted: number; unchanged: number; filtered: number; failed: number; pages: number };
+
+async function recordFailure(errors: { nct_id: string; error: string }[], nctId: string, err: unknown): Promise<void> {
+  const msg = err instanceof Error ? err.message : String(err);
+  errors.push({ nct_id: nctId, error: msg });
+  await pool.query(
+    `INSERT INTO sync_failures (nct_id, failure_type, error_msg, retry_count, last_attempted)
+     VALUES ($1, 'map_or_upsert', $2, 0, now())`,
+    [nctId, msg],
+  );
+}
+
+/**
+ * Ingest a batch of CT.gov records: trim to the fields we use, hash, drop
+ * non-primary-obesity trials, skip unchanged records (same content hash and
+ * parser — only `last_seen_at` moves) and write the rest in one transaction.
+ * If that transaction fails, the batch is retried trial by trial so one bad
+ * record can't block the others.
+ */
+async function ingestBatch(
+  raws: RawStudy[],
+  ctx: ProductContext,
+  runId: string | null,
+  res: Counts,
+  errors: { nct_id: string; error: string }[],
+): Promise<void> {
+  const prepared: Prepared[] = [];
+  for (const raw of raws) {
+    const nctId = raw?.protocolSection?.identificationModule?.nctId ?? "UNKNOWN";
+    try {
+      const payload = trimPayload(raw);
+      const mapped = mapStudy(payload);
+      if (!mapped.nct_id) throw new Error("missing nct_id");
+      prepared.push({ nct_id: mapped.nct_id, payload, mapped, hash: contentHash(payload) });
+    } catch (err) {
+      res.failed += 1;
+      await recordFailure(errors, nctId, err);
+    }
+  }
+  const items = dedupe(prepared, (p) => p.nct_id);
+
+  // Keep only primary-obesity-indication trials; drop any that stopped qualifying.
+  const filtered = config.ctgov.obesityIndicationOnly
+    ? items.filter((p) => !isObesityIndication(p.mapped.conditions))
+    : [];
+  const filteredIds = new Set(filtered.map((p) => p.nct_id));
+  const kept = items.filter((p) => !filteredIds.has(p.nct_id));
+  if (filtered.length) {
+    await deleteTrials(pool, [...filteredIds]);
+    res.filtered += filtered.length;
+  }
+  if (!kept.length) return;
+
+  const prev = await pool.query<{ source_id: string; content_hash: string; parser_version: string; has_trial: boolean }>(
+    `SELECT r.source_id, r.content_hash, r.parser_version,
+            EXISTS (SELECT 1 FROM trials t WHERE t.nct_id = r.source_id) AS has_trial
+       FROM raw_trials r WHERE r.source = $1 AND r.source_id = ANY($2)`,
+    [SOURCE, kept.map((p) => p.nct_id)],
+  );
+  const prevOf = new Map(prev.rows.map((r) => [r.source_id, r]));
+  const unchanged: string[] = [];
+  const changed: Prepared[] = [];
+  for (const p of kept) {
+    const o = prevOf.get(p.nct_id);
+    if (o && o.content_hash === p.hash && o.parser_version === PARSER_VERSION && o.has_trial) unchanged.push(p.nct_id);
+    else changed.push(p);
+  }
+
+  if (unchanged.length) {
+    await pool.query("UPDATE raw_trials SET last_seen_at = now() WHERE source = $1 AND source_id = ANY($2)", [SOURCE, unchanged]);
+    await pool.query("UPDATE trial_sources SET last_seen_at = now() WHERE source = $1 AND source_id = ANY($2)", [SOURCE, unchanged]);
+    await pool.query("UPDATE trials SET last_seen_at = now() WHERE nct_id = ANY($1)", [unchanged]);
+    res.unchanged += unchanged.length;
+  }
+  if (!changed.length) return;
+
+  const write = (group: Prepared[]) =>
+    withTransaction(async (c) => {
+      await upsertRawBatch(c, group, runId);
+      await writeTrialsBatch(c, group.map((p) => p.mapped), ctx, runId);
+    });
+  try {
+    await write(changed);
+    res.upserted += changed.length;
+  } catch {
+    for (const p of changed) {
+      try {
+        await write([p]);
+        res.upserted += 1;
+      } catch (err) {
+        res.failed += 1;
+        await recordFailure(errors, p.nct_id, err);
+      }
+    }
+  }
+}
+
 /**
  * Core sync loop, shared by the live network sync and by tests.
  * `source` yields raw study payloads; `getPages` reports page progress.
@@ -273,32 +403,27 @@ async function runSyncCore(
   source: AsyncIterable<RawStudy>,
   getPages: () => number = () => 0,
   mode = "incremental",
+  onProgress?: (res: Counts) => void,
 ): Promise<SyncResult> {
   const started = Date.now();
   const ctx = await loadProductContext();
   const runId = await startRun(mode);
-  const res = { fetched: 0, upserted: 0, unchanged: 0, filtered: 0, failed: 0, pages: 0 };
+  const res: Counts = { fetched: 0, upserted: 0, unchanged: 0, filtered: 0, failed: 0, pages: 0 };
   const errors: { nct_id: string; error: string }[] = [];
 
   try {
+    let buf: RawStudy[] = [];
     for await (const raw of source) {
-      res.pages = getPages();
       res.fetched += 1;
-      const nctId = raw?.protocolSection?.identificationModule?.nctId ?? "UNKNOWN";
-      try {
-        const outcome = await withTransaction((c) => ingestStudy(c, raw, ctx, runId));
-        res[outcome] += 1;
-      } catch (err) {
-        res.failed += 1;
-        const msg = err instanceof Error ? err.message : String(err);
-        errors.push({ nct_id: nctId, error: msg });
-        await pool.query(
-          `INSERT INTO sync_failures (nct_id, failure_type, error_msg, retry_count, last_attempted)
-           VALUES ($1, 'map_or_upsert', $2, 0, now())`,
-          [nctId, msg],
-        );
+      buf.push(raw);
+      if (buf.length >= BATCH_SIZE) {
+        res.pages = getPages();
+        await ingestBatch(buf, ctx, runId, res, errors);
+        buf = [];
+        onProgress?.(res);
       }
     }
+    if (buf.length) await ingestBatch(buf, ctx, runId, res, errors);
     res.pages = getPages();
     await finishRun(runId, res, started, errors);
   } catch (err) {
@@ -324,9 +449,18 @@ export async function runSync(
   const source = iterateStudies({ incrementalDays: days, startDateFrom }, (pageIndex) => {
     pageCount = pageIndex + 1;
   });
-  const result = await runSyncCore(source, () => pageCount, full ? "full" : "incremental");
+  let lastLog = 0;
+  const result = await runSyncCore(source, () => pageCount, full ? "full" : "incremental", (r) => {
+    if (Date.now() - lastLog < 15_000) return; // progress line every ~15 s (visible in the GitHub log)
+    lastLog = Date.now();
+    console.log(`  … ${r.fetched} fetched · ${r.upserted} written · ${r.unchanged} unchanged · ` +
+      `${r.filtered} not obesity · ${r.failed} failed`);
+  });
   // A full backfill re-derives every product link with the corpus-wide known set.
-  if (full) await rebuildProducts();
+  if (full) {
+    await rebuildProducts();
+    await setMeta("full_sync_at", new Date().toISOString()); // the first full load is complete
+  }
   return result;
 }
 
@@ -357,23 +491,41 @@ export async function reparseFromRaw(opts: { all?: boolean } = {}): Promise<Repa
   const ctx = await loadProductContext();
   const out: ReparseResult = { runId, scanned: rows.rowCount ?? 0, reparsed: 0, filtered: 0, failed: 0 };
   const errors: { nct_id: string; error: string }[] = [];
-  for (const r of rows.rows) {
-    try {
-      await withTransaction(async (c) => {
+  const write = (group: { id: string; mapped: MappedTrial }[]) =>
+    withTransaction(async (c) => {
+      await writeTrialsBatch(c, group.map((g) => g.mapped), ctx, runId);
+      await c.query("UPDATE raw_trials SET parser_version = $2 WHERE source = $1 AND source_id = ANY($3)",
+        [SOURCE, PARSER_VERSION, group.map((g) => g.id)]);
+    });
+  for (const batch of chunks(rows.rows, BATCH_SIZE)) {
+    const mappedRows: { id: string; mapped: MappedTrial }[] = [];
+    const drop: string[] = [];
+    for (const r of batch) {
+      try {
         const mapped = mapStudy(r.payload);
-        if (config.ctgov.obesityIndicationOnly && !isObesityIndication(mapped.conditions)) {
-          await deleteTrial(c, r.source_id);
-          out.filtered += 1;
-          return;
+        if (config.ctgov.obesityIndicationOnly && !isObesityIndication(mapped.conditions)) drop.push(r.source_id);
+        else mappedRows.push({ id: r.source_id, mapped });
+      } catch (err) {
+        out.failed += 1;
+        errors.push({ nct_id: r.source_id, error: err instanceof Error ? err.message : String(err) });
+      }
+    }
+    await deleteTrials(pool, drop);
+    out.filtered += drop.length;
+    if (!mappedRows.length) continue;
+    try {
+      await write(mappedRows);
+      out.reparsed += mappedRows.length;
+    } catch {
+      for (const g of mappedRows) {
+        try {
+          await write([g]);
+          out.reparsed += 1;
+        } catch (err) {
+          out.failed += 1;
+          errors.push({ nct_id: g.id, error: err instanceof Error ? err.message : String(err) });
         }
-        await writeTrial(c, mapped, ctx, runId);
-        await c.query("UPDATE raw_trials SET parser_version = $3 WHERE source = $1 AND source_id = $2",
-          [SOURCE, r.source_id, PARSER_VERSION]);
-        out.reparsed += 1;
-      });
-    } catch (err) {
-      out.failed += 1;
-      errors.push({ nct_id: r.source_id, error: err instanceof Error ? err.message : String(err) });
+      }
     }
   }
   await finishRun(runId, { fetched: out.scanned, upserted: out.reparsed, unchanged: 0, filtered: out.filtered,
@@ -391,6 +543,18 @@ async function setMeta(key: string, value: string): Promise<void> {
     "INSERT INTO app_meta (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
     [key, value],
   );
+}
+
+/**
+ * Has a full download ever completed? (Databases from before this check count as
+ * complete if they had a successful full run or the one-off lineage backfill.)
+ */
+async function fullLoadCompleted(): Promise<boolean> {
+  if ((await getMeta("full_sync_at")) || (await getMeta("lineage_backfill_at"))) return true;
+  const r = await pool.query(
+    "SELECT 1 FROM sync_runs WHERE (mode = 'full' OR mode IS NULL) AND status IN ('success','partial') LIMIT 1",
+  );
+  return (r.rowCount ?? 0) > 0;
 }
 
 /** Stored raw records parsed by an older parser version. */
@@ -430,6 +594,13 @@ export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void)
     log("backfill complete", await runSync(true));
     return true;
   }
+  // A first full load that was cut off (e.g. a job time limit) leaves a partly
+  // filled database: finish it before switching to daily updates.
+  if (!(await fullLoadCompleted())) {
+    log("the first full download never finished — running it now (already-stored trials are skipped)");
+    log("full download complete", await runSync(true));
+    return true;
+  }
   const missing = await trialsMissingLineage();
   if (missing > 0 && !(await getMeta("lineage_backfill_at"))) {
     log(`${missing} trial(s) have no source record yet — running a one-off full sync to fill in lineage`);
@@ -455,16 +626,15 @@ export async function refreshQuality(context?: ProductContext): Promise<number> 
     `SELECT r.payload FROM raw_trials r JOIN trials t ON t.nct_id = r.source_id WHERE r.source = $1`,
     [SOURCE],
   );
-  let n = 0;
-  await withTransaction(async (c) => {
-    for (const r of rows.rows) {
-      const mapped = mapStudy(r.payload);
-      const { kept, products } = deriveTrialProducts(mapped.interventions, ctx.aliases, ctx.known);
-      await writeQuality(c, mapped, kept, products.length);
-      n += 1;
-    }
+  const items: QualityInput[] = rows.rows.map((r) => {
+    const mapped = mapStudy(r.payload);
+    const { kept, products } = deriveTrialProducts(mapped.interventions, ctx.aliases, ctx.known);
+    return { mapped, kept, productCount: products.length };
   });
-  return n;
+  await withTransaction(async (c) => {
+    for (const group of chunks(items, 1000)) await writeQualityBatch(c, group);
+  });
+  return items.length;
 }
 
 /**
@@ -578,10 +748,12 @@ export async function rebuildProducts(): Promise<RebuildResult> {
       );
     }
     // Keep only the intervention names that named a product (drops placebos etc.).
-    for (const [id, d] of perTrial) {
+    for (const group of chunks([...perTrial.entries()], 2000)) {
       await c.query(
-        "UPDATE trials SET interventions = $2 WHERE nct_id = $1 AND interventions IS DISTINCT FROM $2",
-        [id, d.kept],
+        `UPDATE trials t SET interventions = x.kept
+           FROM jsonb_to_recordset($1::jsonb) AS x(nct_id text, kept text[])
+          WHERE t.nct_id = x.nct_id AND t.interventions IS DISTINCT FROM x.kept`,
+        [JSON.stringify(group.map(([nct_id, d]) => ({ nct_id, kept: d.kept })))],
       );
     }
     const kept = await c.query<{ c: number }>(
