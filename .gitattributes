@@ -1,0 +1,7 @@
+# Keep Unix line endings everywhere: shell scripts, SQL and Docker files run on Linux
+# (Docker, GitHub Actions, Vercel) and break with Windows CRLF line endings.
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
