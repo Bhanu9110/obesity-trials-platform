@@ -1,0 +1,84 @@
+# Daily update of the hosted database from ClinicalTrials.gov.
+#
+# Needs one repository secret: DATABASE_URL — the Supabase *Session pooler* string
+# (port 5432). Optional secret DATABASE_CA_CERT enables full certificate checking.
+# Runs every day at 00:05 India time (18:35 UTC), and on demand from the
+# Actions tab ("Run workflow"), where you can also force a full re-download.
+name: Daily CT.gov sync
+
+on:
+  schedule:
+    - cron: "35 18 * * *"
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Full re-download of every trial (instead of the daily update)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ctgov-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # only used by the keep-alive step below
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the DATABASE_URL secret
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Add a repository secret named DATABASE_URL (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: sync/package-lock.json
+
+      - name: Install psql
+        run: command -v psql || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
+
+      - name: Apply database migrations
+        run: |
+          # psql: make sure the connection is encrypted even if the URL has no sslmode
+          case "$DATABASE_URL" in *sslmode=*) export PSQL_URL="$DATABASE_URL" ;; *\?*) export PSQL_URL="$DATABASE_URL&sslmode=require" ;; *) export PSQL_URL="$DATABASE_URL?sslmode=require" ;; esac
+          DATABASE_URL="$PSQL_URL" bash db/run-migrations.sh
+
+      - name: Install sync dependencies
+        working-directory: sync
+        run: npm ci --no-audit --no-fund
+
+      - name: Sync from ClinicalTrials.gov
+        working-directory: sync
+        run: |
+          if [ "${{ github.event.inputs.full }}" = "true" ]; then
+            npm run backfill
+          else
+            npm run daily
+          fi
+
+      # GitHub pauses scheduled workflows in public repos after 60 days without
+      # any commit. Push an empty commit when the last one is 50+ days old.
+      - name: Keep the daily schedule alive
+        if: github.event_name == 'schedule'
+        run: |
+          last=$(git log -1 --format=%ct)
+          age=$(( ( $(date +%s) - last ) / 86400 ))
+          echo "Last commit is $age day(s) old"
+          if [ "$age" -ge 50 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "keep daily sync schedule active"
+            git push
+          fi

@@ -17,5 +17,10 @@ dist/
 
 # local postgres data (docker volume is separate)
 pgdata/
-obesity_trials_backup.sql
+
+# local database backups (contain your data) and old builds
+*backup*.sql
+/*.sql
+*.sql.gz
+*.dump
 _old_build/

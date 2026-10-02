@@ -1,7 +1,5 @@
 -- 0003_sync_audit.sql
 -- Sync job tracking and retry queue (shown on the Admin dashboard).
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS sync_runs (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   run_at               timestamptz DEFAULT now(),
@@ -26,5 +24,3 @@ CREATE TABLE IF NOT EXISTS sync_failures (
 );
 CREATE INDEX IF NOT EXISTS idx_sync_failures_unresolved
   ON sync_failures (resolved) WHERE resolved = false;
-
-COMMIT;

@@ -11,8 +11,6 @@
 --   product_aliases optional manual merges (e.g. a code name -> its INN).
 --
 -- An older, wider database is converted by 0005_slim_existing.sql.
-BEGIN;
-
 -- trials ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS trials (
   nct_id              text PRIMARY KEY,
@@ -74,5 +72,3 @@ CREATE TABLE IF NOT EXISTS app_meta (
   key    text PRIMARY KEY,
   value  text
 );
-
-COMMIT;

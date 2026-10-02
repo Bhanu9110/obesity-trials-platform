@@ -1,10 +1,10 @@
-import { createHash } from "node:crypto";
 import { config } from "./config.js";
 import type { RawStudy } from "./ctgov-client.js";
 import { iterateStudies } from "./ctgov-client.js";
-import { mapStudy, type MappedTrial } from "./mapper.js";
+import { PARSER_VERSION, contentHash, mapStudy, trimPayload, type MappedTrial } from "./mapper.js";
 import { pool, withTransaction, type Client } from "./db.js";
 import { isObesityIndication } from "./obesity-filter.js";
+import { assessQuality } from "./quality.js";
 import {
   PRODUCT_RULES_VERSION,
   builtinAliasMap,
@@ -15,17 +15,15 @@ import {
   type ProductRef,
 } from "./products.js";
 
-/** Checksum of the registry fields we use: unchanged => nothing to write. */
-function checksum(m: MappedTrial): string {
-  return createHash("md5").update(JSON.stringify(m)).digest("hex");
-}
+const SOURCE = "CTGOV";
+const ctgovUrl = (id: string) => `https://clinicaltrials.gov/study/${id}`;
 
 export interface SyncResult {
   runId: string;
   fetched: number;
-  upserted: number;
-  unchanged: number;
-  filtered: number;
+  upserted: number;   // new, changed, or re-parsed with a newer parser
+  unchanged: number;  // same content hash and parser version — only last_seen_at touched
+  filtered: number;   // not a primary-obesity trial (removed if it was stored)
   failed: number;
   pages: number;
   durationMs: number;
@@ -96,34 +94,55 @@ async function linkProducts(client: Client, nctId: string, products: ProductRef[
   }
 }
 
+// --------------------------------------------------------------------------- #
+// Data quality
+// --------------------------------------------------------------------------- #
+async function writeQuality(
+  client: Client,
+  mapped: MappedTrial,
+  kept: string[],
+  productCount: number,
+): Promise<void> {
+  const geo = await client.query<{ continents: string[]; unknown: string[] }>(
+    `SELECT continents,
+            ARRAY(SELECT c FROM unnest(countries) c WHERE continent_of(c) = 'Other') AS unknown
+       FROM trials WHERE nct_id = $1`,
+    [mapped.nct_id],
+  );
+  const q = assessQuality(mapped, kept, productCount, geo.rows[0]?.continents ?? [], geo.rows[0]?.unknown ?? []);
+  await client.query(
+    `INSERT INTO trial_quality (trial_id, score, error_count, warning_count, info_count, issues, parser_version, checked_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, now())
+     ON CONFLICT (trial_id) DO UPDATE SET
+       score = EXCLUDED.score, error_count = EXCLUDED.error_count, warning_count = EXCLUDED.warning_count,
+       info_count = EXCLUDED.info_count, issues = EXCLUDED.issues, parser_version = EXCLUDED.parser_version,
+       checked_at = now()`,
+    [mapped.nct_id, q.score, q.error_count, q.warning_count, q.info_count, JSON.stringify(q.issues), PARSER_VERSION],
+  );
+}
+
+// --------------------------------------------------------------------------- #
+// Writing one trial (shared by live sync and re-parse)
+// --------------------------------------------------------------------------- #
 /**
- * Upsert one trial (lean fields) and its product links in one transaction.
- * Returns true if a write happened, false if the stored checksum matched.
+ * Write the canonical trial row, its source link, product links and quality
+ * record (inside the caller's transaction). The trial's `version` and
+ * `last_changed_at` only move when the mapped record actually changed.
  */
-async function upsertTrial(
+async function writeTrial(
   client: Client,
   mapped: MappedTrial,
   ctx: ProductContext,
-): Promise<boolean> {
-  // Checksum the registry data itself, so unchanged CT.gov records are skipped even
-  // if the product-matching rules change (rule changes are applied by rebuildProducts).
-  const sum = checksum(mapped);
+  runId: string | null,
+): Promise<void> {
+  const recordHash = contentHash(mapped);
   const { kept, products } = deriveTrialProducts(mapped.interventions, ctx.aliases, ctx.known);
-  const row: MappedTrial = { ...mapped, interventions: kept };
-
-  const existing = await client.query<{ source_checksum: string | null }>(
-    "SELECT source_checksum FROM trials WHERE nct_id = $1",
-    [row.nct_id],
-  );
-  if (existing.rowCount && existing.rows[0].source_checksum === sum) {
-    await client.query("UPDATE trials SET fetched_at = now() WHERE nct_id = $1", [row.nct_id]);
-    return false;
-  }
 
   await client.query(
     `INSERT INTO trials (nct_id, phase, sponsor, lead_sponsor_class, conditions, interventions,
-                         countries, continents, is_active, source_checksum, version, fetched_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, continents_of($7::text[]), true, $8, 1, now())
+                         countries, continents, source_updated_at, is_active, record_hash, version,
+                         parser_version, last_run_id, first_seen_at, last_seen_at, last_changed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, continents_of($7::text[]), $8, true, $9, 1, $10, $11, now(), now(), now())
      ON CONFLICT (nct_id) DO UPDATE SET
         phase              = EXCLUDED.phase,
         sponsor            = EXCLUDED.sponsor,
@@ -132,17 +151,118 @@ async function upsertTrial(
         interventions      = EXCLUDED.interventions,
         countries          = EXCLUDED.countries,
         continents         = EXCLUDED.continents,
+        source_updated_at  = EXCLUDED.source_updated_at,
         is_active          = true,
-        source_checksum    = EXCLUDED.source_checksum,
-        version            = trials.version + 1,
-        fetched_at         = now()`,
+        parser_version     = EXCLUDED.parser_version,
+        last_seen_at       = now(),
+        version            = CASE WHEN trials.record_hash IS DISTINCT FROM EXCLUDED.record_hash
+                                  THEN trials.version + 1 ELSE trials.version END,
+        last_changed_at    = CASE WHEN trials.record_hash IS DISTINCT FROM EXCLUDED.record_hash
+                                  THEN now() ELSE trials.last_changed_at END,
+        last_run_id        = CASE WHEN trials.record_hash IS DISTINCT FROM EXCLUDED.record_hash
+                                  THEN EXCLUDED.last_run_id ELSE trials.last_run_id END,
+        record_hash        = EXCLUDED.record_hash`,
     [
-      row.nct_id, row.phase, row.sponsor, row.lead_sponsor_class,
-      row.conditions, row.interventions, row.countries, sum,
+      mapped.nct_id, mapped.phase, mapped.sponsor, mapped.lead_sponsor_class, mapped.conditions,
+      kept, mapped.countries, mapped.source_updated_at, recordHash, PARSER_VERSION, runId,
     ],
   );
-  await linkProducts(client, row.nct_id, products);
-  return true;
+  await client.query(
+    `INSERT INTO trial_sources (source, source_id, trial_id, source_url, is_primary, source_updated_at, first_seen_at, last_seen_at)
+     VALUES ($1, $2, $2, $3, true, $4, now(), now())
+     ON CONFLICT (source, source_id) DO UPDATE SET
+       trial_id = EXCLUDED.trial_id, source_url = EXCLUDED.source_url,
+       source_updated_at = EXCLUDED.source_updated_at, last_seen_at = now()`,
+    [SOURCE, mapped.nct_id, ctgovUrl(mapped.nct_id), mapped.source_updated_at],
+  );
+  await linkProducts(client, mapped.nct_id, products);
+  await writeQuality(client, mapped, kept, products.length);
+}
+
+/** Remove a stored trial (and its raw record): it is no longer in scope. */
+async function deleteTrial(client: Client | typeof pool, nctId: string): Promise<void> {
+  await client.query("DELETE FROM trials WHERE nct_id = $1", [nctId]); // cascades sources/products/quality
+  await client.query("DELETE FROM raw_trials WHERE source = $1 AND source_id = $2", [SOURCE, nctId]);
+}
+
+type IngestOutcome = "upserted" | "unchanged" | "filtered";
+
+/**
+ * Ingest one CT.gov record: trim to the fields we use, hash, and skip it when
+ * the content hash and parser version are unchanged (only `last_seen_at` moves).
+ */
+async function ingestStudy(client: Client, raw: RawStudy, ctx: ProductContext, runId: string | null): Promise<IngestOutcome> {
+  const payload = trimPayload(raw);
+  const mapped = mapStudy(payload);
+  if (!mapped.nct_id) throw new Error("missing nct_id");
+
+  // Keep only primary-obesity-indication trials; drop one that stopped qualifying.
+  if (config.ctgov.obesityIndicationOnly && !isObesityIndication(mapped.conditions)) {
+    await deleteTrial(client, mapped.nct_id);
+    return "filtered";
+  }
+
+  const hash = contentHash(payload);
+  const prev = await client.query<{ content_hash: string; parser_version: string; has_trial: boolean }>(
+    `SELECT r.content_hash, r.parser_version,
+            EXISTS (SELECT 1 FROM trials t WHERE t.nct_id = r.source_id) AS has_trial
+       FROM raw_trials r WHERE r.source = $1 AND r.source_id = $2`,
+    [SOURCE, mapped.nct_id],
+  );
+  const p = prev.rows[0];
+  if (p && p.content_hash === hash && p.parser_version === PARSER_VERSION && p.has_trial) {
+    await client.query("UPDATE raw_trials SET last_seen_at = now() WHERE source = $1 AND source_id = $2", [SOURCE, mapped.nct_id]);
+    await client.query("UPDATE trial_sources SET last_seen_at = now() WHERE source = $1 AND source_id = $2", [SOURCE, mapped.nct_id]);
+    await client.query("UPDATE trials SET last_seen_at = now() WHERE nct_id = $1", [mapped.nct_id]);
+    return "unchanged";
+  }
+
+  await client.query(
+    `INSERT INTO raw_trials (source, source_id, payload, content_hash, parser_version, source_updated_at,
+                             first_seen_at, last_seen_at, last_changed_at, last_run_id)
+     VALUES ($1, $2, $3, $4, $5, $6, now(), now(), now(), $7)
+     ON CONFLICT (source, source_id) DO UPDATE SET
+       payload           = EXCLUDED.payload,
+       parser_version    = EXCLUDED.parser_version,
+       source_updated_at = EXCLUDED.source_updated_at,
+       last_seen_at      = now(),
+       last_changed_at   = CASE WHEN raw_trials.content_hash IS DISTINCT FROM EXCLUDED.content_hash
+                                THEN now() ELSE raw_trials.last_changed_at END,
+       last_run_id       = CASE WHEN raw_trials.content_hash IS DISTINCT FROM EXCLUDED.content_hash
+                                THEN EXCLUDED.last_run_id ELSE raw_trials.last_run_id END,
+       content_hash      = EXCLUDED.content_hash`,
+    [SOURCE, mapped.nct_id, JSON.stringify(payload), hash, PARSER_VERSION, mapped.source_updated_at, runId],
+  );
+  await writeTrial(client, mapped, ctx, runId);
+  return "upserted";
+}
+
+// --------------------------------------------------------------------------- #
+// Sync loop
+// --------------------------------------------------------------------------- #
+async function startRun(mode: string): Promise<string> {
+  const r = await pool.query<{ id: string }>(
+    `INSERT INTO sync_runs (status, mode, parser_version, trials_fetched, trials_upserted, trials_failed,
+                            trials_unchanged, trials_filtered, api_pages_consumed)
+     VALUES ('running', $1, $2, 0, 0, 0, 0, 0, 0) RETURNING id`,
+    [mode, PARSER_VERSION],
+  );
+  return r.rows[0].id;
+}
+
+async function finishRun(runId: string, res: Omit<SyncResult, "runId" | "durationMs">, started: number,
+                         errors: { nct_id: string; error: string }[], fatal?: string): Promise<void> {
+  const status = fatal ? "failed" : res.failed === 0 ? "success" : "partial";
+  await pool.query(
+    `UPDATE sync_runs SET status=$2, trials_fetched=$3, trials_upserted=$4, trials_failed=$5,
+        trials_unchanged=$6, trials_filtered=$7, api_pages_consumed=$8, duration_ms=$9, error_detail=$10
+      WHERE id=$1`,
+    [
+      runId, status, res.fetched, res.upserted, res.failed, res.unchanged, res.filtered, res.pages,
+      Date.now() - started,
+      fatal ? JSON.stringify({ fatal }) : errors.length ? JSON.stringify(errors.slice(0, 50)) : null,
+    ],
+  );
 }
 
 /**
@@ -152,44 +272,24 @@ async function upsertTrial(
 async function runSyncCore(
   source: AsyncIterable<RawStudy>,
   getPages: () => number = () => 0,
+  mode = "incremental",
 ): Promise<SyncResult> {
   const started = Date.now();
   const ctx = await loadProductContext();
-
-  const runRow = await pool.query<{ id: string }>(
-    `INSERT INTO sync_runs (status, trials_fetched, trials_upserted, trials_failed, api_pages_consumed)
-     VALUES ('running', 0, 0, 0, 0) RETURNING id`,
-  );
-  const runId = runRow.rows[0].id;
-
-  let fetched = 0;
-  let upserted = 0;
-  let unchanged = 0;
-  let filtered = 0;
-  let failed = 0;
-  let pages = 0;
+  const runId = await startRun(mode);
+  const res = { fetched: 0, upserted: 0, unchanged: 0, filtered: 0, failed: 0, pages: 0 };
   const errors: { nct_id: string; error: string }[] = [];
 
   try {
     for await (const raw of source) {
-      pages = getPages();
-      fetched += 1;
+      res.pages = getPages();
+      res.fetched += 1;
       const nctId = raw?.protocolSection?.identificationModule?.nctId ?? "UNKNOWN";
       try {
-        const mapped = mapStudy(raw);
-        if (!mapped.nct_id) throw new Error("missing nct_id");
-        // Keep only primary-obesity-indication trials. A stored trial that no longer
-        // qualifies (its conditions changed) is removed.
-        if (config.ctgov.obesityIndicationOnly && !isObesityIndication(mapped.conditions)) {
-          await pool.query("DELETE FROM trials WHERE nct_id = $1", [mapped.nct_id]);
-          filtered += 1;
-          continue;
-        }
-        const wrote = await withTransaction((c) => upsertTrial(c, mapped, ctx));
-        if (wrote) upserted += 1;
-        else unchanged += 1;
+        const outcome = await withTransaction((c) => ingestStudy(c, raw, ctx, runId));
+        res[outcome] += 1;
       } catch (err) {
-        failed += 1;
+        res.failed += 1;
         const msg = err instanceof Error ? err.message : String(err);
         errors.push({ nct_id: nctId, error: msg });
         await pool.query(
@@ -199,34 +299,13 @@ async function runSyncCore(
         );
       }
     }
-
-    pages = getPages();
-    const status = failed === 0 ? "success" : "partial";
-    await pool.query(
-      `UPDATE sync_runs SET status=$2, trials_fetched=$3, trials_upserted=$4,
-          trials_failed=$5, api_pages_consumed=$6, duration_ms=$7,
-          error_detail=$8 WHERE id=$1`,
-      [
-        runId, status, fetched, upserted, failed, pages, Date.now() - started,
-        errors.length ? JSON.stringify(errors.slice(0, 50)) : null,
-      ],
-    );
+    res.pages = getPages();
+    await finishRun(runId, res, started, errors);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    await pool.query(
-      `UPDATE sync_runs SET status='failed', trials_fetched=$2, trials_upserted=$3,
-          trials_failed=$4, api_pages_consumed=$5, duration_ms=$6,
-          error_detail=$7 WHERE id=$1`,
-      [runId, fetched, upserted, failed, pages, Date.now() - started,
-       JSON.stringify({ fatal: msg })],
-    );
+    await finishRun(runId, res, started, errors, err instanceof Error ? err.message : String(err));
     throw err;
   }
-
-  return {
-    runId, fetched, upserted, unchanged, filtered, failed, pages,
-    durationMs: Date.now() - started,
-  };
+  return { runId, ...res, durationMs: Date.now() - started };
 }
 
 /**
@@ -245,10 +324,147 @@ export async function runSync(
   const source = iterateStudies({ incrementalDays: days, startDateFrom }, (pageIndex) => {
     pageCount = pageIndex + 1;
   });
-  const result = await runSyncCore(source, () => pageCount);
+  const result = await runSyncCore(source, () => pageCount, full ? "full" : "incremental");
   // A full backfill re-derives every product link with the corpus-wide known set.
   if (full) await rebuildProducts();
   return result;
+}
+
+// --------------------------------------------------------------------------- #
+// Re-parse from raw_trials (no network)
+// --------------------------------------------------------------------------- #
+export interface ReparseResult {
+  runId: string;
+  scanned: number;
+  reparsed: number;
+  filtered: number;
+  failed: number;
+}
+
+/**
+ * Re-map stored raw records with the current parser. By default only records
+ * parsed by an older PARSER_VERSION; `all` re-parses everything. Then rebuilds
+ * product links corpus-wide.
+ */
+export async function reparseFromRaw(opts: { all?: boolean } = {}): Promise<ReparseResult> {
+  const started = Date.now();
+  const runId = await startRun("reparse");
+  const rows = await pool.query<{ source_id: string; payload: RawStudy }>(
+    `SELECT source_id, payload FROM raw_trials
+      WHERE source = $1 AND ($2 OR parser_version <> $3)`,
+    [SOURCE, Boolean(opts.all), PARSER_VERSION],
+  );
+  const ctx = await loadProductContext();
+  const out: ReparseResult = { runId, scanned: rows.rowCount ?? 0, reparsed: 0, filtered: 0, failed: 0 };
+  const errors: { nct_id: string; error: string }[] = [];
+  for (const r of rows.rows) {
+    try {
+      await withTransaction(async (c) => {
+        const mapped = mapStudy(r.payload);
+        if (config.ctgov.obesityIndicationOnly && !isObesityIndication(mapped.conditions)) {
+          await deleteTrial(c, r.source_id);
+          out.filtered += 1;
+          return;
+        }
+        await writeTrial(c, mapped, ctx, runId);
+        await c.query("UPDATE raw_trials SET parser_version = $3 WHERE source = $1 AND source_id = $2",
+          [SOURCE, r.source_id, PARSER_VERSION]);
+        out.reparsed += 1;
+      });
+    } catch (err) {
+      out.failed += 1;
+      errors.push({ nct_id: r.source_id, error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+  await finishRun(runId, { fetched: out.scanned, upserted: out.reparsed, unchanged: 0, filtered: out.filtered,
+    failed: out.failed, pages: 0 }, started, errors);
+  if (out.reparsed) await rebuildProducts();
+  return out;
+}
+
+async function getMeta(key: string): Promise<string | null> {
+  const r = await pool.query<{ value: string }>("SELECT value FROM app_meta WHERE key = $1", [key]);
+  return r.rows[0]?.value ?? null;
+}
+async function setMeta(key: string, value: string): Promise<void> {
+  await pool.query(
+    "INSERT INTO app_meta (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+    [key, value],
+  );
+}
+
+/** Stored raw records parsed by an older parser version. */
+export async function rawNeedingReparse(): Promise<number> {
+  const r = await pool.query<{ c: number }>(
+    "SELECT count(*)::int AS c FROM raw_trials WHERE source = $1 AND parser_version <> $2",
+    [SOURCE, PARSER_VERSION],
+  );
+  return r.rows[0].c;
+}
+
+/**
+ * Trials with no source/raw record yet (databases upgraded from before lineage
+ * tracking). A one-off full sync fills in raw_trials, trial_sources and
+ * source_updated_at for them.
+ */
+export async function trialsMissingLineage(): Promise<number> {
+  const r = await pool.query<{ c: number }>(
+    `SELECT count(*)::int AS c FROM trials t
+      WHERE NOT EXISTS (SELECT 1 FROM trial_sources s WHERE s.trial_id = t.nct_id)`,
+  );
+  return r.rows[0].c;
+}
+
+/**
+ * Bring the database up to date before a sync (used by the scheduler on start
+ * and by the daily job). Returns true if it already ran a full backfill.
+ *   - empty database               -> full backfill
+ *   - trials with no lineage yet   -> full backfill (fills raw_trials, trial_sources,
+ *                                     source_updated_at for databases upgraded from v1)
+ *   - raw parsed by an old parser  -> re-parse from raw_trials (no network)
+ *   - product rules changed        -> rebuild product links
+ */
+export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void): Promise<boolean> {
+  if ((await trialCount()) === 0) {
+    log("database empty — running full backfill");
+    log("backfill complete", await runSync(true));
+    return true;
+  }
+  const missing = await trialsMissingLineage();
+  if (missing > 0 && !(await getMeta("lineage_backfill_at"))) {
+    log(`${missing} trial(s) have no source record yet — running a one-off full sync to fill in lineage`);
+    log("lineage backfill complete", await runSync(true));
+    await setMeta("lineage_backfill_at", new Date().toISOString()); // only after a successful full run
+    const left = await trialsMissingLineage();
+    if (left > 0) log(`${left} stored trial(s) were not returned by CT.gov and still have no source record`);
+    return true;
+  }
+  const stale = await rawNeedingReparse();
+  if (stale > 0) {
+    log(`${stale} raw record(s) parsed by an older parser — re-parsing (no download)`);
+    log("re-parse complete", await reparseFromRaw());
+  }
+  if (await productsNeedRebuild()) log("products rebuilt", await rebuildProducts());
+  return false;
+}
+
+/** Recompute trial_quality for every stored trial from its raw record (no network). */
+export async function refreshQuality(context?: ProductContext): Promise<number> {
+  const ctx = context ?? (await loadProductContext());
+  const rows = await pool.query<{ payload: RawStudy }>(
+    `SELECT r.payload FROM raw_trials r JOIN trials t ON t.nct_id = r.source_id WHERE r.source = $1`,
+    [SOURCE],
+  );
+  let n = 0;
+  await withTransaction(async (c) => {
+    for (const r of rows.rows) {
+      const mapped = mapStudy(r.payload);
+      const { kept, products } = deriveTrialProducts(mapped.interventions, ctx.aliases, ctx.known);
+      await writeQuality(c, mapped, kept, products.length);
+      n += 1;
+    }
+  });
+  return n;
 }
 
 /**
@@ -270,7 +486,7 @@ export async function runSyncForStudies(studies: RawStudy[]): Promise<SyncResult
   async function* gen() {
     for (const s of studies) yield s;
   }
-  return runSyncCore(gen(), () => 1);
+  return runSyncCore(gen(), () => 1, "test");
 }
 
 /** How many active trials are currently stored. */
@@ -386,6 +602,8 @@ export async function rebuildProducts(): Promise<RebuildResult> {
       [PRODUCT_RULES_VERSION],
     );
   });
+  // Product matches feed the quality checks (NO_DRUG_PRODUCT etc.).
+  await refreshQuality({ aliases, known });
   return result;
 }
 
@@ -434,7 +652,9 @@ export async function pruneNonObesityIndication(
   }
   if (opts.apply && toRemove.length) {
     for (let i = 0; i < toRemove.length; i += 1000) {
-      await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [toRemove.slice(i, i + 1000)]);
+      const chunk = toRemove.slice(i, i + 1000);
+      await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [chunk]);
+      await pool.query("DELETE FROM raw_trials WHERE source = $1 AND source_id = ANY($2)", [SOURCE, chunk]);
     }
   }
   return res;

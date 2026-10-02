@@ -3,8 +3,6 @@
 -- migration backfill via continents_of()). Keys are lower-cased country names as
 -- ClinicalTrials.gov spells them, plus common variants. Unknown countries map to
 -- 'Other' — add a row here (and re-run migrations) to fix one.
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS ref_country_continent (
   country_key  text PRIMARY KEY,   -- lower(btrim(country))
   continent    text NOT NULL
@@ -296,5 +294,3 @@ LANGUAGE sql STABLE AS $$
     FROM unnest(coalesce(cs, '{}')) AS x
    WHERE coalesce(btrim(x), '') <> ''
 $$;
-
-COMMIT;

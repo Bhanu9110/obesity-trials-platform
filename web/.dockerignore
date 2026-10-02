@@ -1,0 +1,8 @@
+# Never send local installs/builds into the Docker build (they break it).
+node_modules
+.next
+dist
+*.tsbuildinfo
+npm-debug.log*
+.env
+.env.local

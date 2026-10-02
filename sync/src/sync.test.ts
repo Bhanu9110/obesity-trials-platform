@@ -1,17 +1,24 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mapStudy } from "./mapper.js";
+import { mapStudy, trimPayload, contentHash, canonicalJson, PARSER_VERSION } from "./mapper.js";
 import { productsFromName, deriveTrialProducts } from "./products.js";
-import { runSyncForStudies, rebuildProducts } from "./sync.js";
+import { runSyncForStudies, rebuildProducts, reparseFromRaw, trialsMissingLineage } from "./sync.js";
+import { assessQuality } from "./quality.js";
 import { isObesityIndication } from "./obesity-filter.js";
-import { pool } from "./db.js";
+import { pool, pgConfig } from "./db.js";
 
 // A realistic (trimmed) CT.gov v2 study payload.
-function study(nct: string, over: { conditions?: string[]; interventions?: any[]; countries?: string[]; phase?: string[] } = {}) {
+function study(
+  nct: string,
+  over: { conditions?: string[]; interventions?: any[]; countries?: string[]; phase?: string[]; updated?: string; sponsor?: string | null } = {},
+) {
   return {
     protocolSection: {
       identificationModule: { nctId: nct, briefTitle: "ignored" },
-      sponsorCollaboratorsModule: { leadSponsor: { name: "Test Pharma Inc.", class: "INDUSTRY" } },
+      statusModule: { overallStatus: "RECRUITING", lastUpdatePostDateStruct: { date: over.updated ?? "2026-09-15", type: "ACTUAL" } },
+      sponsorCollaboratorsModule: {
+        leadSponsor: over.sponsor === null ? undefined : { name: over.sponsor ?? "Test Pharma Inc.", class: "INDUSTRY" },
+      },
       conditionsModule: { conditions: over.conditions ?? ["Obesity", "Overweight"] },
       designModule: { phases: over.phase ?? ["PHASE3"], enrollmentInfo: { count: 400 } },
       armsInterventionsModule: {
@@ -33,8 +40,9 @@ function study(nct: string, over: { conditions?: string[]; interventions?: any[]
 test("mapStudy keeps only the lean fields", () => {
   const m = mapStudy(study("NCT99999001"));
   assert.deepEqual(Object.keys(m).sort(), [
-    "conditions", "countries", "interventions", "lead_sponsor_class", "nct_id", "phase", "sponsor",
+    "conditions", "countries", "interventions", "lead_sponsor_class", "nct_id", "phase", "source_updated_at", "sponsor",
   ]);
+  assert.equal(m.source_updated_at, "2026-09-15");
   assert.equal(m.phase, "PHASE3");
   assert.equal(m.sponsor, "Test Pharma Inc.");
   assert.deepEqual(m.conditions, ["Obesity", "Overweight"]);
@@ -131,6 +139,156 @@ test("product_aliases merges are applied by the sync", async () => {
   assert.deepEqual(r.rows.map((x) => x.slug), ["semaglutide"]);
   await pool.query("DELETE FROM trials WHERE nct_id = $1", [C]);
   await pool.query("DELETE FROM product_aliases WHERE alias_slug = 'semagludtide'");
+});
+
+// --------------------------------------------------------------------------- #
+// Priority 1: lineage, hashing, parser version, quality, migrations
+// --------------------------------------------------------------------------- #
+test("content hash is stable: key order and full vs fields-limited payload", () => {
+  const full = study("NCT99999010");
+  const trimmed = trimPayload(full);
+  // Fields we do not ingest are dropped...
+  assert.equal((trimmed as any).protocolSection.identificationModule.briefTitle, undefined);
+  assert.equal((trimmed as any).protocolSection.statusModule.overallStatus, undefined);
+  // ...and the trimmed copy maps to exactly the same trial (re-parse parity).
+  assert.deepEqual(mapStudy(trimmed), mapStudy(full));
+  // A re-ordered object hashes identically.
+  const reverseKeys = (v: any): any =>
+    Array.isArray(v) ? v.map(reverseKeys)
+      : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).reverse().map((k) => [k, reverseKeys(v[k])]))
+      : v;
+  const reordered = reverseKeys(full);
+  assert.notEqual(JSON.stringify(reordered), JSON.stringify(full)); // really re-ordered
+  assert.equal(contentHash(trimPayload(reordered)), contentHash(trimmed));
+  assert.equal(canonicalJson({ b: 1, a: [2, { d: 3, c: 4 }] }), '{"a":[2,{"c":4,"d":3}],"b":1}');
+  // A real change changes the hash.
+  assert.notEqual(contentHash(trimPayload(study("NCT99999010", { phase: ["PHASE2"] }))), contentHash(trimmed));
+});
+
+test("quality checks", () => {
+  const good = mapStudy(study("NCT99999011"));
+  const q1 = assessQuality(good, ["Semaglutide 2.4 mg"], 1, ["Europe", "North America"]);
+  assert.equal(q1.score, 1);
+  assert.deepEqual(q1.issues, []);
+
+  const bad = mapStudy(study("NCT99999012", { sponsor: null, countries: [], phase: [], interventions: [{ type: "DRUG", name: "Wonderpill XR" }] }));
+  const q2 = assessQuality(bad, [], 0, []);
+  const codes = q2.issues.map((i) => i.code).sort();
+  assert.deepEqual(codes, ["MISSING_PHASE", "MISSING_SPONSOR", "NO_DRUG_PRODUCT", "NO_LOCATION"]);
+  assert.equal(q2.error_count, 1);
+  assert.equal(q2.warning_count, 3);
+  assert.ok(q2.score < 0.5);
+
+  const q3 = assessQuality(good, ["Semaglutide 2.4 mg"], 1, ["Other"], ["Atlantis"]);
+  assert.deepEqual(q3.issues.map((i) => [i.code, i.detail]), [["UNKNOWN_COUNTRY", ["Atlantis"]]]);
+});
+
+test("lineage: raw_trials, trial_sources, timestamps, parser version, change detection", async () => {
+  const id = "NCT99999020";
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = $1", [id]);
+
+  const r1 = await runSyncForStudies([study(id)]);
+  assert.equal(r1.upserted, 1);
+  const raw1 = (await pool.query("SELECT * FROM raw_trials WHERE source='CTGOV' AND source_id=$1", [id])).rows[0];
+  assert.equal(raw1.parser_version, PARSER_VERSION);
+  assert.equal(raw1.content_hash, contentHash(trimPayload(study(id))));
+  assert.equal(raw1.payload.protocolSection.identificationModule.nctId, id);
+  assert.equal(raw1.payload.protocolSection.identificationModule.briefTitle, undefined); // trimmed
+  const src = (await pool.query("SELECT * FROM trial_sources WHERE source='CTGOV' AND source_id=$1", [id])).rows[0];
+  assert.equal(src.trial_id, id);
+  assert.equal(src.source_url, `https://clinicaltrials.gov/study/${id}`);
+  const t1 = (await pool.query(
+    "SELECT version, to_char(source_updated_at,'YYYY-MM-DD') su, parser_version, record_hash, first_seen_at, last_seen_at, last_changed_at, last_run_id FROM trials WHERE nct_id=$1", [id])).rows[0];
+  assert.equal(t1.version, 1);
+  assert.equal(t1.su, "2026-09-15");
+  assert.equal(t1.parser_version, PARSER_VERSION);
+  assert.equal(t1.last_run_id, r1.runId);
+  const q = (await pool.query("SELECT score FROM trial_quality WHERE trial_id=$1", [id])).rows[0];
+  assert.ok(Number(q.score) > 0.9);
+
+  // Same payload: unchanged; last_seen_at moves, last_changed_at and version do not.
+  await new Promise((r) => setTimeout(r, 20));
+  const r2 = await runSyncForStudies([study(id)]);
+  assert.equal(r2.unchanged, 1);
+  const t2 = (await pool.query("SELECT version, last_seen_at, last_changed_at FROM trials WHERE nct_id=$1", [id])).rows[0];
+  assert.equal(t2.version, 1);
+  assert.ok(t2.last_seen_at > t1.last_seen_at);
+  assert.equal(t2.last_changed_at.getTime(), t1.last_changed_at.getTime());
+
+  // Raw-only change (an extra site in a country already listed): raw hash changes,
+  // the lean trial record does not -> no version bump.
+  const r3 = await runSyncForStudies([study(id, { countries: ["United States", "Germany", "United States", "Germany"] })]);
+  assert.equal(r3.upserted, 1);
+  const raw3 = (await pool.query("SELECT content_hash, last_changed_at FROM raw_trials WHERE source_id=$1", [id])).rows[0];
+  assert.notEqual(raw3.content_hash, raw1.content_hash);
+  assert.equal((await pool.query("SELECT version FROM trials WHERE nct_id=$1", [id])).rows[0].version, 1);
+
+  // Real change: version bumps, last_changed_at and last_run_id move.
+  const r4 = await runSyncForStudies([study(id, { phase: ["PHASE4"], updated: "2026-10-01" })]);
+  const t4 = (await pool.query(
+    "SELECT version, phase, to_char(source_updated_at,'YYYY-MM-DD') su, last_changed_at, last_run_id FROM trials WHERE nct_id=$1", [id])).rows[0];
+  assert.equal(t4.version, 2);
+  assert.equal(t4.phase, "PHASE4");
+  assert.equal(t4.su, "2026-10-01");
+  assert.ok(t4.last_changed_at > t1.last_changed_at);
+  assert.equal(t4.last_run_id, r4.runId);
+
+  // Run log records mode / parser / counts.
+  const run = (await pool.query("SELECT mode, parser_version, trials_upserted, trials_unchanged FROM sync_runs WHERE id=$1", [r2.runId])).rows[0];
+  assert.deepEqual(run, { mode: "test", parser_version: PARSER_VERSION, trials_upserted: 0, trials_unchanged: 1 });
+
+  // Out of scope now -> trial AND raw record removed.
+  await runSyncForStudies([study(id, { conditions: ["Type 2 Diabetes"] })]);
+  assert.equal((await pool.query("SELECT count(*)::int c FROM raw_trials WHERE source_id=$1", [id])).rows[0].c, 0);
+  assert.equal((await pool.query("SELECT count(*)::int c FROM trial_sources WHERE source_id=$1", [id])).rows[0].c, 0);
+});
+
+test("re-parse from raw_trials without downloading", async () => {
+  const id = "NCT99999030";
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
+  await runSyncForStudies([study(id)]);
+  // Simulate an older parser having produced a wrong value.
+  await pool.query("UPDATE raw_trials SET parser_version = 'ctgov-old' WHERE source_id = $1", [id]);
+  await pool.query("UPDATE trials SET phase = 'WRONG' WHERE nct_id = $1", [id]);
+  const r = await reparseFromRaw();
+  assert.ok(r.reparsed >= 1);
+  const t = (await pool.query("SELECT phase, parser_version FROM trials WHERE nct_id=$1", [id])).rows[0];
+  assert.equal(t.phase, "PHASE3");
+  assert.equal(t.parser_version, PARSER_VERSION);
+  assert.equal((await pool.query("SELECT parser_version FROM raw_trials WHERE source_id=$1", [id])).rows[0].parser_version, PARSER_VERSION);
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = $1", [id]);
+});
+
+test("migrations are tracked; trials without lineage are detected", async () => {
+  const m = await pool.query("SELECT version, checksum FROM schema_migrations ORDER BY version");
+  assert.ok(m.rowCount! >= 7);
+  assert.ok(m.rows.every((r) => /^[0-9a-f]{64}$/.test(r.checksum)));
+  const id = "NCT99999040";
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
+  const before = await trialsMissingLineage();
+  await pool.query("INSERT INTO trials (nct_id, conditions) VALUES ($1, '{Obesity}')", [id]);
+  assert.equal(await trialsMissingLineage(), before + 1);
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
+});
+
+test("database connection settings (Supabase SSL handling)", () => {
+  const prev = process.env.DATABASE_CA_CERT;
+  delete process.env.DATABASE_CA_CERT;
+  // Local / Neon: untouched.
+  const local = pgConfig("postgres://postgres:postgres@db:5432/obesity_trials");
+  assert.equal(local.connectionString, "postgres://postgres:postgres@db:5432/obesity_trials");
+  assert.equal(local.ssl, undefined);
+  // Supabase pooler: sslmode stripped, encrypted without CA verification.
+  const supa = pgConfig("postgresql://postgres.abcd:Pass123@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require");
+  assert.ok(!supa.connectionString!.includes("sslmode"));
+  assert.deepEqual(supa.ssl, { rejectUnauthorized: false });
+  // With Supabase's CA certificate: verified.
+  process.env.DATABASE_CA_CERT = "-----BEGIN CERTIFICATE-----\\nABC\\n-----END CERTIFICATE-----";
+  const verified = pgConfig("postgresql://u:p@aws-0-x.pooler.supabase.com:5432/postgres?sslmode=require");
+  assert.deepEqual(verified.ssl, { ca: "-----BEGIN CERTIFICATE-----\nABC\n-----END CERTIFICATE-----", rejectUnauthorized: true });
+  if (prev === undefined) delete process.env.DATABASE_CA_CERT; else process.env.DATABASE_CA_CERT = prev;
 });
 
 test.after(async () => {

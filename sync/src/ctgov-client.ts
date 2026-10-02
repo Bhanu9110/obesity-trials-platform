@@ -80,7 +80,7 @@ export async function fetchStudiesPage(opts: FetchOptions): Promise<StudiesPage>
   while (attempt <= config.ctgov.maxRetries) {
     try {
       const res = await fetch(url, {
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", "User-Agent": "obesity-trials-sync/1.0 (daily research sync)" },
       });
       if (res.status === 429 || res.status >= 500) {
         throw new Error(`Retryable HTTP ${res.status}`);

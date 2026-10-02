@@ -244,3 +244,89 @@ export async function mergeProduct(fromSlug: string, intoSlug: string): Promise<
     client.release();
   }
 }
+
+// --------------------------------------------------------------------------- #
+// Data quality (trial_quality / data_quality_summary)
+// --------------------------------------------------------------------------- #
+export interface QualityOverview {
+  checked: number;
+  avgScore: number | null;
+  clean: number;          // score = 1
+  minor: number;          // 0.9 – 0.999
+  needsReview: number;    // 0.75 – 0.899
+  poor: number;           // < 0.75
+  withLineage: number;    // trials that have a source record
+  totalTrials: number;
+  issues: { code: string; severity: string; trials: number }[];
+}
+
+export async function qualityOverview(): Promise<QualityOverview> {
+  const [stats, issues] = await Promise.all([
+    query<any>(
+      `SELECT count(q.trial_id)::int AS checked,
+              round(avg(q.score), 3)::float AS avg_score,
+              count(*) FILTER (WHERE q.score = 1)::int AS clean,
+              count(*) FILTER (WHERE q.score >= 0.9 AND q.score < 1)::int AS minor,
+              count(*) FILTER (WHERE q.score >= 0.75 AND q.score < 0.9)::int AS needs_review,
+              count(*) FILTER (WHERE q.score < 0.75)::int AS poor,
+              (SELECT count(*)::int FROM trials WHERE is_active) AS total_trials,
+              (SELECT count(DISTINCT trial_id)::int FROM trial_sources) AS with_lineage
+         FROM trials t JOIN trial_quality q ON q.trial_id = t.nct_id
+        WHERE t.is_active`,
+    ),
+    query<{ code: string; severity: string; trials: number }>(
+      `SELECT code, severity, trials FROM data_quality_summary
+        ORDER BY CASE severity WHEN 'error' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END, trials DESC`,
+    ),
+  ]);
+  const s = stats[0] ?? {};
+  return {
+    checked: s.checked ?? 0,
+    avgScore: s.avg_score ?? null,
+    clean: s.clean ?? 0,
+    minor: s.minor ?? 0,
+    needsReview: s.needs_review ?? 0,
+    poor: s.poor ?? 0,
+    withLineage: s.with_lineage ?? 0,
+    totalTrials: s.total_trials ?? 0,
+    issues,
+  };
+}
+
+export interface QualityTrial {
+  nct_id: string;
+  phase: string | null;
+  sponsor: string | null;
+  score: number;
+  issues: { code: string; severity: string; message: string; detail?: string[] }[];
+  checked_at: string;
+}
+
+/** Trials with at least one issue (optionally a specific issue code), worst first. */
+export async function qualityTrials(
+  code: string | undefined,
+  page: number,
+  pageSize = 50,
+): Promise<{ items: QualityTrial[]; total: number }> {
+  const params: unknown[] = [];
+  let where = "t.is_active AND jsonb_array_length(q.issues) > 0";
+  if (code) {
+    params.push(JSON.stringify([{ code }]));
+    where += ` AND q.issues @> $${params.length}::jsonb`;
+  }
+  const total = (await query<{ c: number }>(
+    `SELECT count(*)::int AS c FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id WHERE ${where}`,
+    params,
+  ))[0]?.c ?? 0;
+  params.push(pageSize, (Math.max(1, page) - 1) * pageSize);
+  const items = await query<QualityTrial>(
+    `SELECT t.nct_id, t.phase, t.sponsor, q.score::float AS score, q.issues,
+            to_char(q.checked_at, 'YYYY-MM-DD HH24:MI') AS checked_at
+       FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id
+      WHERE ${where}
+      ORDER BY q.score ASC, t.nct_id DESC
+      LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+  return { items, total };
+}

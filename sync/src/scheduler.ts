@@ -4,8 +4,7 @@ import {
   runSync,
   trialCount,
   daysSinceLastSuccessfulSync,
-  productsNeedRebuild,
-  rebuildProducts,
+  upgradeIfNeeded,
   type SyncResult,
 } from "./sync.js";
 
@@ -62,32 +61,28 @@ async function main() {
   }
 
   // Startup behaviour:
-  //   - empty DB  -> full backfill of the whole corpus (year 2000+)
-  //   - non-empty -> a catch-up incremental sync RIGHT NOW, covering any days
-  //                  missed while the machine/container was off. This is what
-  //                  makes updates reliable on a laptop that isn't on at midnight.
-  // Drug products: build them after an upgrade from the old schema, or when the
-  // product-matching rules have changed. Manual product info is preserved.
-  if ((await trialCount()) > 0 && (await productsNeedRebuild())) {
-    log("building drug products from trial interventions");
-    try {
-      log("products built", await rebuildProducts());
-    } catch (err) {
-      log("product build failed", { error: err instanceof Error ? err.message : String(err) });
-    }
-  }
-
+  //   - bring the database up to date: full backfill if empty or if trials lack
+  //     lineage (upgrade from v1), re-parse raw records from an older parser,
+  //     rebuild product links if the matching rules changed;
+  //   - then a catch-up incremental sync RIGHT NOW, covering any days missed while
+  //     the machine/container was off (reliable on a laptop that isn't on at midnight).
   const count = await trialCount();
-  if (count === 0) {
-    if (backfillOnStartIfEmpty) {
-      log("database empty — running initial full backfill (this can take a while)");
-      await runOnce(true);
-    } else {
-      log("database empty and backfill-on-start disabled — skipping");
-    }
+  if (count === 0 && !backfillOnStartIfEmpty) {
+    log("database empty and backfill-on-start disabled — skipping");
   } else {
-    log(`database has ${count} trials — running catch-up sync on startup`);
-    await runCatchUp("startup catch-up");
+    let didFull = false;
+    running = true;
+    try {
+      didFull = await upgradeIfNeeded(log);
+    } catch (err) {
+      log("startup upgrade failed", { error: err instanceof Error ? err.message : String(err) });
+    } finally {
+      running = false;
+    }
+    if (!didFull) {
+      log(`database has ${await trialCount()} trials — running catch-up sync on startup`);
+      await runCatchUp("startup catch-up");
+    }
   }
 
   // Daily scheduled run (for days the machine happens to be on at this time).

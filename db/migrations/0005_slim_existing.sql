@@ -6,8 +6,6 @@
 -- Safe on a fresh database (every step is guarded) and safe to re-run.
 -- Products are (re)built from trials.interventions by the sync service
 -- (`npm run rebuild-products`, which the scheduler also runs automatically).
-BEGIN;
-
 -- 1. Make sure the lean columns exist on an old trials table.
 ALTER TABLE trials ADD COLUMN IF NOT EXISTS conditions    text[];
 ALTER TABLE trials ADD COLUMN IF NOT EXISTS interventions text[];
@@ -95,5 +93,3 @@ UPDATE trials SET version = 1 WHERE version IS NULL;
 UPDATE trials SET fetched_at = now() WHERE fetched_at IS NULL;
 
 DROP EXTENSION IF EXISTS vector;
-
-COMMIT;

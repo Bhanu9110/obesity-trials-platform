@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 import { config } from "./config.js";
-import { runSync, pruneNonObesityIndication, rebuildProducts } from "./sync.js";
+import {
+  runSync,
+  pruneNonObesityIndication,
+  rebuildProducts,
+  daysSinceLastSuccessfulSync,
+  upgradeIfNeeded,
+  reparseFromRaw,
+  refreshQuality,
+} from "./sync.js";
 import { closePool } from "./db.js";
 
 function log(msg: string, obj?: unknown) {
@@ -19,6 +27,31 @@ async function main() {
       log(`Starting ${isFull ? "FULL" : "incremental"} sync`, { condition: config.ctgov.condition });
       const result = await runSync(isFull);
       log("Sync complete", result);
+      break;
+    }
+    case "daily": {
+      // One-shot version of what the scheduler does (used by the GitHub Actions
+      // daily job): bring the database up to date (backfill / lineage / re-parse /
+      // product rebuild as needed), then an incremental sync covering every day
+      // since the last successful run (max 30), so a missed day is caught up.
+      if (await upgradeIfNeeded(log)) break;
+      const gap = await daysSinceLastSuccessfulSync();
+      const days = Math.min(Math.max(gap ?? config.ctgov.incrementalDays, config.ctgov.incrementalDays), 30);
+      log(`Incremental sync covering last ${days} day(s)`);
+      const result = await runSync(false, days);
+      log("Sync complete", result);
+      if (result.failed > 0 && result.upserted + result.unchanged === 0) process.exitCode = 1;
+      break;
+    }
+    case "reparse": {
+      // Re-map stored raw records with the current parser (no download).
+      // Default: only records parsed by an older parser; --all re-parses everything.
+      const r = await reparseFromRaw({ all: process.argv.includes("--all") });
+      log("Re-parse complete", r);
+      break;
+    }
+    case "quality": {
+      log("Data-quality checks refreshed", { trials: await refreshQuality() });
       break;
     }
     case "rebuild-products": {
@@ -46,7 +79,7 @@ async function main() {
     }
     default:
       console.error(
-        `Unknown command "${cmd}". Use: sync [--full] | backfill | rebuild-products | prune-nonobesity [--apply]`,
+        `Unknown command "${cmd}". Use: sync [--full] | backfill | daily | reparse [--all] | quality | rebuild-products | prune-nonobesity [--apply]`,
       );
       process.exitCode = 1;
   }
