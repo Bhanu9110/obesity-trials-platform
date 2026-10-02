@@ -458,6 +458,14 @@ export async function runSync(
   });
   // A full backfill re-derives every product link with the corpus-wide known set.
   if (full) {
+    // Trials CT.gov no longer returns for our scope (withdrawn from the search,
+    // or the scope was narrowed) are removed — only after a clean, complete run.
+    if (result.failed === 0 && result.fetched > 0) {
+      const removed = await pruneNotSeen(result.runId);
+      if (removed) console.log(`  removed ${removed} stored trial(s) no longer returned by CT.gov for this scope`);
+    } else {
+      console.log("  some records failed — skipped removing trials that were not returned this time");
+    }
     await rebuildProducts();
     await setMeta("full_sync_at", new Date().toISOString()); // the first full load is complete
   }
@@ -543,6 +551,22 @@ async function setMeta(key: string, value: string): Promise<void> {
     "INSERT INTO app_meta (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
     [key, value],
   );
+}
+
+/**
+ * After a complete full download: delete stored trials (and raw records) that
+ * were not seen in that run. Every trial the run returned had its last_seen_at
+ * set during the run, so anything older than the run's start was not returned.
+ */
+export async function pruneNotSeen(runId: string): Promise<number> {
+  return withTransaction(async (c) => {
+    const start = await c.query<{ run_at: Date }>("SELECT run_at FROM sync_runs WHERE id = $1", [runId]);
+    const runAt = start.rows[0]?.run_at;
+    if (!runAt) return 0;
+    const del = await c.query("DELETE FROM trials WHERE last_seen_at < $1", [runAt]);
+    await c.query("DELETE FROM raw_trials WHERE source = $1 AND last_seen_at < $2", [SOURCE, runAt]);
+    return del.rowCount ?? 0;
+  });
 }
 
 /**

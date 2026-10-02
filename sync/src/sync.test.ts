@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mapStudy, trimPayload, contentHash, canonicalJson, PARSER_VERSION } from "./mapper.js";
 import { productsFromName, deriveTrialProducts } from "./products.js";
-import { runSyncForStudies, rebuildProducts, reparseFromRaw, trialsMissingLineage } from "./sync.js";
+import { runSyncForStudies, rebuildProducts, reparseFromRaw, trialsMissingLineage, pruneNotSeen } from "./sync.js";
 import { assessQuality } from "./quality.js";
 import { isObesityIndication } from "./obesity-filter.js";
 import { pool, pgConfig } from "./db.js";
@@ -279,6 +279,25 @@ test("batched sync: many trials, duplicates, mixed new / unchanged / filtered", 
 
   await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [ids]);
   await pool.query("DELETE FROM raw_trials WHERE source_id = ANY($1)", [ids]);
+});
+
+test("after a full run, trials it did not return are removed", async () => {
+  const keep = "NCT99999050", gone = "NCT99999051";
+  await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [[keep, gone]]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = ANY($1)", [[keep, gone]]);
+  await runSyncForStudies([study(keep), study(gone)]);
+  await pool.query("UPDATE trials SET last_seen_at = now() - interval '1 day' WHERE nct_id = ANY($1)", [[keep, gone]]);
+  await pool.query("UPDATE raw_trials SET last_seen_at = now() - interval '1 day' WHERE source_id = ANY($1)", [[keep, gone]]);
+  // Leave only the two test trials "unseen" from other tests' perspective: run returns just `keep`.
+  await pool.query("UPDATE trials SET last_seen_at = now() + interval '1 hour' WHERE nct_id <> ALL($1)", [[keep, gone]]);
+  await pool.query("UPDATE raw_trials SET last_seen_at = now() + interval '1 hour' WHERE source_id <> ALL($1)", [[keep, gone]]);
+  const r = await runSyncForStudies([study(keep)]);
+  assert.equal(await pruneNotSeen(r.runId), 1);
+  const left = (await pool.query("SELECT nct_id FROM trials WHERE nct_id = ANY($1)", [[keep, gone]])).rows.map((x) => x.nct_id);
+  assert.deepEqual(left, [keep]);
+  assert.equal((await pool.query("SELECT count(*)::int c FROM raw_trials WHERE source_id=$1", [gone])).rows[0].c, 0);
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [keep]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = $1", [keep]);
 });
 
 test("re-parse from raw_trials without downloading", async () => {

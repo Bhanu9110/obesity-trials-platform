@@ -18,10 +18,11 @@ export const config = {
     // Lower bound on trial StartDate for the corpus. "all data from year 2000".
     startDateFrom: process.env.CTGOV_START_DATE_FROM ?? "2000-01-01",
     // Restrict to trials that contain at least one of these intervention types.
-    // Empty => all study types. Set "DRUG" for drug/capsule studies only
+    // Empty string => all study types. "DRUG" = drug/capsule studies only
     // (excludes exercise/behavioral/device/procedure-only trials). You can list
     // several, e.g. "DRUG,DIETARY_SUPPLEMENT,BIOLOGICAL".
-    interventionTypes: (process.env.CTGOV_INTERVENTION_TYPES ?? "")
+    // Default "DRUG" (same as Docker), so the hosted daily job uses the same scope.
+    interventionTypes: (process.env.CTGOV_INTERVENTION_TYPES ?? "DRUG")
       .split(",")
       .map((s) => s.trim().toUpperCase())
       .filter(Boolean),
