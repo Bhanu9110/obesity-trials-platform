@@ -67,22 +67,20 @@ export async function listTrials(
   const params: unknown[] = [];
   const where = buildWhere(f, params);
 
-  const countRows = await query<{ count: number }>(
-    `SELECT count(*)::int AS count FROM trials t ${where}`,
-    params,
-  );
-  const total = countRows[0]?.count ?? 0;
-
-  params.push(pageSize, (page - 1) * pageSize);
-  const items = await query<TrialListItem>(
-    `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents,
-            ${PRODUCTS_JSON} AS products
-       FROM trials t ${where}
-      ORDER BY t.nct_id DESC
-      LIMIT $${params.length - 1} OFFSET $${params.length}`,
-    params,
-  );
-  return { items, total };
+  // Count and page are fetched in parallel (the database may be far away).
+  const pageParams = [...params, pageSize, (page - 1) * pageSize];
+  const [countRows, items] = await Promise.all([
+    query<{ count: number }>(`SELECT count(*)::int AS count FROM trials t ${where}`, params),
+    query<TrialListItem>(
+      `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents,
+              ${PRODUCTS_JSON} AS products
+         FROM trials t ${where}
+        ORDER BY t.nct_id DESC
+        LIMIT $${pageParams.length - 1} OFFSET $${pageParams.length}`,
+      pageParams,
+    ),
+  ]);
+  return { items, total: countRows[0]?.count ?? 0 };
 }
 
 export async function filterOptions(): Promise<FilterOptions> {
@@ -314,19 +312,21 @@ export async function qualityTrials(
     params.push(JSON.stringify([{ code }]));
     where += ` AND q.issues @> $${params.length}::jsonb`;
   }
-  const total = (await query<{ c: number }>(
-    `SELECT count(*)::int AS c FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id WHERE ${where}`,
-    params,
-  ))[0]?.c ?? 0;
-  params.push(pageSize, (Math.max(1, page) - 1) * pageSize);
-  const items = await query<QualityTrial>(
-    `SELECT t.nct_id, t.phase, t.sponsor, q.score::float AS score, q.issues,
-            to_char(q.checked_at, 'YYYY-MM-DD HH24:MI') AS checked_at
-       FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id
-      WHERE ${where}
-      ORDER BY q.score ASC, t.nct_id DESC
-      LIMIT $${params.length - 1} OFFSET $${params.length}`,
-    params,
-  );
-  return { items, total };
+  const pageParams = [...params, pageSize, (Math.max(1, page) - 1) * pageSize];
+  const [countRows, items] = await Promise.all([
+    query<{ c: number }>(
+      `SELECT count(*)::int AS c FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id WHERE ${where}`,
+      params,
+    ),
+    query<QualityTrial>(
+      `SELECT t.nct_id, t.phase, t.sponsor, q.score::float AS score, q.issues,
+              to_char(q.checked_at, 'YYYY-MM-DD HH24:MI') AS checked_at
+         FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id
+        WHERE ${where}
+        ORDER BY q.score ASC, t.nct_id DESC
+        LIMIT $${pageParams.length - 1} OFFSET $${pageParams.length}`,
+      pageParams,
+    ),
+  ]);
+  return { items, total: countRows[0]?.c ?? 0 };
 }

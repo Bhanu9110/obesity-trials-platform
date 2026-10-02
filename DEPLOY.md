@@ -102,6 +102,9 @@ From then on it runs by itself every day at 00:05 India time.
    | `AUTH_USERS` | logins as `name:password`, comma-separated, e.g. `poli:MyStrongPass2026,anita:AnotherPass77` |
    | `AUTH_SECRET` | a long random string — make one in PowerShell: `$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)` |
 
+   The site's server code runs in **Mumbai** (`web/vercel.json` → `"regions": ["bom1"]`), next to the
+   Supabase database. If you created Supabase in another region, change `bom1` to the closest
+   [Vercel region](https://vercel.com/docs/regions) (e.g. `sin1` Singapore, `iad1` US East, `fra1` Frankfurt).
 5. **Deploy**. After ~2 minutes you get `https://obesity-trials-platform.vercel.app` (or
    similar). Open it and sign in.
 
