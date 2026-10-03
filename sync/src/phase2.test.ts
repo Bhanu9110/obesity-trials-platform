@@ -105,6 +105,23 @@ test("sync: industry trials are classified with sponsor and title", async () => 
   await clean([a, b]);
 });
 
+test("drug class only -> Undisclosed drug; no drug at all -> no product (hidden on the website)", async () => {
+  const cls = "NCT88880061", none = "NCT88880062";
+  await clean([cls, none]);
+  await runSyncForStudies([
+    study(cls, { drugs: ["GLP-1 receptor agonist therapy", "Placebo"] }),
+    study(none, { drugs: ["Control Group", "Placebo"] }),
+  ]);
+  const prods = async (id: string) => (await pool.query(
+    "SELECT p.slug, p.name FROM trial_products tp JOIN products p ON p.id = tp.product_id WHERE tp.nct_id = $1", [id])).rows;
+  assert.deepEqual(await prods(cls), [{ slug: "undisclosedglp1receptoragonist", name: "Undisclosed GLP-1 receptor agonist" }]);
+  assert.deepEqual(await prods(none), []);
+  const q = (await pool.query("SELECT issues FROM trial_quality WHERE trial_id = $1", [cls])).rows[0].issues;
+  assert.ok(q.some((i: any) => i.code === "DRUG_CLASS_ONLY"));
+  assert.ok(!q.some((i: any) => i.code === "NO_DRUG_PRODUCT"));
+  await clean([cls, none]);
+});
+
 // --------------------------------------------------------------------------- #
 // Validation
 // --------------------------------------------------------------------------- #

@@ -36,7 +36,7 @@ interface Dashboard {
   health: { status: "ok" | "warn" | "fail"; checks: Check[] };
   runs: SyncRun[];
   failures: Failure[];
-  counts: { trials: number; storedTrials: number; products: number; productsWithInfo: number };
+  counts: { trials: number; storedTrials: number; noDrug: number; products: number; productsWithInfo: number };
   classes: { name: string; trials: number }[];
   lastSuccessfulSync: string | null;
   sync: { configured: boolean; actionsUrl: string | null };
@@ -212,8 +212,14 @@ export default function AdminPage() {
             </Link>
           ))}
           <span className="rounded-lg bg-white px-3 py-2 text-slate-500">
-            {data.counts.storedTrials.toLocaleString()} stored in total
+            {data.counts.storedTrials.toLocaleString()} shown in total
           </span>
+          {data.counts.noDrug > 0 && (
+            <span className="rounded-lg bg-white px-3 py-2 text-slate-400"
+                  title="These trials list only placebo, study arms, diet, devices or a sentence — no drug and no drug class. They stay in the database (and come back automatically if the registry adds a drug name) but are hidden on the website.">
+              + {data.counts.noDrug.toLocaleString()} hidden: no specific drug named
+            </span>
+          )}
         </div>
       </section>
 

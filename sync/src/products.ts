@@ -16,7 +16,10 @@
 // rebuilds trial_products automatically on its next start. Manually entered
 // product info is keyed by product slug and is never touched by a rebuild.
 
-export const PRODUCT_RULES_VERSION = "2"; // 2: "A ; Placebo" lists split on semicolons
+export const PRODUCT_RULES_VERSION = "3";
+// 2: "A ; Placebo" lists split on semicolons
+// 3: a drug class without a drug name ("GLP-1 receptor agonist") becomes an
+//    "Undisclosed …" product, e.g. "Undisclosed GLP-1 receptor agonist"
 
 export interface ProductRef {
   slug: string; // normalized key (also used in the drug-page URL)
@@ -84,6 +87,41 @@ export function builtinAliasMap(): AliasMap {
 // --------------------------------------------------------------------------- #
 // Word lists
 // --------------------------------------------------------------------------- #
+/**
+ * Drug classes named instead of a specific drug. Most specific first. Such an
+ * intervention becomes one "Undisclosed <class>" product so the trial still has a
+ * drug page (all undisclosed GLP-1 trials together, for example).
+ */
+export const UNDISCLOSED_PREFIX = "undisclosed";
+const DRUG_CLASSES: { re: RegExp; slug: string; name: string }[] = [
+  { re: /\btriple\b.*\b(agonist|incretin)|\bgip\b.*\bglp[- ]?1\b.*\bglucagon\b|\bglp[- ]?1\b.*\bgip\b.*\bglucagon\b/i,
+    slug: "gipglp1glucagontripleagonist", name: "GIP/GLP-1/glucagon triple agonist" },
+  { re: /\bgip\b.*\bglp[- ]?1\b|\bglp[- ]?1\b.*\bgip\b|\btwincretin\b/i,
+    slug: "gipglp1receptoragonist", name: "GIP/GLP-1 receptor agonist" },
+  { re: /\bglp[- ]?1\b.*\bglucagon\b.*\b(agonist|dual)|\bglucagon\s*\/\s*glp[- ]?1\b|\bglp[- ]?1\s*\/\s*glucagon\b/i,
+    slug: "glp1glucagonreceptoragonist", name: "GLP-1/glucagon receptor agonist" },
+  { re: /\bglp[- ]?1\b|\bglucagon[- ]like[- ]peptide[- ]?1\b|\bincretin[- ]based\b/i,
+    slug: "glp1receptoragonist", name: "GLP-1 receptor agonist" },
+  { re: /\bamylin\b/i, slug: "amylinanalogue", name: "amylin analogue" },
+  { re: /\bdpp[- ]?(4|iv)\b|\bdipeptidyl[- ]peptidase\b|\bgliptins?\b/i, slug: "dpp4inhibitor", name: "DPP-4 inhibitor" },
+  { re: /\bsglt[- ]?2\b|\bsodium[- ]glucose co-?transporter|\bgliflozins?\b/i, slug: "sglt2inhibitor", name: "SGLT2 inhibitor" },
+  { re: /\bpcsk9\b/i, slug: "pcsk9inhibitor", name: "PCSK9 inhibitor" },
+  { re: /\bstatins?\b|\bhmg[- ]?coa reductase inhibitor/i, slug: "statin", name: "statin" },
+  { re: /\bmelanocortin[- ]4\b|\bmc4r?\b/i, slug: "mc4ragonist", name: "MC4R agonist" },
+];
+
+/** "Undisclosed <class>" product for a class-only intervention name, or null. */
+export function drugClassProduct(name: string): ProductRef | null {
+  const t = asciiPunct(name);
+  if (PLACEBO_RE.test(t)) return null;
+  for (const c of DRUG_CLASSES) {
+    if (c.re.test(t)) return { slug: UNDISCLOSED_PREFIX + c.slug, name: `Undisclosed ${c.name}` };
+  }
+  return null;
+}
+
+export const isUndisclosedProduct = (slug: string) => slug.startsWith(UNDISCLOSED_PREFIX);
+
 // A list part containing any of these describes an activity or outcome, not a drug.
 const NON_DRUG_PART_RE = /\b(improvement|improving|management|lifestyle|diet(ary)? (advice|counsel\w*)|exercise|education|counsel\w*|usual care|standard (of )?care|best medical|follow[- ]?up|monitoring|assessment)\b/i;
 
@@ -277,7 +315,11 @@ function resolveFragment(fragment: string, ctx: Ctx): ProductRef[] {
     const drugs = meaningfulTokens(scrubbed).filter((t) => isDrugToken(t, ctx));
     return drugs.map((d) => ctx.aliases.get(slugify(d)) ?? { slug: slugify(d), name: prettyName([d]) });
   }
-  if (NON_PRODUCT_RE.test(scrubbed) || /\b(standard|usual|routine|best supportive) (of )?care\b/i.test(scrubbed)) return [];
+  if (NON_PRODUCT_RE.test(scrubbed) || /\b(standard|usual|routine|best supportive)( clinical)? (of )?care\b/i.test(scrubbed)) {
+    // "Tirzepatide is administered as part of routine clinical care" -> Tirzepatide
+    const drugs = meaningfulTokens(scrubbed).filter((t) => (ctx.known.has(slugify(t)) || ctx.aliases.has(slugify(t))) && isDrugToken(t, ctx));
+    return drugs.map((d) => ctx.aliases.get(slugify(d)) ?? { slug: slugify(d), name: prettyName([d]) });
+  }
   const toks = meaningfulTokens(scrubbed);
   if (!toks.length) return [];
   const cleaned = toks.join(" ").replace(/,(?=\d)/g, ""); // CP-945,598 -> CP-945598
@@ -329,8 +371,12 @@ export function productsFromName(
   // "Drug: X", "Phase IIb: X", "GLP-1 receptor agonist: X" -> X
   s = s.replace(/^[^:]{1,60}:\s*(?=\S)/, "");
   s = s.replace(/\s*\band\s*\/\s*or\b\s*/gi, " or ");
-  // "X or placebo" / "placebo or X" -> X
-  s = s.replace(/\s+or\s+(matching\s+)?placebos?\b.*$/i, "").replace(/^placebos?\s+or\s+/i, "");
+  // "X or placebo" / "X versus placebo" / "placebo or X" -> X
+  s = s.replace(/\s+(or|vs\.?|versus)\s+(matching\s+)?placebos?\b.*$/i, "").replace(/^placebos?\s+or\s+/i, "");
+  // "... dissolved in 0.9% saline" — the saline is only the vehicle.
+  s = s.replace(/\s+(dissolved|diluted|reconstituted)\s+in\b.*$/i, "");
+  // "Levonorgestrel-based emergency contraception" -> "Levonorgestrel emergency contraception"
+  s = s.replace(/\b([A-Za-z]{4,})-based\b/g, "$1");
   // Doses first, so "32 mg/bupropion" or "6Mg/Ml" are not mistaken for combinations.
   s = s.replace(DOSE_RE, " ").replace(/\s+/g, " ").trim();
 
@@ -344,8 +390,6 @@ export function productsFromName(
   if (/,(?=\s*[A-Za-z])/.test(s)) alternatives = alternatives.flatMap((a) => a.split(/\s+and\s+/i));
   for (const alt of alternatives) {
     if (!alt.trim()) continue;
-    // Descriptions that ride along in a list ("Rosuvastatin; improvement of lipid profile").
-    if (alternatives.length > 1 && NON_DRUG_PART_RE.test(alt)) continue;
 
     // Whole-name alias ("Wegovy", "CagriSema", "VI-0521", "SR141716", "Saxenda (liraglutide)").
     const wholeSlug = slugify(meaningfulTokens(scrub(alt.replace(/[+/&]/g, " "))).join(" "));
@@ -362,7 +406,18 @@ export function productsFromName(
     // "GLP-1 (Liraglutide)", "Formulation A (PF-07081532 ...)", "(semaglutide)" -> use the inside,
     // unless the name is a placebo ("Placebo (semaglutide)").
     if (comps.length === 0 && inside.trim() && !PLACEBO_RE.test(outside)) comps = resolve(inside);
-    if (comps.length === 0) continue;
+    // Descriptions that ride along in a list ("Rosuvastatin; improvement of lipid profile"):
+    // keep only drugs we already know from such a part.
+    if (alternatives.length > 1 && NON_DRUG_PART_RE.test(alt)) {
+      const aliasSlugs = new Set([...aliases.values()].map((a) => a.slug));
+      comps = comps.filter((c) => known.has(c.slug) || aliases.has(c.slug) || aliasSlugs.has(c.slug));
+    }
+    if (comps.length === 0) {
+      // No specific drug: maybe a drug class ("GLP-1 receptor agonist therapy").
+      const cls = drugClassProduct(alt);
+      if (cls) out.push(cls);
+      continue;
+    }
     if (comps.length === 1) {
       out.push(comps[0]);
       continue;

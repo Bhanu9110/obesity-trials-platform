@@ -29,8 +29,16 @@ const PRODUCTS_JSON = `
 
 export const OBESITY_SCOPES = ["primary", "comorbidity", "weight_related", "unrelated", "all"];
 
+/**
+ * Trials that name no drug at all (only placebo, a study arm, diet, a sentence…)
+ * are kept in the database but hidden everywhere on the website. A trial that
+ * names only a drug class has an "Undisclosed <class>" drug, so it is shown.
+ */
+export const hasDrug = (alias = "t") =>
+  `EXISTS (SELECT 1 FROM trial_products hd WHERE hd.nct_id = ${alias}.nct_id)`;
+
 function buildWhere(f: TrialFilters, params: unknown[]): string {
-  const clauses: string[] = ["t.is_active = true"];
+  const clauses: string[] = ["t.is_active = true", hasDrug("t")];
   const scope = f.scope && OBESITY_SCOPES.includes(f.scope) ? f.scope : "primary";
   if (scope !== "all") {
     params.push(scope);
@@ -95,15 +103,15 @@ export async function listTrials(
 export async function filterOptions(): Promise<FilterOptions> {
   const [phases, countries, classes] = await Promise.all([
     query<{ phase: string }>(
-      `SELECT DISTINCT phase FROM trials WHERE is_active AND coalesce(phase, '') <> ''`,
+      `SELECT DISTINCT phase FROM trials t WHERE t.is_active AND ${hasDrug("t")} AND coalesce(phase, '') <> ''`,
     ),
     query<{ country: string; continent: string }>(
       `SELECT c AS country, continent_of(c) AS continent
-         FROM (SELECT DISTINCT unnest(countries) AS c FROM trials WHERE is_active) x
+         FROM (SELECT DISTINCT unnest(countries) AS c FROM trials t WHERE t.is_active AND ${hasDrug("t")}) x
         ORDER BY c`,
     ),
     query<{ name: string; trials: number }>(
-      `SELECT obesity_class AS name, count(*)::int AS trials FROM trials WHERE is_active GROUP BY 1`,
+      `SELECT obesity_class AS name, count(*)::int AS trials FROM trials t WHERE t.is_active AND ${hasDrug("t")} GROUP BY 1`,
     ),
   ]);
   const byContinent = new Map<string, string[]>();
@@ -181,10 +189,13 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
   return rows.length ? getProduct(slug) : null;
 }
 
-export async function dashboardCounts(): Promise<{ trials: number; storedTrials: number; products: number; productsWithInfo: number }> {
-  const r = await query<{ trials: number; stored: number; products: number; with_info: number }>(
-    `SELECT (SELECT count(*)::int FROM trials WHERE is_active AND obesity_class = 'primary') AS trials,
-            (SELECT count(*)::int FROM trials WHERE is_active) AS stored,
+export async function dashboardCounts(): Promise<{
+  trials: number; storedTrials: number; noDrug: number; products: number; productsWithInfo: number;
+}> {
+  const r = await query<{ trials: number; stored: number; no_drug: number; products: number; with_info: number }>(
+    `SELECT (SELECT count(*)::int FROM trials t WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")}) AS trials,
+            (SELECT count(*)::int FROM trials t WHERE t.is_active AND ${hasDrug("t")}) AS stored,
+            (SELECT count(*)::int FROM trials t WHERE t.is_active AND NOT ${hasDrug("t")}) AS no_drug,
             (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp
                JOIN trials t ON t.nct_id = tp.nct_id AND t.obesity_class = 'primary') AS products,
             (SELECT count(*)::int FROM products p
@@ -194,7 +205,10 @@ export async function dashboardCounts(): Promise<{ trials: number; storedTrials:
                      OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL
                      OR p.drug_class IS NOT NULL)) AS with_info`,
   );
-  return { trials: r[0].trials, storedTrials: r[0].stored, products: r[0].products, productsWithInfo: r[0].with_info };
+  return {
+    trials: r[0].trials, storedTrials: r[0].stored, noDrug: r[0].no_drug,
+    products: r[0].products, productsWithInfo: r[0].with_info,
+  };
 }
 
 /** All product names (for the merge picker). */
@@ -285,17 +299,17 @@ export async function qualityOverview(): Promise<QualityOverview> {
               count(*) FILTER (WHERE q.score >= 0.9 AND q.score < 1)::int AS minor,
               count(*) FILTER (WHERE q.score >= 0.75 AND q.score < 0.9)::int AS needs_review,
               count(*) FILTER (WHERE q.score < 0.75)::int AS poor,
-              (SELECT count(*)::int FROM trials WHERE is_active AND obesity_class = 'primary') AS total_trials,
+              (SELECT count(*)::int FROM trials t3 WHERE t3.is_active AND t3.obesity_class = 'primary' AND ${hasDrug("t3")}) AS total_trials,
               (SELECT count(DISTINCT s.trial_id)::int FROM trial_sources s
-                 JOIN trials t2 ON t2.nct_id = s.trial_id AND t2.obesity_class = 'primary') AS with_lineage
+                 JOIN trials t2 ON t2.nct_id = s.trial_id AND t2.obesity_class = 'primary' AND ${hasDrug("t2")}) AS with_lineage
          FROM trials t JOIN trial_quality q ON q.trial_id = t.nct_id
-        WHERE t.is_active AND t.obesity_class = 'primary'`,
+        WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")}`,
     ),
     // Issue counts over the trials shown on the website (primary obesity).
     query<{ code: string; severity: string; trials: number }>(
       `SELECT i->>'code' AS code, i->>'severity' AS severity, count(*)::int AS trials
          FROM trial_quality q
-         JOIN trials t ON t.nct_id = q.trial_id AND t.is_active AND t.obesity_class = 'primary'
+         JOIN trials t ON t.nct_id = q.trial_id AND t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")}
         CROSS JOIN LATERAL jsonb_array_elements(q.issues) AS i
         GROUP BY 1, 2
         ORDER BY CASE i->>'severity' WHEN 'error' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END, count(*) DESC`,
@@ -342,7 +356,7 @@ export interface QualityFilter {
 }
 
 function qualityWhere(f: QualityFilter, params: unknown[]): string {
-  let where = "t.is_active AND t.obesity_class = 'primary'";
+  let where = `t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")}`;
   if (f.band) where += ` AND ${QUALITY_BANDS[f.band].sql}`;
   else where += " AND jsonb_array_length(q.issues) > 0";
   if (f.code) {
@@ -399,7 +413,7 @@ export async function qualityIssueCounts(band?: QualityBand): Promise<{ code: st
   return query<{ code: string; severity: string; trials: number }>(
     `SELECT i->>'code' AS code, i->>'severity' AS severity, count(*)::int AS trials
        FROM trial_quality q
-       JOIN trials t ON t.nct_id = q.trial_id AND t.is_active AND t.obesity_class = 'primary'
+       JOIN trials t ON t.nct_id = q.trial_id AND t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")}
       CROSS JOIN LATERAL jsonb_array_elements(q.issues) AS i
       ${band ? `WHERE ${QUALITY_BANDS[band].sql}` : ""}
       GROUP BY 1, 2

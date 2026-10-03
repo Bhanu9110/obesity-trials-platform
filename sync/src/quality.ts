@@ -32,6 +32,8 @@ const PENALTY: Record<Severity, number> = { error: 0.25, warning: 0.1, info: 0.0
  * @param continents continents derived from the countries (contains "Other" for
  *                   countries missing from the country→continent table)
  * @param validationWarnings values cleaned / dropped by validateMapped()
+ * @param undisclosedOnly  names of "Undisclosed <class>" products when the trial names
+ *                   only a drug class, no specific drug
  */
 export function assessQuality(
   mapped: MappedTrial,
@@ -40,6 +42,7 @@ export function assessQuality(
   continents: string[],
   unknownCountries: string[] = [],
   validationWarnings: string[] = [],
+  undisclosedOnly: string[] = [],
 ): QualityResult {
   const issues: QualityIssue[] = [];
   const add = (code: string, severity: Severity, message: string, detail?: string[]) =>
@@ -54,6 +57,9 @@ export function assessQuality(
     add("NO_DRUG_INTERVENTION", "warning", "No drug / biological intervention listed.");
   } else if (productCount === 0) {
     add("NO_DRUG_PRODUCT", "warning", "Drug interventions listed, but none could be matched to a drug.", mapped.interventions);
+  }
+  if (undisclosedOnly.length) {
+    add("DRUG_CLASS_ONLY", "info", "Only a drug class is named, no specific drug.", undisclosedOnly);
   }
   const keptSet = new Set(kept);
   const unmatched = mapped.interventions.filter((n) => !keptSet.has(n) && !NON_PRODUCT_NAME_RE.test(n));

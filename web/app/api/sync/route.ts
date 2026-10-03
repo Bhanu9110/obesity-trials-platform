@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dashboardCounts, openFailures, recentRuns } from "@/lib/queries";
+import { dashboardCounts, hasDrug, openFailures, recentRuns } from "@/lib/queries";
 import { query } from "@/lib/db";
 import { getHealth } from "@/lib/health";
 import { actionsUrl, dispatchConfig, dispatchSync } from "@/lib/github";
@@ -16,7 +16,7 @@ export async function GET() {
       openFailures().catch(() => []),
       dashboardCounts(),
       query<{ name: string; trials: number }>(
-        "SELECT obesity_class AS name, count(*)::int AS trials FROM trials WHERE is_active GROUP BY 1",
+        `SELECT obesity_class AS name, count(*)::int AS trials FROM trials t WHERE t.is_active AND ${hasDrug("t")} GROUP BY 1`,
       ).catch(() => []),
     ]);
     return NextResponse.json({

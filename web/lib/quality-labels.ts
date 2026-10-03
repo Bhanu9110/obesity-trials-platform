@@ -11,6 +11,7 @@ export const QUALITY_LABELS: Record<string, string> = {
   UNKNOWN_COUNTRY: "Country without continent",
   MISSING_SOURCE_UPDATED_AT: "No CT.gov update date",
   VALIDATION_WARNING: "Values cleaned on import",
+  DRUG_CLASS_ONLY: "Only a drug class named",
 };
 
 export const SEV_STYLE: Record<string, string> = {
@@ -33,4 +34,6 @@ export const QUALITY_HELP: Record<string, string> = {
   UNKNOWN_COUNTRY: "A country is not in the country → continent table (shown as 'Other').",
   MISSING_SOURCE_UPDATED_AT: "CT.gov's 'last update posted' date is missing.",
   VALIDATION_WARNING: "Some registry values were cleaned or dropped on import (see details).",
+  DRUG_CLASS_ONLY:
+    "The sponsor names only a drug class (e.g. \"GLP-1 receptor agonist\"), no specific drug. The trial is listed under an \"Undisclosed …\" drug.",
 };

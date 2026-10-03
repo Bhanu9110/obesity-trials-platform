@@ -64,7 +64,14 @@ test("product normalization", () => {
   assert.deepEqual(names("aleniglipron or placebo"), ["Aleniglipron"]);
   assert.deepEqual(names("Semaglutide or Tirzepatide"), ["Semaglutide", "Tirzepatide"]);
   assert.deepEqual(names("Naltrexone SR 32 mg/bupropion SR 360 mg/day"), ["Bupropion + Naltrexone"]);
-  assert.deepEqual(names("GLP-1 receptor agonist"), []);
+  // a drug class without a drug name -> one "Undisclosed <class>" drug
+  assert.deepEqual(names("GLP-1 receptor agonist"), ["Undisclosed GLP-1 receptor agonist"]);
+  assert.deepEqual(names("GLP-1 RAs"), ["Undisclosed GLP-1 receptor agonist"]);
+  assert.deepEqual(names("Dual GIP/GLP-1 receptor agonist"), ["Undisclosed GIP/GLP-1 receptor agonist"]);
+  assert.deepEqual(names("SGLT2 inhibitor"), ["Undisclosed SGLT2 inhibitor"]);
+  assert.deepEqual(names("GIP placebo"), []);
+  assert.deepEqual(names("Semaglutide (GLP-1 RA)"), ["Semaglutide"]);   // a named drug wins
+  assert.deepEqual(names("Telmisartan (Micardis®) vs. Placebo"), ["Telmisartan"]);
   assert.deepEqual(names("Glucagon"), ["Glucagon"]);
   // several interventions typed into one field, separated by ";" or "；"
   assert.deepEqual(names("SHR-1179 ; Placebo"), ["SHR-1179"]);

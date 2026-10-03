@@ -16,6 +16,7 @@ import {
   aliasTargets,
   buildKnownSet,
   deriveTrialProducts,
+  isUndisclosedProduct,
   type AliasMap,
   type ProductRef,
 } from "./products.js";
@@ -103,7 +104,12 @@ interface QualityInput {
   kept: string[];
   productCount: number;
   warnings: string[];
+  /** product names when every product is an "Undisclosed <class>" one */
+  undisclosedOnly?: string[];
 }
+
+const undisclosedOnly = (products: ProductRef[]) =>
+  products.length && products.every((p) => isUndisclosedProduct(p.slug)) ? products.map((p) => p.name) : [];
 
 /** Compute and store trial_quality for a set of stored trials (two round trips). */
 async function writeQualityBatch(db: Db, items: QualityInput[]): Promise<void> {
@@ -119,7 +125,7 @@ async function writeQualityBatch(db: Db, items: QualityInput[]): Promise<void> {
     .filter((i) => geoOf.has(i.mapped.nct_id))
     .map((i) => {
       const g = geoOf.get(i.mapped.nct_id)!;
-      const q = assessQuality(i.mapped, i.kept, i.productCount, g.continents ?? [], g.unknown ?? [], i.warnings);
+      const q = assessQuality(i.mapped, i.kept, i.productCount, g.continents ?? [], g.unknown ?? [], i.warnings, i.undisclosedOnly ?? []);
       return {
         trial_id: i.mapped.nct_id, score: q.score, error_count: q.error_count,
         warning_count: q.warning_count, info_count: q.info_count, issues: q.issues,
@@ -272,7 +278,7 @@ async function writeTrialsBatch(
   }
 
   await writeQualityBatch(c, derived.map(({ m, kept, products, warnings }) => ({
-    mapped: m, kept, productCount: products.length, warnings,
+    mapped: m, kept, productCount: products.length, warnings, undisclosedOnly: undisclosedOnly(products),
   })));
 
   const reclassified: ChangeRow[] = derived
@@ -802,7 +808,7 @@ export async function trialsMissingLineage(): Promise<number> {
  *     them back (they are now kept and labelled)
  *   - raw parsed by an old parser  -> re-parse from raw_trials (no network)
  *   - classifier rules changed     -> re-classify stored trials (no network)
- *   - product rules changed        -> rebuild product links
+ *   - product rules changed        -> re-parse raw records + rebuild product links
  */
 export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void): Promise<boolean> {
   if ((await trialCount()) === 0) {
@@ -846,7 +852,13 @@ export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void)
   if ((await getMeta("obesity_classifier_version")) !== CLASSIFIER_VERSION) {
     log(`classification rules changed (${CLASSIFIER_VERSION}) — re-classifying stored trials`, await reclassifyAll());
   }
-  if (await productsNeedRebuild()) log("products rebuilt", await rebuildProducts());
+  if (await productsNeedRebuild()) {
+    // New drug-matching rules: re-parse every stored raw record (not just the stored
+    // drug names — names that matched no drug before were not kept), then rebuild.
+    const r = await reparseFromRaw({ all: true });
+    log("drug-matching rules changed — re-parsed stored records and rebuilt drugs", r);
+    if (!r.reparsed) log("products rebuilt", await rebuildProducts());
+  }
   return false;
 }
 
@@ -860,7 +872,7 @@ export async function refreshQuality(context?: ProductContext): Promise<number> 
   const items: QualityInput[] = rows.rows.map((r) => {
     const v = parseAndValidate(r.payload);
     const { kept, products } = deriveTrialProducts(v.value.interventions, ctx.aliases, ctx.known);
-    return { mapped: v.value, kept, productCount: products.length, warnings: v.warnings };
+    return { mapped: v.value, kept, productCount: products.length, warnings: v.warnings, undisclosedOnly: undisclosedOnly(products) };
   });
   await withTransaction(async (c) => {
     for (const group of chunks(items, 1000)) await writeQualityBatch(c, group);
