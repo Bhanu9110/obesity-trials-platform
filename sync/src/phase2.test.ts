@@ -7,7 +7,7 @@ import { validateMapped, checkStudiesPage } from "./validate.js";
 import { mapStudy } from "./mapper.js";
 import { MAX_ATTEMPTS, recordFailure, requeueFailure, dismissFailure, failureCounts } from "./failures.js";
 import {
-  runSyncForStudies, retryFailures, reclassifyAll, pruneNotSeen, rebuildProducts, getMeta,
+  runSyncForStudies, retryFailures, reclassifyAll, pruneNotSeen, rebuildProducts, getMeta, purgeOutOfScope,
 } from "./sync.js";
 import { checkHealth } from "./health.js";
 import { pool } from "./db.js";
@@ -88,7 +88,7 @@ test("classification: industry-sponsored trials are not missed", () => {
   assert.equal(ind(["Cancer Cachexia"], "Treatment of Cancer Related Anorexia and Weight Loss").class, "unrelated");
 });
 
-test("sync: industry trials are classified with sponsor and title", async () => {
+test("sync: industry trials are kept via sponsor and title; others not stored", async () => {
   const a = "NCT88880051", b = "NCT88880052";
   await clean([a, b]);
   await runSyncForStudies([
@@ -97,15 +97,15 @@ test("sync: industry trials are classified with sponsor and title", async () => 
   ]);
   const r = Object.fromEntries((await pool.query("SELECT nct_id, obesity_class FROM trials WHERE nct_id = ANY($1)", [[a, b]])).rows
     .map((x) => [x.nct_id, x.obesity_class]));
-  assert.deepEqual(r, { [a]: "primary", [b]: "unrelated" });
-  // re-classification from storage uses the stored title too
-  await pool.query("UPDATE trials SET obesity_class = 'unrelated' WHERE nct_id = $1", [a]);
+  assert.deepEqual(r, { [a]: "primary" });            // the academic one is not stored
+  // re-classification from storage uses the stored title too (stays)
+  await pool.query("UPDATE trials SET classifier_version = 'old' WHERE nct_id = $1", [a]);
   await reclassifyAll();
   assert.equal((await pool.query("SELECT obesity_class FROM trials WHERE nct_id = $1", [a])).rows[0].obesity_class, "primary");
   await clean([a, b]);
 });
 
-test("drug class only -> Undisclosed drug; no drug at all -> no product (hidden on the website)", async () => {
+test("drug class only -> Undisclosed drug; no drug at all -> not stored", async () => {
   const cls = "NCT88880061", none = "NCT88880062";
   await clean([cls, none]);
   await runSyncForStudies([
@@ -116,6 +116,7 @@ test("drug class only -> Undisclosed drug; no drug at all -> no product (hidden 
     "SELECT p.slug, p.name FROM trial_products tp JOIN products p ON p.id = tp.product_id WHERE tp.nct_id = $1", [id])).rows;
   assert.deepEqual(await prods(cls), [{ slug: "undisclosedglp1receptoragonist", name: "Undisclosed GLP-1 receptor agonist" }]);
   assert.deepEqual(await prods(none), []);
+  assert.equal((await pool.query("SELECT count(*)::int c FROM trials WHERE nct_id = $1", [none])).rows[0].c, 0);
   const q = (await pool.query("SELECT issues FROM trial_quality WHERE trial_id = $1", [cls])).rows[0].issues;
   assert.ok(q.some((i: any) => i.code === "DRUG_CLASS_ONLY"));
   assert.ok(!q.some((i: any) => i.code === "NO_DRUG_PRODUCT"));
@@ -250,14 +251,16 @@ test("change history: added, field updates, reclassified, removed — no noise",
     ["updated", "countries", ["India"], ["India", "Japan"]],
   ]);
 
-  // Conditions change so that it is no longer primary obesity.
+  // Conditions change so that it is no longer primary obesity -> removed (out of scope).
   await runSyncForStudies([study(id, { phase: ["PHASE3"], countries: ["India", "Japan"], conditions: ["Weight Loss"] })]);
   c = await changes();
-  const kinds = c.slice(3).map((x) => `${x.change}:${x.field}`).sort();
-  assert.deepEqual(kinds, ["reclassified:obesity_class", "updated:conditions"]);
-  assert.deepEqual(c.find((x) => x.change === "reclassified")!.new_value, "weight_related");
+  assert.equal(c.length, 4);
+  assert.equal(c[3].change, "removed");
+  assert.equal(c[3].old_value.obesity_class, "primary");
+  assert.equal((await pool.query("SELECT count(*)::int c FROM trials WHERE nct_id=$1", [id])).rows[0].c, 0);
 
-  // Removed by a full sync that no longer returns it.
+  // Back in scope -> added again; then removed by a full sync that no longer returns it.
+  await runSyncForStudies([study(id)]);
   await pool.query("UPDATE trials SET last_seen_at = now() - interval '1 day' WHERE nct_id = $1", [id]);
   await pool.query("UPDATE trials SET last_seen_at = now() + interval '1 hour' WHERE nct_id <> $1", [id]);
   await pool.query("UPDATE raw_trials SET last_seen_at = now() + interval '1 hour' WHERE source_id <> $1", [id]);
@@ -265,25 +268,40 @@ test("change history: added, field updates, reclassified, removed — no noise",
   assert.deepEqual(await pruneNotSeen(run.runId), { removed: 1, skipped: 0 });
   c = await changes();
   assert.equal(c[c.length - 1].change, "removed");
-  assert.equal(c[c.length - 1].old_value.obesity_class, "weight_related");
+  assert.equal(c[c.length - 2].change, "added");
   await clean([id]);
 });
 
-test("re-classification from stored conditions (rule change) is recorded", async () => {
-  const id = "NCT88880031";
-  await clean([id]);
-  await runSyncForStudies([study(id, { conditions: ["Obesity-associated Asthma"] })]);
-  // Pretend an older classifier had labelled it primary.
-  await pool.query("UPDATE trials SET obesity_class = 'primary', classifier_version = 'obesity-1.0' WHERE nct_id = $1", [id]);
+test("re-classification (rule change) removes trials that are no longer primary obesity", async () => {
+  const keep = "NCT88880031", gone = "NCT88880032";
+  await clean([keep, gone]);
+  await runSyncForStudies([study(keep), study(gone)]);
+  // Pretend an older classifier stored this comorbidity trial as primary.
+  await pool.query("UPDATE trials SET conditions = ARRAY['Obesity-associated Asthma'], classifier_version = 'obesity-1.0' WHERE nct_id = $1", [gone]);
   const s = await reclassifyAll();
-  assert.ok(s.reclassified >= 1);
+  assert.ok(s.removed >= 1);
   assert.equal(s.version, CLASSIFIER_VERSION);
-  const t = (await pool.query("SELECT obesity_class, classifier_version FROM trials WHERE nct_id = $1", [id])).rows[0];
-  assert.deepEqual(t, { obesity_class: "comorbidity", classifier_version: CLASSIFIER_VERSION });
+  const left = (await pool.query("SELECT nct_id FROM trials WHERE nct_id = ANY($1)", [[keep, gone]])).rows.map((x) => x.nct_id);
+  assert.deepEqual(left, [keep]);
   assert.equal(await getMeta("obesity_classifier_version"), CLASSIFIER_VERSION);
-  const ch = (await pool.query("SELECT old_value, new_value FROM trial_changes WHERE trial_id = $1 AND change = 'reclassified'", [id])).rows;
-  assert.deepEqual(ch.at(-1), { old_value: "primary", new_value: "comorbidity" });
-  await clean([id]);
+  const ch = (await pool.query("SELECT change FROM trial_changes WHERE trial_id = $1 ORDER BY id", [gone])).rows.map((x) => x.change);
+  assert.deepEqual(ch.slice(-1), ["removed"]);
+  await clean([keep, gone]);
+});
+
+test("one-off clean-up removes stored out-of-scope trials", async () => {
+  const ok = "NCT88880071", nodrug = "NCT88880072";
+  await clean([ok, nodrug]);
+  await runSyncForStudies([study(ok), study(nodrug)]);
+  // An older version stored a non-primary trial and a trial whose drug link vanished.
+  await pool.query("DELETE FROM trial_products WHERE nct_id = $1", [nodrug]);
+  const extra = "NCT88880073";
+  await pool.query(`INSERT INTO trials (nct_id, conditions, is_active, obesity_class) VALUES ($1, ARRAY['Breast Cancer'], true, 'unrelated')`, [extra]);
+  const removed = await purgeOutOfScope();
+  assert.ok(removed >= 2);
+  const left = (await pool.query("SELECT nct_id FROM trials WHERE nct_id = ANY($1)", [[ok, nodrug, extra]])).rows.map((x) => x.nct_id);
+  assert.deepEqual(left, [ok]);
+  await clean([ok, nodrug, extra]);
 });
 
 // --------------------------------------------------------------------------- #

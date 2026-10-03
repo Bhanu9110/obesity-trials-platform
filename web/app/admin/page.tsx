@@ -1,9 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { NctLink } from "@/components/ui";
-import { OBESITY_CLASSES, OBESITY_CLASS_ORDER } from "@/lib/format";
 
 interface SyncRun {
   id: string;
@@ -119,7 +117,6 @@ export default function AdminPage() {
 
   const dead = data.failures.filter((f) => f.status === "dead");
   const pending = data.failures.filter((f) => f.status === "pending");
-  const classCount = Object.fromEntries(data.classes.map((c) => [c.name, c.trials]));
 
   return (
     <div className="space-y-6">
@@ -197,31 +194,12 @@ export default function AdminPage() {
         <Tile label="Drugs still blank" value={data.counts.products - data.counts.productsWithInfo} color="text-amber-600" />
       </div>
 
-      {/* Classification */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-1 text-sm font-semibold text-slate-900">Stored trials by obesity class</h2>
-        <p className="mb-3 text-xs text-slate-500">
-          Every trial CT.gov returns is kept and labelled. Only primary-obesity trials are shown by default; the
-          Trials page can show the others.
-        </p>
-        <div className="flex flex-wrap gap-2 text-sm">
-          {OBESITY_CLASS_ORDER.map((k) => (
-            <Link key={k} href={`/?scope=${k}`} className={`rounded-lg px-3 py-2 ${OBESITY_CLASSES[k].badge} hover:opacity-80`}>
-              <span className="font-semibold tabular-nums">{(classCount[k] ?? 0).toLocaleString()}</span>{" "}
-              {OBESITY_CLASSES[k].label}
-            </Link>
-          ))}
-          <span className="rounded-lg bg-white px-3 py-2 text-slate-500">
-            {data.counts.storedTrials.toLocaleString()} shown in total
-          </span>
-          {data.counts.noDrug > 0 && (
-            <span className="rounded-lg bg-white px-3 py-2 text-slate-400"
-                  title="These trials list only placebo, study arms, diet, devices or a sentence — no drug and no drug class. They stay in the database (and come back automatically if the registry adds a drug name) but are hidden on the website.">
-              + {data.counts.noDrug.toLocaleString()} hidden: no specific drug named
-            </span>
-          )}
-        </div>
-      </section>
+      <p className="text-xs text-slate-500">
+        Stored: only <b>primary-obesity</b> trials that name a drug or a drug class
+        (industry trials count as primary when obesity or weight loss appears in their conditions or title).
+        Trials where obesity is only a comorbidity, weight-related trials, non-obesity trials and trials naming no drug are
+        not stored — the “Excluded” column below counts them per run.
+      </p>
 
       {/* Dead-letter queue */}
       <section className="rounded-xl border border-slate-200 bg-white p-5">
@@ -263,7 +241,7 @@ export default function AdminPage() {
                   <th className="pb-2 text-right font-medium">Fetched</th>
                   <th className="pb-2 text-right font-medium">Written</th>
                   <th className="pb-2 text-right font-medium">Unchanged</th>
-                  <th className="pb-2 text-right font-medium">Not primary</th>
+                  <th className="pb-2 text-right font-medium" title="Not primary obesity, or no drug named — not stored">Excluded</th>
                   <th className="pb-2 text-right font-medium">Failed</th>
                   <th className="pb-2 text-right font-medium">Duration</th>
                 </tr>

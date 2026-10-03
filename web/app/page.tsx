@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FilterOptions, TrialListItem } from "@/lib/types";
-import { formatPhase, SPONSOR_GROUPS, OBESITY_CLASSES, OBESITY_CLASS_ORDER } from "@/lib/format";
+import { formatPhase, SPONSOR_GROUPS } from "@/lib/format";
 import { Chips, ContinentChips, Dash, NctLink, PhaseText, ProductChips } from "@/components/ui";
 
 const SELECT = "rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm";
@@ -15,7 +15,6 @@ export default function BrowsePage() {
   const [continent, setContinent] = useState("");
   const [country, setCountry] = useState("");
   const [sponsor, setSponsor] = useState("");
-  const [scope, setScope] = useState("primary");
   const [items, setItems] = useState<TrialListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -25,14 +24,7 @@ export default function BrowsePage() {
 
   useEffect(() => {
     fetch("/api/filters").then((r) => r.json()).then(setOptions).catch(() => setOptions(null));
-    // Links from the Admin page open a class directly (?scope=comorbidity).
-    const s = new URLSearchParams(window.location.search).get("scope");
-    if (s && (s === "all" || OBESITY_CLASSES[s])) setScope(s);
   }, []);
-  const classCount = useMemo(
-    () => Object.fromEntries((options?.classes ?? []).map((c) => [c.name, c.trials])),
-    [options],
-  );
 
   // Country dropdown is scoped to the chosen continent.
   const countryChoices = useMemo(() => {
@@ -51,7 +43,6 @@ export default function BrowsePage() {
       if (country) p.set("country", country);
       else if (continent) p.set("continent", continent);
       if (sponsor && SPONSOR_GROUPS[sponsor]) p.set("sponsorClass", SPONSOR_GROUPS[sponsor].classes);
-      p.set("scope", scope);
       p.set("page", String(page));
       p.set("pageSize", String(pageSize));
       const res = await fetch(`/api/trials?${p.toString()}`).then((r) => r.json());
@@ -65,17 +56,17 @@ export default function BrowsePage() {
     } finally {
       setLoading(false);
     }
-  }, [phase, continent, country, sponsor, activeQuery, page, scope]);
+  }, [phase, continent, country, sponsor, activeQuery, page]);
 
   useEffect(() => {
     load();
   }, [load]);
   useEffect(() => {
     setPage(1);
-  }, [phase, continent, country, sponsor, activeQuery, scope]);
+  }, [phase, continent, country, sponsor, activeQuery]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const filtersOn = Boolean(activeQuery || phase || continent || country || sponsor || scope !== "primary");
+  const filtersOn = Boolean(activeQuery || phase || continent || country || sponsor);
 
   return (
     <div className="space-y-4">
@@ -129,19 +120,6 @@ export default function BrowsePage() {
             <option key={k} value={k}>{v.label}</option>
           ))}
         </select>
-        <select
-          value={scope}
-          onChange={(e) => setScope(e.target.value)}
-          className={`${SELECT} ${scope !== "primary" ? "border-amber-400 bg-amber-50" : ""}`}
-          title="Which trials: primary-obesity trials (default) or the others that are stored and labelled"
-        >
-          {OBESITY_CLASS_ORDER.map((k) => (
-            <option key={k} value={k}>
-              {OBESITY_CLASSES[k].label}{classCount[k] != null ? ` (${classCount[k].toLocaleString()})` : ""}
-            </option>
-          ))}
-          <option value="all">All stored trials</option>
-        </select>
         <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700">
           Search
         </button>
@@ -155,7 +133,6 @@ export default function BrowsePage() {
               setContinent("");
               setCountry("");
               setSponsor("");
-              setScope("primary");
             }}
             className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
           >
@@ -199,17 +176,7 @@ export default function BrowsePage() {
                   <td className="px-4 py-3"><ProductChips products={t.products} /></td>
                   <td className="px-4 py-3 text-slate-700"><PhaseText phase={t.phase} /></td>
                   <td className="px-4 py-3 text-slate-700">{t.sponsor || <Dash />}</td>
-                  <td className="px-4 py-3">
-                    {t.obesity_class !== "primary" && OBESITY_CLASSES[t.obesity_class] && (
-                      <span
-                        title={t.obesity_reason ?? undefined}
-                        className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${OBESITY_CLASSES[t.obesity_class].badge}`}
-                      >
-                        {OBESITY_CLASSES[t.obesity_class].short}
-                      </span>
-                    )}
-                    <Chips values={t.indication} />
-                  </td>
+                  <td className="px-4 py-3"><Chips values={t.indication} /></td>
                   <td className="px-4 py-3"><ContinentChips continents={t.continents} /></td>
                 </tr>
               ))

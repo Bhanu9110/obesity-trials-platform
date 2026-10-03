@@ -26,27 +26,27 @@ on ClinicalTrials.gov.
 
 Scope: CT.gov search `obesity OR overweight OR obese OR "weight management" OR "weight loss"
 OR "weight reduction" OR adiposity`, start date ≥ 2000, trials with a **drug, biological or
-combination-product** intervention. Every trial CT.gov returns is **stored and labelled**
-with an obesity class (nothing is deleted):
+combination-product** intervention. Only trials that pass **both** rules below are stored; everything else is skipped at
+download time (and removed if it was stored before, with a "removed" entry on the
+Changes page):
 
-| Class | Meaning | Shown by default |
-|---|---|---|
-| **Primary obesity** | obesity / obese / overweight / morbid obesity / hyperlipidemia / dyslipidemia is the primary condition | yes |
-| Obesity as comorbidity | obesity is context of another disease ("obesity-associated asthma", "T2D in obese adults") | no |
-| Weight-related | no obesity term, but weight-management terms (weight loss, BMI, adiposity…) | no |
-| Not obesity | none of the above (CT.gov's keyword search matched something else) | no |
+1. **Primary obesity** — obesity / obese / overweight / morbid obesity / hyperlipidemia /
+   dyslipidemia is the primary condition. Not stored: obesity only as a comorbidity of
+   another disease ("obesity-associated asthma"), weight-related trials without an
+   obesity term ("weight gain"), and trials that are not about obesity at all.
+   **Industry-sponsored trials** (competitor programmes) count as primary whenever obesity
+   or weight loss / weight management is named in their conditions *or their title*
+   (e.g. healthy-volunteer, drug-interaction or OSA / hypertension studies of obesity drugs).
+   Negated diseases ("non-diabetic") are ignored, and several conditions typed into one
+   field ("Type 2 Diabetes; Obesity") are split.
+2. **A drug is named** — a specific drug, or a drug class, which becomes an
+   "Undisclosed …" drug (e.g. "GLP-1 receptor agonist" → *Undisclosed GLP-1 receptor
+   agonist*). Trials naming only placebo, study arms, diet, devices or a sentence are not stored.
 
-**Industry-sponsored trials** (competitor programmes) count as primary obesity whenever
-obesity or weight loss / weight management is named in their conditions *or their title*
-(e.g. healthy-volunteer, drug-interaction or OSA / hypertension studies of obesity drugs).
-Negated diseases ("non-diabetic") are ignored, and several conditions typed into one field
-("Type 2 Diabetes; Obesity") are split. Changing the search terms triggers one automatic
-full sync.
-
-The Trials page, each drug page and the Drugs list show **primary-obesity** trials;
-a selector shows the others. Each trial keeps the reason for its class. Rules live
-in `sync/src/obesity-filter.ts`; bump `CLASSIFIER_VERSION` after changing them and
-the next run re-classifies every stored trial (no download), recording any changes.
+Rules live in `sync/src/obesity-filter.ts` and `sync/src/products.ts`; bumping
+`CLASSIFIER_VERSION`, `PRODUCT_RULES_VERSION` or `STORE_SCOPE` (sync.ts) makes the next run
+re-apply them to every stored trial (no download). Changing the search terms triggers one
+automatic full sync.
 
 ## Drug pages
 

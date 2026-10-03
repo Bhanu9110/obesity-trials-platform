@@ -162,6 +162,24 @@ interface TrialInput {
 
 const classify = (m: MappedTrial, title?: string | null) => classifyObesity(m.conditions, m.lead_sponsor_class, title);
 
+/** Version of the "what is stored" rule below; a change triggers a one-off clean-up. */
+export const STORE_SCOPE = "primary-obesity-with-drug-1";
+
+/**
+ * Only trials that belong in the database are stored:
+ *   - primary obesity (see obesity-filter.ts; industry trials naming obesity or
+ *     weight loss in their conditions or title count as primary), AND
+ *   - at least one specific drug, or a drug class ("Undisclosed GLP-1 receptor agonist").
+ * Everything else (obesity as comorbidity, weight-related, not obesity, trials that
+ * name no drug) is not stored, and removed if it was stored before.
+ */
+function outOfScopeReason(m: MappedTrial, title: string | null | undefined, ctx: ProductContext): string | null {
+  const cls = classify(m, title);
+  if (cls.class !== "primary") return cls.class;
+  if (!deriveTrialProducts(m.interventions, ctx.aliases, ctx.known).products.length) return "no_drug";
+  return null;
+}
+
 /** Parse + validate a stored or downloaded payload. */
 function parseAndValidate(payload: RawStudy): ValidationResult {
   return validateMapped(mapStudy(payload));
@@ -419,10 +437,21 @@ async function ingestBatch(raws: RawStudy[], state: RunState): Promise<void> {
       await fail(state, String(nctId), "map_or_upsert", err);
     }
   }
-  const items = dedupe(prepared, (p) => p.nct_id);
+  const all = dedupe(prepared, (p) => p.nct_id);
+  // Out of scope (not primary obesity, or no drug named): not stored; removed if it was.
+  const outIds = all.filter((p) => outOfScopeReason(p.mapped, p.title, ctx)).map((p) => p.nct_id);
+  if (outIds.length) {
+    await deleteTrials(pool, outIds, runId);
+    res.filtered += outIds.length;
+    for (const id of outIds) state.touched.add(id);
+    const healedOut = outIds.filter((id) => state.openFailures.has(id));
+    if (healedOut.length) {
+      await resolveFailures(healedOut, "out of scope (not primary obesity / no drug)");
+      for (const id of healedOut) state.openFailures.delete(id);
+    }
+  }
+  const items = all.filter((p) => !outIds.includes(p.nct_id));
   if (!items.length) return;
-  // Not a primary-obesity trial: stored and labelled, hidden on the website by default.
-  res.filtered += items.filter((p) => classify(p.mapped, p.title).class !== "primary").length;
 
   const prev = await pool.query<{ source_id: string; content_hash: string; parser_version: string; has_trial: boolean }>(
     `SELECT r.source_id, r.content_hash, r.parser_version,
@@ -547,7 +576,7 @@ function progressLogger(label: string) {
     if (Date.now() - lastLog < 15_000) return; // progress line every ~15 s (visible in the GitHub log)
     lastLog = Date.now();
     console.log(`  … ${label}: ${r.fetched} fetched · ${r.upserted} written · ${r.unchanged} unchanged · ` +
-      `${r.filtered} not primary obesity · ${r.failed} failed`);
+      `${r.filtered} out of scope · ${r.failed} failed`);
   };
 }
 
@@ -587,7 +616,7 @@ export async function runSync(
     await rebuildProducts();
     const now = new Date().toISOString();
     await setMeta("full_sync_at", now);              // the first full load is complete
-    await setMeta("keeps_non_primary_since", now);   // non-primary trials are stored (Phase 2)
+    await setMeta("store_scope", STORE_SCOPE);       // only in-scope trials are stored
     await setMeta("fetch_scope", fetchScopeKey());   // which CT.gov search this full load covered
   }
   return result;
@@ -646,7 +675,7 @@ export interface ReparseResult {
   runId: string;
   scanned: number;
   reparsed: number;
-  filtered: number;   // not primary obesity (kept, labelled)
+  filtered: number;   // out of scope (not primary obesity / no drug): removed
   failed: number;
 }
 
@@ -674,17 +703,25 @@ export async function reparseFromRaw(opts: { all?: boolean } = {}): Promise<Repa
     });
   for (const batch of chunks(rows.rows, BATCH_SIZE)) {
     const group: { id: string; input: TrialInput }[] = [];
+    const drop: string[] = [];
     for (const r of batch) {
       try {
         const v = parseAndValidate(r.payload);
         if (v.errors.length) throw new Error(v.errors.join(" "));
         const title = studyTitle(r.payload);
-        if (classify(v.value, title).class !== "primary") out.filtered += 1;
+        if (outOfScopeReason(v.value, title, ctx)) {
+          drop.push(r.source_id);
+          continue;
+        }
         group.push({ id: r.source_id, input: { mapped: v.value, warnings: v.warnings, title } });
       } catch (err) {
         out.failed += 1;
         errors.push({ nct_id: r.source_id, error: err instanceof Error ? err.message : String(err) });
       }
+    }
+    if (drop.length) {
+      await deleteTrials(pool, drop, runId);
+      out.filtered += drop.length;
     }
     if (!group.length) continue;
     try {
@@ -838,11 +875,11 @@ export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void)
     log("classification", await reclassifyAll());
     return true;
   }
-  if (!(await getMeta("keeps_non_primary_since"))) {
-    log("older versions deleted non-primary-obesity trials — one full sync to store and label them");
-    log("full sync complete", await runSync(true));
-    log("classification", await reclassifyAll());
-    return true;
+  if ((await getMeta("store_scope")) !== STORE_SCOPE) {
+    log("storage rule changed: keeping only primary-obesity trials that name a drug or drug class — cleaning up");
+    log("clean-up complete", await reparseFromRaw({ all: true }));
+    log("trials without a source record removed", { removed: await purgeOutOfScope() });
+    await setMeta("store_scope", STORE_SCOPE);
   }
   const stale = await rawNeedingReparse();
   if (stale > 0) {
@@ -919,6 +956,7 @@ export interface RebuildResult {
   products: number;        // products linked to at least one trial
   orphansRemoved: number;  // unlinked products with no manual info, deleted
   keptWithInfo: number;    // unlinked products kept because they have manual info
+  trialsRemoved: number;   // trials that name no drug any more (out of scope)
 }
 
 const MANUAL_INFO_EMPTY = `modality IS NULL AND phase IS NULL AND moa IS NULL AND roa IS NULL
@@ -958,9 +996,13 @@ export async function rebuildProducts(): Promise<RebuildResult> {
     return votes[0]?.[0] ?? slug;
   };
 
-  const result: RebuildResult = { trials: rows.rowCount ?? 0, products: nameVotes.size, orphansRemoved: 0, keptWithInfo: 0 };
+  const result: RebuildResult = { trials: rows.rowCount ?? 0, products: nameVotes.size, orphansRemoved: 0, keptWithInfo: 0, trialsRemoved: 0 };
+  const noDrug = [...perTrial].filter(([, d]) => d.products.length === 0).map(([id]) => id);
+  for (const id of noDrug) perTrial.delete(id);
 
   await withTransaction(async (c) => {
+    // Trials that no longer name any drug are out of scope.
+    result.trialsRemoved = await deleteTrials(c, noDrug, null);
     // Upsert products with their best display name (manual fields untouched).
     const slugs = [...nameVotes.keys()];
     for (let i = 0; i < slugs.length; i += 500) {
@@ -1039,6 +1081,7 @@ export interface ClassificationSummary {
   trials: number;
   changed: number;            // class, reason or terms changed
   reclassified: number;       // class changed
+  removed: number;            // no longer primary obesity -> removed
   counts: Record<string, number>;
 }
 
@@ -1060,9 +1103,14 @@ export async function reclassifyAll(runId: string | null = null): Promise<Classi
   const counts: Record<string, number> = { primary: 0, comorbidity: 0, weight_related: 0, unrelated: 0 };
   const updates: { nct_id: string; cls: string; reason: string; terms: string[] }[] = [];
   const changes: ChangeRow[] = [];
+  const remove: string[] = [];
   for (const r of rows.rows) {
     const c = classifyObesity(r.conditions ?? [], r.lead_sponsor_class, r.title);
     counts[c.class] = (counts[c.class] ?? 0) + 1;
+    if (c.class !== "primary") {
+      remove.push(r.nct_id); // only primary-obesity trials are stored
+      continue;
+    }
     const differs = c.class !== r.obesity_class || c.reason !== r.obesity_reason ||
       JSON.stringify(c.terms) !== JSON.stringify(r.obesity_terms ?? []) || r.classifier_version !== CLASSIFIER_VERSION;
     if (!differs) continue;
@@ -1082,13 +1130,27 @@ export async function reclassifyAll(runId: string | null = null): Promise<Classi
       );
     }
     await insertChanges(c, changes, runId);
+    await deleteTrials(c, remove, runId);
     await c.query(
       `INSERT INTO app_meta (key, value) VALUES ('obesity_classifier_version', $1)
        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
       [CLASSIFIER_VERSION],
     );
   });
-  return { version: CLASSIFIER_VERSION, trials: rows.rowCount ?? 0, changed: updates.length, reclassified: changes.length, counts };
+  return { version: CLASSIFIER_VERSION, trials: rows.rowCount ?? 0, changed: updates.length, reclassified: changes.length, removed: remove.length, counts };
+}
+
+/**
+ * Remove stored trials that are out of scope by what is in the database
+ * (not primary obesity, or no drug linked) — catches rows with no raw record.
+ */
+export async function purgeOutOfScope(): Promise<number> {
+  const r = await pool.query<{ nct_id: string }>(
+    `SELECT nct_id FROM trials t
+      WHERE t.obesity_class <> 'primary'
+         OR NOT EXISTS (SELECT 1 FROM trial_products tp WHERE tp.nct_id = t.nct_id)`,
+  );
+  return deleteTrials(pool, r.rows.map((x) => x.nct_id), null);
 }
 
 /** Stored trials per obesity class. */
