@@ -43,7 +43,7 @@ test("classification: primary / comorbidity / weight_related / unrelated, with r
   const c = (conds: string[]) => classifyObesity(conds).class;
   assert.equal(c(["Obesity"]), "primary");
   assert.equal(c(["Overweight and Obesity"]), "primary");
-  assert.equal(c(["Type 2 Diabetes", "Obesity"]), "primary");                 // obesity listed on its own
+  assert.equal(c(["Obesity", "Type 2 Diabetes"]), "primary");                 // obesity leads
   assert.equal(c(["Obesity With Comorbidities Such as Hypertension"]), "primary");
   assert.equal(c(["Hypothalamic Obesity"]), "primary");
   assert.equal(c(["Pregestational Obesity (BMI > 27kg/m2)"]), "primary");
@@ -59,30 +59,70 @@ test("classification: primary / comorbidity / weight_related / unrelated, with r
 
   // 2.1: negated diseases are ignored; several conditions typed into one field are split.
   assert.equal(c(["Non-diabetic Overweight or Obese"]), "primary");                       // NCT06714955
-  assert.equal(c(["Type 2 Diabetes Mellitus ;Obesity,High Triglycerides；TCM"]), "primary"); // NCT01471275
+  assert.equal(c(["Healthy Volunteers", "Obesity"]), "primary");                           // generic items skipped
   assert.equal(c(["Obesity without hypertension"]), "primary");
   assert.equal(c(["Non-alcoholic Fatty Liver Disease in Obese Adults"]), "comorbidity");     // NAFLD stays a disease
 
   const r = classifyObesity(["Obesity-associated Asthma"]);
-  assert.match(r.reason, /context of another disease \(asthma\)/);
+  assert.match(r.reason, /comorbidity — the lead condition is "Obesity-associated Asthma"/);
   assert.deepEqual(r.terms, ["Obesity-associated Asthma"]);
   assert.ok(CLASSIFIER_VERSION.startsWith("obesity-"));
 });
 
+test("classification 2.2: the lead condition decides (review-band cases)", () => {
+  const acad = (conds: string[], title?: string) => classifyObesity(conds, "OTHER", title);
+  // another disease listed first -> obesity is a comorbidity (real review-band trials)
+  assert.equal(acad(["Alzheimer Disease", "Diabetes Mellitus Type 2", "Obesity & Overweight"]).class, "comorbidity"); // NCT07677865
+  assert.equal(acad(["Heart Failure With Preserved Ejection Fraction", "Obesity"],
+    "GLIDE-HF Registry: Patients With Obesity-Related Heart Failure").class, "comorbidity");                    // NCT07787936
+  assert.equal(acad(["Non-arteritic Anterior Ischemic Optic Neuropathy Obesity", "Obesity"],
+    "NAION in Non-Diabetic Obese Patients Using GLP-1 RAs").class, "comorbidity");                             // NCT07846956
+  assert.equal(acad(["Polycystic Ovarian Syndrome in Adolescent Females", "Obesity (Disorder)"],
+    "Effects of GLP-1 Agonist in Neuro-reproductive Function in Obese Adolescent Females").class, "comorbidity"); // NCT07169136
+  assert.equal(acad(["Pregnancy", "Obesity", "Preeclampsia"]).class, "comorbidity");                           // NCT02791568
+  assert.equal(acad(["Type 2 Diabetes", "Obesity"]).class, "comorbidity");
+  const r = acad(["Alzheimer Disease", "Obesity"]);
+  assert.match(r.reason, /lead condition is "Alzheimer Disease"/);
+  // ...unless the title names obesity as the treated condition
+  assert.equal(acad(["Type 2 Diabetes Mellitus ;Obesity,High Triglycerides；TCM"],
+    "Chinese Medicine Treatment of Obesity With Type 2 Diabetes, Dyslipidemia").class, "primary");             // NCT01471275
+  assert.equal(acad(["Type 1 Diabetes", "Obesity"], "Gut Microbiome in Lean and Overweight Youth With Type 1 Diabetes").class, "comorbidity");
+  // genetic obesity syndromes listed first, PK/healthy items and bariatric surgery skipped
+  assert.equal(acad(["Bardet-Biedl Syndrome", "Obesity"]).class, "primary");
+  assert.equal(acad(["Bariatric Surgery", "Obesity"]).class, "primary");
+  assert.equal(acad(["Metabolism and Nutrition Disorder", "Obesity"]).class, "primary");
+  assert.equal(acad(["Prader-Willi Syndrome"], "Oxytocin for Social Behaviour in Prader-Willi Syndrome").class, "unrelated");
+  assert.equal(acad(["Participants With Obesity and Knee Osteoarthritis"]).class, "primary");
+});
+
 test("classification: industry-sponsored trials are not missed", () => {
-  const ind = (conds: string[], title?: string) => classifyObesity(conds, "INDUSTRY", title);
+  const ind = (conds: string[], title?: string, drugs: string[] = []) => classifyObesity(conds, "INDUSTRY", title, drugs);
   const acad = (conds: string[], title?: string) => classifyObesity(conds, "OTHER", title).class;
-  // obesity named with another disease
-  assert.equal(ind(["Obstructive Sleep Apnea (OSA) and Obesity"]).class, "primary");
+  // obesity-drug programmes in obesity complications are kept...
+  assert.equal(ind(["Obstructive Sleep Apnea", "Obesity"],
+    "Tirzepatide in Participants Who Have Obstructive Sleep Apnea and Obesity", ["Tirzepatide"]).class, "primary");
+  assert.equal(ind(["Knee Osteoarthritis", "Obesity"],
+    "Ecnoglutide Injection in Obese Participants With Knee Osteoarthritis", ["XW003 injection"]).class, "primary");
+  assert.equal(ind(["Type 2 Diabetes", "Overweight", "Obesity"],
+    "Tirzepatide in Participants With Type 2 Diabetes Who Have Obesity or Are Overweight (SURMOUNT-2)", ["Tirzepatide"]).class, "primary");
+  assert.match(ind(["Hypertension"], "A Master Protocol of Orforglipron in Participants With Hypertension and Obesity").reason,
+    /Industry obesity-drug trial \(orforglipron\)/);
+  // ...but other drugs in obese patients are a comorbidity
+  assert.equal(ind(["Atrial Fibrillation", "Obesity"],
+    "Oral Anticoagulants Among Obese Patients With Non-Valvular Atrial Fibrillation", ["Apixaban"]).class, "comorbidity");
+  assert.equal(ind(["Obstructive Sleep Apnea (OSA) and Obesity"]).class, "comorbidity");          // no title / drug evidence
   assert.equal(acad(["Obstructive Sleep Apnea (OSA) and Obesity"]), "comorbidity");
-  assert.match(ind(["Obesity-associated Asthma"]).reason, /Industry-sponsored/);
   // weight-loss / weight-management wording
   assert.equal(ind(["Chronic Weight Management"]).class, "primary");
   assert.equal(acad(["Chronic Weight Management"]), "weight_related");
-  assert.equal(ind(["Weight Gain"]).class, "weight_related");        // antipsychotic weight gain is not obesity
-  // obesity only in the title (healthy-volunteer / DDI / other-population studies of obesity drugs)
+  assert.notEqual(ind(["Weight Gain"]).class, "primary");            // antipsychotic weight gain is not obesity
+  assert.notEqual(ind(["HIV Lipodystrophy", "Waist Circumference", "BMI"], "The Visceral Adiposity Measurement Study").class, "primary");
+  assert.notEqual(ind(["Contraceptive Usage", "Metabolic Syndrome", "Body Weight Changes"]).class, "primary");
+  // obesity only in the title (healthy-volunteer / DDI studies of obesity drugs)
   assert.equal(ind(["Healthy"], "Safety of XYZ-123 in Healthy Participants and Participants With Obesity").class, "primary");
-  assert.equal(ind(["Hypertension"], "A Master Protocol of Orforglipron in Participants With Hypertension and Obesity").class, "primary");
+  assert.equal(ind(["Healthy Participants"],
+    "Effect of AZD6234 on Oral Contraceptive PK in Healthy Female Participants Living With Overweight or Obesity").class, "primary");
+  assert.equal(ind(["Cardiometabolic Disease"], "SAD/MAD Study of AMG 513 in Participants With Obesity").class, "primary");
   assert.equal(acad(["Healthy"], "Safety of XYZ-123 in Participants With Obesity"), "unrelated");
   // weight loss from wasting diseases is not obesity
   assert.equal(ind(["Cancer Cachexia"], "Treatment of Cancer Related Anorexia and Weight Loss").class, "unrelated");

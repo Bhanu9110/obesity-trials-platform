@@ -196,8 +196,9 @@ export default function AdminPage() {
 
       <p className="text-xs text-slate-500">
         Stored: only <b>primary-obesity</b> trials that name a drug or a drug class
-        (industry trials count as primary when obesity or weight loss appears in their conditions or title).
-        Trials where obesity is only a comorbidity, weight-related trials, non-obesity trials and trials naming no drug are
+        — obesity must be the lead (first-listed) condition; industry trials of weight-loss drugs in people with obesity
+        are also kept. Trials where another disease leads and obesity is only a comorbidity, weight-related trials,
+        non-obesity trials and trials naming no drug are
         not stored — the “Excluded” column below counts them per run.
       </p>
 

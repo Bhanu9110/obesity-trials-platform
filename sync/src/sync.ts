@@ -160,15 +160,16 @@ interface TrialInput {
   title?: string | null;
 }
 
-const classify = (m: MappedTrial, title?: string | null) => classifyObesity(m.conditions, m.lead_sponsor_class, title);
+const classify = (m: MappedTrial, title?: string | null) =>
+  classifyObesity(m.conditions, m.lead_sponsor_class, title, m.interventions);
 
 /** Version of the "what is stored" rule below; a change triggers a one-off clean-up. */
 export const STORE_SCOPE = "primary-obesity-with-drug-1";
 
 /**
  * Only trials that belong in the database are stored:
- *   - primary obesity (see obesity-filter.ts; industry trials naming obesity or
- *     weight loss in their conditions or title count as primary), AND
+ *   - primary obesity: obesity is the lead condition (see obesity-filter.ts; industry
+ *     trials of weight-loss drugs in people with obesity also count), AND
  *   - at least one specific drug, or a drug class ("Undisclosed GLP-1 receptor agonist").
  * Everything else (obesity as comorbidity, weight-related, not obesity, trials that
  * name no drug) is not stored, and removed if it was stored before.
@@ -1091,10 +1092,10 @@ export interface ClassificationSummary {
  */
 export async function reclassifyAll(runId: string | null = null): Promise<ClassificationSummary> {
   const rows = await pool.query<{
-    nct_id: string; conditions: string[] | null; lead_sponsor_class: string | null; title: string | null;
+    nct_id: string; conditions: string[] | null; lead_sponsor_class: string | null; title: string | null; interventions: string[] | null;
     obesity_class: string; obesity_reason: string | null; obesity_terms: string[]; classifier_version: string | null;
   }>(
-    `SELECT t.nct_id, t.conditions, t.lead_sponsor_class,
+    `SELECT t.nct_id, t.conditions, t.lead_sponsor_class, t.interventions,
             r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
             t.obesity_class, t.obesity_reason, t.obesity_terms, t.classifier_version
        FROM trials t LEFT JOIN raw_trials r ON r.source = $1 AND r.source_id = t.nct_id`,
@@ -1105,7 +1106,7 @@ export async function reclassifyAll(runId: string | null = null): Promise<Classi
   const changes: ChangeRow[] = [];
   const remove: string[] = [];
   for (const r of rows.rows) {
-    const c = classifyObesity(r.conditions ?? [], r.lead_sponsor_class, r.title);
+    const c = classifyObesity(r.conditions ?? [], r.lead_sponsor_class, r.title, r.interventions ?? []);
     counts[c.class] = (counts[c.class] ?? 0) + 1;
     if (c.class !== "primary") {
       remove.push(r.nct_id); // only primary-obesity trials are stored

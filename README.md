@@ -31,12 +31,21 @@ download time (and removed if it was stored before, with a "removed" entry on th
 Changes page):
 
 1. **Primary obesity** — obesity / obese / overweight / morbid obesity / hyperlipidemia /
-   dyslipidemia is the primary condition. Not stored: obesity only as a comorbidity of
-   another disease ("obesity-associated asthma"), weight-related trials without an
-   obesity term ("weight gain"), and trials that are not about obesity at all.
-   **Industry-sponsored trials** (competitor programmes) count as primary whenever obesity
-   or weight loss / weight management is named in their conditions *or their title*
-   (e.g. healthy-volunteer, drug-interaction or OSA / hypertension studies of obesity drugs).
+   dyslipidemia / a genetic-obesity syndrome is the **lead condition**: the first condition
+   listed on the registry (items such as "Healthy volunteers", pharmacokinetics,
+   "Metabolism and Nutrition Disorder" or "Bariatric surgery" are skipped). When another
+   disease is listed first (Alzheimer's, heart failure, PCOS, pregnancy, type 2 diabetes…)
+   obesity is a **comorbidity** and the trial is not stored — unless the title names obesity
+   as the treated condition ("Treatment of Obesity With Type 2 Diabetes"). Also not stored:
+   weight-related trials without an obesity term ("weight gain", lipodystrophy,
+   contraception) and trials that are not about obesity at all.
+   **Industry-sponsored trials** (competitor programmes) are also kept when they test a
+   weight-loss drug (-glutide, -tirzepatide, -glipron, -lintide… or an investigational code
+   name) in people the title describes as having obesity — e.g. tirzepatide in OSA with
+   obesity, SURMOUNT-2 (type 2 diabetes with obesity) — and when they are weight-management
+   or healthy-volunteer / drug-interaction studies whose title names obesity. Older trials
+   of unrelated drugs in obese patients ("anticoagulants in obese patients with atrial
+   fibrillation") are comorbidity and not stored.
    Negated diseases ("non-diabetic") are ignored, and several conditions typed into one
    field ("Type 2 Diabetes; Obesity") are split.
 2. **A drug is named** — a specific drug, or a drug class, which becomes an

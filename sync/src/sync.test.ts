@@ -86,6 +86,7 @@ test("product normalization", () => {
 test("obesity filter", () => {
   assert.equal(isObesityIndication(["Obesity"]), true);
   assert.equal(isObesityIndication(["Type 2 Diabetes", "Obesity-related hypertension"]), false);
+  assert.equal(isObesityIndication(["Alzheimer Disease", "Obesity"]), false);
 });
 
 test("sync: lean upsert, product links, manual info preserved, non-obesity removed", async () => {
