@@ -14,13 +14,13 @@ import { pool } from "./db.js";
 
 function study(
   nct: string,
-  over: { conditions?: string[]; drugs?: string[]; countries?: string[]; phase?: string[]; updated?: string; sponsor?: string } = {},
+  over: { conditions?: string[]; drugs?: string[]; countries?: string[]; phase?: string[]; updated?: string; sponsor?: string; cls?: string; title?: string } = {},
 ) {
   return {
     protocolSection: {
-      identificationModule: { nctId: nct },
+      identificationModule: { nctId: nct, briefTitle: over.title ?? "A study" },
       statusModule: { lastUpdatePostDateStruct: { date: over.updated ?? "2026-09-15" } },
-      sponsorCollaboratorsModule: { leadSponsor: { name: over.sponsor ?? "Phase Two Pharma", class: "INDUSTRY" } },
+      sponsorCollaboratorsModule: { leadSponsor: { name: over.sponsor ?? "Phase Two University", class: over.cls ?? "OTHER" } },
       conditionsModule: { conditions: over.conditions ?? ["Obesity"] },
       designModule: { phases: over.phase ?? ["PHASE2"] },
       armsInterventionsModule: { interventions: (over.drugs ?? ["Tirzepatide"]).map((name) => ({ type: "DRUG", name })) },
@@ -57,10 +57,52 @@ test("classification: primary / comorbidity / weight_related / unrelated, with r
   // word-start matching: "adrenal" is not "renal", so obesity stays primary here
   assert.equal(c(["Obesity and adrenal function"]), "primary");
 
+  // 2.1: negated diseases are ignored; several conditions typed into one field are split.
+  assert.equal(c(["Non-diabetic Overweight or Obese"]), "primary");                       // NCT06714955
+  assert.equal(c(["Type 2 Diabetes Mellitus ;Obesity,High Triglycerides；TCM"]), "primary"); // NCT01471275
+  assert.equal(c(["Obesity without hypertension"]), "primary");
+  assert.equal(c(["Non-alcoholic Fatty Liver Disease in Obese Adults"]), "comorbidity");     // NAFLD stays a disease
+
   const r = classifyObesity(["Obesity-associated Asthma"]);
   assert.match(r.reason, /context of another disease \(asthma\)/);
   assert.deepEqual(r.terms, ["Obesity-associated Asthma"]);
   assert.ok(CLASSIFIER_VERSION.startsWith("obesity-"));
+});
+
+test("classification: industry-sponsored trials are not missed", () => {
+  const ind = (conds: string[], title?: string) => classifyObesity(conds, "INDUSTRY", title);
+  const acad = (conds: string[], title?: string) => classifyObesity(conds, "OTHER", title).class;
+  // obesity named with another disease
+  assert.equal(ind(["Obstructive Sleep Apnea (OSA) and Obesity"]).class, "primary");
+  assert.equal(acad(["Obstructive Sleep Apnea (OSA) and Obesity"]), "comorbidity");
+  assert.match(ind(["Obesity-associated Asthma"]).reason, /Industry-sponsored/);
+  // weight-loss / weight-management wording
+  assert.equal(ind(["Chronic Weight Management"]).class, "primary");
+  assert.equal(acad(["Chronic Weight Management"]), "weight_related");
+  assert.equal(ind(["Weight Gain"]).class, "weight_related");        // antipsychotic weight gain is not obesity
+  // obesity only in the title (healthy-volunteer / DDI / other-population studies of obesity drugs)
+  assert.equal(ind(["Healthy"], "Safety of XYZ-123 in Healthy Participants and Participants With Obesity").class, "primary");
+  assert.equal(ind(["Hypertension"], "A Master Protocol of Orforglipron in Participants With Hypertension and Obesity").class, "primary");
+  assert.equal(acad(["Healthy"], "Safety of XYZ-123 in Participants With Obesity"), "unrelated");
+  // weight loss from wasting diseases is not obesity
+  assert.equal(ind(["Cancer Cachexia"], "Treatment of Cancer Related Anorexia and Weight Loss").class, "unrelated");
+});
+
+test("sync: industry trials are classified with sponsor and title", async () => {
+  const a = "NCT88880051", b = "NCT88880052";
+  await clean([a, b]);
+  await runSyncForStudies([
+    study(a, { conditions: ["Healthy"], cls: "INDUSTRY", title: "First-in-human study of ABC-1 in adults with overweight or obesity" }),
+    study(b, { conditions: ["Healthy"], cls: "OTHER", title: "First-in-human study of ABC-1 in adults with overweight or obesity" }),
+  ]);
+  const r = Object.fromEntries((await pool.query("SELECT nct_id, obesity_class FROM trials WHERE nct_id = ANY($1)", [[a, b]])).rows
+    .map((x) => [x.nct_id, x.obesity_class]));
+  assert.deepEqual(r, { [a]: "primary", [b]: "unrelated" });
+  // re-classification from storage uses the stored title too
+  await pool.query("UPDATE trials SET obesity_class = 'unrelated' WHERE nct_id = $1", [a]);
+  await reclassifyAll();
+  assert.equal((await pool.query("SELECT obesity_class FROM trials WHERE nct_id = $1", [a])).rows[0].obesity_class, "primary");
+  await clean([a, b]);
 });
 
 // --------------------------------------------------------------------------- #
@@ -176,7 +218,7 @@ test("change history: added, field updates, reclassified, removed — no noise",
   let c = await changes();
   assert.equal(c.length, 1);
   assert.equal(c[0].change, "added");
-  assert.deepEqual(c[0].new_value, { phase: "PHASE2", sponsor: "Phase Two Pharma", obesity_class: "primary" });
+  assert.deepEqual(c[0].new_value, { phase: "PHASE2", sponsor: "Phase Two University", obesity_class: "primary" });
 
   // Unchanged record and a product rebuild: no new history.
   await runSyncForStudies([study(id)]);

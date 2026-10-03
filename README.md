@@ -24,8 +24,10 @@ Everything else (titles, eligibility, outcomes, arms, sites, raw payloads, NLP
 embeddings, audit history) is **not** stored — the NCT ID links to the full record
 on ClinicalTrials.gov.
 
-Scope: condition `obesity`, start date ≥ 2000, drug studies. Every trial CT.gov
-returns is **stored and labelled** with an obesity class (nothing is deleted):
+Scope: CT.gov search `obesity OR overweight OR obese OR "weight management" OR "weight loss"
+OR "weight reduction" OR adiposity`, start date ≥ 2000, trials with a **drug, biological or
+combination-product** intervention. Every trial CT.gov returns is **stored and labelled**
+with an obesity class (nothing is deleted):
 
 | Class | Meaning | Shown by default |
 |---|---|---|
@@ -33,6 +35,13 @@ returns is **stored and labelled** with an obesity class (nothing is deleted):
 | Obesity as comorbidity | obesity is context of another disease ("obesity-associated asthma", "T2D in obese adults") | no |
 | Weight-related | no obesity term, but weight-management terms (weight loss, BMI, adiposity…) | no |
 | Not obesity | none of the above (CT.gov's keyword search matched something else) | no |
+
+**Industry-sponsored trials** (competitor programmes) count as primary obesity whenever
+obesity or weight loss / weight management is named in their conditions *or their title*
+(e.g. healthy-volunteer, drug-interaction or OSA / hypertension studies of obesity drugs).
+Negated diseases ("non-diabetic") are ignored, and several conditions typed into one field
+("Type 2 Diabetes; Obesity") are split. Changing the search terms triggers one automatic
+full sync.
 
 The Trials page, each drug page and the Drugs list show **primary-obesity** trials;
 a selector shows the others. Each trial keeps the reason for its class. Rules live

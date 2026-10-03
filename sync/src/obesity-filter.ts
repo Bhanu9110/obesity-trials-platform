@@ -13,7 +13,11 @@
 // In-scope indications: obesity, obese, overweight, morbid obesity, hyperlipidemia,
 // dyslipidemia.
 
-export const CLASSIFIER_VERSION = "obesity-2.0";
+export const CLASSIFIER_VERSION = "obesity-2.1";
+// 2.1: negations ("non-diabetic") ignored; several conditions typed into one field
+//      ("Type 2 Diabetes; Obesity") split; industry-sponsored trials that name obesity
+//      or weight loss / weight management — in the conditions OR the title — are counted
+//      as primary (competitor trials).
 
 export type ObesityClass = "primary" | "comorbidity" | "weight_related" | "unrelated";
 
@@ -60,6 +64,22 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const termRegex = (terms: string[]) => new RegExp(`\\b(?:${terms.map(escape).join("|")})`, "g");
 const OBESITY_RE = termRegex(OBESITY_INDICATION_ROOTS);
 const OTHER_RE = termRegex(OTHER_DISEASE_TERMS);
+// A disease that is NEGATED is not a competing indication: "non-diabetic overweight",
+// "obesity without diabetes", "free of hypertension".
+const NEGATED_OTHER_RE = new RegExp(
+  `\\b(?:non|not|without|no|free of|absence of|excluding|except)[\\s-]*(?:${OTHER_DISEASE_TERMS.map(escape).join("|")})\\w*`,
+  "g",
+);
+// Obesity in a trial TITLE (industry rule only).
+const TITLE_OBESITY_RE = /\b(?:obes\w*|overweight|anti-?obesity|weight (?:loss|reduction|management|maintenance|control))\b/;
+// Weight loss from wasting diseases is not obesity.
+const WASTING_RE = /\b(?:cachexi\w*|anorexi\w*|wasting|sarcopeni\w*|malnutrition)\b/;
+// Weight-loss / weight-management wording (not "weight gain"): an obesity indication
+// in all but name. Counted as primary for industry-sponsored trials.
+const WEIGHT_LOSS_RE = termRegex([
+  "weight loss", "weight reduction", "weight management", "weight maintenance", "weight control",
+  "body weight", "bodyweight", "adiposity", "body fat", "fat mass", "visceral fat", "bmi", "body mass index",
+]);
 const WEIGHT_RE = termRegex(WEIGHT_TERMS);
 
 function firstMatch(re: RegExp, t: string): { index: number; term: string } | null {
@@ -72,7 +92,7 @@ type ItemVerdict = { kind: "primary" | "comorbidity" | "weight" | "none"; other?
 
 /** Classify ONE condition item. */
 export function classifyConditionItem(item: string): ItemVerdict {
-  const t = foldText(item);
+  const t = foldText(item).replace(NEGATED_OTHER_RE, " ");
   const obes = firstMatch(OBESITY_RE, t);
   if (!obes) return { kind: firstMatch(WEIGHT_RE, t) ? "weight" : "none" };
   const other = firstMatch(OTHER_RE, t);
@@ -98,9 +118,51 @@ export function isObesityConditionItem(item: string): boolean {
   return classifyConditionItem(item).kind === "primary";
 }
 
-/** Classify a trial from its condition list. */
-export function classifyObesity(conditions: string[]): ObesityClassification {
-  const items = (conditions || []).filter((c) => c && c.trim());
+/** Registries sometimes put several conditions in one field: "Type 2 Diabetes ;Obesity". */
+export function splitConditions(conditions: string[]): string[] {
+  return (conditions || [])
+    .flatMap((c) => String(c ?? "").split(/[;；|\n]+/))
+    .map((c) => c.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Classify a trial from its condition list. `sponsorClass` = CT.gov lead sponsor
+ * class: INDUSTRY trials are competitor intelligence, so any obesity / weight-loss
+ * mention makes them primary.
+ */
+export function classifyObesity(
+  conditions: string[],
+  sponsorClass?: string | null,
+  title?: string | null,
+): ObesityClassification {
+  const base = classifyBase(conditions);
+  if (String(sponsorClass ?? "").toUpperCase() !== "INDUSTRY" || base.class === "primary") return base;
+  if (base.class === "comorbidity") {
+    return {
+      class: "primary",
+      reason: `Industry-sponsored; obesity is named with another condition: "${base.terms[0]}".`,
+      terms: base.terms,
+    };
+  }
+  if (base.class === "weight_related") {
+    const loss = base.terms.filter((t) => firstMatch(WEIGHT_LOSS_RE, foldText(t)));
+    if (loss.length) {
+      return { class: "primary", reason: `Industry-sponsored weight-loss / weight-management trial: "${loss[0]}".`, terms: loss };
+    }
+  }
+  // Industry trials of obesity drugs in healthy volunteers, drug-interaction studies,
+  // or other populations often say "obesity" only in the title.
+  const t = foldText(title ?? "");
+  if (t && TITLE_OBESITY_RE.test(t) && !WASTING_RE.test(t) && !conditions.some((c) => WASTING_RE.test(foldText(c)))) {
+    const m = t.match(TITLE_OBESITY_RE)?.[0] ?? "obesity";
+    return { class: "primary", reason: `Industry-sponsored; the title names ${m} ("${(title ?? "").slice(0, 120)}").`, terms: base.terms };
+  }
+  return base;
+}
+
+function classifyBase(conditions: string[]): ObesityClassification {
+  const items = splitConditions(conditions);
   if (!items.length) {
     return { class: "unrelated", reason: "No conditions listed.", terms: [] };
   }
@@ -134,6 +196,6 @@ export function classifyObesity(conditions: string[]): ObesityClassification {
 }
 
 /** True when at least one condition of the trial is a primary obesity indication. */
-export function isObesityIndication(conditions: string[]): boolean {
-  return classifyObesity(conditions).class === "primary";
+export function isObesityIndication(conditions: string[], sponsorClass?: string | null, title?: string | null): boolean {
+  return classifyObesity(conditions, sponsorClass, title).class === "primary";
 }

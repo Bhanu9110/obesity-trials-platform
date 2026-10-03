@@ -1,7 +1,7 @@
 import { config } from "./config.js";
 import type { RawStudy } from "./ctgov-client.js";
 import { iterateStudies } from "./ctgov-client.js";
-import { PARSER_VERSION, contentHash, mapStudy, trimPayload, type MappedTrial } from "./mapper.js";
+import { PARSER_VERSION, contentHash, mapStudy, studyTitle, trimPayload, type MappedTrial } from "./mapper.js";
 import { pool, withTransaction, type Client } from "./db.js";
 import { CLASSIFIER_VERSION, classifyObesity } from "./obesity-filter.js";
 import { assessQuality } from "./quality.js";
@@ -150,7 +150,11 @@ function dedupe<T>(items: T[], key: (t: T) => string): T[] {
 interface TrialInput {
   mapped: MappedTrial;
   warnings: string[];
+  /** registry brief title — only used to classify industry trials */
+  title?: string | null;
 }
+
+const classify = (m: MappedTrial, title?: string | null) => classifyObesity(m.conditions, m.lead_sponsor_class, title);
 
 /** Parse + validate a stored or downloaded payload. */
 function parseAndValidate(payload: RawStudy): ValidationResult {
@@ -172,10 +176,10 @@ async function writeTrialsBatch(
 ): Promise<Set<string>> {
   const list = dedupe(trials, (t) => t.mapped.nct_id);
   if (!list.length) return new Set();
-  const derived = list.map(({ mapped: m, warnings }) => ({
+  const derived = list.map(({ mapped: m, warnings, title }) => ({
     m,
     warnings,
-    cls: classifyObesity(m.conditions),
+    cls: classify(m, title),
     ...deriveTrialProducts(m.interventions, ctx.aliases, ctx.known),
   }));
   const ids = list.map((t) => t.mapped.nct_id);
@@ -300,6 +304,7 @@ interface Prepared {
   payload: RawStudy;
   mapped: MappedTrial;
   warnings: string[];
+  title: string | null;
   hash: string;
 }
 
@@ -400,7 +405,10 @@ async function ingestBatch(raws: RawStudy[], state: RunState): Promise<void> {
         await fail(state, String(nctId), "validation", new Error(v.errors.join(" ")));
         continue;
       }
-      prepared.push({ nct_id: v.value.nct_id, payload, mapped: v.value, warnings: v.warnings, hash: contentHash(payload) });
+      prepared.push({
+        nct_id: v.value.nct_id, payload, mapped: v.value, warnings: v.warnings,
+        title: studyTitle(payload), hash: contentHash(payload),
+      });
     } catch (err) {
       await fail(state, String(nctId), "map_or_upsert", err);
     }
@@ -408,7 +416,7 @@ async function ingestBatch(raws: RawStudy[], state: RunState): Promise<void> {
   const items = dedupe(prepared, (p) => p.nct_id);
   if (!items.length) return;
   // Not a primary-obesity trial: stored and labelled, hidden on the website by default.
-  res.filtered += items.filter((p) => classifyObesity(p.mapped.conditions).class !== "primary").length;
+  res.filtered += items.filter((p) => classify(p.mapped, p.title).class !== "primary").length;
 
   const prev = await pool.query<{ source_id: string; content_hash: string; parser_version: string; has_trial: boolean }>(
     `SELECT r.source_id, r.content_hash, r.parser_version,
@@ -448,7 +456,7 @@ async function ingestBatch(raws: RawStudy[], state: RunState): Promise<void> {
         if (!existed.has(p.nct_id)) {
           changes.push({
             trial_id: p.nct_id, change: "added", field: null, old_value: null,
-            new_value: snapshot({ ...p.mapped, obesity_class: classifyObesity(p.mapped.conditions).class }),
+            new_value: snapshot({ ...p.mapped, obesity_class: classify(p.mapped, p.title).class }),
           });
         } else if (beforeOf.has(p.nct_id)) {
           changes.push(...diffMapped(parseAndValidate(beforeOf.get(p.nct_id)!).value, p.mapped));
@@ -574,6 +582,7 @@ export async function runSync(
     const now = new Date().toISOString();
     await setMeta("full_sync_at", now);              // the first full load is complete
     await setMeta("keeps_non_primary_since", now);   // non-primary trials are stored (Phase 2)
+    await setMeta("fetch_scope", fetchScopeKey());   // which CT.gov search this full load covered
   }
   return result;
 }
@@ -663,8 +672,9 @@ export async function reparseFromRaw(opts: { all?: boolean } = {}): Promise<Repa
       try {
         const v = parseAndValidate(r.payload);
         if (v.errors.length) throw new Error(v.errors.join(" "));
-        if (classifyObesity(v.value.conditions).class !== "primary") out.filtered += 1;
-        group.push({ id: r.source_id, input: { mapped: v.value, warnings: v.warnings } });
+        const title = studyTitle(r.payload);
+        if (classify(v.value, title).class !== "primary") out.filtered += 1;
+        group.push({ id: r.source_id, input: { mapped: v.value, warnings: v.warnings, title } });
       } catch (err) {
         out.failed += 1;
         errors.push({ nct_id: r.source_id, error: err instanceof Error ? err.message : String(err) });
@@ -738,6 +748,16 @@ export async function pruneNotSeen(runId: string): Promise<{ removed: number; sk
   });
 }
 
+/** The CT.gov search a full download covers. A change triggers one full sync. */
+export function fetchScopeKey(): string {
+  return JSON.stringify({
+    condition: config.ctgov.condition,
+    interventionTypes: [...config.ctgov.interventionTypes].sort(),
+    startDateFrom: config.ctgov.startDateFrom || null,
+    statuses: [...config.ctgov.statuses].sort(),
+  });
+}
+
 /**
  * Has a full download ever completed? (Databases from before this check count as
  * complete if they had a successful full run or the one-off lineage backfill.)
@@ -804,6 +824,12 @@ export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void)
     await setMeta("lineage_backfill_at", new Date().toISOString()); // only after a successful full run
     const left = await trialsMissingLineage();
     if (left > 0) log(`${left} stored trial(s) were not returned by CT.gov and still have no source record`);
+    return true;
+  }
+  if ((await getMeta("fetch_scope")) !== fetchScopeKey()) {
+    log("the CT.gov search changed (wider terms / intervention types) — full sync to pick up the extra trials", JSON.parse(fetchScopeKey()));
+    log("full sync complete", await runSync(true));
+    log("classification", await reclassifyAll());
     return true;
   }
   if (!(await getMeta("keeps_non_primary_since"))) {
@@ -1010,14 +1036,20 @@ export interface ClassificationSummary {
  */
 export async function reclassifyAll(runId: string | null = null): Promise<ClassificationSummary> {
   const rows = await pool.query<{
-    nct_id: string; conditions: string[] | null; obesity_class: string;
-    obesity_reason: string | null; obesity_terms: string[]; classifier_version: string | null;
-  }>("SELECT nct_id, conditions, obesity_class, obesity_reason, obesity_terms, classifier_version FROM trials");
+    nct_id: string; conditions: string[] | null; lead_sponsor_class: string | null; title: string | null;
+    obesity_class: string; obesity_reason: string | null; obesity_terms: string[]; classifier_version: string | null;
+  }>(
+    `SELECT t.nct_id, t.conditions, t.lead_sponsor_class,
+            r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
+            t.obesity_class, t.obesity_reason, t.obesity_terms, t.classifier_version
+       FROM trials t LEFT JOIN raw_trials r ON r.source = $1 AND r.source_id = t.nct_id`,
+    [SOURCE],
+  );
   const counts: Record<string, number> = { primary: 0, comorbidity: 0, weight_related: 0, unrelated: 0 };
   const updates: { nct_id: string; cls: string; reason: string; terms: string[] }[] = [];
   const changes: ChangeRow[] = [];
   for (const r of rows.rows) {
-    const c = classifyObesity(r.conditions ?? []);
+    const c = classifyObesity(r.conditions ?? [], r.lead_sponsor_class, r.title);
     counts[c.class] = (counts[c.class] ?? 0) + 1;
     const differs = c.class !== r.obesity_class || c.reason !== r.obesity_reason ||
       JSON.stringify(c.terms) !== JSON.stringify(r.obesity_terms ?? []) || r.classifier_version !== CLASSIFIER_VERSION;

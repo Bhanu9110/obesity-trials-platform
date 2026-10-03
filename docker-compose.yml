@@ -47,10 +47,10 @@ services:
       migrate: { condition: service_completed_successfully }
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/obesity_trials
-      CTGOV_CONDITION: obesity
+      # Search scope: the defaults in sync/src/config.ts (obesity / overweight / weight
+      # management…, drug + biological + combination-product trials, started 2000+).
       CTGOV_START_DATE_FROM: "2000-01-01"
       CTGOV_STATUSES: ""            # empty => all statuses (full history)
-      CTGOV_INTERVENTION_TYPES: "DRUG"   # drug/capsule studies only; "" => all study types
       SYNC_CRON: "0 0 * * *"        # midnight
       SYNC_TZ: "Asia/Kolkata"       # change to your timezone
       SYNC_BACKFILL_ON_START: "true"

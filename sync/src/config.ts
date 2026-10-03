@@ -7,7 +7,10 @@ export const config = {
   ctgov: {
     baseUrl: process.env.CTGOV_BASE_URL ?? "https://clinicaltrials.gov/api/v2",
     // The condition keyword that scopes this platform. Only "obesity" trials.
-    condition: process.env.CTGOV_CONDITION ?? "obesity",
+    // Broad on purpose: trials registered as "overweight" or "weight management" (common
+    // for industry obesity programmes) are not always found by "obesity" alone.
+    condition: process.env.CTGOV_CONDITION ??
+      'obesity OR overweight OR obese OR "weight management" OR "weight loss" OR "weight reduction" OR adiposity',
     pageSize: Number(process.env.CTGOV_PAGE_SIZE ?? 1000),
     // Statuses to include. Empty string => ALL statuses (used for the full
     // backfill so historical/terminated trials since 2000 are included).
@@ -22,7 +25,9 @@ export const config = {
     // (excludes exercise/behavioral/device/procedure-only trials). You can list
     // several, e.g. "DRUG,DIETARY_SUPPLEMENT,BIOLOGICAL".
     // Default "DRUG" (same as Docker), so the hosted daily job uses the same scope.
-    interventionTypes: (process.env.CTGOV_INTERVENTION_TYPES ?? "DRUG")
+    // DRUG + BIOLOGICAL + COMBINATION_PRODUCT: antibodies and peptides are often
+    // registered as BIOLOGICAL — "DRUG" alone missed industry trials.
+    interventionTypes: (process.env.CTGOV_INTERVENTION_TYPES ?? "DRUG,BIOLOGICAL,COMBINATION_PRODUCT")
       .split(",")
       .map((s) => s.trim().toUpperCase())
       .filter(Boolean),
@@ -32,7 +37,7 @@ export const config = {
     // Set CTGOV_FIELDS="" to download full records instead. If the API rejects the
     // list, the client automatically falls back to full records.
     fields: (process.env.CTGOV_FIELDS ??
-      "NCTId,LastUpdatePostDate,Phase,LeadSponsorName,LeadSponsorClass,Condition,InterventionType,InterventionName,LocationCountry")
+      "NCTId,BriefTitle,LastUpdatePostDate,Phase,LeadSponsorName,LeadSponsorClass,Condition,InterventionType,InterventionName,LocationCountry")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean),

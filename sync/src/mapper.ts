@@ -54,7 +54,7 @@ export function trimPayload(study: RawStudy): RawStudy {
   const pick = <T>(v: T | undefined | null) => (v === undefined || v === null ? undefined : v);
   const trimmed = {
     protocolSection: {
-      identificationModule: { nctId: pick(p.identificationModule?.nctId) },
+      identificationModule: { nctId: pick(p.identificationModule?.nctId), briefTitle: pick(p.identificationModule?.briefTitle) },
       statusModule: {
         lastUpdatePostDateStruct: pick(
           p.statusModule?.lastUpdatePostDateStruct?.date !== undefined
@@ -133,4 +133,10 @@ export function mapStudy(study: RawStudy): MappedTrial {
     countries: uniqTrimmed((locMod.locations ?? []).map((l: any) => l?.country), true),
     source_updated_at: normalizeDate(p.statusModule?.lastUpdatePostDateStruct?.date),
   };
+}
+
+/** The registry's brief title (used only to classify industry trials; not displayed). */
+export function studyTitle(study: RawStudy): string | null {
+  const t = study?.protocolSection?.identificationModule?.briefTitle;
+  return typeof t === "string" && t.trim() ? t.replace(/\s+/g, " ").trim().slice(0, 500) : null;
 }

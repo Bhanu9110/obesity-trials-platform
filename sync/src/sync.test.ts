@@ -148,8 +148,8 @@ test("product_aliases merges are applied by the sync", async () => {
 test("content hash is stable: key order and full vs fields-limited payload", () => {
   const full = study("NCT99999010");
   const trimmed = trimPayload(full);
-  // Fields we do not ingest are dropped...
-  assert.equal((trimmed as any).protocolSection.identificationModule.briefTitle, undefined);
+  // Fields we do not ingest are dropped (the brief title is kept: industry classification)...
+  assert.equal((trimmed as any).protocolSection.identificationModule.briefTitle, "ignored");
   assert.equal((trimmed as any).protocolSection.statusModule.overallStatus, undefined);
   // ...and the trimmed copy maps to exactly the same trial (re-parse parity).
   assert.deepEqual(mapStudy(trimmed), mapStudy(full));
@@ -195,7 +195,7 @@ test("lineage: raw_trials, trial_sources, timestamps, parser version, change det
   assert.equal(raw1.parser_version, PARSER_VERSION);
   assert.equal(raw1.content_hash, contentHash(trimPayload(study(id))));
   assert.equal(raw1.payload.protocolSection.identificationModule.nctId, id);
-  assert.equal(raw1.payload.protocolSection.identificationModule.briefTitle, undefined); // trimmed
+  assert.equal(raw1.payload.protocolSection.statusModule.overallStatus, undefined); // trimmed
   const src = (await pool.query("SELECT * FROM trial_sources WHERE source='CTGOV' AND source_id=$1", [id])).rows[0];
   assert.equal(src.trial_id, id);
   assert.equal(src.source_url, `https://clinicaltrials.gov/study/${id}`);
@@ -240,9 +240,9 @@ test("lineage: raw_trials, trial_sources, timestamps, parser version, change det
   assert.deepEqual(run, { mode: "test", parser_version: PARSER_VERSION, trials_upserted: 0, trials_unchanged: 1 });
 
   // No longer primary obesity -> kept with its lineage, relabelled.
-  await runSyncForStudies([study(id, { conditions: ["Type 2 Diabetes in obese adults"] })]);
+  await runSyncForStudies([study(id, { conditions: ["Type 2 Diabetes"] })]);
   assert.equal((await pool.query("SELECT count(*)::int c FROM raw_trials WHERE source_id=$1", [id])).rows[0].c, 1);
-  assert.equal((await pool.query("SELECT obesity_class FROM trials WHERE nct_id=$1", [id])).rows[0].obesity_class, "comorbidity");
+  assert.equal((await pool.query("SELECT obesity_class FROM trials WHERE nct_id=$1", [id])).rows[0].obesity_class, "unrelated");
   await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
   await pool.query("DELETE FROM raw_trials WHERE source_id = $1", [id]);
 });
