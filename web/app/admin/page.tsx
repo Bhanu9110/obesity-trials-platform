@@ -154,7 +154,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {!data.sync.configured && (
+      {!data.sync.configured && !notice && (
         <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
           The Sync buttons need one setting on the website: <code>GITHUB_DISPATCH_TOKEN</code> (see DEPLOY.md). Until then,
           start a sync from GitHub → Actions → Daily CT.gov sync → Run workflow.

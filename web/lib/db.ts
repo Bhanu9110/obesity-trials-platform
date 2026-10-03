@@ -43,11 +43,45 @@ export const pool =
       Number(process.env.PG_POOL_MAX ?? defaultMax),
     ),
     idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 15_000,
   });
+
+// A pooled connection can be closed by the database side while the serverless
+// function is frozen between requests. Never let that crash the process.
+if (!(pool as any).__errorHandler) {
+  pool.on("error", () => { /* the broken client is discarded by the pool */ });
+  (pool as any).__errorHandler = true;
+}
 
 if (process.env.NODE_ENV !== "production") globalForPg.pgPool = pool;
 
+/** Errors that mean "this connection is dead", not "this query is wrong". */
+export function isConnectionError(err: unknown): boolean {
+  const e = err as { code?: string; message?: string } | null;
+  const code = e?.code ?? "";
+  const msg = (e?.message ?? "").toLowerCase();
+  return (
+    ["ECONNRESET", "EPIPE", "ETIMEDOUT", "ECONNREFUSED", "57P01", "57P02", "57P03"].includes(code) ||
+    code.startsWith("08") ||
+    msg.includes("connection terminated") ||
+    msg.includes("terminating connection") ||
+    msg.includes("client has encountered a connection error") ||
+    msg.includes("connection timeout") ||
+    msg.includes("server closed the connection")
+  );
+}
+
+/**
+ * Run a query. A query that fails because its pooled connection had gone stale
+ * (common on Vercel after the function was idle) is retried once on a fresh one.
+ */
 export async function query<T = any>(text: string, params?: unknown[]) {
-  const res = await pool.query(text, params as any[]);
-  return res.rows as T[];
+  try {
+    const res = await pool.query(text, params as any[]);
+    return res.rows as T[];
+  } catch (err) {
+    if (!isConnectionError(err)) throw err;
+    const res = await pool.query(text, params as any[]);
+    return res.rows as T[];
+  }
 }

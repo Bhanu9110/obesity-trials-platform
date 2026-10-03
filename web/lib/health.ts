@@ -23,13 +23,24 @@ export interface Health {
 export async function getHealth(): Promise<Health> {
   const checks: HealthCheck[] = [];
   const now = new Date();
-  try {
-    await query("SELECT 1");
-    checks.push({ name: "database", status: "ok", detail: "reachable" });
-  } catch (err) {
-    checks.push({ name: "database", status: "fail", detail: "not reachable" });
+  let dbError: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await query("SELECT 1");
+      dbError = null;
+      break;
+    } catch (err) {
+      dbError = err;
+    }
+  }
+  if (dbError) {
+    const e = dbError as { code?: string; message?: string };
+    // Short reason only (never the connection string).
+    const reason = `${e.code ? e.code + ": " : ""}${(e.message ?? String(dbError)).replace(/postgres(ql)?:\/\/\S+/gi, "[url]").slice(0, 160)}`;
+    checks.push({ name: "database", status: "fail", detail: `not reachable (${reason})` });
     return { status: "fail", checkedAt: now.toISOString(), lastSuccessfulSync: null, hoursSinceSync: null, checks };
   }
+  checks.push({ name: "database", status: "ok", detail: "reachable" });
 
   const [mig, last, latest, queue, trials] = await Promise.all([
     query<{ ok: boolean }>(
