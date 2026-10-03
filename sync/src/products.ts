@@ -16,7 +16,7 @@
 // rebuilds trial_products automatically on its next start. Manually entered
 // product info is keyed by product slug and is never touched by a rebuild.
 
-export const PRODUCT_RULES_VERSION = "1";
+export const PRODUCT_RULES_VERSION = "2"; // 2: "A ; Placebo" lists split on semicolons
 
 export interface ProductRef {
   slug: string; // normalized key (also used in the drug-page URL)
@@ -84,6 +84,9 @@ export function builtinAliasMap(): AliasMap {
 // --------------------------------------------------------------------------- #
 // Word lists
 // --------------------------------------------------------------------------- #
+// A list part containing any of these describes an activity or outcome, not a drug.
+const NON_DRUG_PART_RE = /\b(improvement|improving|management|lifestyle|diet(ary)? (advice|counsel\w*)|exercise|education|counsel\w*|usual care|standard (of )?care|best medical|follow[- ]?up|monitoring|assessment)\b/i;
+
 // A name containing any of these is a placebo/control, not a product.
 const PLACEBO_RE = /\b(placebos?|saline|vehicle|sham|dummy|mock|matching|matched)\b/i;
 
@@ -332,12 +335,17 @@ export function productsFromName(
   s = s.replace(DOSE_RE, " ").replace(/\s+/g, " ").trim();
 
   const out: ProductRef[] = [];
-  // "A or B" and comma lists name separate products.
-  let alternatives = s.split(/\s+or\s+|,(?=\s*[A-Za-z])/i);
+  // "A or B", "A; B" (several interventions typed into one field, e.g.
+  // "SHR-1179 ; Placebo") and comma lists name separate products.
+  // A semicolon inside brackets lists parts of one regimen: "Best care (Metformin; gliclazide)".
+  s = s.replace(/\(([^)]*)\)/g, (_m, inner: string) => `(${inner.replace(/\s*;\s*/g, " + ")})`);
+  let alternatives = s.split(/\s+or\s+|\s*;\s*|\n+|,(?=\s*[A-Za-z])/i);
   // In a comma list, a trailing "and" enumerates too: "A, B and C" -> A | B | C.
   if (/,(?=\s*[A-Za-z])/.test(s)) alternatives = alternatives.flatMap((a) => a.split(/\s+and\s+/i));
   for (const alt of alternatives) {
     if (!alt.trim()) continue;
+    // Descriptions that ride along in a list ("Rosuvastatin; improvement of lipid profile").
+    if (alternatives.length > 1 && NON_DRUG_PART_RE.test(alt)) continue;
 
     // Whole-name alias ("Wegovy", "CagriSema", "VI-0521", "SR141716", "Saxenda (liraglutide)").
     const wholeSlug = slugify(meaningfulTokens(scrub(alt.replace(/[+/&]/g, " "))).join(" "));

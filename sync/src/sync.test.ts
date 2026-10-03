@@ -66,6 +66,11 @@ test("product normalization", () => {
   assert.deepEqual(names("Naltrexone SR 32 mg/bupropion SR 360 mg/day"), ["Bupropion + Naltrexone"]);
   assert.deepEqual(names("GLP-1 receptor agonist"), []);
   assert.deepEqual(names("Glucagon"), ["Glucagon"]);
+  // several interventions typed into one field, separated by ";" or "；"
+  assert.deepEqual(names("SHR-1179 ; Placebo"), ["SHR-1179"]);
+  assert.deepEqual(names("HRS9531 injection； Placebo"), ["HRS9531"]);
+  assert.deepEqual(names("Liraglutide;metformin"), ["Liraglutide", "Metformin"]);
+  assert.deepEqual(names("Rosuvastatin; improvement of lipid profile"), ["Rosuvastatin"]);
   const d = deriveTrialProducts(["Tirzepatide", "Placebo", "tirzepatide injection"]);
   assert.deepEqual(d.kept, ["Tirzepatide", "tirzepatide injection"]);
   assert.deepEqual(d.products.map((p) => p.slug), ["tirzepatide"]);

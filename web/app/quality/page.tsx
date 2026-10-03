@@ -8,7 +8,7 @@ import {
   type QualityBand,
 } from "@/lib/queries";
 import { Chips, ContinentChips, Dash, NctLink, PhaseText } from "@/components/ui";
-import { QUALITY_LABELS, SEV_STYLE } from "@/lib/quality-labels";
+import { QUALITY_HELP, QUALITY_LABELS, SEV_STYLE } from "@/lib/quality-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -143,7 +143,7 @@ export default async function QualityPage({
                   key={i.code}
                   href={href({ code: code === i.code ? null : i.code, page: 1 })}
                   scroll={false}
-                  title={i.code}
+                  title={QUALITY_HELP[i.code] ?? i.code}
                   className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs ${code === i.code ? "border-brand-600 ring-2 ring-brand-100" : "border-slate-200 hover:bg-slate-50"}`}
                 >
                   <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${SEV_STYLE[i.severity] ?? ""}`}>{i.severity}</span>
@@ -219,7 +219,7 @@ export default async function QualityPage({
                           {t.issues.map((i) => (
                             <li key={i.code} className="text-xs">
                               <span className={`mr-1.5 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${SEV_STYLE[i.severity] ?? ""}`}>{i.severity}</span>
-                              <span className="text-slate-700">{QUALITY_LABELS[i.code] ?? i.message}</span>
+                              <span className="text-slate-700" title={QUALITY_HELP[i.code]}>{QUALITY_LABELS[i.code] ?? i.message}</span>
                               {i.detail?.length ? (
                                 <span className="text-slate-400" title={i.detail.join(", ")}>
                                   {" "}— {i.detail.slice(0, 3).join(", ")}{i.detail.length > 3 ? ` +${i.detail.length - 3} more` : ""}
