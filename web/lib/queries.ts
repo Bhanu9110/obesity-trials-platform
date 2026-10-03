@@ -324,26 +324,65 @@ export interface QualityTrial {
   checked_at: string;
 }
 
-/** Trials with at least one issue (optionally a specific issue code), worst first. */
-export async function qualityTrials(
-  code: string | undefined,
-  page: number,
-  pageSize = 50,
-): Promise<{ items: QualityTrial[]; total: number }> {
-  const params: unknown[] = [];
-  let where = "t.is_active AND t.obesity_class = 'primary' AND jsonb_array_length(q.issues) > 0";
-  if (code) {
-    params.push(JSON.stringify([{ code }]));
+/** Score bands shown as tiles on the Data quality page. */
+export const QUALITY_BANDS = {
+  clean: { label: "Clean (1.00)", sql: "q.score >= 1" },
+  minor: { label: "Minor (0.90–0.99)", sql: "q.score >= 0.9 AND q.score < 1" },
+  review: { label: "Review (0.75–0.89)", sql: "q.score >= 0.75 AND q.score < 0.9" },
+  poor: { label: "Poor (< 0.75)", sql: "q.score < 0.75" },
+} as const;
+export type QualityBand = keyof typeof QUALITY_BANDS;
+export const isQualityBand = (v: unknown): v is QualityBand =>
+  typeof v === "string" && Object.prototype.hasOwnProperty.call(QUALITY_BANDS, v);
+
+export interface QualityFilter {
+  code?: string;          // one issue code
+  band?: QualityBand;     // score band; none = every trial with at least one issue
+  q?: string;             // NCT ID / sponsor / indication / drug text
+}
+
+function qualityWhere(f: QualityFilter, params: unknown[]): string {
+  let where = "t.is_active AND t.obesity_class = 'primary'";
+  if (f.band) where += ` AND ${QUALITY_BANDS[f.band].sql}`;
+  else where += " AND jsonb_array_length(q.issues) > 0";
+  if (f.code) {
+    params.push(JSON.stringify([{ code: f.code }]));
     where += ` AND q.issues @> $${params.length}::jsonb`;
   }
-  const pageParams = [...params, pageSize, (Math.max(1, page) - 1) * pageSize];
+  if (f.q) {
+    params.push(`%${f.q}%`);
+    const i = params.length;
+    where += ` AND (t.nct_id ILIKE $${i} OR coalesce(t.sponsor, '') ILIKE $${i}
+                OR array_to_string(t.conditions, ' ') ILIKE $${i}
+                OR array_to_string(t.interventions, ' ') ILIKE $${i})`;
+  }
+  return where;
+}
+
+export interface QualityTrialRow extends QualityTrial {
+  indication: string[];
+  interventions: string[];
+  continents: string[];
+}
+
+/** Trials for the current filter (worst first), with what is needed to cross-check them. */
+export async function qualityTrials(
+  f: QualityFilter,
+  page: number,
+  pageSize = 50,
+): Promise<{ items: QualityTrialRow[]; total: number }> {
+  const params: unknown[] = [];
+  const where = qualityWhere(f, params);
+  const limit = pageSize > 0 ? pageSize : 100000;
+  const pageParams = [...params, limit, (Math.max(1, page) - 1) * (pageSize > 0 ? pageSize : 0)];
   const [countRows, items] = await Promise.all([
     query<{ c: number }>(
       `SELECT count(*)::int AS c FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id WHERE ${where}`,
       params,
     ),
-    query<QualityTrial>(
+    query<QualityTrialRow>(
       `SELECT t.nct_id, t.phase, t.sponsor, q.score::float AS score, q.issues,
+              t.conditions AS indication, t.interventions, t.continents,
               to_char(q.checked_at, 'YYYY-MM-DD HH24:MI') AS checked_at
          FROM trial_quality q JOIN trials t ON t.nct_id = q.trial_id
         WHERE ${where}
@@ -353,6 +392,19 @@ export async function qualityTrials(
     ),
   ]);
   return { items, total: countRows[0]?.c ?? 0 };
+}
+
+/** Issue counts for the issue chips, within the selected score band (or all trials). */
+export async function qualityIssueCounts(band?: QualityBand): Promise<{ code: string; severity: string; trials: number }[]> {
+  return query<{ code: string; severity: string; trials: number }>(
+    `SELECT i->>'code' AS code, i->>'severity' AS severity, count(*)::int AS trials
+       FROM trial_quality q
+       JOIN trials t ON t.nct_id = q.trial_id AND t.is_active AND t.obesity_class = 'primary'
+      CROSS JOIN LATERAL jsonb_array_elements(q.issues) AS i
+      ${band ? `WHERE ${QUALITY_BANDS[band].sql}` : ""}
+      GROUP BY 1, 2
+      ORDER BY CASE i->>'severity' WHEN 'error' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END, count(*) DESC`,
+  );
 }
 
 // --------------------------------------------------------------------------- #
