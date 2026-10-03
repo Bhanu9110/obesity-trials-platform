@@ -1,4 +1,5 @@
 import { config } from "./config.js";
+import { checkStudiesPage } from "./validate.js";
 
 // Raw shape (subset) of a CT.gov v2 study record. Kept loose on purpose: the
 // mapper is defensive and works with both full and `fields`-limited records.
@@ -29,6 +30,8 @@ export interface FetchOptions {
   startDateFrom?: string | null;
   pageToken?: string;
   countTotal?: boolean;
+  /** Only these NCT IDs (used to re-fetch records from the retry queue). */
+  ids?: string[];
 }
 
 /**
@@ -49,6 +52,7 @@ export async function fetchStudiesPage(opts: FetchOptions): Promise<StudiesPage>
   url.searchParams.set("pageSize", String(pageSize));
   url.searchParams.set("countTotal", String(opts.countTotal ?? false));
   if (opts.pageToken) url.searchParams.set("pageToken", opts.pageToken);
+  if (opts.ids?.length) url.searchParams.set("filter.ids", opts.ids.join(","));
   const fields = config.ctgov.fields;
   if (useFields && fields.length) url.searchParams.set("fields", fields.join(","));
 
@@ -96,6 +100,8 @@ export async function fetchStudiesPage(opts: FetchOptions): Promise<StudiesPage>
         throw new Error(`HTTP ${res.status}: ${await res.text()}`);
       }
       const body = (await res.json()) as any;
+      const shapeError = checkStudiesPage(body);
+      if (shapeError) throw new Error(`Unexpected CT.gov response: ${shapeError}`); // retried
       return {
         studies: body.studies ?? [],
         nextPageToken: body.nextPageToken,
@@ -119,7 +125,7 @@ export async function fetchStudiesPage(opts: FetchOptions): Promise<StudiesPage>
  * Tracks pages consumed via the onPage callback.
  */
 export async function* iterateStudies(
-  opts: { incrementalDays: number | null; startDateFrom?: string | null },
+  opts: { incrementalDays: number | null; startDateFrom?: string | null; ids?: string[] },
   onPage?: (pageIndex: number, total?: number) => void,
 ): AsyncGenerator<RawStudy> {
   let pageToken: string | undefined;
@@ -128,6 +134,7 @@ export async function* iterateStudies(
     const page = await fetchStudiesPage({
       incrementalDays: opts.incrementalDays,
       startDateFrom: opts.startDateFrom ?? null,
+      ids: opts.ids,
       pageToken,
       countTotal: pageIndex === 0,
     });

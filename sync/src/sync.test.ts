@@ -76,7 +76,7 @@ test("obesity filter", () => {
   assert.equal(isObesityIndication(["Type 2 Diabetes", "Obesity-related hypertension"]), false);
 });
 
-test("sync: lean upsert, product links, manual info preserved, non-obesity removed", async () => {
+test("sync: lean upsert, product links, manual info preserved, non-obesity kept and labelled", async () => {
   const A = "NCT99999001";
   const B = "NCT99999002";
   await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [[A, B]]);
@@ -116,11 +116,12 @@ test("sync: lean upsert, product links, manual info preserved, non-obesity remov
   const info = await pool.query("SELECT modality, moa, approved, to_char(approval_date,'YYYY-MM-DD') d FROM products WHERE slug='semaglutide'");
   assert.deepEqual(info.rows[0], { modality: "Peptide", moa: "GLP-1 receptor agonist", approved: "Yes", d: "2021-06-04" });
 
-  // A trial whose conditions change to non-primary-obesity is removed.
+  // A trial whose conditions change to non-primary-obesity is KEPT, relabelled.
   const r4 = await runSyncForStudies([study(B, { conditions: ["Type 2 Diabetes"] })]);
   assert.equal(r4.filtered, 1);
-  const gone = await pool.query("SELECT count(*)::int c FROM trials WHERE nct_id=$1", [B]);
-  assert.equal(gone.rows[0].c, 0);
+  const kept = await pool.query("SELECT obesity_class, obesity_reason FROM trials WHERE nct_id=$1", [B]);
+  assert.equal(kept.rows[0].obesity_class, "unrelated");
+  assert.match(kept.rows[0].obesity_reason, /Type 2 Diabetes/);
 
   await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [[A, B]]);
   await pool.query("UPDATE products SET modality=NULL, moa=NULL, approved=NULL, approval_date=NULL WHERE slug='semaglutide'");
@@ -238,10 +239,12 @@ test("lineage: raw_trials, trial_sources, timestamps, parser version, change det
   const run = (await pool.query("SELECT mode, parser_version, trials_upserted, trials_unchanged FROM sync_runs WHERE id=$1", [r2.runId])).rows[0];
   assert.deepEqual(run, { mode: "test", parser_version: PARSER_VERSION, trials_upserted: 0, trials_unchanged: 1 });
 
-  // Out of scope now -> trial AND raw record removed.
-  await runSyncForStudies([study(id, { conditions: ["Type 2 Diabetes"] })]);
-  assert.equal((await pool.query("SELECT count(*)::int c FROM raw_trials WHERE source_id=$1", [id])).rows[0].c, 0);
-  assert.equal((await pool.query("SELECT count(*)::int c FROM trial_sources WHERE source_id=$1", [id])).rows[0].c, 0);
+  // No longer primary obesity -> kept with its lineage, relabelled.
+  await runSyncForStudies([study(id, { conditions: ["Type 2 Diabetes in obese adults"] })]);
+  assert.equal((await pool.query("SELECT count(*)::int c FROM raw_trials WHERE source_id=$1", [id])).rows[0].c, 1);
+  assert.equal((await pool.query("SELECT obesity_class FROM trials WHERE nct_id=$1", [id])).rows[0].obesity_class, "comorbidity");
+  await pool.query("DELETE FROM trials WHERE nct_id = $1", [id]);
+  await pool.query("DELETE FROM raw_trials WHERE source_id = $1", [id]);
 });
 
 test("batched sync: many trials, duplicates, mixed new / unchanged / filtered", async () => {
@@ -270,12 +273,12 @@ test("batched sync: many trials, duplicates, mixed new / unchanged / filtered", 
   assert.deepEqual((await pool.query("SELECT continents FROM trials WHERE nct_id=$1", [ids[5]])).rows[0].continents.sort(),
     ["Europe", "North America"]);
 
-  // Second pass: 1 changed, 1 now out of scope, the rest unchanged.
+  // Second pass: 1 changed, 1 no longer primary obesity, the rest unchanged.
   const r2 = await runSyncForStudies(ids.map((id, i) =>
     i === 1 ? mk(id, i, { phase: ["PHASE2"] }) : i === 2 ? mk(id, i, { conditions: ["Type 2 Diabetes"] }) : mk(id, i)));
-  assert.deepEqual([r2.upserted, r2.filtered, r2.unchanged, r2.failed], [1, 1, 598, 0]);
+  assert.deepEqual([r2.upserted, r2.filtered, r2.unchanged, r2.failed], [2, 1, 598, 0]);
   assert.equal((await pool.query("SELECT version FROM trials WHERE nct_id=$1", [ids[1]])).rows[0].version, 2);
-  assert.equal((await pool.query("SELECT count(*)::int c FROM trials WHERE nct_id=$1", [ids[2]])).rows[0].c, 0);
+  assert.equal((await pool.query("SELECT obesity_class FROM trials WHERE nct_id=$1", [ids[2]])).rows[0].obesity_class, "unrelated");
 
   await pool.query("DELETE FROM trials WHERE nct_id = ANY($1)", [ids]);
   await pool.query("DELETE FROM raw_trials WHERE source_id = ANY($1)", [ids]);
@@ -292,7 +295,7 @@ test("after a full run, trials it did not return are removed", async () => {
   await pool.query("UPDATE trials SET last_seen_at = now() + interval '1 hour' WHERE nct_id <> ALL($1)", [[keep, gone]]);
   await pool.query("UPDATE raw_trials SET last_seen_at = now() + interval '1 hour' WHERE source_id <> ALL($1)", [[keep, gone]]);
   const r = await runSyncForStudies([study(keep)]);
-  assert.equal(await pruneNotSeen(r.runId), 1);
+  assert.deepEqual(await pruneNotSeen(r.runId), { removed: 1, skipped: 0 });
   const left = (await pool.query("SELECT nct_id FROM trials WHERE nct_id = ANY($1)", [[keep, gone]])).rows.map((x) => x.nct_id);
   assert.deepEqual(left, [keep]);
   assert.equal((await pool.query("SELECT count(*)::int c FROM raw_trials WHERE source_id=$1", [gone])).rows[0].c, 0);

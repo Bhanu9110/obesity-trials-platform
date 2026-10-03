@@ -4,7 +4,7 @@ import type { RawStudy } from "./ctgov-client.js";
 // Version of the CT.gov parser (trimPayload + mapStudy). Bump it whenever the
 // mapping changes: stored raw records with an older version are re-parsed from
 // raw_trials automatically — no re-download needed.
-export const PARSER_VERSION = "ctgov-2.0";
+export const PARSER_VERSION = "ctgov-2.1"; // 2.1: validation + clean-up of every record
 
 // Intervention types that count as drug PRODUCTS. Behavioural, device, procedure,
 // dietary-supplement and "other" interventions are not stored.

@@ -14,6 +14,8 @@ export interface TrialListItem {
   indication: string[];
   continents: string[];
   products: ProductLink[];
+  obesity_class: string;
+  obesity_reason: string | null;
 }
 
 export interface TrialsResponse {
@@ -26,6 +28,8 @@ export interface TrialsResponse {
 export interface FilterOptions {
   phases: string[];
   continents: { name: string; countries: string[] }[];
+  /** stored trials per obesity class */
+  classes: { name: string; trials: number }[];
 }
 
 /** Manually curated product info (all blank until edited on the drug page). */
@@ -57,12 +61,15 @@ export interface ProductTrial {
   sponsor: string | null;
   indication: string[];
   continents: string[];
+  obesity_class: string;
+  obesity_reason: string | null;
 }
 
 export interface ProductSummary {
   slug: string;
   name: string;
-  trials: number;
+  trials: number;      // primary-obesity trials
+  all_trials: number;  // all stored trials (incl. comorbidity / weight-related / not obesity)
   trial_phases: string[];
   modality: string | null;
   phase: string | null;

@@ -47,6 +47,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Drugs
               </Link>
               <Link
+                href="/changes"
+                className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
+              >
+                Changes
+              </Link>
+              <Link
                 href="/quality"
                 className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
               >

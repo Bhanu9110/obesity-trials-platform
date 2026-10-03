@@ -26,12 +26,8 @@ export const config = {
       .split(",")
       .map((s) => s.trim().toUpperCase())
       .filter(Boolean),
-    // Keep only trials whose PRIMARY indication is obesity (obesity/obese/overweight/
-    // hyperlipidemia/dyslipidemia/morbid obesity), excluding comorbidity/subject-type
-    // trials. Applied on every sync so the auto-updating DB stays clean. Set
-    // CTGOV_OBESITY_INDICATION_ONLY=false to store all obesity drug trials instead.
-    obesityIndicationOnly:
-      (process.env.CTGOV_OBESITY_INDICATION_ONLY ?? "true").toLowerCase() === "true",
+    // Obesity classification is applied to every trial (primary / comorbidity /
+    // weight_related / unrelated) — see obesity-filter.ts. Nothing is deleted.
     // Ask CT.gov for only the fields we store (much smaller, faster downloads).
     // Set CTGOV_FIELDS="" to download full records instead. If the API rejects the
     // list, the client automatically falls back to full records.

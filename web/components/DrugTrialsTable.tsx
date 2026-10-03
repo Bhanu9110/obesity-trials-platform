@@ -2,14 +2,25 @@
 
 import { useMemo, useState } from "react";
 import type { ProductTrial } from "@/lib/types";
-import { CONTINENT_ORDER, formatPhase, phaseRank } from "@/lib/format";
+import { CONTINENT_ORDER, formatPhase, phaseRank, OBESITY_CLASSES, OBESITY_CLASS_ORDER } from "@/lib/format";
 import { Chips, ContinentChips, Dash, NctLink, PhaseText } from "@/components/ui";
 
 const NO_PHASE = "__none__";
 const SELECT = "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm";
 
 /** Trials of one drug, with a search box and phase / continent filters. */
-export default function DrugTrialsTable({ trials }: { trials: ProductTrial[] }) {
+export default function DrugTrialsTable({ trials: allTrials }: { trials: ProductTrial[] }) {
+  const classCounts = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const t of allTrials) m[t.obesity_class] = (m[t.obesity_class] ?? 0) + 1;
+    return m;
+  }, [allTrials]);
+  // Primary-obesity trials by default (all of them if the drug has none).
+  const [scope, setScope] = useState(() => (allTrials.some((t) => t.obesity_class === "primary") ? "primary" : "all"));
+  const trials = useMemo(
+    () => (scope === "all" ? allTrials : allTrials.filter((t) => t.obesity_class === scope)),
+    [allTrials, scope],
+  );
   const [q, setQ] = useState("");
   const [phase, setPhase] = useState("");
   const [continent, setContinent] = useState("");
@@ -72,7 +83,7 @@ export default function DrugTrialsTable({ trials }: { trials: ProductTrial[] }) 
           </div>
         </div>
 
-        {trials.length > 0 && (
+        {allTrials.length > 0 && (
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <input
               value={q}
@@ -86,6 +97,22 @@ export default function DrugTrialsTable({ trials }: { trials: ProductTrial[] }) 
                 <option key={p} value={p}>{label(p)} ({n})</option>
               ))}
             </select>
+            {Object.keys(classCounts).length > 1 && (
+              <select
+                value={scope}
+                onChange={(e) => {
+                  setScope(e.target.value);
+                  setPhase("");
+                }}
+                className={`${SELECT} ${scope !== "primary" ? "border-amber-400 bg-amber-50" : ""}`}
+                title="Primary-obesity trials, or the other stored trials"
+              >
+                {OBESITY_CLASS_ORDER.filter((k) => classCounts[k]).map((k) => (
+                  <option key={k} value={k}>{OBESITY_CLASSES[k].label} ({classCounts[k]})</option>
+                ))}
+                <option value="all">All stored trials ({allTrials.length})</option>
+              </select>
+            )}
             <select value={continent} onChange={(e) => setContinent(e.target.value)} className={SELECT} title="Continent">
               <option value="">All continents</option>
               {continents.map((c) => (
@@ -133,7 +160,15 @@ export default function DrugTrialsTable({ trials }: { trials: ProductTrial[] }) 
                   <td className="px-5 py-2.5"><NctLink id={t.nct_id} /></td>
                   <td className="px-5 py-2.5 text-slate-700"><PhaseText phase={t.phase} /></td>
                   <td className="px-5 py-2.5 text-slate-700">{t.sponsor || <Dash />}</td>
-                  <td className="px-5 py-2.5"><Chips values={t.indication} /></td>
+                  <td className="px-5 py-2.5">
+                    {t.obesity_class !== "primary" && OBESITY_CLASSES[t.obesity_class] && (
+                      <span title={t.obesity_reason ?? undefined}
+                            className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${OBESITY_CLASSES[t.obesity_class].badge}`}>
+                        {OBESITY_CLASSES[t.obesity_class].short}
+                      </span>
+                    )}
+                    <Chips values={t.indication} />
+                  </td>
                   <td className="px-5 py-2.5"><ContinentChips continents={t.continents} /></td>
                 </tr>
               ))

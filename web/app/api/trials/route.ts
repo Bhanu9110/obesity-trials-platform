@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     continent: multi(sp.get("continent")),
     country: multi(sp.get("country")),
     sponsorClass: sp.get("sponsorClass")?.split(/[|,]/).map((s) => s.trim()).filter(Boolean),
+    scope: sp.get("scope") ?? undefined,
     page: sp.get("page") ? Number(sp.get("page")) : 1,
     pageSize: sp.get("pageSize") ? Number(sp.get("pageSize")) : 20,
   };

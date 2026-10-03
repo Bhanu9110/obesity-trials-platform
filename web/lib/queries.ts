@@ -15,6 +15,8 @@ export interface TrialFilters {
   continent?: string[];
   country?: string[];
   sponsorClass?: string[];
+  /** obesity class: "primary" (default), "all", or one class */
+  scope?: string;
   page?: number;
   pageSize?: number;
 }
@@ -25,8 +27,15 @@ const PRODUCTS_JSON = `
               FROM trial_products tp JOIN products p ON p.id = tp.product_id
              WHERE tp.nct_id = t.nct_id), '[]'::json)`;
 
+export const OBESITY_SCOPES = ["primary", "comorbidity", "weight_related", "unrelated", "all"];
+
 function buildWhere(f: TrialFilters, params: unknown[]): string {
   const clauses: string[] = ["t.is_active = true"];
+  const scope = f.scope && OBESITY_SCOPES.includes(f.scope) ? f.scope : "primary";
+  if (scope !== "all") {
+    params.push(scope);
+    clauses.push(`t.obesity_class = $${params.length}`);
+  }
   if (f.q) {
     // Keyword search across every stored field + drug names.
     params.push(`%${f.q}%`);
@@ -73,7 +82,7 @@ export async function listTrials(
     query<{ count: number }>(`SELECT count(*)::int AS count FROM trials t ${where}`, params),
     query<TrialListItem>(
       `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents,
-              ${PRODUCTS_JSON} AS products
+              t.obesity_class, t.obesity_reason, ${PRODUCTS_JSON} AS products
          FROM trials t ${where}
         ORDER BY t.nct_id DESC
         LIMIT $${pageParams.length - 1} OFFSET $${pageParams.length}`,
@@ -84,7 +93,7 @@ export async function listTrials(
 }
 
 export async function filterOptions(): Promise<FilterOptions> {
-  const [phases, countries] = await Promise.all([
+  const [phases, countries, classes] = await Promise.all([
     query<{ phase: string }>(
       `SELECT DISTINCT phase FROM trials WHERE is_active AND coalesce(phase, '') <> ''`,
     ),
@@ -92,6 +101,9 @@ export async function filterOptions(): Promise<FilterOptions> {
       `SELECT c AS country, continent_of(c) AS continent
          FROM (SELECT DISTINCT unnest(countries) AS c FROM trials WHERE is_active) x
         ORDER BY c`,
+    ),
+    query<{ name: string; trials: number }>(
+      `SELECT obesity_class AS name, count(*)::int AS trials FROM trials WHERE is_active GROUP BY 1`,
     ),
   ]);
   const byContinent = new Map<string, string[]>();
@@ -106,6 +118,7 @@ export async function filterOptions(): Promise<FilterOptions> {
       name: c,
       countries: byContinent.get(c)!,
     })),
+    classes,
   };
 }
 
@@ -118,8 +131,9 @@ const INFO_COLS = `p.modality, p.phase, p.moa, p.roa, p.approved,
 export async function listProducts(): Promise<ProductSummary[]> {
   return query<ProductSummary>(
     `SELECT p.slug, p.name, ${INFO_COLS},
-            count(t.nct_id)::int AS trials,
-            coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL), '{}') AS trial_phases,
+            count(t.nct_id) FILTER (WHERE t.obesity_class = 'primary')::int AS trials,
+            count(t.nct_id)::int AS all_trials,
+            coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
             (p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
              OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL
              OR p.drug_class IS NOT NULL) AS has_info
@@ -127,7 +141,7 @@ export async function listProducts(): Promise<ProductSummary[]> {
        JOIN trial_products tp ON tp.product_id = p.id
        JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
       GROUP BY p.id
-      ORDER BY trials DESC, p.name`,
+      ORDER BY trials DESC, all_trials DESC, p.name`,
   );
 }
 
@@ -142,7 +156,8 @@ export async function getProduct(slug: string): Promise<Product | null> {
 
 export async function getProductTrials(productId: number): Promise<ProductTrial[]> {
   const rows = await query<ProductTrial>(
-    `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents
+    `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents,
+            t.obesity_class, t.obesity_reason
        FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
       WHERE tp.product_id = $1`,
     [productId],
@@ -166,17 +181,20 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
   return rows.length ? getProduct(slug) : null;
 }
 
-export async function dashboardCounts(): Promise<{ trials: number; products: number; productsWithInfo: number }> {
-  const r = await query<{ trials: number; products: number; with_info: number }>(
-    `SELECT (SELECT count(*)::int FROM trials WHERE is_active) AS trials,
-            (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp) AS products,
+export async function dashboardCounts(): Promise<{ trials: number; storedTrials: number; products: number; productsWithInfo: number }> {
+  const r = await query<{ trials: number; stored: number; products: number; with_info: number }>(
+    `SELECT (SELECT count(*)::int FROM trials WHERE is_active AND obesity_class = 'primary') AS trials,
+            (SELECT count(*)::int FROM trials WHERE is_active) AS stored,
+            (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp
+               JOIN trials t ON t.nct_id = tp.nct_id AND t.obesity_class = 'primary') AS products,
             (SELECT count(*)::int FROM products p
-              WHERE EXISTS (SELECT 1 FROM trial_products tp WHERE tp.product_id = p.id)
+              WHERE EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id
+                             WHERE tp.product_id = p.id AND t.obesity_class = 'primary')
                 AND (p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
                      OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL
                      OR p.drug_class IS NOT NULL)) AS with_info`,
   );
-  return { trials: r[0].trials, products: r[0].products, productsWithInfo: r[0].with_info };
+  return { trials: r[0].trials, storedTrials: r[0].stored, products: r[0].products, productsWithInfo: r[0].with_info };
 }
 
 /** All product names (for the merge picker). */
@@ -267,14 +285,20 @@ export async function qualityOverview(): Promise<QualityOverview> {
               count(*) FILTER (WHERE q.score >= 0.9 AND q.score < 1)::int AS minor,
               count(*) FILTER (WHERE q.score >= 0.75 AND q.score < 0.9)::int AS needs_review,
               count(*) FILTER (WHERE q.score < 0.75)::int AS poor,
-              (SELECT count(*)::int FROM trials WHERE is_active) AS total_trials,
-              (SELECT count(DISTINCT trial_id)::int FROM trial_sources) AS with_lineage
+              (SELECT count(*)::int FROM trials WHERE is_active AND obesity_class = 'primary') AS total_trials,
+              (SELECT count(DISTINCT s.trial_id)::int FROM trial_sources s
+                 JOIN trials t2 ON t2.nct_id = s.trial_id AND t2.obesity_class = 'primary') AS with_lineage
          FROM trials t JOIN trial_quality q ON q.trial_id = t.nct_id
-        WHERE t.is_active`,
+        WHERE t.is_active AND t.obesity_class = 'primary'`,
     ),
+    // Issue counts over the trials shown on the website (primary obesity).
     query<{ code: string; severity: string; trials: number }>(
-      `SELECT code, severity, trials FROM data_quality_summary
-        ORDER BY CASE severity WHEN 'error' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END, trials DESC`,
+      `SELECT i->>'code' AS code, i->>'severity' AS severity, count(*)::int AS trials
+         FROM trial_quality q
+         JOIN trials t ON t.nct_id = q.trial_id AND t.is_active AND t.obesity_class = 'primary'
+        CROSS JOIN LATERAL jsonb_array_elements(q.issues) AS i
+        GROUP BY 1, 2
+        ORDER BY CASE i->>'severity' WHEN 'error' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END, count(*) DESC`,
     ),
   ]);
   const s = stats[0] ?? {};
@@ -307,7 +331,7 @@ export async function qualityTrials(
   pageSize = 50,
 ): Promise<{ items: QualityTrial[]; total: number }> {
   const params: unknown[] = [];
-  let where = "t.is_active AND jsonb_array_length(q.issues) > 0";
+  let where = "t.is_active AND t.obesity_class = 'primary' AND jsonb_array_length(q.issues) > 0";
   if (code) {
     params.push(JSON.stringify([{ code }]));
     where += ` AND q.issues @> $${params.length}::jsonb`;
@@ -329,4 +353,141 @@ export async function qualityTrials(
     ),
   ]);
   return { items, total: countRows[0]?.c ?? 0 };
+}
+
+// --------------------------------------------------------------------------- #
+// Change history (trial_changes)
+// --------------------------------------------------------------------------- #
+export interface ChangeItem {
+  id: number;
+  trial_id: string;
+  changed_at: string;
+  change: "added" | "updated" | "removed" | "reclassified";
+  field: string | null;
+  old_value: unknown;
+  new_value: unknown;
+  sponsor: string | null;
+  obesity_class: string | null;
+}
+
+export const CHANGE_KINDS = ["added", "updated", "reclassified", "removed"] as const;
+
+/** Time zone for dates shown on the website (APP_TIMEZONE, default India). */
+export function displayTimeZone(): string {
+  const tz = process.env.APP_TIMEZONE || "Asia/Kolkata";
+  return /^[A-Za-z_]+(\/[A-Za-z_+-]+)*$/.test(tz) ? tz : "UTC";
+}
+
+export async function recentChanges(opts: {
+  kind?: string;
+  days?: number;
+  q?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{ items: ChangeItem[]; total: number; counts: Record<string, number> }> {
+  const days = Math.min(Math.max(1, opts.days ?? 30), 3650);
+  const pageSize = Math.min(200, Math.max(10, opts.pageSize ?? 50));
+  const page = Math.max(1, opts.page ?? 1);
+  const params: unknown[] = [days];
+  let where = "c.changed_at >= now() - make_interval(days => $1)";
+  if (opts.q) {
+    params.push(`%${opts.q.trim()}%`);
+    where += ` AND (c.trial_id ILIKE $${params.length} OR coalesce(t.sponsor, '') ILIKE $${params.length})`;
+  }
+  const countParams = [...params];
+  const countWhere = where;
+  if (opts.kind && (CHANGE_KINDS as readonly string[]).includes(opts.kind)) {
+    params.push(opts.kind);
+    where += ` AND c.change = $${params.length}`;
+  }
+  const pageParams = [...params, pageSize, (page - 1) * pageSize];
+  const [items, totals, counts] = await Promise.all([
+    query<ChangeItem>(
+      `SELECT c.id, c.trial_id, to_char(c.changed_at AT TIME ZONE $${pageParams.length + 1}, 'YYYY-MM-DD HH24:MI') AS changed_at,
+              c.change, c.field,
+              c.old_value, c.new_value, t.sponsor, t.obesity_class
+         FROM trial_changes c LEFT JOIN trials t ON t.nct_id = c.trial_id
+        WHERE ${where}
+        ORDER BY c.changed_at DESC, c.id DESC
+        LIMIT $${pageParams.length - 1} OFFSET $${pageParams.length}`,
+      [...pageParams, displayTimeZone()],
+    ),
+    query<{ c: number }>(
+      `SELECT count(*)::int AS c FROM trial_changes c LEFT JOIN trials t ON t.nct_id = c.trial_id WHERE ${where}`,
+      params,
+    ),
+    query<{ change: string; c: number }>(
+      `SELECT c.change, count(*)::int AS c FROM trial_changes c LEFT JOIN trials t ON t.nct_id = c.trial_id
+        WHERE ${countWhere} GROUP BY 1`,
+      countParams,
+    ),
+  ]);
+  return {
+    items,
+    total: totals[0]?.c ?? 0,
+    counts: Object.fromEntries(counts.map((r) => [r.change, r.c])),
+  };
+}
+
+// --------------------------------------------------------------------------- #
+// Admin: pipeline runs, retry / dead-letter queue
+// --------------------------------------------------------------------------- #
+export interface SyncRunRow {
+  id: string;
+  run_at: string;
+  status: string;
+  mode: string | null;
+  trials_fetched: number | null;
+  trials_upserted: number | null;
+  trials_unchanged: number | null;
+  trials_filtered: number | null;
+  trials_failed: number | null;
+  duration_ms: number | null;
+  error_detail: unknown;
+}
+
+export interface FailureRow {
+  nct_id: string;
+  status: "pending" | "dead";
+  failure_type: string;
+  error_msg: string;
+  attempts: number;
+  first_failed_at: string | null;
+  last_attempted: string | null;
+  next_attempt_at: string | null;
+}
+
+export async function recentRuns(limit = 15): Promise<SyncRunRow[]> {
+  return query<SyncRunRow>(
+    `SELECT id, run_at, status, mode, trials_fetched, trials_upserted, trials_unchanged, trials_filtered,
+            trials_failed, duration_ms, error_detail
+       FROM sync_runs ORDER BY run_at DESC LIMIT $1`,
+    [limit],
+  );
+}
+
+export async function openFailures(): Promise<FailureRow[]> {
+  return query<FailureRow>(
+    `SELECT nct_id, status, failure_type, error_msg, retry_count + 1 AS attempts,
+            first_failed_at, last_attempted, next_attempt_at
+       FROM sync_failures WHERE status IN ('pending', 'dead')
+      ORDER BY CASE status WHEN 'dead' THEN 0 ELSE 1 END, last_attempted DESC
+      LIMIT 200`,
+  );
+}
+
+/** Re-queue (dead -> pending, due now) or dismiss an open failure. */
+export async function updateFailure(nctId: string, action: "requeue" | "dismiss"): Promise<boolean> {
+  const rows = action === "requeue"
+    ? await query(
+        `UPDATE sync_failures SET status = 'pending', retry_count = 0, next_attempt_at = now()
+          WHERE nct_id = $1 AND status IN ('pending', 'dead') RETURNING nct_id`,
+        [nctId],
+      )
+    : await query(
+        `UPDATE sync_failures SET status = 'dismissed', resolved_at = now(), resolution = 'dismissed on the Admin page'
+          WHERE nct_id = $1 AND status IN ('pending', 'dead') RETURNING nct_id`,
+        [nctId],
+      );
+  return rows.length > 0;
 }

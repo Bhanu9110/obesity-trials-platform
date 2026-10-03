@@ -12,14 +12,19 @@
     "sync:full": "tsx src/index.ts sync --full",
     "backfill": "tsx src/index.ts backfill",
     "daily": "tsx src/index.ts daily",
-    "prune-nonobesity": "tsx src/index.ts prune-nonobesity",
+    "retry": "tsx src/index.ts retry",
+    "failures": "tsx src/index.ts failures",
+    "requeue": "tsx src/index.ts requeue",
+    "dismiss": "tsx src/index.ts dismiss",
+    "classify": "tsx src/index.ts classify",
+    "health": "tsx src/index.ts health",
     "rebuild-products": "tsx src/index.ts rebuild-products",
     "reparse": "tsx src/index.ts reparse",
     "quality": "tsx src/index.ts quality",
     "migrate": "bash ../db/run-migrations.sh",
     "migrate:status": "bash ../db/run-migrations.sh --status",
     "scheduler": "tsx src/scheduler.ts",
-    "test": "tsx --test src/*.test.ts"
+    "test": "tsx --test --test-concurrency=1 src/*.test.ts"
   },
   "dependencies": {
     "node-cron": "^3.0.3",

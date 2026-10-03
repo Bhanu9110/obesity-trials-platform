@@ -13,6 +13,7 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
   const product = await getProduct(decodeURIComponent(slug));
   if (!product) notFound();
   const [trials, names] = await Promise.all([getProductTrials(product.id), productNames()]);
+  const primary = trials.filter((t) => t.obesity_class === "primary");
 
   return (
     <div className="space-y-4">
@@ -23,8 +24,9 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
       <div className="rounded-xl border border-slate-200 bg-white p-5">
         <h1 className="text-xl font-semibold text-slate-900">{product.name}</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {trials.length.toLocaleString()} trial{trials.length === 1 ? "" : "s"} in the database
-          {trials.length > 0 && <> · most advanced trial: {highestPhase(trials.map((t) => t.phase))}</>}
+          {primary.length.toLocaleString()} primary-obesity trial{primary.length === 1 ? "" : "s"}
+          {trials.length > primary.length && <> (+{trials.length - primary.length} other stored)</>}
+          {primary.length > 0 && <> · most advanced: {highestPhase(primary.map((t) => t.phase))}</>}
         </p>
       </div>
 

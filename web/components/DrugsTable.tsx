@@ -11,20 +11,25 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
   const [q, setQ] = useState("");
   const [info, setInfo] = useState<"" | "filled" | "blank">("");
   const [page, setPage] = useState(1);
+  // Drugs that only appear in non-primary trials (comorbidity, weight-related, not obesity)
+  // are hidden unless asked for.
+  const [includeOther, setIncludeOther] = useState(false);
+  const otherOnly = useMemo(() => products.filter((p) => p.trials === 0).length, [products]);
+  const visible = useMemo(() => (includeOther ? products : products.filter((p) => p.trials > 0)), [products, includeOther]);
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return products.filter((p) => {
+    return visible.filter((p) => {
       if (info === "filled" && !p.has_info) return false;
       if (info === "blank" && p.has_info) return false;
       if (!needle) return true;
       return [p.name, p.sponsor, p.drug_class, p.modality].some((v) => v?.toLowerCase().includes(needle));
     });
-  }, [products, q, info]);
+  }, [visible, q, info]);
 
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
-  const filled = products.filter((p) => p.has_info).length;
+  const filled = visible.filter((p) => p.has_info).length;
 
   return (
     <div className="space-y-4">
@@ -46,10 +51,24 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
           }}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm"
         >
-          <option value="">All drugs ({products.length.toLocaleString()})</option>
+          <option value="">All drugs ({visible.length.toLocaleString()})</option>
           <option value="filled">Info filled in ({filled.toLocaleString()})</option>
-          <option value="blank">Info still blank ({(products.length - filled).toLocaleString()})</option>
+          <option value="blank">Info still blank ({(visible.length - filled).toLocaleString()})</option>
         </select>
+        {otherOnly > 0 && (
+          <label className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-600"
+                 title="Drugs whose trials are all comorbidity / weight-related / not obesity">
+            <input
+              type="checkbox"
+              checked={includeOther}
+              onChange={(e) => {
+                setIncludeOther(e.target.checked);
+                setPage(1);
+              }}
+            />
+            + {otherOnly.toLocaleString()} only in non-primary trials
+          </label>
+        )}
       </div>
 
       <div className="text-sm text-slate-500">{rows.length.toLocaleString()} drugs</div>
@@ -59,7 +78,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3 font-semibold">Drug</th>
-              <th className="px-4 py-3 text-right font-semibold">Trials</th>
+              <th className="px-4 py-3 text-right font-semibold" title="Primary-obesity trials (+ other stored trials)">Trials</th>
               <th className="px-4 py-3 font-semibold">Most advanced trial</th>
               <th className="px-4 py-3 font-semibold">Modality</th>
               <th className="px-4 py-3 font-semibold">Class</th>
@@ -79,7 +98,14 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
                       {p.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">{p.trials}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">
+                    {p.trials}
+                    {p.all_trials > p.trials && (
+                      <span className="ml-1 text-xs text-slate-400" title="Other stored trials (comorbidity / weight-related / not obesity)">
+                        +{p.all_trials - p.trials}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5 text-slate-700">{highestPhase(p.trial_phases)}</td>
                   <td className="px-4 py-2.5 text-slate-700">{p.modality || <span className="text-slate-300">—</span>}</td>
                   <td className="px-4 py-2.5 text-slate-700">{p.drug_class || <span className="text-slate-300">—</span>}</td>

@@ -16,6 +16,7 @@ const LABELS: Record<string, string> = {
   NO_LOCATION: "No site countries",
   UNKNOWN_COUNTRY: "Country without continent",
   MISSING_SOURCE_UPDATED_AT: "No CT.gov update date",
+  VALIDATION_WARNING: "Values cleaned on import",
 };
 const SEV_STYLE: Record<string, string> = {
   error: "bg-rose-100 text-rose-800",
@@ -58,6 +59,7 @@ export default async function QualityPage({
         <h1 className="text-lg font-semibold text-slate-900">Data quality</h1>
         <p className="text-sm text-slate-500">
           Every trial is checked automatically each time it is synced. Score 1.00 = no issues.
+          Covers the primary-obesity trials shown on the website.
         </p>
       </div>
 

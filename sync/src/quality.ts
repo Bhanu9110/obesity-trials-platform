@@ -31,6 +31,7 @@ const PENALTY: Record<Severity, number> = { error: 0.25, warning: 0.1, info: 0.0
  * @param productCount number of distinct drug products linked
  * @param continents continents derived from the countries (contains "Other" for
  *                   countries missing from the country→continent table)
+ * @param validationWarnings values cleaned / dropped by validateMapped()
  */
 export function assessQuality(
   mapped: MappedTrial,
@@ -38,6 +39,7 @@ export function assessQuality(
   productCount: number,
   continents: string[],
   unknownCountries: string[] = [],
+  validationWarnings: string[] = [],
 ): QualityResult {
   const issues: QualityIssue[] = [];
   const add = (code: string, severity: Severity, message: string, detail?: string[]) =>
@@ -65,6 +67,9 @@ export function assessQuality(
   }
 
   if (!mapped.source_updated_at) add("MISSING_SOURCE_UPDATED_AT", "info", "Registry last-update date missing.");
+  if (validationWarnings.length) {
+    add("VALIDATION_WARNING", "info", "Some registry values were cleaned or dropped.", validationWarnings);
+  }
 
   const count = (s: Severity) => issues.filter((i) => i.severity === s).length;
   const penalty = issues.reduce((sum, i) => sum + PENALTY[i.severity], 0);

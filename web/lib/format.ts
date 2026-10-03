@@ -48,3 +48,12 @@ export const SPONSOR_GROUPS: Record<string, { label: string; classes: string }> 
   GOV: { label: "Government / NIH", classes: "NIH,FED,OTHER_GOV" },
   ACADEMIC: { label: "Academic / other", classes: "OTHER,NETWORK,INDIV,AMBIG,UNKNOWN" },
 };
+
+/** Obesity classification of a trial (set by the daily sync). */
+export const OBESITY_CLASSES: Record<string, { label: string; short: string; badge: string }> = {
+  primary: { label: "Primary obesity", short: "Primary", badge: "bg-emerald-50 text-emerald-700" },
+  comorbidity: { label: "Obesity as comorbidity", short: "Comorbidity", badge: "bg-amber-50 text-amber-700" },
+  weight_related: { label: "Weight-related (no obesity term)", short: "Weight-related", badge: "bg-sky-50 text-sky-700" },
+  unrelated: { label: "Not obesity", short: "Not obesity", badge: "bg-slate-100 text-slate-600" },
+};
+export const OBESITY_CLASS_ORDER = ["primary", "comorbidity", "weight_related", "unrelated"];

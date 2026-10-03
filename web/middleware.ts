@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, authConfigured, authDisabled, verifySession } from "@/lib/auth";
 
 // Every page and API requires login, except the login page itself.
-const PUBLIC_PATHS = ["/login", "/api/auth/login"];
+const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health"];
 
 export async function middleware(req: NextRequest) {
   if (authDisabled()) return NextResponse.next();

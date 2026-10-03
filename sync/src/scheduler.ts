@@ -5,6 +5,7 @@ import {
   trialCount,
   daysSinceLastSuccessfulSync,
   upgradeIfNeeded,
+  retryFailures,
   type SyncResult,
 } from "./sync.js";
 
@@ -51,6 +52,17 @@ async function runCatchUp(reason: string): Promise<void> {
       : Math.min(Math.max(gap, config.ctgov.incrementalDays), MAX_CATCHUP_DAYS);
   log(`${reason}: incremental sync covering last ${days} day(s)`);
   await runOnce(false, days);
+  // Then the retry queue: failed records whose next attempt is due.
+  if (running) return;
+  running = true;
+  try {
+    const r = await retryFailures();
+    if (r.due) log("retry queue", r);
+  } catch (err) {
+    log("retry queue failed", { error: err instanceof Error ? err.message : String(err) });
+  } finally {
+    running = false;
+  }
 }
 
 async function main() {

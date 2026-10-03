@@ -112,6 +112,35 @@ If you already deployed to Vercel earlier (with Neon): Vercel → project → *S
 Environment Variables* → edit `DATABASE_URL` → paste the Transaction pooler string →
 *Deployments* → ⋯ → **Redeploy**.
 
+### Optional: the "Sync now" button on the Admin page
+
+The button starts the GitHub workflow for you. It needs a GitHub token that can only
+run this repository's workflows:
+
+1. GitHub → your picture → **Settings → Developer settings → Personal access tokens →
+   Fine-grained tokens → Generate new token**.
+2. Name `obesity-trials sync button`, expiration up to 1 year, **Repository access →
+   Only select repositories → `obesity-trials-platform`**.
+3. **Permissions → Repository permissions → Actions → Read and write** (nothing else).
+4. **Generate**, copy the token (starts with `github_pat_`).
+5. Vercel → project → *Settings → Environment Variables* → add `GITHUB_DISPATCH_TOKEN`
+   = the token → *Deployments* → ⋯ → **Redeploy**.
+
+Optional extra settings (Vercel environment variables):
+
+| Name | What it does |
+|---|---|
+| `ADMIN_USERS` | only these logins (comma-separated, e.g. `poli`) may press Sync / re-queue failed records. Empty = everyone who can sign in. |
+| `APP_TIMEZONE` | time zone for dates on the Changes page (default `Asia/Kolkata`). |
+
+### Optional: get an email if the site or the data goes stale
+
+`https://<your-site>.vercel.app/api/health` needs no login and returns HTTP 503 when
+something is broken (database unreachable, migrations missing, no successful sync for
+3 days). A free uptime monitor (e.g. UptimeRobot, Better Stack) pointed at that URL
+emails you. The daily GitHub job also fails — and GitHub emails you — when its
+health check fails.
+
 ### Optional: full certificate checking
 
 Connections to Supabase are always **encrypted**. To also **verify** Supabase's certificate:
@@ -139,7 +168,11 @@ Open the file in Notepad, copy everything, and add it as `DATABASE_CA_CERT` in V
 - **Is the daily update working?** Website **Admin** page (last successful sync), or
   GitHub → *Actions* (GitHub emails you if a run fails).
 - **Change the code:** `git add . ; git commit -m "change" ; git push` — Vercel redeploys
-  automatically; the next daily run applies any new database migrations.
+  automatically. If the push changes `db/migrations/` or `sync/`, the GitHub workflow
+  also runs straight away and applies the migrations (and syncs).
+- **What changed in the data?** Website → **Changes** (new trials, field updates,
+  reclassifications, removals).
+- **Failed records?** Website → **Admin** → *Dead-letter queue* (re-queue or dismiss).
 - **Local copy:** `docker compose up` on your PC still works, with its own database and no login.
 
 ## If something goes wrong
@@ -155,3 +188,8 @@ Open the file in Notepad, copy everything, and add it as `DATABASE_CA_CERT` in V
 | Site was working, now errors / HTTP 540 | Supabase project paused → dashboard → **Restore project**. |
 | First full run was cut off (time limit) | Just run it again — trials already stored are skipped. A daily run also finishes an incomplete first download by itself. |
 | Daily runs stopped | GitHub → Actions → *Daily CT.gov sync* → **Enable workflow**. |
+| Website error right after an update that added a migration | The workflow applies migrations on push; if it hasn't run, GitHub → Actions → *Daily CT.gov sync* → **Run workflow**. |
+| Sync button: "not set up" | Add `GITHUB_DISPATCH_TOKEN` (see above) and redeploy. |
+| Sync button: GitHub answered 403/404 | The token needs *Actions: Read and write* on this repository; or set `GITHUB_REPO` = `owner/name`. |
+| Job fails at **Health check** | Read the lines marked `[FAIL]` in that step's log; they say what is wrong. |
+| Log says "NOT removing … trial(s)" | The removal guard stopped a large deletion. If CT.gov really dropped them (scope changed): GitHub repo → *Settings → Secrets and variables → Actions → **Variables*** → add `SYNC_ALLOW_LARGE_PRUNE` = `true`, run a full re-download, then delete the variable. |

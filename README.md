@@ -24,9 +24,20 @@ Everything else (titles, eligibility, outcomes, arms, sites, raw payloads, NLP
 embeddings, audit history) is **not** stored — the NCT ID links to the full record
 on ClinicalTrials.gov.
 
-Scope (unchanged): condition `obesity`, start date ≥ 2000, drug studies, and only
-trials whose **primary indication** is obesity / obese / overweight / morbid
-obesity / hyperlipidemia / dyslipidemia (comorbidity or subject-type trials are excluded).
+Scope: condition `obesity`, start date ≥ 2000, drug studies. Every trial CT.gov
+returns is **stored and labelled** with an obesity class (nothing is deleted):
+
+| Class | Meaning | Shown by default |
+|---|---|---|
+| **Primary obesity** | obesity / obese / overweight / morbid obesity / hyperlipidemia / dyslipidemia is the primary condition | yes |
+| Obesity as comorbidity | obesity is context of another disease ("obesity-associated asthma", "T2D in obese adults") | no |
+| Weight-related | no obesity term, but weight-management terms (weight loss, BMI, adiposity…) | no |
+| Not obesity | none of the above (CT.gov's keyword search matched something else) | no |
+
+The Trials page, each drug page and the Drugs list show **primary-obesity** trials;
+a selector shows the others. Each trial keeps the reason for its class. Rules live
+in `sync/src/obesity-filter.ts`; bump `CLASSIFIER_VERSION` after changing them and
+the next run re-classifies every stored trial (no download), recording any changes.
 
 ## Drug pages
 
@@ -80,11 +91,16 @@ containers.
 ```bash
 npm run sync                # incremental sync now
 npm run backfill            # full re-download of every trial
+npm run daily               # what the daily job does (upgrade if needed, catch-up, retry queue)
+npm run retry               # retry failed records that are due
+npm run failures            # show the retry queue and the dead-letter queue
+npm run requeue NCT…        # put dead-letter records back in the retry queue (or: npm run dismiss NCT…)
+npm run classify            # re-classify stored trials (primary / comorbidity / weight-related / not obesity)
+npm run health              # pipeline health checks (exit code 1 on failure)
 npm run rebuild-products    # re-derive drugs (after editing product_aliases by hand)
 npm run reparse             # re-map raw_trials with the current parser (no download); --all for every record
 npm run quality             # recompute the data-quality checks (results: website → Data quality)
 npm run migrate:status      # which migrations are applied / pending / edited
-npm run prune-nonobesity    # dry-run: list non-primary-obesity trials; add --apply to delete
 npm test                    # tests (needs DATABASE_URL)
 ```
 
@@ -95,11 +111,13 @@ With Docker: `docker compose run --rm scheduler npm run rebuild-products` (same 
 ```
 db/migrations/   0001 extensions · 0002 lean schema · 0003 sync log ·
                  0004 country→continent · 0005 convert an older DB · 0006 indexes ·
-                 0007 ingestion lineage + data quality · 0008 lock tables against Supabase's public API
+                 0007 ingestion lineage + data quality · 0008 lock tables against Supabase's public API ·
+                 0009 obesity classification, change history, retry / dead-letter queue
 db/run-migrations.sh  tracked runner (schema_migrations, one transaction per migration)
-sync/src/        ctgov-client (fields-limited API fetch) · mapper (parser, hashing) ·
-                 products (drug normalisation) · obesity-filter · quality · sync · scheduler
-web/app/         / (trials) · /drugs · /drugs/[slug] · /admin · api/*
+sync/src/        ctgov-client (fields-limited API fetch) · mapper (parser, hashing) · validate ·
+                 products (drug normalisation) · obesity-filter (classification) · quality ·
+                 history (change log) · failures (retry / dead-letter) · health · sync · scheduler
+web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality · /admin · api/* (incl. /api/health)
 ```
 
 ## Customising
@@ -125,6 +143,9 @@ Every ingested record is traceable:
 | `trial_quality` / `data_quality_summary` | per-trial score (1.0 = clean) and issues: missing sponsor/phase/conditions/location, no drug matched, unmatched interventions, unknown country, missing update date. |
 | `sync_runs` | + mode (full / incremental / reparse), parser version, unchanged and filtered counts. |
 
+| `trial_changes` | change history: new trial, field-by-field registry updates (old → new), reclassification, removal — website **Changes** tab. |
+| `sync_failures` | retry queue + dead-letter queue (see *Reliability*). |
+
 Unchanged records (same content hash and parser) are skipped — only `last_seen_at` moves.
 Records are written in batches (`SYNC_BATCH_SIZE`, default 250) with a few set-based
 statements per batch, so a full download stays quick even when the database is far away
@@ -133,6 +154,25 @@ If a first full download is ever cut off, the next run finishes it automatically
 When the parser changes (`PARSER_VERSION` in `sync/src/mapper.ts`), stored raw records are
 re-parsed automatically on the next start — no re-download. A database upgraded from the
 previous version gets one automatic full sync to fill in its lineage.
+
+## Reliability
+
+- **Validation** — every record is checked before it is written: NCT ID format, known
+  phase values, real and plausible dates, control characters, over-long text. Bad
+  records are not written; cleaned values are written and listed on the Data quality
+  page ("Values cleaned on import").
+- **Retry queue** — a record that fails is retried on later runs (re-fetched by NCT ID),
+  12 h, 1 d, 2 d, 4 d… apart. Success removes it from the queue.
+- **Dead-letter queue** — after `SYNC_MAX_ATTEMPTS` (5) failures in a row it waits for a
+  person: Admin page → *Re-queue* or *Dismiss* (or `npm run requeue` / `dismiss`).
+- **Removal guard** — a full download never removes more than max(50, 20 %) of stored
+  trials at once (protects against a truncated CT.gov response); override once with
+  `SYNC_ALLOW_LARGE_PRUNE=true`.
+- **Abandoned runs** — a run killed by a time limit is closed as *failed* on the next start.
+- **Health checks** — `npm run health` (run by the daily job; a failure emails you),
+  the Admin page *Health* panel, and `GET /api/health` (no login, for uptime monitors;
+  HTTP 503 when broken). Checks: database, migrations, last successful sync (warn 36 h,
+  fail 72 h), latest run, trials present, dead-letter queue, removal guard.
 
 ## Roadmap
 
@@ -146,14 +186,14 @@ previous version gets one automatic full sync to fill in its lineage.
 - [x] content hash
 - [x] data-quality table
 
-**Phase 2 — Make CT.gov production-grade**
-- [ ] Better retry queue
-- [ ] Dead-letter queue
-- [ ] Change history
-- [ ] Better validation
-- [ ] Better obesity classification
-- [ ] More tests
-- [ ] Proper health checks
+**Phase 2 — Make CT.gov production-grade — done**
+- [x] Better retry queue
+- [x] Dead-letter queue
+- [x] Change history
+- [x] Better validation
+- [x] Better obesity classification
+- [x] More tests (21 tests: classification, validation, queues, history, guards, health)
+- [x] Proper health checks
 
 **Phase 3 — Product intelligence**
 - [ ] intervention table
@@ -175,6 +215,6 @@ previous version gets one automatic full sync to fill in its lineage.
 - [ ] authenticated admin
 - [ ] advanced search
 - [x] data-quality dashboard
-- [ ] change history UI
+- [x] change history UI (basic: Changes tab)
 - [ ] pipeline monitoring
 - [ ] export API
