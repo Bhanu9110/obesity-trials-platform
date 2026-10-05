@@ -78,6 +78,8 @@ export function isCapacityError(err: unknown): boolean {
   return (
     e?.code === "53300" || // too_many_connections
     msg.includes("max client connections") ||
+    msg.includes("max clients reached") || // Supabase session pooler: EMAXCONNSESSION
+    msg.includes("emaxconn") ||
     msg.includes("too many clients") ||
     msg.includes("remaining connection slots") ||
     msg.includes("timeout exceeded when trying to connect")

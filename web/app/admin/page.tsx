@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { NctLink } from "@/components/ui";
+import AccessPanel from "@/components/AccessPanel";
 
 interface SyncRun {
   id: string;
@@ -111,7 +112,12 @@ export default function AdminPage() {
   }
 
   if (error && !data) {
-    return <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>;
+    return (
+      <div className="space-y-6">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
+        <AccessPanel />
+      </div>
+    );
   }
   if (!data) return <div className="text-sm text-slate-400">Loading pipeline health…</div>;
 
@@ -269,6 +275,8 @@ export default function AdminPage() {
           Health check for uptime monitors: <code>/api/health</code> (no login needed).
         </p>
       </section>
+
+      <AccessPanel />
     </div>
   );
 }

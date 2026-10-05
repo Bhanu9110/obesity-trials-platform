@@ -3,7 +3,7 @@
 import { query } from "./db";
 
 /** Latest migration the website needs. Keep in step with sync/src/health.ts. */
-export const REQUIRED_SCHEMA_VERSION = "0011";
+export const REQUIRED_SCHEMA_VERSION = "0012";
 export const SYNC_AGE = { warn: 36, fail: 72 }; // hours since the last successful sync
 
 export type HealthStatus = "ok" | "warn" | "fail";
@@ -18,6 +18,17 @@ export interface Health {
   lastSuccessfulSync: string | null;
   hoursSinceSync: number | null;
   checks: HealthCheck[];
+}
+
+/** "session" / "transaction" for a Supabase pooler URL, otherwise null. */
+export function poolerMode(url: string | undefined): "session" | "transaction" | null {
+  try {
+    const u = new URL(url ?? "");
+    if (!/\.pooler\.supabase\.com$/i.test(u.hostname)) return null;
+    return u.port === "6543" ? "transaction" : "session";
+  } catch {
+    return null;
+  }
 }
 
 export async function getHealth(): Promise<Health> {
@@ -41,6 +52,18 @@ export async function getHealth(): Promise<Health> {
     return { status: "fail", checkedAt: now.toISOString(), lastSuccessfulSync: null, hoursSinceSync: null, checks };
   }
   checks.push({ name: "database", status: "ok", detail: "reachable" });
+
+  // On Vercel every server instance opens its own connections. Supabase's session
+  // pooler (port 5432) allows only ~15 clients in total and then refuses with
+  // EMAXCONNSESSION; the transaction pooler (port 6543) is the one meant for this.
+  const mode = poolerMode(process.env.DATABASE_URL);
+  if (process.env.VERCEL && mode === "session") {
+    checks.push({
+      name: "connection",
+      status: "warn",
+      detail: "DATABASE_URL uses Supabase's session pooler (port 5432) — set it to the transaction pooler (port 6543) in Vercel to avoid 'max clients reached' errors",
+    });
+  }
 
   const [mig, last, latest, queue, trials] = await Promise.all([
     query<{ ok: boolean }>(

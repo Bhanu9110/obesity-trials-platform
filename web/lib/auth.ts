@@ -32,6 +32,11 @@ function parseUsers(): Map<string, string> {
   return m;
 }
 
+/** Usernames allowed to sign in (from AUTH_USERS), never the passwords. */
+export function configuredUsers(): string[] {
+  return [...parseUsers().keys()].sort();
+}
+
 const enc = new TextEncoder();
 
 function b64url(bytes: Uint8Array): string {

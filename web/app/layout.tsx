@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { SESSION_COOKIE, authDisabled, verifySession } from "@/lib/auth";
+import ActivityTracker from "@/components/ActivityTracker";
 
 export const metadata: Metadata = {
   title: "Obesity Trials Intelligence",
@@ -76,6 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             )}
           </div>
         </header>
+        {user && <ActivityTracker />}
         <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
         <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-slate-400">
           Trial data from ClinicalTrials.gov (v2 API), updated daily. Product information is curated manually.
