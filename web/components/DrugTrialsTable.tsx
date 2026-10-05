@@ -8,18 +8,18 @@ import {
   phaseRank, sortContinents, statusInfo, trialUrl,
 } from "@/lib/format";
 
-// Trials of one drug: a clickable phase bar, a summary line, one toolbar, and the
-// trials as two-line entries grouped by phase (title + status, then NCT ID,
-// sponsor, start, participants, location). Plain "Obesity" is not repeated on
-// every trial — only the extra conditions are listed.
+// Trials of one drug: a clickable phase bar, a summary line, one toolbar, and a
+// table of trials grouped by phase. Columns line up (Trial = "NCT ID – title" ·
+// Sponsor · Status · Start · Participants · Region) and every column header sorts; the active sort
+// is marked with an arrow, so the order is always visible.
 
 const NO_PHASE = "__none__";
 const ACTIVE = "__active__";
 const SELECT = "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700";
-const GROUP_PREVIEW = 8;   // trials shown per phase group before "Show all"
-const FLAT_PREVIEW = 40;   // trials shown in a flat (non-grouped) list before "Show more"
+const GROUP_PREVIEW = 10;  // trials shown per phase group before "Show all"
+const FLAT_PREVIEW = 50;   // trials shown in the ungrouped list before "Show more"
 
-type Sort = "phase" | "start" | "enrollment" | "sponsor";
+type SortKey = "title" | "sponsor" | "status" | "start" | "enrollment" | "region";
 type SponsorFilter = "" | "industry" | "academic";
 
 const phaseKey = (t: ProductTrial) => t.phase || NO_PHASE;
@@ -39,60 +39,86 @@ function phaseColour(p: string): string {
   return "bg-slate-200 text-slate-600";
 }
 
-// Conditions every obesity trial has — not worth repeating on each entry.
-const PLAIN_OBESITY = /^(?:obes(?:e|ity)|overweight|adult obesity|(?:overweight|obesity)\s*(?:and|or|&|,|\/)\s*(?:obes(?:e|ity)|overweight))$/i;
+const CONTINENT_SHORT: Record<string, string> = {
+  "North America": "N. America", "South America": "S. America", Europe: "Europe", Asia: "Asia",
+  Africa: "Africa", Oceania: "Oceania", Other: "Other",
+};
 
-function StatusBadge({ s, className = "" }: { s: string | null; className?: string }) {
-  const info = statusInfo(s);
-  if (!info) return null;
-  return <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${info.badge} ${className}`}>{info.label}</span>;
+// Column layout shared by the header and every row (md and up). On phones each
+// row stacks instead.
+const GRID = "md:grid md:grid-cols-[minmax(0,1fr)_180px_150px_84px_96px_110px] md:items-center md:gap-x-4";
+
+const COLUMNS: { key: SortKey; label: string; align?: "right"; first: "asc" | "desc" }[] = [
+  { key: "title", label: "Trial", first: "asc" },
+  { key: "sponsor", label: "Sponsor", first: "asc" },
+  { key: "status", label: "Status", first: "asc" },
+  { key: "start", label: "Start", first: "desc" },
+  { key: "enrollment", label: "Participants", align: "right", first: "desc" },
+  { key: "region", label: "Region", first: "asc" },
+];
+
+/** Comparator for one column; missing values always go last. */
+function compare(key: SortKey, dir: "asc" | "desc") {
+  const sign = dir === "asc" ? 1 : -1;
+  const val = (t: ProductTrial): string | number | null => {
+    switch (key) {
+      case "title": return t.title?.toLowerCase() ?? null;
+      case "sponsor": return t.sponsor?.toLowerCase() ?? null;
+      case "status": { const i = TRIAL_STATUS_ORDER.indexOf(t.overall_status ?? ""); return t.overall_status ? (i < 0 ? 99 : i) : null; }
+      case "start": return t.start_date ?? null;
+      case "enrollment": return t.enrollment ?? null;
+      case "region": return t.continents.length ? sortContinents(t.continents).map((c) => CONTINENT_ORDER.indexOf(c)).join(",") : null;
+    }
+  };
+  return (a: ProductTrial, b: ProductTrial) => {
+    const va = val(a), vb = val(b);
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    const c = typeof va === "number" && typeof vb === "number" ? va - vb : String(va).localeCompare(String(vb));
+    return c * sign;
+  };
 }
 
-function TrialEntry({ t, showPhase }: { t: ProductTrial; showPhase: boolean }) {
-  const extra = t.indication.filter((c) => !PLAIN_OBESITY.test(c.trim()));
-  const start = formatMonthYear(t.start_date);
-  const cls = t.obesity_class !== "primary" ? OBESITY_CLASSES[t.obesity_class] : null;
-  const meta: React.ReactNode[] = [
-    <span key="id" className="font-mono text-xs text-brand-600">{t.nct_id}</span>,
-    <span key="sp" className="text-slate-600">
-      {t.sponsor || "Sponsor not given"}
-      {isIndustry(t) && <span className="ml-1.5 rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-700">Industry</span>}
-    </span>,
-  ];
-  if (showPhase) meta.push(<span key="ph" className="font-medium text-slate-700">{phaseLabel(phaseKey(t))}</span>);
-  if (start) meta.push(<span key="st">Start {start}</span>);
-  if (t.enrollment != null) meta.push(<span key="en">{t.enrollment.toLocaleString()} participant{t.enrollment === 1 ? "" : "s"}</span>);
-  if (t.continents.length) meta.push(<span key="co">{sortContinents(t.continents).join(", ")}</span>);
+function StatusBadge({ s }: { s: string | null }) {
+  const info = statusInfo(s);
+  if (!info) return <span className="text-xs text-slate-300">—</span>;
+  return <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${info.badge}`}>{info.label}</span>;
+}
 
+function TrialRow({ t }: { t: ProductTrial }) {
+  const start = formatMonthYear(t.start_date);
+  const region = sortContinents(t.continents).map((c) => CONTINENT_SHORT[c] ?? c).join(", ");
   return (
     <li>
-      <Link href={trialUrl(t.nct_id)} className="group block px-5 py-3 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none">
-        <div className="flex items-start justify-between gap-4">
-          <span className="text-[14px] font-semibold leading-snug text-slate-900 group-hover:text-brand-700">
-            {t.title || <span className="font-normal italic text-slate-400">Title appears after the next sync</span>}
-          </span>
-          <StatusBadge s={t.overall_status} className="hidden sm:inline-block" />
-        </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-slate-500 sm:gap-x-2">
-          {/* on phones the status sits on this line so the title gets the full width */}
-          <StatusBadge s={t.overall_status} className="sm:hidden" />
-          {meta.map((m, i) => (
-            <span key={i} className="inline-flex items-center gap-2">
-              {i > 0 && <span aria-hidden className="hidden text-slate-300 sm:inline">·</span>}
-              {m}
-            </span>
-          ))}
-        </div>
-        {(extra.length > 0 || cls) && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-slate-400">
-            {cls && (
-              <span title={t.obesity_reason ?? undefined} className={`rounded px-1.5 py-0.5 font-medium ${cls.badge}`}>{cls.short}</span>
-            )}
-            {extra.length > 0 && <span className="mr-0.5">Also:</span>}
-            {extra.slice(0, 4).map((c) => <span key={c} className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">{c}</span>)}
-            {extra.length > 4 && <span title={extra.slice(4).join(", ")}>+{extra.length - 4}</span>}
+      <Link href={trialUrl(t.nct_id)} className={`group block px-5 py-3 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none ${GRID}`}>
+        {/* Trial: "NCT ID – title" */}
+        <div className="min-w-0">
+          <div className="line-clamp-2 text-[14px] leading-snug text-slate-900 group-hover:text-brand-700" title={t.title ?? undefined}>
+            <span className="font-mono text-[13px] font-medium text-brand-600">{t.nct_id}</span>
+            <span className="text-slate-400"> – </span>
+            <span className="font-medium">{t.title || <span className="font-normal italic text-slate-400">title appears after the next sync</span>}</span>
           </div>
-        )}
+        </div>
+        {/* Phones: the other columns as one compact line */}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 md:hidden">
+          <StatusBadge s={t.overall_status} />
+          <span>{t.sponsor ?? "—"}{isIndustry(t) && <span className="ml-1 font-semibold text-indigo-700">· Industry</span>}</span>
+          {start && <span>{start}</span>}
+          {t.enrollment != null && <span>{t.enrollment.toLocaleString()} pts</span>}
+          {region && <span>{region}</span>}
+        </div>
+        {/* md and up: aligned columns */}
+        <div className="hidden min-w-0 text-[13px] text-slate-700 md:block">
+          <div className="truncate" title={t.sponsor ?? undefined}>{t.sponsor ?? <span className="text-slate-300">—</span>}</div>
+          {isIndustry(t) && <span className="text-[10px] font-semibold uppercase tracking-wide text-indigo-700">Industry</span>}
+        </div>
+        <div className="hidden md:block"><StatusBadge s={t.overall_status} /></div>
+        <div className="hidden text-[13px] tabular-nums text-slate-700 md:block">{start ?? <span className="text-slate-300">—</span>}</div>
+        <div className="hidden text-right text-[13px] tabular-nums text-slate-700 md:block">
+          {t.enrollment != null ? t.enrollment.toLocaleString() : <span className="text-slate-300">—</span>}
+        </div>
+        <div className="hidden truncate text-[13px] text-slate-600 md:block" title={region}>{region || <span className="text-slate-300">—</span>}</div>
       </Link>
     </li>
   );
@@ -111,7 +137,9 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
   const [sponsor, setSponsor] = useState<SponsorFilter>("");
   const [status, setStatus] = useState("");
   const [continent, setContinent] = useState("");
-  const [sort, setSort] = useState<Sort>("phase");
+  const [sortKey, setSortKey] = useState<SortKey>("start");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [grouped, setGrouped] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [flatLimit, setFlatLimit] = useState(FLAT_PREVIEW);
@@ -147,15 +175,18 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
 
   const rows = useMemo(() => {
     const r = phase ? base.filter((t) => phaseKey(t) === phase) : base.slice();
-    const byStart = (a: ProductTrial, b: ProductTrial) => (b.start_date ?? "").localeCompare(a.start_date ?? "");
-    const cmp: Record<Sort, (a: ProductTrial, b: ProductTrial) => number> = {
-      phase: (a, b) => rankOf(phaseKey(b)) - rankOf(phaseKey(a)) || byStart(a, b) || b.nct_id.localeCompare(a.nct_id),
-      start: (a, b) => byStart(a, b) || b.nct_id.localeCompare(a.nct_id),
-      enrollment: (a, b) => (b.enrollment ?? -1) - (a.enrollment ?? -1),
-      sponsor: (a, b) => (a.sponsor ?? "~").localeCompare(b.sponsor ?? "~") || byStart(a, b),
-    };
-    return r.sort(cmp[sort]);
-  }, [base, phase, sort]);
+    const byCol = compare(sortKey, sortDir);
+    // Ties: newest start first, then newest registration.
+    const tie = (a: ProductTrial, b: ProductTrial) => compare("start", "desc")(a, b) || b.nct_id.localeCompare(a.nct_id);
+    return r.sort((a, b) => byCol(a, b) || tie(a, b));
+  }, [base, phase, sortKey, sortDir]);
+
+  const sortBy = (key: SortKey) => {
+    const col = COLUMNS.find((c) => c.key === key)!;
+    if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir(col.first); }
+    setFlatLimit(FLAT_PREVIEW);
+  };
 
   const summary = useMemo(() => {
     const years = rows.map((t) => Number(t.start_date?.slice(0, 4))).filter((y) => y > 1900);
@@ -182,11 +213,11 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
   const industryTotal = useMemo(() => scoped.filter(isIndustry).length, [scoped]);
 
   const groups = useMemo(() => {
-    if (sort !== "phase") return null;
+    if (!grouped) return null;
     const g = new Map<string, ProductTrial[]>();
     for (const t of rows) g.set(phaseKey(t), [...(g.get(phaseKey(t)) ?? []), t]);
-    return [...g.entries()];
-  }, [rows, sort]);
+    return [...g.entries()].sort((a, b) => rankOf(b[0]) - rankOf(a[0])); // latest phase first
+  }, [rows, grouped]);
 
   const filtered = Boolean(q.trim() || phase || sponsor || status || continent);
   const clear = () => { setQ(""); setPhase(""); setSponsor(""); setStatus(""); setContinent(""); };
@@ -295,12 +326,22 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
                   <option value="all">All stored trials ({allTrials.length})</option>
                 </select>
               )}
-              <select value={sort} onChange={(e) => { setSort(e.target.value as Sort); setFlatLimit(FLAT_PREVIEW); }} className={SELECT} title="Sort">
-                <option value="phase">Sort: latest phase</option>
-                <option value="start">Sort: newest start</option>
-                <option value="enrollment">Sort: most participants</option>
-                <option value="sponsor">Sort: sponsor A–Z</option>
+              <select
+                value={`${sortKey}:${sortDir}`}
+                onChange={(e) => { const [k, d] = e.target.value.split(":"); setSortKey(k as SortKey); setSortDir(d as "asc" | "desc"); }}
+                className={`${SELECT} md:hidden`}
+                title="Sort"
+              >
+                <option value="start:desc">Newest start first</option>
+                <option value="start:asc">Oldest start first</option>
+                <option value="status:asc">Recruiting first</option>
+                <option value="enrollment:desc">Most participants</option>
+                <option value="sponsor:asc">Sponsor A–Z</option>
               </select>
+              <label className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600">
+                <input type="checkbox" checked={grouped} onChange={(e) => { setGrouped(e.target.checked); setFlatLimit(FLAT_PREVIEW); }} />
+                Group by phase
+              </label>
               {filtered && (
                 <button type="button" onClick={clear} className="rounded-lg px-3 py-2 text-sm text-brand-600 hover:bg-slate-50">
                   Clear filters
@@ -310,6 +351,27 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
           </div>
         )}
       </div>
+
+      {rows.length > 0 && (
+        <div className={`hidden border-b border-slate-200 bg-white px-5 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 ${GRID}`} role="row">
+          {COLUMNS.map((c) => {
+            const on = sortKey === c.key;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => sortBy(c.key)}
+                title={`Sort by ${c.label.toLowerCase()}`}
+                aria-sort={on ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                className={`flex items-center gap-1 uppercase hover:text-slate-900 ${c.align === "right" ? "justify-end" : ""} ${on ? "text-slate-900" : ""}`}
+              >
+                {c.label}
+                <span aria-hidden className={on ? "text-brand-600" : "text-slate-300"}>{on ? (sortDir === "asc" ? "▲" : "▼") : "↕"}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <p className="px-5 py-10 text-center text-sm text-slate-400">
@@ -325,7 +387,7 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
                 type="button"
                 onClick={() => toggle(collapsed, p, setCollapsed)}
                 aria-expanded={!isCollapsed}
-                className="flex w-full items-center gap-2 border-y border-slate-100 bg-slate-50 px-5 py-2 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-100"
+                className="flex w-full items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-2 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-100"
               >
                 <span aria-hidden className={`text-slate-400 transition ${isCollapsed ? "-rotate-90" : ""}`}>▾</span>
                 {phaseLabel(p)}
@@ -333,8 +395,8 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
               </button>
               {!isCollapsed && (
                 <>
-                  <ul className="divide-y divide-slate-100">
-                    {shown.map((t) => <TrialEntry key={t.nct_id} t={t} showPhase={false} />)}
+                  <ul className="divide-y divide-slate-100 border-b border-slate-100">
+                    {shown.map((t) => <TrialRow key={t.nct_id} t={t} />)}
                   </ul>
                   {list.length > GROUP_PREVIEW && (
                     <button
@@ -352,8 +414,8 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
         })
       ) : (
         <>
-          <ul className="divide-y divide-slate-100 border-t border-slate-100">
-            {rows.slice(0, flatLimit).map((t) => <TrialEntry key={t.nct_id} t={t} showPhase />)}
+          <ul className="divide-y divide-slate-100">
+            {rows.slice(0, flatLimit).map((t) => <TrialRow key={t.nct_id} t={t} />)}
           </ul>
           {rows.length > flatLimit && (
             <button
