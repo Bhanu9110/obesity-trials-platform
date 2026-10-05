@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listTrials, type TrialFilters } from "@/lib/queries";
+import { activeUser } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ function multi(v: string | null): string[] | undefined {
 // List params use "|" as the separator because country names contain commas
 // ("Korea, Republic of"). sponsorClass also accepts commas.
 export async function GET(req: NextRequest) {
+  if (!(await activeUser(req))) return NextResponse.json({ error: "login required" }, { status: 401 });
   const sp = req.nextUrl.searchParams;
   const filters: TrialFilters = {
     q: sp.get("q")?.trim() || undefined,

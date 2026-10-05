@@ -48,7 +48,7 @@ function LoginForm() {
       </div>
       {params.get("ended") && !error && (
         <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          You were signed out. If you had guest access, it has ended — ask the person who invited you for more time.
+          You were signed out. If your access was time-limited, it has ended — ask the person who gave you access.
         </p>
       )}
       {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}

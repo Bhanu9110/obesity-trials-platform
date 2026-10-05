@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser, mayEdit } from "@/lib/admin";
+import { activeUser, mayEdit } from "@/lib/admin";
 import { getProduct, updateProductInfo } from "@/lib/queries";
 import { PRODUCT_INFO_FIELDS, type ProductInfo } from "@/lib/types";
 
@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
 
 /** Save the manually curated product info. Blank strings are stored as empty (NULL). */
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-  if (!mayEdit(await currentUser(req))) {
+  if (!mayEdit(await activeUser(req))) {
     return NextResponse.json({ error: "Guest access is view-only." }, { status: 403 });
   }
   const { slug } = await params;

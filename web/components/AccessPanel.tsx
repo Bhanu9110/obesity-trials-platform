@@ -27,6 +27,12 @@ function device(ua: string | null): string {
   return os ? `${browser} on ${os}` : browser;
 }
 
+const ROLE_TAG = {
+  owner: { label: "owner", style: "bg-violet-50 text-violet-700 ring-violet-200" },
+  member: { label: "member", style: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  guest: { label: "guest", style: "bg-sky-50 text-sky-700 ring-sky-200" },
+} as const;
+
 const flag = (cc: string) =>
   /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)) : "";
 
@@ -46,6 +52,16 @@ export default function AccessPanel() {
       setError(e instanceof Error ? e.message : String(e));
     }
   }, [kind]);
+
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  async function remove(username: string) {
+    if (confirmRemove !== username) { setConfirmRemove(username); return; }
+    setConfirmRemove(null);
+    const r = await fetch(`/api/access?username=${encodeURIComponent(username)}`, { method: "DELETE" });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) setError(body.error ?? `HTTP ${r.status}`);
+    load();
+  }
 
   useEffect(() => {
     load();
@@ -96,11 +112,19 @@ export default function AccessPanel() {
                 ) : data.members.map((m) => (
                   <tr key={m.username} className={m.allowed ? "" : "bg-amber-50/50"}>
                     <td className="px-5 py-2.5 font-medium text-slate-800">
-                      {m.role === "guest" ? m.username.replace(/^guest:/, "") : m.username}
-                      {m.role === "guest" && <span className="ml-2 rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-sky-700 ring-1 ring-sky-200" title="Temporary view-only login (Guest access)">guest</span>}
-                      {!m.allowed && (m.role === "guest"
-                        ? <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-600" title="Guest access expired or revoked">ended</span>
-                        : <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800" title="Not in AUTH_USERS any more — cannot sign in">removed</span>)}
+                      {m.username.replace(/^(guest|user):/, "")}
+                      <span className={`ml-2 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ring-1 ${ROLE_TAG[m.role].style}`}>{ROLE_TAG[m.role].label}</span>
+                      {!m.allowed && (
+                        <>
+                          <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-600" title="Can no longer sign in">
+                            no access
+                          </span>
+                          <button type="button" onClick={() => remove(m.username)}
+                                  className="ml-2 text-[11px] font-medium text-rose-700 hover:underline" title="Remove from this list (deletes their activity history)">
+                            {confirmRemove === m.username ? "Click again to remove" : "Remove"}
+                          </button>
+                        </>
+                      )}
                     </td>
                     <td className="px-3 py-2.5 tabular-nums text-slate-700">{m.last_seen ?? <span className="text-slate-400">never</span>}</td>
                     <td className="px-3 py-2.5 tabular-nums text-slate-700">{m.last_login ?? <span className="text-slate-400">—</span>}</td>
@@ -137,7 +161,7 @@ export default function AccessPanel() {
                     <tr key={e.id} className="align-top">
                       <td className="whitespace-nowrap px-5 py-2 tabular-nums text-slate-500">{e.at}</td>
                       <td className="px-3 py-2"><span className={`rounded px-1.5 py-0.5 text-xs font-medium ${st.style}`}>{st.label}</span></td>
-                      <td className="px-3 py-2 font-medium text-slate-800">{e.username ?? <span className="text-slate-400">—</span>}</td>
+                      <td className="px-3 py-2 font-medium text-slate-800">{e.username ? e.username.replace(/^(guest|user):/, "") : <span className="text-slate-400">—</span>}</td>
                       <td className="px-3 py-2 font-mono text-xs text-slate-600">{e.event === "page" ? e.path : ""}</td>
                       <td className="px-3 py-2 text-slate-600">
                         {e.place ? <>{flag((e.place.split(", ").pop() ?? "").trim())} {e.place}</> : <span className="text-slate-400">—</span>}
@@ -151,8 +175,8 @@ export default function AccessPanel() {
             </table>
           </div>
           <p className="px-5 py-3 text-xs text-slate-500">
-            To change who can get in, edit <code className="rounded bg-slate-100 px-1">AUTH_USERS</code> in Vercel and redeploy — anyone removed is signed out immediately.
-            Change <code className="rounded bg-slate-100 px-1">AUTH_SECRET</code> to sign everyone out. Locations come from the visitor&apos;s IP address and are approximate.
+            Manage who can get in under Users &amp; access above. Owner accounts are set in Vercel (<code className="rounded bg-slate-100 px-1">AUTH_USERS</code>).
+            Locations come from the visitor&apos;s IP address and are approximate.
           </p>
         </>
       )}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, readSession, verifySession } from "@/lib/auth";
-import { DEFAULT_GUEST_PAGES, firstPagePath, guestMayOpen } from "@/lib/guest-pages";
+import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, isSiteMember, readSession, verifySession } from "@/lib/auth";
+import { DEFAULT_GUEST_PAGES, firstPagePath, guestMayOpen, requiredPage } from "@/lib/guest-pages";
 
 // Every page and API requires login, except the login page itself.
 const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health"];
@@ -41,6 +41,13 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL(firstPagePath(pages), req.url));
     }
     return NextResponse.next();
+  }
+  if (user && isSiteMember(user) && requiredPage(pathname) === "never") {
+    // Members made on the Admin page: every page except Admin.
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Only owners can open the Admin page." }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/", req.url));
   }
   if (user) return NextResponse.next();
 

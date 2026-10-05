@@ -29,7 +29,7 @@ export function cleanPages(input: unknown): GuestPage[] {
  */
 export function requiredPage(pathname: string): GuestPage | "always" | "never" {
   const under = (p: string) => pathname === p || pathname.startsWith(p + "/");
-  if (["/admin", "/api/sync", "/api/failures", "/api/access", "/api/guests"].some(under)) return "never";
+  if (["/admin", "/api/sync", "/api/failures", "/api/access", "/api/users", "/api/guests"].some(under)) return "never";
   if (["/login", "/api/auth", "/api/activity", "/api/health", "/trials"].some(under)) return "always";
   if (pathname === "/" || under("/api/trials") || under("/api/filters")) return "trials";
   if (under("/drugs") || under("/api/products")) return "drugs";

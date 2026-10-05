@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentUser, mayAdminister } from "@/lib/admin";
-import { configuredUsers, guestName, isGuest } from "@/lib/auth";
-import { listGuests } from "@/lib/guests";
+import { configuredUsers, isGuest, isSiteUser, plainName } from "@/lib/auth";
+import { listUsers } from "@/lib/site-users";
 import { query } from "@/lib/db";
 import { displayTimeZone } from "@/lib/queries";
 
@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 
 export interface AccessMember {
   username: string;
-  allowed: boolean;          // still in AUTH_USERS, or a guest whose access hasn't ended
-  role: "member" | "guest";
+  allowed: boolean;          // can still sign in (owner in AUTH_USERS, or an active site login)
+  role: "owner" | "member" | "guest";
   last_seen: string | null;
   last_login: string | null;
   logins_30d: number;
@@ -70,17 +70,19 @@ export async function GET(req: NextRequest) {
           WHERE event IN ('login_failed', 'blocked') AND at > now() - interval '7 days'`,
       ),
     ]);
-    const allowed = configuredUsers();
-    const activeGuests = new Set(
-      (await listGuests().catch(() => [])).filter((g) => g.status === "active").map((g) => g.username),
+    const owners = configuredUsers();
+    const active = new Map(
+      (await listUsers().catch(() => [])).filter((u) => u.status === "active").map((u) => [u.username, u.role]),
     );
     const seen = new Set(members.map((m) => m.username));
     const all: AccessMember[] = [
-      ...members.map((m) => isGuest(m.username)
-        ? { ...m, role: "guest" as const, allowed: activeGuests.has(guestName(m.username)) }
-        : { ...m, role: "member" as const, allowed: allowed.includes(m.username) }),
-      ...allowed.filter((u) => !seen.has(u)).map((u) => ({
-        username: u, role: "member" as const, allowed: true, last_seen: null, last_login: null, logins_30d: 0, pages_30d: 0,
+      ...members.map((m) => {
+        if (!isSiteUser(m.username)) return { ...m, role: "owner" as const, allowed: owners.includes(m.username) };
+        const role = isGuest(m.username) ? ("guest" as const) : ("member" as const);
+        return { ...m, role, allowed: active.get(plainName(m.username)) === role };
+      }),
+      ...owners.filter((u) => !seen.has(u)).map((u) => ({
+        username: u, role: "owner" as const, allowed: true, last_seen: null, last_login: null, logins_30d: 0, pages_30d: 0,
         countries: [], last_place: null, last_ip: null, last_agent: null,
       })),
     ];
@@ -92,4 +94,25 @@ export async function GET(req: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+/**
+ * Remove someone who can no longer sign in from this list: deletes their rows
+ * from the access log. ?username=… (as stored, e.g. "guest:rahul"). Owners only.
+ */
+export async function DELETE(req: NextRequest) {
+  if (!mayAdminister(await currentUser(req))) return NextResponse.json({ error: "Only admins can do this." }, { status: 403 });
+  const name = (req.nextUrl.searchParams.get("username") ?? "").trim();
+  if (!name) return NextResponse.json({ error: "invalid request" }, { status: 400 });
+  if (configuredUsers().includes(name)) {
+    return NextResponse.json({ error: "Owner accounts can't be removed here — they are set in Vercel." }, { status: 400 });
+  }
+  if (isSiteUser(name)) {
+    const still = (await listUsers().catch(() => [])).find((u) => u.username === plainName(name) && u.status === "active");
+    if (still) return NextResponse.json({ error: "This login is still active — revoke or delete it under Users & access first." }, { status: 400 });
+  }
+  const rows = await query<{ n: number }>(
+    `WITH d AS (DELETE FROM access_log WHERE username = $1 RETURNING 1) SELECT count(*)::int AS n FROM d`, [name],
+  );
+  return NextResponse.json({ removed: rows[0]?.n ?? 0 });
 }

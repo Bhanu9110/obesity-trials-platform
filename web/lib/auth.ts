@@ -12,15 +12,23 @@
 export const SESSION_COOKIE = "otd_session";
 export const SESSION_DAYS = 30;
 
-// Guests (temporary view-only logins, Admin → Guest access) sign in as
-// "guest:<name>". A colon can never appear in an AUTH_USERS name, so the prefix
-// alone tells every part of the site that this is a guest.
+// Logins managed on the Admin page (Users & access) sign in as "user:<name>"
+// (members) or "guest:<name>" (guests). A colon can never appear in an
+// AUTH_USERS name, so the prefix alone tells every part of the site which kind
+// of login this is. AUTH_USERS accounts are the owners.
 export const GUEST_PREFIX = "guest:";
-/** A guest session lasts this long and is renewed while they use the site (never past their end date). */
+export const MEMBER_PREFIX = "user:";
+/** Session length for site users; renewed while they use the site (never past their end date). */
 export const GUEST_SESSION_MIN = 60;
+export const MEMBER_SESSION_MIN = 12 * 60;
 
 export const isGuest = (user: string | null | undefined): boolean => Boolean(user?.startsWith(GUEST_PREFIX));
-export const guestName = (user: string): string => (isGuest(user) ? user.slice(GUEST_PREFIX.length) : user);
+export const isSiteMember = (user: string | null | undefined): boolean => Boolean(user?.startsWith(MEMBER_PREFIX));
+/** Managed on the Admin page (member or guest), as opposed to an owner in AUTH_USERS. */
+export const isSiteUser = (user: string | null | undefined): boolean => isGuest(user) || isSiteMember(user);
+/** The name without its "guest:" / "user:" prefix. */
+export const plainName = (user: string): string => user.replace(/^(guest|user):/, "");
+export const guestName = plainName;
 
 export function authDisabled(): boolean {
   return (process.env.AUTH_DISABLED ?? "").toLowerCase() === "true";
@@ -123,9 +131,10 @@ export async function readSession(token: string | undefined | null): Promise<Ses
     const data = JSON.parse(new TextDecoder().decode(fromB64url(payload))) as { u: string; exp: number; p?: unknown };
     if (!data.u || typeof data.exp !== "number" || data.exp < Date.now()) return null;
     if (isGuest(data.u)) {
-      // Still active? checked against the database (lib/guests.ts).
+      // Still active? checked against the database (lib/site-users.ts).
       return { user: data.u, pages: Array.isArray(data.p) ? data.p.map(String) : [] };
     }
+    if (isSiteMember(data.u)) return { user: data.u };
     return parseUsers().has(data.u) ? { user: data.u } : null; // removing a user from AUTH_USERS logs them out
   } catch {
     return null;
@@ -137,7 +146,7 @@ export async function verifySession(token: string | undefined | null): Promise<s
   return (await readSession(token))?.user ?? null;
 }
 
-// ---- Guest passwords: PBKDF2-SHA256 with a random salt (Web Crypto only). ----
+// ---- Site-user passwords: PBKDF2-SHA256 with a random salt (Web Crypto only). ----
 const PBKDF2_ITERATIONS = 120_000;
 
 async function pbkdf2(password: string, salt: Uint8Array<ArrayBuffer>, iterations: number): Promise<Uint8Array> {
@@ -168,4 +177,29 @@ export function generatePassword(length = 12): string {
   const bytes = new Uint8Array(length);
   crypto.getRandomValues(bytes);
   return [...bytes].map((b) => alphabet[b % alphabet.length]).join("");
+}
+
+// ---- Kept-for-the-admin password copy: AES-GCM, key derived from AUTH_SECRET. ----
+async function aesKey(): Promise<CryptoKey> {
+  const raw = await crypto.subtle.digest("SHA-256", enc.encode(`otd-password-copy:${process.env.AUTH_SECRET ?? ""}`));
+  return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+export async function encryptText(text: string): Promise<string> {
+  const iv = new Uint8Array(new ArrayBuffer(12));
+  crypto.getRandomValues(iv);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await aesKey(), enc.encode(text)));
+  return `v1.${b64url(iv)}.${b64url(ct)}`;
+}
+
+/** null when there is no copy, or it can't be read (e.g. AUTH_SECRET was changed). */
+export async function decryptText(stored: string | null | undefined): Promise<string | null> {
+  const [v, iv, ct] = (stored ?? "").split(".");
+  if (v !== "v1" || !iv || !ct) return null;
+  try {
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64url(iv) }, await aesKey(), fromB64url(ct));
+    return new TextDecoder().decode(pt);
+  } catch {
+    return null;
+  }
 }

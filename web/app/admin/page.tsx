@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { NctLink } from "@/components/ui";
 import AccessPanel from "@/components/AccessPanel";
-import GuestPanel from "@/components/GuestPanel";
+import UsersPanel from "@/components/UsersPanel";
 
 interface SyncRun {
   id: string;
@@ -116,7 +116,7 @@ export default function AdminPage() {
     return (
       <div className="space-y-6">
         <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
-        <GuestPanel />
+        <UsersPanel />
         <AccessPanel />
       </div>
     );
@@ -278,7 +278,7 @@ export default function AdminPage() {
         </p>
       </section>
 
-      <GuestPanel />
+      <UsersPanel />
       <AccessPanel />
     </div>
   );

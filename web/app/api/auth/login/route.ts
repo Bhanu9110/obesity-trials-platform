@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, SESSION_DAYS, authConfigured, checkCredentials, createSession } from "@/lib/auth";
 import { FAILURE_WINDOW_MIN, logAccess, tooManyFailures } from "@/lib/access-log";
-import { guestLogin, guestSessionUntil } from "@/lib/guests";
+import { sessionUntil, siteLogin } from "@/lib/site-users";
 
 export const dynamic = "force-dynamic";
 
@@ -28,16 +28,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Members (AUTH_USERS) first, then temporary guest logins (Admin → Guest access).
+  // Owners (AUTH_USERS) first, then logins made on the Admin page (Users & access).
   let user = await checkCredentials(username, password);
   let until: number | undefined;
   let pages: string[] | undefined;
   if (!user) {
-    const guest = await guestLogin(username, password).catch(() => null);
-    if (guest) {
-      user = guest.user;
-      until = guestSessionUntil(guest.expiresAt);
-      pages = guest.pages;
+    const site = await siteLogin(username, password).catch(() => null);
+    if (site) {
+      user = site.user;
+      until = sessionUntil(site.role, site.expiresAt);
+      pages = site.role === "guest" ? site.pages : undefined;
     }
   }
   if (!user) {
