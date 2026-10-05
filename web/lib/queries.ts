@@ -557,3 +557,62 @@ export async function updateFailure(nctId: string, action: "requeue" | "dismiss"
       );
   return rows.length > 0;
 }
+
+// --------------------------------------------------------------------------- #
+// Trial page: what this database holds about one trial
+// --------------------------------------------------------------------------- #
+export interface StoredTrial {
+  nct_id: string;
+  phase: string | null;
+  sponsor: string | null;
+  lead_sponsor_class: string | null;
+  conditions: string[];
+  interventions: string[];
+  countries: string[];
+  continents: string[];
+  obesity_class: string;
+  obesity_reason: string | null;
+  title: string | null;
+  source_updated_at: string | null;
+  first_seen_at: string | null;
+  last_seen_at: string | null;
+  products: { slug: string; name: string }[];
+  quality: { score: number; issues: { code: string; severity: string; message: string; detail?: string[] }[] } | null;
+}
+
+export interface TrialRecord {
+  stored: StoredTrial | null;
+  changes: ChangeItem[];
+}
+
+/** Stored fields, drugs, quality and change history of one trial (stored or removed). */
+export async function trialRecord(nctId: string): Promise<TrialRecord> {
+  const tz = displayTimeZone();
+  const [rows, changes] = await Promise.all([
+    query<StoredTrial>(
+      `SELECT t.nct_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions, t.interventions, t.countries,
+              t.continents, t.obesity_class, t.obesity_reason,
+              r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
+              to_char(t.source_updated_at, 'YYYY-MM-DD') AS source_updated_at,
+              to_char(t.first_seen_at AT TIME ZONE $2, 'YYYY-MM-DD HH24:MI') AS first_seen_at,
+              to_char(t.last_seen_at AT TIME ZONE $2, 'YYYY-MM-DD HH24:MI') AS last_seen_at,
+              ${PRODUCTS_JSON} AS products,
+              (SELECT json_build_object('score', q.score::float, 'issues', q.issues)
+                 FROM trial_quality q WHERE q.trial_id = t.nct_id) AS quality
+         FROM trials t
+         LEFT JOIN raw_trials r ON r.source = 'CTGOV' AND r.source_id = t.nct_id
+        WHERE t.nct_id = $1`,
+      [nctId, tz],
+    ),
+    query<ChangeItem>(
+      `SELECT c.id, c.trial_id, to_char(c.changed_at AT TIME ZONE $2, 'YYYY-MM-DD HH24:MI') AS changed_at,
+              c.change, c.field, c.old_value, c.new_value, NULL::text AS sponsor, NULL::text AS obesity_class
+         FROM trial_changes c
+        WHERE c.trial_id = $1
+        ORDER BY c.changed_at DESC, c.id DESC
+        LIMIT 100`,
+      [nctId, tz],
+    ),
+  ]);
+  return { stored: rows[0] ?? null, changes };
+}

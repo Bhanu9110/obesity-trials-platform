@@ -1,26 +1,21 @@
 import Link from "next/link";
-import { ctgovUrl, formatPhase, sortContinents } from "@/lib/format";
+import { formatPhase, sortContinents, trialUrl } from "@/lib/format";
 import type { ProductLink } from "@/lib/types";
 
 export function Dash() {
   return <span className="text-slate-300">—</span>;
 }
 
-/** NCT ID that opens the study on ClinicalTrials.gov in a new tab. */
+/** NCT ID that opens the full trial page on this website. */
 export function NctLink({ id }: { id: string }) {
   return (
-    <a
-      href={ctgovUrl(id)}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Open on ClinicalTrials.gov"
-      className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-xs font-medium text-brand-600 hover:underline"
+    <Link
+      href={trialUrl(id)}
+      title="Open full trial details"
+      className="whitespace-nowrap font-mono text-xs font-medium text-brand-600 hover:underline"
     >
       {id}
-      <svg aria-hidden viewBox="0 0 12 12" className="h-2.5 w-2.5 opacity-70">
-        <path d="M4.5 2H10v5.5M10 2 3 9" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      </svg>
-    </a>
+    </Link>
   );
 }
 

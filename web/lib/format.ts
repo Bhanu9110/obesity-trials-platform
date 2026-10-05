@@ -39,6 +39,12 @@ export function highestPhase(phases: (string | null)[]): string {
   return best ? formatPhase(best) : "—";
 }
 
+/** The trial page on this website. */
+export function trialUrl(nctId: string): string {
+  return `/trials/${encodeURIComponent(nctId)}`;
+}
+
+/** The original registry record (cited as the source on the trial page). */
 export function ctgovUrl(nctId: string): string {
   return `https://clinicaltrials.gov/study/${encodeURIComponent(nctId)}`;
 }

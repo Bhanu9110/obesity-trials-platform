@@ -13,16 +13,24 @@ Only what the drug database needs — per trial:
 
 | Field | Source |
 |---|---|
-| **Trial ID** (NCT…) | CT.gov — clicking it opens the study on clinicaltrials.gov |
+| **Trial ID** (NCT…) | CT.gov — clicking it opens the full trial page on this website |
 | **Intervention** | drug / biological / combination-product interventions, grouped into **drugs** |
 | **Phase** | CT.gov phases |
 | **Sponsor** | lead sponsor (+ sponsor class for the Industry / Government / Academic filter) |
 | **Indication** | CT.gov conditions |
 | **Location** | site countries → **continents** |
 
-Everything else (titles, eligibility, outcomes, arms, sites, raw payloads, NLP
-embeddings, audit history) is **not** stored — the NCT ID links to the full record
-on ClinicalTrials.gov.
+Everything else (descriptions, eligibility, outcomes, arms, sites, results…) is
+**not** stored. Clicking a Trial ID opens the **trial page** (`/trials/NCT…`), which
+reads the complete record from the ClinicalTrials.gov API when it is opened (cached
+on the server for 6 hours) and shows every section the registry shows — study
+overview, participation criteria, study plan and arms, outcome measures, sites and
+contacts, sponsors and investigators, publications, record dates, IPD sharing,
+documents, MeSH terms and, when posted, the full **results** (participant flow,
+baseline, outcome measures with statistical analyses, adverse events). It also shows
+what this database holds about the trial (drugs, classification and why, data
+quality, change history). If the registry cannot be reached, the page falls back to
+the stored fields. Optional settings: `CTGOV_API_BASE`, `CTGOV_CACHE_SECONDS`.
 
 Scope: CT.gov search `obesity OR overweight OR obese OR "weight management" OR "weight loss"
 OR "weight reduction" OR adiposity`, start date ≥ 2000, trials with a **drug, biological or
@@ -70,7 +78,7 @@ Click a drug anywhere to open its page:
 - **Product information** — Modality, Phase, MOA, ROA, Approved (Yes/No),
   Approval date, Sponsor, Class. These start **blank** and are filled in manually
   with the *Edit* button. The daily sync never overwrites them.
-- **Trials** — every trial of the drug with its Trial ID (→ clinicaltrials.gov),
+- **Trials** — every trial of the drug with its Trial ID (→ trial page),
   phase, sponsor, indication and continents.
 - **Merge** — if a drug is a duplicate (registry typo, code name, brand name),
   *“Duplicate of another drug? Merge it…”* moves its trials into the right drug.

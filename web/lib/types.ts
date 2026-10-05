@@ -1,6 +1,6 @@
 // Lean data model: per trial only phase, sponsor, indication, interventions
-// (as drug products) and location (continents). Full study details live on
-// clinicaltrials.gov — the NCT ID links there.
+// (as drug products) and location (continents). The NCT ID opens the trial page
+// (/trials/NCT…), which shows the full registry record (lib/ctgov.ts).
 
 export interface ProductLink {
   slug: string;

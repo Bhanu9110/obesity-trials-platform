@@ -154,7 +154,7 @@ Open the file in Notepad, copy everything, and add it as `DATABASE_CA_CERT` in V
 
 - **On the website:** the **Data quality** tab — average score, how many trials are clean /
   need review, every issue type with counts (click one to filter), and the affected trials
-  with links to ClinicalTrials.gov.
+  with links to each trial page.
 - **In Supabase:** *SQL Editor* → run
   ```sql
   SELECT * FROM data_quality_summary ORDER BY trials DESC;

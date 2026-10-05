@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isQualityBand, qualityTrials } from "@/lib/queries";
 import { QUALITY_LABELS } from "@/lib/quality-labels";
-import { formatPhase } from "@/lib/format";
+import { formatPhase, trialUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
   const q = (sp.get("q") ?? "").trim().slice(0, 100) || undefined;
   try {
     const { items } = await qualityTrials({ code, band, q }, 1, 0);
+    const origin = req.nextUrl.origin;
     // Cells starting with = + - @ are prefixed so Excel never runs them as formulas.
     const cell = (v: unknown) => {
       let s = v == null ? "" : String(v);
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
     const lines = items.map((t) =>
       [
         t.nct_id,
-        `https://clinicaltrials.gov/study/${t.nct_id}`,
+        `${origin}${trialUrl(t.nct_id)}`,
         t.score.toFixed(2),
         t.issues.map((i) => `${i.severity.toUpperCase()}: ${QUALITY_LABELS[i.code] ?? i.message}`).join("; "),
         t.issues.filter((i) => i.detail?.length).map((i) => `${QUALITY_LABELS[i.code] ?? i.code}: ${i.detail!.join(", ")}`).join("; "),
