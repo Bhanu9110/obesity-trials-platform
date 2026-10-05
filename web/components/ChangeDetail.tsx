@@ -1,5 +1,6 @@
 import type { ChangeItem } from "@/lib/queries";
 import { OBESITY_CLASSES, formatPhase } from "@/lib/format";
+import { humanize } from "@/lib/ctgov";
 
 // How one tracked change (trial_changes row) is shown — Changes page and trial page.
 
@@ -17,12 +18,14 @@ const FIELD_LABEL: Record<string, string> = {
   interventions: "Interventions",
   countries: "Countries",
   obesity_class: "Obesity class",
+  overall_status: "Status",
 };
 
 function show(field: string | null, v: unknown): string {
   if (v == null) return "—";
   if (field === "phase" && typeof v === "string") return formatPhase(v);
   if (field === "obesity_class" && typeof v === "string") return OBESITY_CLASSES[v]?.label ?? v;
+  if (field === "overall_status" && typeof v === "string") return humanize(v);
   if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
   return String(v);
 }

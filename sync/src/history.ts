@@ -19,7 +19,9 @@ export interface ChangeRow {
 }
 
 /** Registry fields whose changes are tracked. */
-export const TRACKED_FIELDS = ["phase", "sponsor", "lead_sponsor_class", "conditions", "interventions", "countries"] as const;
+export const TRACKED_FIELDS = ["phase", "sponsor", "lead_sponsor_class", "conditions", "interventions", "countries", "overall_status"] as const;
+/** Fields added later: the first time they are filled in is not a change. */
+const FILL_ONLY = new Set<string>(["overall_status"]);
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
@@ -27,6 +29,7 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stri
 export function diffMapped(prev: MappedTrial, next: MappedTrial): ChangeRow[] {
   const rows: ChangeRow[] = [];
   for (const f of TRACKED_FIELDS) {
+    if (FILL_ONLY.has(f) && prev[f] == null) continue;
     if (!same(prev[f], next[f])) {
       rows.push({ trial_id: next.nct_id, change: "updated", field: f, old_value: prev[f] ?? null, new_value: next[f] ?? null });
     }

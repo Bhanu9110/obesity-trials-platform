@@ -16,6 +16,11 @@ export interface ValidationResult {
 
 export const NCT_RE = /^NCT\d{8}$/;
 
+const STATUSES = new Set([
+  "NOT_YET_RECRUITING", "RECRUITING", "ENROLLING_BY_INVITATION", "ACTIVE_NOT_RECRUITING", "SUSPENDED",
+  "TERMINATED", "COMPLETED", "WITHDRAWN", "UNKNOWN", "AVAILABLE", "NO_LONGER_AVAILABLE",
+  "TEMPORARILY_NOT_AVAILABLE", "APPROVED_FOR_MARKETING", "WITHHELD",
+]);
 const PHASES = new Set(["EARLY_PHASE1", "PHASE1", "PHASE2", "PHASE3", "PHASE4", "NA"]);
 const SPONSOR_CLASSES = new Set([
   "INDUSTRY", "NIH", "FED", "OTHER_GOV", "INDIV", "NETWORK", "OTHER", "UNKNOWN", "AMBIG",
@@ -108,6 +113,20 @@ export function validateMapped(m: MappedTrial, today: Date = new Date()): Valida
     }
   }
 
+  // Recruitment status: a known CT.gov value, else dropped.
+  let status = m.overall_status ? cleanText(m.overall_status).toUpperCase() : null;
+  if (status && !STATUSES.has(status)) {
+    warnings.push(`Unknown recruitment status "${status.slice(0, 40)}" dropped.`);
+    status = null;
+  }
+  const startDate = m.start_date && /^\d{4}-\d{2}(-\d{2})?$/.test(m.start_date) && m.start_date >= "1950" ? m.start_date : null;
+  if (m.start_date && !startDate) warnings.push(`Invalid start date "${String(m.start_date).slice(0, 20)}" ignored.`);
+  let enrollment = m.enrollment;
+  if (enrollment != null && (!Number.isInteger(enrollment) || enrollment < 0 || enrollment > 10_000_000)) {
+    warnings.push(`Implausible enrollment ${enrollment} ignored.`);
+    enrollment = null;
+  }
+
   const value: MappedTrial = {
     nct_id: nct,
     phase,
@@ -116,6 +135,9 @@ export function validateMapped(m: MappedTrial, today: Date = new Date()): Valida
     conditions: cleanList(m.conditions, LIMITS.conditions, "condition", warnings),
     interventions: cleanList(m.interventions, LIMITS.interventions, "intervention", warnings),
     countries: cleanList(m.countries, LIMITS.countries, "country", warnings).sort((a, b) => a.localeCompare(b)),
+    overall_status: status || null,
+    start_date: startDate,
+    enrollment: enrollment ?? null,
     source_updated_at: updated,
   };
   return { value, errors, warnings };

@@ -4,15 +4,15 @@ import type { RawStudy } from "./ctgov-client.js";
 // Version of the CT.gov parser (trimPayload + mapStudy). Bump it whenever the
 // mapping changes: stored raw records with an older version are re-parsed from
 // raw_trials automatically — no re-download needed.
-export const PARSER_VERSION = "ctgov-2.1"; // 2.1: validation + clean-up of every record
+export const PARSER_VERSION = "ctgov-2.2"; // 2.1: validation + clean-up; 2.2: status, start date, enrollment
 
 // Intervention types that count as drug PRODUCTS. Behavioural, device, procedure,
 // dietary-supplement and "other" interventions are not stored.
 export const PRODUCT_INTERVENTION_TYPES = new Set(["DRUG", "BIOLOGICAL", "COMBINATION_PRODUCT"]);
 
 // The only fields kept per trial: phase, sponsor, indication, interventions,
-// location (countries; continents are derived in the database), plus the
-// registry's own last-update date.
+// location (countries; continents are derived in the database), recruitment
+// status, start date and enrollment, plus the registry's own last-update date.
 export interface MappedTrial {
   nct_id: string;
   phase: string | null;              // "PHASE2" or "PHASE2, PHASE3"
@@ -21,6 +21,9 @@ export interface MappedTrial {
   conditions: string[];              // indication(s)
   interventions: string[];           // drug intervention names as registered
   countries: string[];               // distinct site countries
+  overall_status: string | null;     // RECRUITING | COMPLETED | ... (CT.gov overall status)
+  start_date: string | null;         // as registered: YYYY-MM or YYYY-MM-DD
+  enrollment: number | null;         // participants (actual or estimated)
   source_updated_at: string | null;  // CT.gov "last update posted" date, YYYY-MM-DD
 }
 
@@ -56,13 +59,22 @@ export function trimPayload(study: RawStudy): RawStudy {
     protocolSection: {
       identificationModule: { nctId: pick(p.identificationModule?.nctId), briefTitle: pick(p.identificationModule?.briefTitle) },
       statusModule: {
+        overallStatus: pick(p.statusModule?.overallStatus),
+        startDateStruct: pick(
+          p.statusModule?.startDateStruct?.date !== undefined ? { date: p.statusModule.startDateStruct.date } : undefined,
+        ),
         lastUpdatePostDateStruct: pick(
           p.statusModule?.lastUpdatePostDateStruct?.date !== undefined
             ? { date: p.statusModule.lastUpdatePostDateStruct.date }
             : undefined,
         ),
       },
-      designModule: { phases: pick(p.designModule?.phases) },
+      designModule: {
+        phases: pick(p.designModule?.phases),
+        enrollmentInfo: pick(
+          p.designModule?.enrollmentInfo?.count !== undefined ? { count: p.designModule.enrollmentInfo.count } : undefined,
+        ),
+      },
       sponsorCollaboratorsModule: {
         leadSponsor: pick(
           p.sponsorCollaboratorsModule?.leadSponsor
@@ -131,6 +143,9 @@ export function mapStudy(study: RawStudy): MappedTrial {
         .map((iv: any) => iv?.name),
     ),
     countries: uniqTrimmed((locMod.locations ?? []).map((l: any) => l?.country), true),
+    overall_status: typeof p.statusModule?.overallStatus === "string" ? p.statusModule.overallStatus : null,
+    start_date: /^\d{4}(-\d{2}){0,2}$/.test(p.statusModule?.startDateStruct?.date ?? "") ? p.statusModule.startDateStruct.date : null,
+    enrollment: Number.isInteger(design.enrollmentInfo?.count) && design.enrollmentInfo.count >= 0 ? design.enrollmentInfo.count : null,
     source_updated_at: normalizeDate(p.statusModule?.lastUpdatePostDateStruct?.date),
   };
 }

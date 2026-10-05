@@ -15,7 +15,10 @@ function study(
   return {
     protocolSection: {
       identificationModule: { nctId: nct, briefTitle: "ignored" },
-      statusModule: { overallStatus: "RECRUITING", lastUpdatePostDateStruct: { date: over.updated ?? "2026-09-15", type: "ACTUAL" } },
+      statusModule: {
+        overallStatus: "RECRUITING", whyStopped: "not ingested", startDateStruct: { date: "2025-03", type: "ACTUAL" },
+        lastUpdatePostDateStruct: { date: over.updated ?? "2026-09-15", type: "ACTUAL" },
+      },
       sponsorCollaboratorsModule: {
         leadSponsor: over.sponsor === null ? undefined : { name: over.sponsor ?? "Test Pharma Inc.", class: "INDUSTRY" },
       },
@@ -40,8 +43,12 @@ function study(
 test("mapStudy keeps only the lean fields", () => {
   const m = mapStudy(study("NCT99999001"));
   assert.deepEqual(Object.keys(m).sort(), [
-    "conditions", "countries", "interventions", "lead_sponsor_class", "nct_id", "phase", "source_updated_at", "sponsor",
+    "conditions", "countries", "enrollment", "interventions", "lead_sponsor_class", "nct_id", "overall_status", "phase",
+    "source_updated_at", "sponsor", "start_date",
   ]);
+  assert.equal(m.overall_status, "RECRUITING");
+  assert.equal(m.start_date, "2025-03");
+  assert.equal(m.enrollment, 400);
   assert.equal(m.source_updated_at, "2026-09-15");
   assert.equal(m.phase, "PHASE3");
   assert.equal(m.sponsor, "Test Pharma Inc.");
@@ -161,7 +168,8 @@ test("content hash is stable: key order and full vs fields-limited payload", () 
   const trimmed = trimPayload(full);
   // Fields we do not ingest are dropped (the brief title is kept: industry classification)...
   assert.equal((trimmed as any).protocolSection.identificationModule.briefTitle, "ignored");
-  assert.equal((trimmed as any).protocolSection.statusModule.overallStatus, undefined);
+  assert.equal((trimmed as any).protocolSection.statusModule.whyStopped, undefined);
+  assert.equal((trimmed as any).protocolSection.statusModule.startDateStruct.type, undefined);
   // ...and the trimmed copy maps to exactly the same trial (re-parse parity).
   assert.deepEqual(mapStudy(trimmed), mapStudy(full));
   // A re-ordered object hashes identically.
@@ -206,7 +214,7 @@ test("lineage: raw_trials, trial_sources, timestamps, parser version, change det
   assert.equal(raw1.parser_version, PARSER_VERSION);
   assert.equal(raw1.content_hash, contentHash(trimPayload(study(id))));
   assert.equal(raw1.payload.protocolSection.identificationModule.nctId, id);
-  assert.equal(raw1.payload.protocolSection.statusModule.overallStatus, undefined); // trimmed
+  assert.equal(raw1.payload.protocolSection.statusModule.whyStopped, undefined); // trimmed
   const src = (await pool.query("SELECT * FROM trial_sources WHERE source='CTGOV' AND source_id=$1", [id])).rows[0];
   assert.equal(src.trial_id, id);
   assert.equal(src.source_url, `https://clinicaltrials.gov/study/${id}`);

@@ -63,3 +63,30 @@ export const OBESITY_CLASSES: Record<string, { label: string; short: string; bad
   unrelated: { label: "Not obesity", short: "Not obesity", badge: "bg-slate-100 text-slate-600" },
 };
 export const OBESITY_CLASS_ORDER = ["primary", "comorbidity", "weight_related", "unrelated"];
+
+/** CT.gov recruitment status -> label and badge colours (drug page, trial lists). */
+export const TRIAL_STATUS: Record<string, { label: string; badge: string; active: boolean }> = {
+  RECRUITING: { label: "Recruiting", badge: "bg-emerald-50 text-emerald-700", active: true },
+  NOT_YET_RECRUITING: { label: "Not yet recruiting", badge: "bg-sky-50 text-sky-700", active: true },
+  ENROLLING_BY_INVITATION: { label: "Enrolling by invitation", badge: "bg-emerald-50 text-emerald-700", active: true },
+  ACTIVE_NOT_RECRUITING: { label: "Active, not recruiting", badge: "bg-amber-50 text-amber-700", active: true },
+  COMPLETED: { label: "Completed", badge: "bg-slate-100 text-slate-600", active: false },
+  SUSPENDED: { label: "Suspended", badge: "bg-orange-50 text-orange-700", active: false },
+  TERMINATED: { label: "Terminated", badge: "bg-rose-50 text-rose-700", active: false },
+  WITHDRAWN: { label: "Withdrawn", badge: "bg-rose-50 text-rose-700", active: false },
+  UNKNOWN: { label: "Unknown status", badge: "bg-slate-100 text-slate-500", active: false },
+};
+export const TRIAL_STATUS_ORDER = Object.keys(TRIAL_STATUS);
+
+export function statusInfo(s: string | null | undefined) {
+  if (!s) return null;
+  return TRIAL_STATUS[s] ?? { label: s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, " "), badge: "bg-slate-100 text-slate-600", active: false };
+}
+
+/** "2025-03" / "2025-03-14" -> "Mar 2025". */
+export function formatMonthYear(d: string | null | undefined): string | null {
+  const m = d?.match(/^(\d{4})-(\d{2})/);
+  if (!m) return d?.match(/^\d{4}$/) ? d : null;
+  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(m[2]) - 1];
+  return mon ? `${mon} ${m[1]}` : m[1];
+}

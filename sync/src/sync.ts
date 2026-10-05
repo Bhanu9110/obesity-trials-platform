@@ -217,16 +217,19 @@ async function writeTrialsBatch(
 
   await c.query(
     `INSERT INTO trials (nct_id, phase, sponsor, lead_sponsor_class, conditions, interventions,
-                         countries, continents, source_updated_at, is_active, record_hash, version,
+                         countries, continents, overall_status, start_date, enrollment,
+                         source_updated_at, is_active, record_hash, version,
                          parser_version, last_run_id, first_seen_at, last_seen_at, last_changed_at,
                          obesity_class, obesity_reason, obesity_terms, classifier_version)
      SELECT x.nct_id, x.phase, x.sponsor, x.lead_sponsor_class, x.conditions, x.interventions,
-            x.countries, continents_of(x.countries), x.source_updated_at, true, x.record_hash, 1,
+            x.countries, continents_of(x.countries), x.overall_status, x.start_date, x.enrollment,
+            x.source_updated_at, true, x.record_hash, 1,
             $2, $3, now(), now(), now(),
             x.obesity_class, x.obesity_reason, x.obesity_terms, $4
        FROM jsonb_to_recordset($1::jsonb)
          AS x(nct_id text, phase text, sponsor text, lead_sponsor_class text, conditions text[],
-              interventions text[], countries text[], source_updated_at date, record_hash text,
+              interventions text[], countries text[], overall_status text, start_date text, enrollment int,
+              source_updated_at date, record_hash text,
               obesity_class text, obesity_reason text, obesity_terms text[])
      ON CONFLICT (nct_id) DO UPDATE SET
         phase              = EXCLUDED.phase,
@@ -236,6 +239,9 @@ async function writeTrialsBatch(
         interventions      = EXCLUDED.interventions,
         countries          = EXCLUDED.countries,
         continents         = EXCLUDED.continents,
+        overall_status     = EXCLUDED.overall_status,
+        start_date         = EXCLUDED.start_date,
+        enrollment         = EXCLUDED.enrollment,
         source_updated_at  = EXCLUDED.source_updated_at,
         is_active          = true,
         parser_version     = EXCLUDED.parser_version,
@@ -255,6 +261,7 @@ async function writeTrialsBatch(
       JSON.stringify(derived.map(({ m, kept, cls }) => ({
         nct_id: m.nct_id, phase: m.phase, sponsor: m.sponsor, lead_sponsor_class: m.lead_sponsor_class,
         conditions: m.conditions, interventions: kept, countries: m.countries,
+        overall_status: m.overall_status, start_date: m.start_date, enrollment: m.enrollment,
         source_updated_at: m.source_updated_at, record_hash: contentHash(m),
         obesity_class: cls.class, obesity_reason: cls.reason, obesity_terms: cls.terms,
       }))),
@@ -799,6 +806,8 @@ export function fetchScopeKey(): string {
     interventionTypes: [...config.ctgov.interventionTypes].sort(),
     startDateFrom: config.ctgov.startDateFrom || null,
     statuses: [...config.ctgov.statuses].sort(),
+    // the stored fields too: a new field (status, start date…) needs one re-download
+    fields: [...config.ctgov.fields].sort(),
   });
 }
 
@@ -871,7 +880,7 @@ export async function upgradeIfNeeded(log: (msg: string, obj?: unknown) => void)
     return true;
   }
   if ((await getMeta("fetch_scope")) !== fetchScopeKey()) {
-    log("the CT.gov search changed (wider terms / intervention types) — full sync to pick up the extra trials", JSON.parse(fetchScopeKey()));
+    log("the CT.gov search or the stored fields changed — full sync to download every trial again", JSON.parse(fetchScopeKey()));
     log("full sync complete", await runSync(true));
     log("classification", await reclassifyAll());
     return true;

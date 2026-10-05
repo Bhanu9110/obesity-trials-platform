@@ -57,10 +57,15 @@ export interface Product extends ProductInfo {
 
 export interface ProductTrial {
   nct_id: string;
+  title: string | null;              // registry brief title
   phase: string | null;
   sponsor: string | null;
+  lead_sponsor_class: string | null; // INDUSTRY | NIH | OTHER ...
   indication: string[];
   continents: string[];
+  overall_status: string | null;     // RECRUITING | COMPLETED | ...
+  start_date: string | null;         // YYYY-MM or YYYY-MM-DD
+  enrollment: number | null;
   obesity_class: string;
   obesity_reason: string | null;
 }

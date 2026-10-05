@@ -14,15 +14,22 @@ import { pool } from "./db.js";
 
 function study(
   nct: string,
-  over: { conditions?: string[]; drugs?: string[]; countries?: string[]; phase?: string[]; updated?: string; sponsor?: string; cls?: string; title?: string } = {},
+  over: {
+    conditions?: string[]; drugs?: string[]; countries?: string[]; phase?: string[]; updated?: string; sponsor?: string;
+    cls?: string; title?: string; status?: string; start?: string; enrollment?: number;
+  } = {},
 ) {
   return {
     protocolSection: {
       identificationModule: { nctId: nct, briefTitle: over.title ?? "A study" },
-      statusModule: { lastUpdatePostDateStruct: { date: over.updated ?? "2026-09-15" } },
+      statusModule: {
+        lastUpdatePostDateStruct: { date: over.updated ?? "2026-09-15" },
+        ...(over.status ? { overallStatus: over.status } : {}),
+        ...(over.start ? { startDateStruct: { date: over.start } } : {}),
+      },
       sponsorCollaboratorsModule: { leadSponsor: { name: over.sponsor ?? "Phase Two University", class: over.cls ?? "OTHER" } },
       conditionsModule: { conditions: over.conditions ?? ["Obesity"] },
-      designModule: { phases: over.phase ?? ["PHASE2"] },
+      designModule: { phases: over.phase ?? ["PHASE2"], ...(over.enrollment != null ? { enrollmentInfo: { count: over.enrollment } } : {}) },
       armsInterventionsModule: { interventions: (over.drugs ?? ["Tirzepatide"]).map((name) => ({ type: "DRUG", name })) },
       contactsLocationsModule: { locations: (over.countries ?? ["India"]).map((country) => ({ country })) },
     },
@@ -266,6 +273,25 @@ test("retry queue: due records are re-fetched by NCT ID", async () => {
 // --------------------------------------------------------------------------- #
 // Change history
 // --------------------------------------------------------------------------- #
+test("status, start date and enrollment are stored; status changes tracked, first fill is not", async () => {
+  const id = "NCT88880025";
+  await clean([id]);
+  const changes = async () => (await pool.query(
+    "SELECT change, field, old_value, new_value FROM trial_changes WHERE trial_id = $1 ORDER BY id", [id])).rows;
+  await runSyncForStudies([study(id)]);                         // stored before the new fields existed
+  await runSyncForStudies([study(id, { status: "RECRUITING", start: "2025-03", enrollment: 240 })]);
+  const row = async () => (await pool.query("SELECT overall_status, start_date, enrollment FROM trials WHERE nct_id = $1", [id])).rows[0];
+  assert.deepEqual(await row(), { overall_status: "RECRUITING", start_date: "2025-03", enrollment: 240 });
+  assert.deepEqual((await changes()).map((c) => c.change), ["added"]);   // filling in is not a change
+  await runSyncForStudies([study(id, { status: "COMPLETED", start: "2025-03", enrollment: 236 })]);
+  assert.deepEqual((await changes()).slice(1).map((c) => [c.field, c.old_value, c.new_value]), [["overall_status", "RECRUITING", "COMPLETED"]]);
+  // validation drops nonsense
+  const v = validateMapped({ ...mapStudy(study(id)), overall_status: "dancing", start_date: "soon", enrollment: -5 });
+  assert.deepEqual([v.value.overall_status, v.value.start_date, v.value.enrollment], [null, null, null]);
+  assert.equal(v.warnings.length, 3);
+  await clean([id]);
+});
+
 test("change history: added, field updates, reclassified, removed — no noise", async () => {
   const id = "NCT88880021";
   await clean([id]);

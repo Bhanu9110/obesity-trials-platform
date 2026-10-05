@@ -164,9 +164,17 @@ export async function getProduct(slug: string): Promise<Product | null> {
 
 export async function getProductTrials(productId: number): Promise<ProductTrial[]> {
   const rows = await query<ProductTrial>(
-    `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents,
-            t.obesity_class, t.obesity_reason
-       FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+    // Status / start date / enrollment are read via to_jsonb so the page keeps
+    // working in the minute between a deploy and migration 0010.
+    `SELECT t.nct_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions AS indication, t.continents,
+            t.obesity_class, t.obesity_reason,
+            r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
+            to_jsonb(t) ->> 'overall_status' AS overall_status,
+            to_jsonb(t) ->> 'start_date' AS start_date,
+            (to_jsonb(t) ->> 'enrollment')::int AS enrollment
+       FROM trial_products tp
+       JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+       LEFT JOIN raw_trials r ON r.source = 'CTGOV' AND r.source_id = t.nct_id
       WHERE tp.product_id = $1`,
     [productId],
   );

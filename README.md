@@ -19,6 +19,7 @@ Only what the drug database needs — per trial:
 | **Sponsor** | lead sponsor (+ sponsor class for the Industry / Government / Academic filter) |
 | **Indication** | CT.gov conditions |
 | **Location** | site countries → **continents** |
+| **Status, start, participants** | CT.gov overall status, start date, enrollment (shown on drug pages) |
 
 Everything else (descriptions, eligibility, outcomes, arms, sites, results…) is
 **not** stored. Clicking a Trial ID opens the **trial page** (`/trials/NCT…`), which
@@ -78,8 +79,12 @@ Click a drug anywhere to open its page:
 - **Product information** — Modality, Phase, MOA, ROA, Approved (Yes/No),
   Approval date, Sponsor, Class. These start **blank** and are filled in manually
   with the *Edit* button. The daily sync never overwrites them.
-- **Trials** — every trial of the drug with its Trial ID (→ trial page),
-  phase, sponsor, indication and continents.
+- **Trials** — a clickable **phase bar** (trial count per phase), a summary line
+  (recruiting / active, industry, participants, start years), one toolbar (search,
+  Industry / Non-industry switch, status, continent, sort) and the trials grouped by
+  phase. Each trial shows its title and recruitment status, then NCT ID, sponsor (with
+  an Industry tag), start date, participants and continents; conditions other than
+  plain obesity are listed under "Also". Clicking a trial opens its trial page.
 - **Merge** — if a drug is a duplicate (registry typo, code name, brand name),
   *“Duplicate of another drug? Merge it…”* moves its trials into the right drug.
   Merges are remembered (table `product_aliases`) so future syncs keep them.

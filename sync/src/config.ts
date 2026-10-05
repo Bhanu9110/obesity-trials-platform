@@ -37,7 +37,7 @@ export const config = {
     // Set CTGOV_FIELDS="" to download full records instead. If the API rejects the
     // list, the client automatically falls back to full records.
     fields: (process.env.CTGOV_FIELDS ??
-      "NCTId,BriefTitle,LastUpdatePostDate,Phase,LeadSponsorName,LeadSponsorClass,Condition,InterventionType,InterventionName,LocationCountry")
+      "NCTId,BriefTitle,OverallStatus,StartDate,EnrollmentCount,LastUpdatePostDate,Phase,LeadSponsorName,LeadSponsorClass,Condition,InterventionType,InterventionName,LocationCountry")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean),
