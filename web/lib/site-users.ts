@@ -96,6 +96,7 @@ export async function createUser(opts: {
 export type UserAction =
   | { action: "revoke" }
   | { action: "extend"; minutes: number }
+  | { action: "set_end"; until: string }
   | { action: "no_end" }
   | { action: "pages"; pages: unknown }
   | { action: "role"; role: Role }
@@ -108,17 +109,34 @@ export async function updateUser(id: number, a: UserAction): Promise<{ user: Sit
   let password: string | undefined;
   switch (a.action) {
     case "revoke":
-      rows = await query<SiteUser>(`UPDATE site_users SET revoked_at = now() WHERE id = $1 RETURNING ${COLS}`, [id]);
+      // Ending access throws away the time that was left, so giving time later starts from now.
+      rows = await query<SiteUser>(
+        `UPDATE site_users SET revoked_at = now(), expires_at = least(expires_at, now()) WHERE id = $1 RETURNING ${COLS}`, [id],
+      );
       break;
     case "extend":
+      // Active: added on top of the time left. Ended (revoked or run out): counted from now.
       if (!validMinutes(a.minutes)) throw new UserError("Choose how much time to add.");
       rows = await query<SiteUser>(
-        `UPDATE site_users SET revoked_at = NULL,
-                expires_at = greatest(coalesce(expires_at, now()), now()) + make_interval(mins => $2::int)
+        `UPDATE site_users
+            SET expires_at = CASE WHEN revoked_at IS NOT NULL OR expires_at IS NULL OR expires_at <= now() THEN now()
+                                  ELSE expires_at END + make_interval(mins => $2::int),
+                revoked_at = NULL
           WHERE id = $1 RETURNING ${COLS}`,
         [id, a.minutes],
       );
       break;
+    case "set_end": {
+      // An exact end time, e.g. "until Friday 6 pm".
+      const t = Date.parse(a.until);
+      if (isNaN(t)) throw new UserError("Choose a date and time.");
+      if (t <= Date.now() + 60_000) throw new UserError("The end time must be in the future.");
+      if (t > Date.now() + 366 * 86_400_000) throw new UserError("Choose an end time within a year.");
+      rows = await query<SiteUser>(
+        `UPDATE site_users SET expires_at = $2, revoked_at = NULL WHERE id = $1 RETURNING ${COLS}`, [id, new Date(t)],
+      );
+      break;
+    }
     case "no_end":
       rows = await query<SiteUser>(
         `UPDATE site_users SET expires_at = NULL, revoked_at = NULL WHERE id = $1 AND role = 'member' RETURNING ${COLS}`, [id],

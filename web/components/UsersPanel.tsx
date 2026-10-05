@@ -151,8 +151,9 @@ export default function UsersPanel() {
     ended: users?.filter((u) => u.status !== "active").length ?? 0,
   }), [users]);
 
+  // The login you are managing stays in view even when ending or reopening it moves it to the other tab.
   const shown = (users ?? []).filter((u) =>
-    (view === "all" || (view === "active" ? u.status === "active" : u.status !== "active")) &&
+    (u.id === open || view === "all" || (view === "active" ? u.status === "active" : u.status !== "active")) &&
     (!q || `${u.username} ${u.label}`.toLowerCase().includes(q.toLowerCase())),
   );
 
@@ -400,6 +401,72 @@ function UserRows({
   );
 }
 
+/** "2026-10-05T18:30" for a datetime-local input, in the viewer's time zone. */
+function localInput(ms: number): string {
+  const d = new Date(ms - new Date(ms).getTimezoneOffset() * 60_000);
+  return d.toISOString().slice(0, 16);
+}
+
+function AccessTime({
+  u, busy, patch,
+}: { u: SiteUser; busy: boolean; patch: (body: Record<string, unknown>, msg?: string) => Promise<void> }) {
+  const active = u.status === "active";
+  const timed = active && Boolean(u.expires_at);
+  // Active with an end date: time is added on top. Otherwise it is counted from now.
+  const base = timed ? new Date(u.expires_at!).getTime() : Date.now();
+  const [until, setUntil] = useState(() => localInput(base + 86_400_000));
+  // Suggest "a day after the current end" (or a day from now once access has ended).
+  useEffect(() => { setUntil(localInput(base + 86_400_000)); }, [u.status, u.expires_at]);
+  const endText = (ms: number) => fmt(new Date(ms).toISOString());
+
+  return (
+    <Card title="Access time">
+      <div className={`mb-3 rounded-md px-3 py-2 text-sm ${active ? "bg-emerald-50 text-emerald-900" : "bg-slate-100 text-slate-700"}`}>
+        {u.status === "revoked" ? <>Access ended {fmt(u.revoked_at)}.</>
+          : u.status === "expired" ? <>Access ran out {fmt(u.expires_at)}.</>
+          : u.expires_at ? <>Active until <b>{fmt(u.expires_at)}</b> · {timeLeft(u.expires_at)}</>
+          : <>Active · no end date</>}
+      </div>
+
+      <div className="mb-1.5 text-xs font-medium text-slate-600">
+        {timed ? "Add time to what's left" : active ? "Limit access to (from now)" : "Give access again for (from now)"}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {ADD_TIME.map(([m, l]) => {
+          const newEnd = base + m * 60_000;
+          return (
+            <button key={m} type="button" disabled={busy} title={`New end: ${endText(newEnd)}`}
+                    onClick={() => patch({ action: "extend", minutes: m }, `Access until ${endText(newEnd)}`)} className={btnPlain}>
+              {timed ? l : l.replace("+", "")}
+            </button>
+          );
+        })}
+        {u.role === "member" && (u.expires_at || !active) && (
+          <button type="button" disabled={busy} onClick={() => patch({ action: "no_end" }, "No end date")} className={btnPlain}>No end date</button>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-slate-600">Or until</span>
+        <input type="datetime-local" value={until} min={localInput(Date.now() + 120_000)} onChange={(e) => setUntil(e.target.value)}
+               className="rounded-md border border-slate-300 px-2 py-1 text-sm outline-none focus:border-brand-500" />
+        <button type="button" disabled={busy || !until}
+                onClick={() => patch({ action: "set_end", until: new Date(until).toISOString() }, `Access until ${endText(new Date(until).getTime())}`)}
+                className={btnPlain}>Set</button>
+      </div>
+
+      {active && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+          <button type="button" disabled={busy} onClick={() => patch({ action: "revoke" }, "Access ended")} className={btnDanger}>
+            End access now
+          </button>
+          <span className="text-xs text-slate-500">Signs them out; any time left is cleared.</span>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4">
@@ -489,25 +556,7 @@ function Manage({
         </dl>
       </Card>
 
-      <Card title="Access time">
-        <p className="mb-3 text-sm text-slate-700">
-          {u.status === "revoked" ? <>Revoked {fmt(u.revoked_at)}. Add time to give access again.</>
-            : u.status === "expired" ? <>Ended {fmt(u.expires_at)}. Add time to give access again.</>
-            : u.expires_at ? <>Until <b>{fmt(u.expires_at)}</b> ({timeLeft(u.expires_at)})</>
-            : <>No end date</>}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {ADD_TIME.map(([m, l]) => (
-            <button key={m} type="button" disabled={busy} onClick={() => patch({ action: "extend", minutes: m }, "Time added")} className={btnPlain}>{l}</button>
-          ))}
-          {u.role === "member" && (u.expires_at || u.status !== "active") && (
-            <button type="button" disabled={busy} onClick={() => patch({ action: "no_end" }, "No end date")} className={btnPlain}>No end date</button>
-          )}
-          {u.status === "active" && (
-            <button type="button" disabled={busy} onClick={() => patch({ action: "revoke" }, "Access ended")} className={btnDanger}>End access now</button>
-          )}
-        </div>
-      </Card>
+      <AccessTime u={u} busy={busy} patch={patch} />
 
       <Card title="Type and pages">
         <div className="mb-3 flex flex-wrap items-center gap-3">
