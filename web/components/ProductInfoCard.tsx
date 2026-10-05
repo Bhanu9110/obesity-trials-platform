@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Product, ProductInfo } from "@/lib/types";
+import type { DrugProfile, Product, ProductInfo } from "@/lib/types";
+import { drugProfile } from "@/lib/drug-profile";
 
 // Suggestions only — every field accepts free text.
 const SUGGEST: Partial<Record<keyof ProductInfo, string[]>> = {
@@ -15,7 +16,12 @@ const SUGGEST: Partial<Record<keyof ProductInfo, string[]>> = {
     "Registration / Filed", "Approved", "Discontinued",
   ],
   roa: ["Oral", "Subcutaneous", "Intravenous", "Intramuscular", "Intranasal", "Transdermal", "Topical"],
+  candidate: ["Pipeline", "Non-pipeline"],
   drug_class: [
+    "Incretin-based therapy", "Amylin-based therapy", "Centrally acting anti-obesity agent",
+    "Peripherally acting anti-obesity agent", "Melanocortin pathway", "Antidiabetic", "Lipid-lowering",
+  ],
+  therapy_subclass: [
     "GLP-1 receptor agonist", "GLP-1/GIP dual agonist", "GLP-1/glucagon dual agonist",
     "GLP-1/GIP/glucagon triple agonist", "Amylin analogue", "Amylin/GLP-1 dual agonist",
     "Oral small-molecule GLP-1 RA", "MC4R agonist", "Lipase inhibitor", "Sympathomimetic amine",
@@ -23,23 +29,32 @@ const SUGGEST: Partial<Record<keyof ProductInfo, string[]>> = {
   ],
 };
 
+// Profile fields (shown on the Drugs list) first; while blank they show the automatic
+// suggestion in grey.
+const PROFILE_KEY: Partial<Record<keyof ProductInfo, keyof DrugProfile>> = {
+  aliases: "aliases", brand_names: "brands", candidate: "candidate", parent_drug: "parent",
+  sponsor: "company", drug_class: "therapyClass", therapy_subclass: "therapySubclass", indication: "indication",
+};
+
 const FIELDS: { key: keyof ProductInfo; label: string; wide?: boolean }[] = [
+  { key: "aliases", label: "Alias (code names)" },
+  { key: "brand_names", label: "Brand name" },
+  { key: "candidate", label: "Candidate" },
+  { key: "parent_drug", label: "Similar / parent drug" },
+  { key: "sponsor", label: "Company" },
+  { key: "indication", label: "Indication" },
+  { key: "drug_class", label: "Therapy class" },
+  { key: "therapy_subclass", label: "Therapy subclass" },
   { key: "modality", label: "Modality" },
   { key: "phase", label: "Phase" },
   { key: "moa", label: "MOA (mechanism of action)", wide: true },
   { key: "roa", label: "ROA (route of administration)" },
   { key: "approved", label: "Approved" },
   { key: "approval_date", label: "Approval date" },
-  { key: "sponsor", label: "Sponsor" },
-  { key: "drug_class", label: "Class" },
 ];
 
 function toForm(p: Product): Record<keyof ProductInfo, string> {
-  return {
-    modality: p.modality ?? "", phase: p.phase ?? "", moa: p.moa ?? "", roa: p.roa ?? "",
-    approved: p.approved ?? "", approval_date: p.approval_date ?? "", sponsor: p.sponsor ?? "",
-    drug_class: p.drug_class ?? "",
-  };
+  return Object.fromEntries(FIELDS.map(({ key }) => [key, p[key] ?? ""])) as Record<keyof ProductInfo, string>;
 }
 
 function display(p: Product, key: keyof ProductInfo): string | null {
@@ -58,6 +73,22 @@ export default function ProductInfoCard({ product }: { product: Product }) {
   const [form, setForm] = useState(() => toForm(product));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const profile = drugProfile(product);
+  const suggestion = (k: keyof ProductInfo) => {
+    const pk = PROFILE_KEY[k];
+    const v = pk ? profile[pk] : null;
+    return v?.auto && v.value ? v : null;
+  };
+  // Copy every automatic suggestion into the fields that are still blank.
+  const fillSuggestions = () =>
+    setForm((f) => {
+      const next = { ...f };
+      for (const { key } of FIELDS) {
+        const s = suggestion(key);
+        if (!next[key] && s?.value) next[key] = s.value;
+      }
+      return next;
+    });
 
   const set = (k: keyof ProductInfo, v: string) =>
     setForm((f) => {
@@ -95,6 +126,7 @@ export default function ProductInfoCard({ product }: { product: Product }) {
           <h2 className="text-sm font-semibold text-slate-900">Product information</h2>
           <p className="text-xs text-slate-500">
             Entered manually{product.info_updated_at ? ` · last edited ${new Date(product.info_updated_at).toLocaleString()}` : " · not filled in yet"}
+            {" "}· grey <span className="font-semibold uppercase">auto</span> values are suggestions until saved
           </p>
         </div>
         {!editing ? (
@@ -108,7 +140,15 @@ export default function ProductInfoCard({ product }: { product: Product }) {
             Edit
           </button>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              onClick={fillSuggestions}
+              disabled={saving}
+              title="Copy the grey automatic suggestions into the blank fields, then review and save"
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+            >
+              Fill in suggestions
+            </button>
             <button
               onClick={() => setEditing(false)}
               disabled={saving}
@@ -135,7 +175,18 @@ export default function ProductInfoCard({ product }: { product: Product }) {
             <dt className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</dt>
             <dd className="text-sm text-slate-800">
               {!editing ? (
-                display(product, key) ?? <span className="text-slate-300">—</span>
+                display(product, key) ?? (suggestion(key) ? (
+                  <span className="text-slate-500" title={`Suggested automatically — ${suggestion(key)!.why ?? ""}`}>
+                    {suggestion(key)!.value}
+                    <span className="ml-1.5 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold uppercase text-slate-400">auto</span>
+                  </span>
+                ) : <span className="text-slate-300">—</span>)
+              ) : key === "candidate" ? (
+                <select value={form.candidate} onChange={(e) => set("candidate", e.target.value)} className={input}>
+                  <option value="">{suggestion("candidate") ? `Automatic (${suggestion("candidate")!.value})` : "—"}</option>
+                  <option value="Pipeline">Pipeline (in development)</option>
+                  <option value="Non-pipeline">Non-pipeline (marketed, generic, withdrawn or discontinued)</option>
+                </select>
               ) : key === "approved" ? (
                 <select value={form.approved} onChange={(e) => set("approved", e.target.value)} className={input}>
                   <option value="">—</option>
@@ -155,6 +206,7 @@ export default function ProductInfoCard({ product }: { product: Product }) {
                 <>
                   <input
                     value={form[key]}
+                    placeholder={suggestion(key)?.value ?? undefined}
                     onChange={(e) => set(key, e.target.value)}
                     list={SUGGEST[key] ? `suggest-${key}` : undefined}
                     className={input}

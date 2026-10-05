@@ -133,30 +133,94 @@ export async function filterOptions(): Promise<FilterOptions> {
 // --------------------------------------------------------------------------- #
 // Products (drug pages)
 // --------------------------------------------------------------------------- #
+// Manually curated product info. The profile columns of migration 0011 are read
+// via to_jsonb so the pages keep working in the minute between a deploy and it.
 const INFO_COLS = `p.modality, p.phase, p.moa, p.roa, p.approved,
-  to_char(p.approval_date, 'YYYY-MM-DD') AS approval_date, p.sponsor, p.drug_class`;
+  to_char(p.approval_date, 'YYYY-MM-DD') AS approval_date, p.sponsor, p.drug_class,
+  to_jsonb(p) ->> 'aliases' AS aliases, to_jsonb(p) ->> 'brand_names' AS brand_names,
+  to_jsonb(p) ->> 'candidate' AS candidate, to_jsonb(p) ->> 'parent_drug' AS parent_drug,
+  to_jsonb(p) ->> 'therapy_subclass' AS therapy_subclass, to_jsonb(p) ->> 'indication' AS indication`;
+
+const HAS_INFO = `(p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
+   OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL OR p.drug_class IS NOT NULL
+   OR coalesce(to_jsonb(p) ->> 'aliases', to_jsonb(p) ->> 'brand_names', to_jsonb(p) ->> 'candidate',
+               to_jsonb(p) ->> 'parent_drug', to_jsonb(p) ->> 'therapy_subclass', to_jsonb(p) ->> 'indication') IS NOT NULL)`;
+
+/**
+ * Facts from the trial data behind the automatic profile suggestions, per product:
+ * most frequent industry sponsor, whether any trial is phase 4 (post-marketing),
+ * the most frequent conditions of its primary-obesity trials, manual alias merges.
+ * `$filter` limits it to one product.
+ */
+function factsCte(filter = "") {
+  return `
+  pt AS (
+    SELECT tp.product_id, t.sponsor, t.lead_sponsor_class, t.phase, t.conditions, t.obesity_class,
+           -- "solo": the only drug of the trial (not a probe drug in an interaction study etc.)
+           NOT EXISTS (SELECT 1 FROM trial_products o WHERE o.nct_id = tp.nct_id AND o.product_id <> tp.product_id) AS solo
+      FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+     ${filter}
+  ),
+  company AS (
+    SELECT DISTINCT ON (product_id) product_id, sponsor
+      FROM (SELECT product_id, sponsor, count(*) FILTER (WHERE solo) AS solo_n, count(*) AS n FROM pt
+             WHERE lead_sponsor_class = 'INDUSTRY' AND sponsor IS NOT NULL GROUP BY 1, 2) x
+     ORDER BY product_id, solo_n DESC, n DESC, sponsor
+  ),
+  cond AS (
+    SELECT product_id, array_agg(label ORDER BY n DESC, label) AS conditions
+      FROM (SELECT product_id, min(trim(c)) AS label, count(*) AS n,
+                   row_number() OVER (PARTITION BY product_id ORDER BY count(*) DESC, min(trim(c))) AS rn
+              FROM pt CROSS JOIN LATERAL unnest(pt.conditions) AS c
+             WHERE pt.obesity_class = 'primary' AND trim(c) <> ''
+             GROUP BY product_id, lower(trim(c))) y
+     WHERE rn <= 8
+     GROUP BY product_id
+  ),
+  facts AS (
+    SELECT pt.product_id,
+           count(*) FILTER (WHERE pt.lead_sponsor_class = 'INDUSTRY')::int AS industry_trials,
+           count(*) FILTER (WHERE pt.lead_sponsor_class = 'INDUSTRY' AND pt.solo)::int AS solo_industry_trials,
+           bool_or(coalesce(pt.phase, '') LIKE '%PHASE4%') AS has_phase4
+      FROM pt GROUP BY pt.product_id
+  )`;
+}
+
+const FACT_COLS = `c.sponsor AS top_industry_sponsor, coalesce(f.industry_trials, 0) AS industry_trials,
+  coalesce(f.solo_industry_trials, 0) AS solo_industry_trials,
+  coalesce(f.has_phase4, false) AS has_phase4, coalesce(cd.conditions, '{}') AS top_conditions,
+  coalesce((SELECT array_agg(a.alias_slug ORDER BY a.alias_slug) FROM product_aliases a WHERE a.product_slug = p.slug), '{}') AS alias_slugs`;
+
+const FACT_JOINS = `LEFT JOIN company c ON c.product_id = p.id
+  LEFT JOIN cond cd ON cd.product_id = p.id
+  LEFT JOIN facts f ON f.product_id = p.id`;
 
 export async function listProducts(): Promise<ProductSummary[]> {
   return query<ProductSummary>(
-    `SELECT p.slug, p.name, ${INFO_COLS},
-            count(t.nct_id) FILTER (WHERE t.obesity_class = 'primary')::int AS trials,
-            count(t.nct_id)::int AS all_trials,
-            coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
-            (p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
-             OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL
-             OR p.drug_class IS NOT NULL) AS has_info
+    `WITH ${factsCte()},
+     counts AS (
+       SELECT product_id,
+              count(*) FILTER (WHERE obesity_class = 'primary')::int AS trials,
+              count(*)::int AS all_trials,
+              coalesce(array_agg(DISTINCT phase) FILTER (WHERE phase IS NOT NULL AND obesity_class = 'primary'), '{}') AS trial_phases
+         FROM pt GROUP BY product_id
+     )
+     SELECT p.slug, p.name, ${INFO_COLS}, n.trials, n.all_trials, n.trial_phases,
+            ${HAS_INFO} AS has_info, ${FACT_COLS}
        FROM products p
-       JOIN trial_products tp ON tp.product_id = p.id
-       JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
-      GROUP BY p.id
-      ORDER BY trials DESC, all_trials DESC, p.name`,
+       JOIN counts n ON n.product_id = p.id
+       ${FACT_JOINS}
+      ORDER BY n.trials DESC, n.all_trials DESC, p.name`,
   );
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
   const rows = await query<Product>(
-    `SELECT p.id, p.slug, p.name, ${INFO_COLS}, p.info_updated_at
-       FROM products p WHERE p.slug = $1`,
+    `WITH ${factsCte("WHERE tp.product_id = (SELECT id FROM products WHERE slug = $1)")}
+     SELECT p.id, p.slug, p.name, ${INFO_COLS}, p.info_updated_at, ${FACT_COLS}
+       FROM products p
+       ${FACT_JOINS}
+      WHERE p.slug = $1`,
     [slug],
   );
   return rows[0] ?? null;
@@ -186,12 +250,15 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
   const rows = await query<{ slug: string }>(
     `UPDATE products SET
         modality = $2, phase = $3, moa = $4, roa = $5, approved = $6,
-        approval_date = $7::date, sponsor = $8, drug_class = $9, info_updated_at = now()
+        approval_date = $7::date, sponsor = $8, drug_class = $9,
+        aliases = $10, brand_names = $11, candidate = $12, parent_drug = $13,
+        therapy_subclass = $14, indication = $15, info_updated_at = now()
       WHERE slug = $1
       RETURNING slug`,
     [
       slug, info.modality, info.phase, info.moa, info.roa, info.approved,
       info.approval_date, info.sponsor, info.drug_class,
+      info.aliases, info.brand_names, info.candidate, info.parent_drug, info.therapy_subclass, info.indication,
     ],
   );
   return rows.length ? getProduct(slug) : null;
@@ -268,7 +335,10 @@ export async function mergeProduct(fromSlug: string, intoSlug: string): Promise<
           modality = coalesce(t.modality, f.modality), phase = coalesce(t.phase, f.phase),
           moa = coalesce(t.moa, f.moa), roa = coalesce(t.roa, f.roa),
           approved = coalesce(t.approved, f.approved), approval_date = coalesce(t.approval_date, f.approval_date),
-          sponsor = coalesce(t.sponsor, f.sponsor), drug_class = coalesce(t.drug_class, f.drug_class)
+          sponsor = coalesce(t.sponsor, f.sponsor), drug_class = coalesce(t.drug_class, f.drug_class),
+          aliases = coalesce(t.aliases, f.aliases), brand_names = coalesce(t.brand_names, f.brand_names),
+          candidate = coalesce(t.candidate, f.candidate), parent_drug = coalesce(t.parent_drug, f.parent_drug),
+          therapy_subclass = coalesce(t.therapy_subclass, f.therapy_subclass), indication = coalesce(t.indication, f.indication)
          FROM products f WHERE t.id = $2 AND f.id = $1`,
       [from.id, into.id],
     );

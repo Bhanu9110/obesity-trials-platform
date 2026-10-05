@@ -26,6 +26,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug
     const s = typeof v === "string" ? v.trim().slice(0, 500) : "";
     info[k] = s === "" ? null : s;
   }
+  if (info.candidate !== null && info.candidate !== "Pipeline" && info.candidate !== "Non-pipeline") {
+    return NextResponse.json({ error: "candidate must be Pipeline, Non-pipeline or blank" }, { status: 400 });
+  }
   if (info.approved !== null && info.approved !== "Yes" && info.approved !== "No") {
     return NextResponse.json({ error: "approved must be Yes, No or blank" }, { status: 400 });
   }
