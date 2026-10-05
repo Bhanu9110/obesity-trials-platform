@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { SESSION_COOKIE, authDisabled, guestName, isGuest, verifySession } from "@/lib/auth";
 import { guestStatus } from "@/lib/guests";
+import { firstPagePath, type GuestPage } from "@/lib/guest-pages";
 import { displayTimeZone } from "@/lib/queries";
 import ActivityTracker from "@/components/ActivityTracker";
 
@@ -18,6 +19,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const user = disabled ? null : await verifySession((await cookies()).get(SESSION_COOKIE)?.value);
   const guest = user && isGuest(user) ? await guestStatus(user) : null;
   const guestEnded = Boolean(guest && !guest.active);
+  // Members see every page; guests only the ones chosen for them (never Admin).
+  const can = (page: GuestPage) => !guest || guest.pages.includes(page);
   const showNav = (disabled || Boolean(user)) && !guestEnded;
   const guestUntil = guest?.active
     ? new Date(guest.expiresAt).toLocaleString("en-GB", {
@@ -30,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href={guest ? firstPagePath(guest.pages) : "/"} className="flex items-center gap-2">
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
                 OT
               </span>
@@ -45,39 +48,30 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
             {showNav && (
             <nav className="flex flex-wrap items-center gap-1 text-sm">
-              <Link
-                href="/"
-                className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
-              >
-                Trials
-              </Link>
-              <Link
-                href="/drugs"
-                className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
-              >
-                Drugs
-              </Link>
-              <Link
-                href="/changes"
-                className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
-              >
-                Changes
-              </Link>
+              {can("trials") && (
+                <Link href="/" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                  Trials
+                </Link>
+              )}
+              {can("drugs") && (
+                <Link href="/drugs" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                  Drugs
+                </Link>
+              )}
+              {can("changes") && (
+                <Link href="/changes" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                  Changes
+                </Link>
+              )}
+              {can("quality") && (
+                <Link href="/quality" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                  Data quality
+                </Link>
+              )}
               {!guest && (
-                <>
-                  <Link
-                    href="/quality"
-                    className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
-                  >
-                    Data quality
-                  </Link>
-                  <Link
-                    href="/admin"
-                    className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100"
-                  >
-                    Admin
-                  </Link>
-                </>
+                <Link href="/admin" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                  Admin
+                </Link>
               )}
               {user && (
                 <form action="/api/auth/logout" method="post" className="ml-2 flex items-center gap-2 border-l border-slate-200 pl-3">

@@ -95,29 +95,46 @@ export async function checkCredentials(username: string, password: string): Prom
   return ok && expected !== undefined ? user : null;
 }
 
-/** Signed session token. Guests get a short one that never outlives their access. */
-export async function createSession(user: string, until?: number): Promise<string> {
+/**
+ * Signed session token. Guests get a short one that never outlives their access,
+ * carrying the pages they may open (checked by the middleware).
+ */
+export async function createSession(user: string, until?: number, pages?: string[]): Promise<string> {
   const exp = until ?? Date.now() + SESSION_DAYS * 86400000;
-  const payload = b64url(enc.encode(JSON.stringify({ u: user, exp })));
+  const payload = b64url(enc.encode(JSON.stringify(pages ? { u: user, exp, p: pages } : { u: user, exp })));
   const sig = new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(), enc.encode(payload)));
   return `${payload}.${b64url(sig)}`;
 }
 
-/** Username from a valid, unexpired session token (and the user still configured), else null. */
-export async function verifySession(token: string | undefined | null): Promise<string | null> {
+export interface Session {
+  user: string;
+  /** Guests only: pages they may open. */
+  pages?: string[];
+}
+
+/** A valid, unexpired session (members must still be in AUTH_USERS), else null. */
+export async function readSession(token: string | undefined | null): Promise<Session | null> {
   if (!token || !process.env.AUTH_SECRET) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
   try {
     const valid = await crypto.subtle.verify("HMAC", await hmacKey(), fromB64url(sig), enc.encode(payload));
     if (!valid) return null;
-    const data = JSON.parse(new TextDecoder().decode(fromB64url(payload))) as { u: string; exp: number };
+    const data = JSON.parse(new TextDecoder().decode(fromB64url(payload))) as { u: string; exp: number; p?: unknown };
     if (!data.u || typeof data.exp !== "number" || data.exp < Date.now()) return null;
-    if (isGuest(data.u)) return data.u; // still active? checked against the database (lib/guests.ts)
-    return parseUsers().has(data.u) ? data.u : null; // removing a user from AUTH_USERS logs them out
+    if (isGuest(data.u)) {
+      // Still active? checked against the database (lib/guests.ts).
+      return { user: data.u, pages: Array.isArray(data.p) ? data.p.map(String) : [] };
+    }
+    return parseUsers().has(data.u) ? { user: data.u } : null; // removing a user from AUTH_USERS logs them out
   } catch {
     return null;
   }
+}
+
+/** Username from a valid session, else null. */
+export async function verifySession(token: string | undefined | null): Promise<string | null> {
+  return (await readSession(token))?.user ?? null;
 }
 
 // ---- Guest passwords: PBKDF2-SHA256 with a random salt (Web Crypto only). ----

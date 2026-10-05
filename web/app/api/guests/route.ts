@@ -10,7 +10,7 @@ function failure(err: unknown) {
   if (err instanceof GuestError) return NextResponse.json({ error: err.message }, { status: 400 });
   const msg = err instanceof Error ? err.message : "failed";
   return NextResponse.json(
-    { error: /guest_access/.test(msg) ? "Guest access starts after the next sync adds its table (migration 0013)." : msg },
+    { error: /guest_access/.test(msg) ? "Guest access starts after the next sync adds its table (migration 0014)." : msg },
     { status: 500 },
   );
 }
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** Create a guest login: { label, username?, minutes }. The password is returned only in this response. */
+/** Create a guest login: { label, username?, minutes, pages }. The password is returned only in this response. */
 export async function POST(req: NextRequest) {
   const user = await currentUser(req);
   if (!mayAdminister(user)) return forbidden();
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       label: String(body?.label ?? ""),
       username: body?.username ? String(body.username) : undefined,
       minutes: Number(body?.minutes),
+      pages: body?.pages,
       createdBy: user,
     });
     return NextResponse.json(created, { status: 201 });
@@ -43,17 +44,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** { id, action: "revoke" | "extend", minutes? } */
+/** { id, action: "revoke" | "extend" | "pages", minutes?, pages? } */
 export async function PATCH(req: NextRequest) {
   if (!mayAdminister(await currentUser(req))) return forbidden();
   try {
     const body = await req.json().catch(() => ({}));
     const id = Number(body?.id);
     const action = body?.action;
-    if (!Number.isInteger(id) || (action !== "revoke" && action !== "extend")) {
+    if (!Number.isInteger(id) || !["revoke", "extend", "pages"].includes(action)) {
       return NextResponse.json({ error: "invalid request" }, { status: 400 });
     }
-    const guest = await updateGuest(id, action, Number(body?.minutes ?? 60));
+    const guest = await updateGuest(id, action, { minutes: Number(body?.minutes ?? 60), pages: body?.pages });
     return guest ? NextResponse.json({ guest }) : NextResponse.json({ error: "not found" }, { status: 404 });
   } catch (err) {
     return failure(err);

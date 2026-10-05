@@ -31,11 +31,13 @@ export async function POST(req: NextRequest) {
   // Members (AUTH_USERS) first, then temporary guest logins (Admin → Guest access).
   let user = await checkCredentials(username, password);
   let until: number | undefined;
+  let pages: string[] | undefined;
   if (!user) {
     const guest = await guestLogin(username, password).catch(() => null);
     if (guest) {
       user = guest.user;
       until = guestSessionUntil(guest.expiresAt);
+      pages = guest.pages;
     }
   }
   if (!user) {
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   const res = NextResponse.json({ ok: true, user });
   const https = req.nextUrl.protocol === "https:" || req.headers.get("x-forwarded-proto") === "https";
-  res.cookies.set(SESSION_COOKIE, await createSession(user, until), {
+  res.cookies.set(SESSION_COOKIE, await createSession(user, until, pages), {
     httpOnly: true,
     secure: https,
     sameSite: "lax",

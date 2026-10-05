@@ -25,6 +25,8 @@ export default function ActivityTracker({ endsAt }: { endsAt?: number }) {
       .then((r) => {
         // Signed out (guest access ended or revoked, or the session expired): back to sign-in.
         if (r.status === 401) window.location.href = `/login?ended=1&next=${encodeURIComponent(pathname)}`;
+        // A guest whose access no longer includes this page.
+        else if (r.status === 403) r.json().then((b) => { if (b?.redirect) window.location.href = b.redirect; }).catch(() => {});
       })
       .catch(() => {});
   }, [pathname]);

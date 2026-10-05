@@ -2,6 +2,34 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Guest } from "@/lib/guests";
+import { DEFAULT_GUEST_PAGES, GUEST_PAGES, cleanPages, type GuestPage } from "@/lib/guest-pages";
+
+const PAGE_LABEL = Object.fromEntries(GUEST_PAGES.map((p) => [p.key, p.label])) as Record<GuestPage, string>;
+
+/** Tick boxes for the pages a guest may open. Admin is shown, locked off. */
+function PagePicker({ value, onChange }: { value: GuestPage[]; onChange: (v: GuestPage[]) => void }) {
+  const toggle = (k: GuestPage) =>
+    onChange(cleanPages(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]));
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {GUEST_PAGES.map((p) => {
+        const sub = p.key === "quality_export";
+        const disabled = sub && !value.includes("quality");
+        return (
+          <label key={p.key} title={p.hint}
+                 className={`flex items-center gap-1.5 text-sm ${disabled ? "text-slate-300" : "text-slate-700"} ${sub ? "-ml-2" : ""}`}>
+            <input type="checkbox" checked={value.includes(p.key)} disabled={disabled} onChange={() => toggle(p.key)}
+                   className="h-4 w-4 rounded border-slate-300 accent-brand-600" />
+            {sub ? "+ CSV download" : p.label}
+          </label>
+        );
+      })}
+      <span className="flex items-center gap-1.5 text-sm text-slate-400" title="Guests can never open the Admin page">
+        <input type="checkbox" checked={false} disabled className="h-4 w-4" /> Admin <span className="text-xs">(never for guests)</span>
+      </span>
+    </div>
+  );
+}
 
 // Admin page: temporary view-only logins for testers and prospects.
 
@@ -37,6 +65,8 @@ export default function GuestPanel() {
   const [label, setLabel] = useState("");
   const [username, setUsername] = useState("");
   const [minutes, setMinutes] = useState(10080);
+  const [pages, setPages] = useState<GuestPage[]>(DEFAULT_GUEST_PAGES);
+  const [editPages, setEditPages] = useState<{ id: number; pages: GuestPage[] } | null>(null);
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<{ guest: Guest; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -69,7 +99,7 @@ export default function GuestPanel() {
       const r = await fetch("/api/guests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ label, username: username || undefined, minutes }),
+        body: JSON.stringify({ label, username: username || undefined, minutes, pages }),
       });
       const body = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
@@ -84,17 +114,18 @@ export default function GuestPanel() {
     }
   }
 
-  async function act(id: number, action: "revoke" | "extend", m = 60) {
+  async function act(id: number, action: "revoke" | "extend" | "pages", m = 60, newPages?: GuestPage[]) {
     setError(null);
     setConfirmRevoke(null);
     try {
       const r = await fetch("/api/guests", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, action, minutes: m }),
+        body: JSON.stringify({ id, action, minutes: m, pages: newPages }),
       });
       const body = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
+      if (action === "pages") setEditPages(null);
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -108,6 +139,7 @@ export default function GuestPanel() {
         `Username: ${created.guest.username}`,
         `Password: ${created.password}`,
         `Valid until: ${fmt(created.guest.expires_at)}`,
+        `Pages: ${created.guest.pages.map((k) => PAGE_LABEL[k]).join(", ")}`,
       ].join("\n")
     : "";
 
@@ -127,8 +159,8 @@ export default function GuestPanel() {
       <div className="border-b border-slate-100 px-5 py-4">
         <h2 className="text-sm font-semibold text-slate-900">Guest access</h2>
         <p className="text-xs text-slate-500">
-          Temporary, view-only logins for testers and prospects. Guests can browse Trials, Drugs and Changes and open trial pages.
-          They can&apos;t edit or merge drugs, see Data quality or open this Admin page. Access ends by itself at the end time (from 10 minutes to 30 days), and you can revoke it at any time.
+          Temporary, view-only logins for testers and prospects. Choose which pages each guest can open (trial records linked from
+          those pages always open). Guests can&apos;t edit or merge drugs, and can never open this Admin page. Access ends by itself at the end time (from 10 minutes to 30 days), and you can revoke it at any time.
         </p>
       </div>
 
@@ -149,7 +181,11 @@ export default function GuestPanel() {
             {DURATIONS.map(([m, l]) => <option key={m} value={m}>{l}</option>)}
           </select>
         </label>
-        <button type="submit" disabled={busy}
+        <div className="w-full">
+          <div className="mb-1.5 text-xs font-medium text-slate-600">Pages they can open</div>
+          <PagePicker value={pages} onChange={setPages} />
+        </div>
+        <button type="submit" disabled={busy || pages.length === 0}
                 className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60">
           {busy ? "Creating…" : "Create guest login"}
         </button>
@@ -177,11 +213,12 @@ export default function GuestPanel() {
       {error && <p className="mx-5 mb-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
 
       <div className="overflow-x-auto border-t border-slate-100">
-        <table className="w-full min-w-[820px] text-left text-sm">
+        <table className="w-full min-w-[1100px] text-left text-sm">
           <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-5 py-2 font-semibold">Username</th>
               <th className="px-3 py-2 font-semibold">For</th>
+              <th className="px-3 py-2 font-semibold">Pages</th>
               <th className="px-3 py-2 font-semibold">Status</th>
               <th className="px-3 py-2 font-semibold">Access until</th>
               <th className="px-3 py-2 font-semibold">Last sign-in</th>
@@ -190,20 +227,48 @@ export default function GuestPanel() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {!guests ? (
-              <tr><td colSpan={6} className="px-5 py-5 text-center text-slate-400">{error ? "—" : "Loading…"}</td></tr>
+              <tr><td colSpan={7} className="px-5 py-5 text-center text-slate-400">{error ? "—" : "Loading…"}</td></tr>
             ) : guests.length === 0 ? (
-              <tr><td colSpan={6} className="px-5 py-5 text-center text-slate-400">No guest logins yet.</td></tr>
+              <tr><td colSpan={7} className="px-5 py-5 text-center text-slate-400">No guest logins yet.</td></tr>
             ) : guests.map((g) => (
               <tr key={g.id} className={g.status === "active" ? "" : "text-slate-500"}>
-                <td className="px-5 py-2.5 font-mono text-[13px] font-medium text-slate-800">{g.username}</td>
+                <td className="whitespace-nowrap px-5 py-2.5 font-mono text-[13px] font-medium text-slate-800">{g.username}</td>
                 <td className="px-3 py-2.5">{g.label}</td>
                 <td className="px-3 py-2.5">
+                  {editPages?.id === g.id ? (
+                    <div className="space-y-2 rounded-lg bg-slate-50 p-2 ring-1 ring-slate-200">
+                      <PagePicker value={editPages.pages} onChange={(v) => setEditPages({ id: g.id, pages: v })} />
+                      <div className="flex gap-2">
+                        <button type="button" disabled={!editPages.pages.length} onClick={() => act(g.id, "pages", 60, editPages.pages)}
+                                className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-50">
+                          Save
+                        </button>
+                        <button type="button" onClick={() => setEditPages(null)} className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-100">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-1">
+                      {g.pages.map((k) => (
+                        <span key={k} className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-700">
+                          {k === "quality_export" ? "CSV" : PAGE_LABEL[k]}
+                        </span>
+                      ))}
+                      <button type="button" onClick={() => setEditPages({ id: g.id, pages: g.pages })}
+                              className="ml-1 text-[11px] font-medium text-brand-700 hover:underline">
+                        Edit pages
+                      </button>
+                    </div>
+                  )}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2.5">
                   <span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${STATUS[g.status]}`}>
                     {g.status === "active" ? timeLeft(g.expires_at) : g.status === "expired" ? "Expired" : "Revoked"}
                   </span>
                 </td>
-                <td className="px-3 py-2.5 tabular-nums">{g.status === "revoked" ? `revoked ${fmt(g.revoked_at)}` : fmt(g.expires_at)}</td>
-                <td className="px-3 py-2.5 tabular-nums">
+                <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">{g.status === "revoked" ? `revoked ${fmt(g.revoked_at)}` : fmt(g.expires_at)}</td>
+                <td className="whitespace-nowrap px-3 py-2.5 tabular-nums">
                   {g.last_login_at ? <>{fmt(g.last_login_at)} <span className="text-xs text-slate-400">({g.login_count}×)</span></> : <span className="text-slate-400">never</span>}
                 </td>
                 <td className="whitespace-nowrap px-5 py-2.5 text-right">

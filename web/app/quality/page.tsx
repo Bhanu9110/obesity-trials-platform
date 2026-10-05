@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE, authDisabled, readSession } from "@/lib/auth";
+import { guestMayOpen } from "@/lib/guest-pages";
 import {
   QUALITY_BANDS,
   isQualityBand,
@@ -78,6 +81,9 @@ export default async function QualityPage({
   // Clicking the selected tile again clears it.
   const bandHref = (b: QualityBand | null) => href({ band: band === b ? null : b, code: null, page: 1 });
   const csvHref = `/api/quality/export?${params({ page: 1 }).toString()}`;
+  // Guests see the download only if their access includes it.
+  const session = authDisabled() ? null : await readSession((await cookies()).get(SESSION_COOKIE)?.value);
+  const canDownload = !session?.pages || guestMayOpen(session.pages, "/api/quality/export");
 
   const title = [
     band ? QUALITY_BANDS[band].label : code ? null : "All trials with issues",
@@ -177,13 +183,13 @@ export default async function QualityPage({
                 className="w-64 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500"
               />
             </form>
-            <a
+            {canDownload && <a
               href={csvHref}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
               title="Download this list (all pages) as a CSV file for Excel"
             >
               Download CSV
-            </a>
+            </a>}
           </div>
         </div>
         <div className="overflow-x-auto">

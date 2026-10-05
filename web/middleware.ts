@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, verifySession } from "@/lib/auth";
+import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, readSession, verifySession } from "@/lib/auth";
+import { DEFAULT_GUEST_PAGES, firstPagePath, guestMayOpen } from "@/lib/guest-pages";
 
 // Every page and API requires login, except the login page itself.
 const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health"];
-
-// Guests (temporary view-only logins) can browse trials, drugs and changes only.
-const GUEST_BLOCKED = ["/admin", "/quality", "/api/quality", "/api/sync", "/api/failures", "/api/access", "/api/guests"];
-const READ_METHODS = ["GET", "HEAD", "OPTIONS"];
-const GUEST_WRITE_OK = ["/api/activity", "/api/auth/logout"];
-
-function guestMayOpen(pathname: string, method: string): boolean {
-  if (GUEST_BLOCKED.some((p) => pathname === p || pathname.startsWith(p + "/"))) return false;
-  if (!READ_METHODS.includes(method) && pathname.startsWith("/api/") && !GUEST_WRITE_OK.includes(pathname)) return false;
-  return true;
-}
 
 export async function middleware(req: NextRequest) {
   if (authDisabled()) return NextResponse.next();
@@ -38,12 +28,19 @@ export async function middleware(req: NextRequest) {
     );
   }
 
-  const user = await verifySession(req.cookies.get(SESSION_COOKIE)?.value);
-  if (user && isGuest(user) && !guestMayOpen(pathname, req.method)) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Guest access is view-only." }, { status: 403 });
+  const session = await readSession(req.cookies.get(SESSION_COOKIE)?.value);
+  const user = session?.user ?? null;
+  if (user && isGuest(user)) {
+    // Guests: only the pages chosen for them, read-only, never the Admin page.
+    const pages = session?.pages?.length ? session.pages : DEFAULT_GUEST_PAGES;
+    const write = !["GET", "HEAD", "OPTIONS"].includes(req.method) && !["/api/activity", "/api/auth/logout"].includes(pathname);
+    if (write || !guestMayOpen(pages, pathname)) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Your guest access doesn't include this." }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL(firstPagePath(pages), req.url));
     }
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.next();
   }
   if (user) return NextResponse.next();
 
