@@ -34,6 +34,7 @@ export interface FilterOptions {
 
 /** Manually curated product info (all blank until edited on the drug page). */
 export interface ProductInfo {
+  // Drug profile — entered by hand on the drug page (blank until filled in).
   aliases: string | null;          // development / code names
   brand_names: string | null;
   candidate: string | null;        // "Pipeline" | "Non-pipeline" | null
@@ -55,38 +56,11 @@ export const PRODUCT_INFO_FIELDS: (keyof ProductInfo)[] = [
   "modality", "phase", "moa", "roa", "approved", "approval_date",
 ];
 
-/** One profile value: entered by hand, or suggested automatically while blank. */
-export interface ProfileValue {
-  value: string | null;
-  auto: boolean;
-  /** why the automatic value was chosen (tooltip) */
-  why?: string;
-}
 
-/** The Drugs-list profile of a drug (manual values win over suggestions). */
-export interface DrugProfile {
-  aliases: ProfileValue;
-  brands: ProfileValue;
-  candidate: ProfileValue;
-  parent: ProfileValue;
-  company: ProfileValue;
-  therapyClass: ProfileValue;
-  therapySubclass: ProfileValue;
-  indication: ProfileValue;
-}
-
-/** Facts from the trial data used for the automatic suggestions. */
-export interface ProductTrialFacts {
-  top_industry_sponsor: string | null;
-  industry_trials: number;
-  solo_industry_trials: number;    // industry trials where it is the only drug
-  has_phase4: boolean;
-  top_conditions: string[];
-  alias_slugs: string[];           // manual merges from product_aliases
-}
-
-export interface Product extends ProductInfo, ProductTrialFacts {
+export interface Product extends ProductInfo {
   id: number;
+  trials: number;      // primary-obesity trials (counted automatically)
+  all_trials: number;  // all stored trials
   slug: string;
   name: string;
   info_updated_at: string | null;
@@ -107,7 +81,7 @@ export interface ProductTrial {
   obesity_reason: string | null;
 }
 
-export interface ProductSummary extends ProductInfo, ProductTrialFacts {
+export interface ProductSummary extends ProductInfo {
   slug: string;
   name: string;
   trials: number;      // primary-obesity trials

@@ -74,32 +74,14 @@ the INN (e.g. *Wegovy*, *Semaglutide 2.4 mg pen* → **Semaglutide**;
 *LY3502970* → **Orforglipron**; *Phentermine-Topiramate* / *Qsymia* →
 **Phentermine + Topiramate**).
 
-The **Drugs** list shows, per drug: **Alias** (code names), **Brand name**,
-**Candidate** (Pipeline = in development; Non-pipeline = marketed, generic, withdrawn
-or discontinued), **Trials** (+ most advanced phase), **Similar / parent drug**,
-**Company**, **Therapy class / subclass** and **Indication** — with search, a
-Pipeline / Non-pipeline filter and a CSV download. Values entered on the drug page
-are shown dark; while a field is blank the list shows a **grey automatic
-suggestion** (hover for the reason):
-
-- alias, brand, company, class / subclass — a built-in reference list of
-  established drugs (`web/lib/drug-reference.ts`) and the drug-name stem
-  (-glutide, -lintide, -gliflozin…); otherwise the company is the sponsor of the
-  drug's own industry trials;
-- candidate — Non-pipeline if marked approved, listed as marketed / withdrawn /
-  discontinued, or it has phase 4 (post-marketing) trials; Pipeline for code-named
-  drugs and drugs a company tests in its own trials; generics used as companion or
-  probe drugs are Non-pipeline;
-- similar / parent — the components of a combination; for an undisclosed drug, its class;
-- indication — the most frequent conditions of its obesity trials.
-
 Click a drug anywhere to open its page:
 
-- **Product information** — Alias, Brand name, Candidate, Similar / parent drug,
-  Company, Indication, Therapy class and subclass, Modality, Phase, MOA, ROA,
-  Approved (Yes/No), Approval date. They are filled in with the *Edit* button
-  (*Fill in suggestions* copies the grey suggestions in for review). The daily sync
-  never overwrites them.
+- **Drug profile** — Alias, Brand name, Candidate (Pipeline / Non-pipeline),
+  No. of trials (counted automatically), Similar / parent drug, Company name,
+  Therapy class / subclass and Indication, plus product details (Modality, Phase,
+  MOA, ROA, Approved, Approval date). Everything except the trial count starts
+  **blank** and is filled in by hand with the *Edit* button. The daily sync never
+  overwrites it.
 - **Trials** — a clickable **phase bar** (trial count per phase), a summary line
   (recruiting / active, industry, participants, start years), one toolbar (search,
   Industry / Non-industry switch, status, continent, sort) and the trials grouped by
