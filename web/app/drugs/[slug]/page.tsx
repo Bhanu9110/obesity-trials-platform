@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE, authDisabled, isGuest, verifySession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { getProduct, getProductTrials, productNames } from "@/lib/queries";
 import { highestPhase } from "@/lib/format";
@@ -14,6 +16,7 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
   if (!product) notFound();
   const [trials, names] = await Promise.all([getProductTrials(product.id), productNames()]);
   const primary = trials.filter((t) => t.obesity_class === "primary");
+  const viewOnly = !authDisabled() && isGuest(await verifySession((await cookies()).get(SESSION_COOKIE)?.value));
 
   return (
     <div className="space-y-4">
@@ -30,11 +33,11 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
         </p>
       </div>
 
-      <ProductInfoCard product={product} />
+      <ProductInfoCard product={product} readOnly={viewOnly} />
 
       <DrugTrialsTable trials={trials} />
 
-      <MergeProduct slug={product.slug} name={product.name} options={names} />
+      {!viewOnly && <MergeProduct slug={product.slug} name={product.name} options={names} />}
     </div>
   );
 }

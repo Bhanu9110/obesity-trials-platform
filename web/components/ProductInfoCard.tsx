@@ -67,7 +67,7 @@ function display(p: Product, key: keyof ProductInfo): string | null {
   return v;
 }
 
-export default function ProductInfoCard({ product }: { product: Product }) {
+export default function ProductInfoCard({ product, readOnly = false }: { product: Product; readOnly?: boolean }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(() => toForm(product));
@@ -161,10 +161,10 @@ export default function ProductInfoCard({ product }: { product: Product }) {
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Drug profile</h2>
           <p className="text-xs text-slate-500">
-            Entered manually{product.info_updated_at ? ` · last edited ${new Date(product.info_updated_at).toLocaleString()}` : " · not filled in yet"}
+            {readOnly ? "Curated" : "Entered manually"}{product.info_updated_at ? ` · last edited ${new Date(product.info_updated_at).toLocaleString()}` : " · not filled in yet"}
           </p>
         </div>
-        {!editing ? (
+        {readOnly ? null : !editing ? (
           <button
             onClick={() => { setForm(toForm(product)); setEditing(true); }}
             className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"

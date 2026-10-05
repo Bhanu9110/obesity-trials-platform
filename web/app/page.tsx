@@ -176,10 +176,14 @@ export default function BrowsePage() {
 
       {error && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          <span>
-            The trial list didn’t load — usually a brief database hiccup.
-            <span className="ml-1 text-xs text-amber-700/80" title={error}>({error.slice(0, 80)})</span>
-          </span>
+          {error.includes("DATABASE_URL") ? (
+            <span className="min-w-0 flex-1">{error}</span>
+          ) : (
+            <span>
+              The trial list didn’t load — usually a brief database hiccup.
+              <span className="ml-1 text-xs text-amber-700/80" title={error}>({error.slice(0, 80)})</span>
+            </span>
+          )}
           <button type="button" onClick={() => load()} className="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-amber-800 ring-1 ring-amber-300 hover:bg-amber-100">
             Try again
           </button>

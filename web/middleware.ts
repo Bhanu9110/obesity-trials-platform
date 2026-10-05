@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, authConfigured, authDisabled, verifySession } from "@/lib/auth";
+import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, verifySession } from "@/lib/auth";
 
 // Every page and API requires login, except the login page itself.
 const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health"];
+
+// Guests (temporary view-only logins) can browse trials, drugs and changes only.
+const GUEST_BLOCKED = ["/admin", "/quality", "/api/quality", "/api/sync", "/api/failures", "/api/access", "/api/guests"];
+const READ_METHODS = ["GET", "HEAD", "OPTIONS"];
+const GUEST_WRITE_OK = ["/api/activity", "/api/auth/logout"];
+
+function guestMayOpen(pathname: string, method: string): boolean {
+  if (GUEST_BLOCKED.some((p) => pathname === p || pathname.startsWith(p + "/"))) return false;
+  if (!READ_METHODS.includes(method) && pathname.startsWith("/api/") && !GUEST_WRITE_OK.includes(pathname)) return false;
+  return true;
+}
 
 export async function middleware(req: NextRequest) {
   if (authDisabled()) return NextResponse.next();
@@ -28,6 +39,12 @@ export async function middleware(req: NextRequest) {
   }
 
   const user = await verifySession(req.cookies.get(SESSION_COOKIE)?.value);
+  if (user && isGuest(user) && !guestMayOpen(pathname, req.method)) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Guest access is view-only." }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/", req.url));
+  }
   if (user) return NextResponse.next();
 
   if (pathname.startsWith("/api/")) {

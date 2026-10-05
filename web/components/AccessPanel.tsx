@@ -49,7 +49,7 @@ export default function AccessPanel() {
 
   useEffect(() => {
     load();
-    const id = setInterval(load, 30000);
+    const id = setInterval(() => { if (document.visibilityState === "visible") load(); }, 30000);
     return () => clearInterval(id);
   }, [load]);
 
@@ -96,8 +96,11 @@ export default function AccessPanel() {
                 ) : data.members.map((m) => (
                   <tr key={m.username} className={m.allowed ? "" : "bg-amber-50/50"}>
                     <td className="px-5 py-2.5 font-medium text-slate-800">
-                      {m.username}
-                      {!m.allowed && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800" title="Not in AUTH_USERS any more — cannot sign in">removed</span>}
+                      {m.role === "guest" ? m.username.replace(/^guest:/, "") : m.username}
+                      {m.role === "guest" && <span className="ml-2 rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-sky-700 ring-1 ring-sky-200" title="Temporary view-only login (Guest access)">guest</span>}
+                      {!m.allowed && (m.role === "guest"
+                        ? <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-600" title="Guest access expired or revoked">ended</span>
+                        : <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800" title="Not in AUTH_USERS any more — cannot sign in">removed</span>)}
                     </td>
                     <td className="px-3 py-2.5 tabular-nums text-slate-700">{m.last_seen ?? <span className="text-slate-400">never</span>}</td>
                     <td className="px-3 py-2.5 tabular-nums text-slate-700">{m.last_login ?? <span className="text-slate-400">—</span>}</td>

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { currentUser, mayEdit } from "@/lib/admin";
 import { mergeProduct } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 /** POST { into: "<target slug>" } — merge this drug into another one. */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  if (!mayEdit(await currentUser(req))) {
+    return NextResponse.json({ error: "Guest access is view-only." }, { status: 403 });
+  }
   const { slug } = await params;
   let into = "";
   try {

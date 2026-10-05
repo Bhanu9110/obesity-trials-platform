@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, SESSION_DAYS, authConfigured, checkCredentials, createSession } from "@/lib/auth";
 import { FAILURE_WINDOW_MIN, logAccess, tooManyFailures } from "@/lib/access-log";
+import { guestLogin, guestSessionUntil } from "@/lib/guests";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const user = await checkCredentials(username, password);
+  // Members (AUTH_USERS) first, then temporary guest logins (Admin → Guest access).
+  let user = await checkCredentials(username, password);
+  let until: number | undefined;
+  if (!user) {
+    const guest = await guestLogin(username, password).catch(() => null);
+    if (guest) {
+      user = guest.user;
+      until = guestSessionUntil(guest.expiresAt);
+    }
+  }
   if (!user) {
     await logAccess("login_failed", username, req);
     await new Promise((r) => setTimeout(r, 600)); // slow down password guessing
@@ -37,12 +47,12 @@ export async function POST(req: NextRequest) {
 
   const res = NextResponse.json({ ok: true, user });
   const https = req.nextUrl.protocol === "https:" || req.headers.get("x-forwarded-proto") === "https";
-  res.cookies.set(SESSION_COOKIE, await createSession(user), {
+  res.cookies.set(SESSION_COOKIE, await createSession(user, until), {
     httpOnly: true,
     secure: https,
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_DAYS * 86400,
+    maxAge: until ? Math.max(60, Math.round((until - Date.now()) / 1000)) : SESSION_DAYS * 86400,
   });
   return res;
 }

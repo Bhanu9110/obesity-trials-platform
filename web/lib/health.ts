@@ -3,7 +3,7 @@
 import { query } from "./db";
 
 /** Latest migration the website needs. Keep in step with sync/src/health.ts. */
-export const REQUIRED_SCHEMA_VERSION = "0012";
+export const REQUIRED_SCHEMA_VERSION = "0013";
 export const SYNC_AGE = { warn: 36, fail: 72 }; // hours since the last successful sync
 
 export type HealthStatus = "ok" | "warn" | "fail";

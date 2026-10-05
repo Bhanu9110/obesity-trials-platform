@@ -46,6 +46,11 @@ function LoginForm() {
         <label htmlFor="p" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Password</label>
         <input id="p" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={input} required />
       </div>
+      {params.get("ended") && !error && (
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          You were signed out. If you had guest access, it has ended — ask the person who invited you for more time.
+        </p>
+      )}
       {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
       <button type="submit" disabled={busy} className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60">
         {busy ? "Signing in…" : "Sign in"}
