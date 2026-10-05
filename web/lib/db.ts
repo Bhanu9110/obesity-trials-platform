@@ -71,17 +71,36 @@ export function isConnectionError(err: unknown): boolean {
   );
 }
 
+/** The database (or Supabase's pooler) is briefly full: worth a short wait and retry. */
+export function isCapacityError(err: unknown): boolean {
+  const e = err as { code?: string; message?: string } | null;
+  const msg = (e?.message ?? "").toLowerCase();
+  return (
+    e?.code === "53300" || // too_many_connections
+    msg.includes("max client connections") ||
+    msg.includes("too many clients") ||
+    msg.includes("remaining connection slots") ||
+    msg.includes("timeout exceeded when trying to connect")
+  );
+}
+
 /**
  * Run a query. A query that fails because its pooled connection had gone stale
- * (common on Vercel after the function was idle) is retried once on a fresh one.
+ * (common on Vercel after the function was idle) or because the pooler was briefly
+ * full is retried up to twice, with a short pause, before the error is shown.
  */
 export async function query<T = any>(text: string, params?: unknown[]) {
-  try {
-    const res = await pool.query(text, params as any[]);
-    return res.rows as T[];
-  } catch (err) {
-    if (!isConnectionError(err)) throw err;
-    const res = await pool.query(text, params as any[]);
-    return res.rows as T[];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await pool.query(text, params as any[]);
+      return res.rows as T[];
+    } catch (err) {
+      const retryable = isConnectionError(err) || isCapacityError(err);
+      if (!retryable || attempt >= 2) {
+        console.error("[db] query failed", (err as { code?: string })?.code ?? "", (err as Error)?.message);
+        throw err;
+      }
+      await new Promise((r) => setTimeout(r, 250 * (attempt + 1) ** 2));
+    }
   }
 }

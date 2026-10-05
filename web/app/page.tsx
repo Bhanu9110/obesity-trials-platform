@@ -22,8 +22,26 @@ export default function BrowsePage() {
   const [error, setError] = useState<string | null>(null);
   const pageSize = 25;
 
+  // Filter choices. A failed request (database hiccup, expired login) must never
+  // break the page: retry a few times, and if it still fails the trial list works
+  // without the dropdown choices.
   useEffect(() => {
-    fetch("/api/filters").then((r) => r.json()).then(setOptions).catch(() => setOptions(null));
+    let cancelled = false;
+    (async () => {
+      for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
+        try {
+          const res = await fetch("/api/filters");
+          if (res.status === 401) { window.location.assign("/login?next=/"); return; }
+          const body = await res.json();
+          if (res.ok && Array.isArray(body?.phases) && Array.isArray(body?.continents)) {
+            if (!cancelled) setOptions(body as FilterOptions);
+            return;
+          }
+        } catch { /* network error: retry */ }
+        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // Country dropdown is scoped to the chosen continent.
@@ -45,7 +63,15 @@ export default function BrowsePage() {
       if (sponsor && SPONSOR_GROUPS[sponsor]) p.set("sponsorClass", SPONSOR_GROUPS[sponsor].classes);
       p.set("page", String(page));
       p.set("pageSize", String(pageSize));
-      const res = await fetch(`/api/trials?${p.toString()}`).then((r) => r.json());
+      // One automatic retry: the first request after the site has been idle can
+      // hit a database connection that has just been closed.
+      let r = await fetch(`/api/trials?${p.toString()}`);
+      if (r.status >= 500) {
+        await new Promise((ok) => setTimeout(ok, 800));
+        r = await fetch(`/api/trials?${p.toString()}`);
+      }
+      if (r.status === 401) { window.location.assign("/login?next=/"); return; }
+      const res = await r.json().catch(() => ({ error: `Server answered ${r.status}` }));
       if (res.error) throw new Error(res.error);
       setItems(res.items ?? []);
       setTotal(res.total ?? 0);
@@ -85,7 +111,7 @@ export default function BrowsePage() {
         />
         <select value={phase} onChange={(e) => setPhase(e.target.value)} className={SELECT} title="Phase">
           <option value="">All phases</option>
-          {options?.phases.map((p) => (
+          {(options?.phases ?? []).map((p) => (
             <option key={p} value={p}>{formatPhase(p)}</option>
           ))}
         </select>
@@ -99,7 +125,7 @@ export default function BrowsePage() {
           title="Continent"
         >
           <option value="">All continents</option>
-          {options?.continents.map((c) => (
+          {(options?.continents ?? []).map((c) => (
             <option key={c.name} value={c.name}>{c.name}</option>
           ))}
         </select>
@@ -144,12 +170,20 @@ export default function BrowsePage() {
       <div className="flex items-center justify-between text-sm text-slate-500">
         <span>{loading ? "Loading…" : `${total.toLocaleString()} ${filtersOn ? "matching trials" : "trials"}`}</span>
         <span className="hidden text-xs text-slate-400 sm:inline">
-          Click a drug for its product page · click an NCT ID to open ClinicalTrials.gov
+          Click a drug for its product page · click an NCT ID for the full trial details
         </span>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <span>
+            The trial list didn’t load — usually a brief database hiccup.
+            <span className="ml-1 text-xs text-amber-700/80" title={error}>({error.slice(0, 80)})</span>
+          </span>
+          <button type="button" onClick={() => load()} className="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-amber-800 ring-1 ring-amber-300 hover:bg-amber-100">
+            Try again
+          </button>
+        </div>
       )}
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
