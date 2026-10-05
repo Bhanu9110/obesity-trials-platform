@@ -92,13 +92,15 @@ function TrialRow({ t }: { t: ProductTrial }) {
   return (
     <li>
       <Link href={trialUrl(t.nct_id)} className={`group block px-5 py-3 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none ${GRID}`}>
-        {/* Trial: "NCT ID – title" */}
-        <div className="min-w-0">
-          <div className="line-clamp-2 text-[14px] leading-snug text-slate-900 group-hover:text-brand-700" title={t.title ?? undefined}>
-            <span className="font-mono text-[13px] font-medium text-brand-600">{t.nct_id}</span>
-            <span className="text-slate-400"> – </span>
-            <span className="font-medium">{t.title || <span className="font-normal italic text-slate-400">title appears after the next sync</span>}</span>
-          </div>
+        {/* Trial: "NCT ID – title". The NCT ID sits in a fixed-width slot so every
+            title — and every wrapped second line — starts at the same position. */}
+        <div className="flex min-w-0 items-baseline gap-2">
+          <span className="w-[112px] shrink-0 whitespace-nowrap font-mono text-[13px] font-medium text-brand-600">
+            {t.nct_id}<span className="font-sans text-slate-400"> –</span>
+          </span>
+          <span className="line-clamp-2 min-w-0 text-[14px] font-medium leading-snug text-slate-900 group-hover:text-brand-700" title={t.title ?? undefined}>
+            {t.title || <span className="font-normal italic text-slate-400">title appears after the next sync</span>}
+          </span>
         </div>
         {/* Phones: the other columns as one compact line */}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 md:hidden">
