@@ -211,7 +211,7 @@ export default function UsersPanel() {
             {view !== "ended" && !q && owners.map((o) => (
               <tr key={`owner-${o.username}`} className="bg-violet-50/30">
                 <td className="px-5 py-2.5">
-                  <div className="font-mono text-[13px] font-medium text-slate-800">{o.username}</div>
+                  <div className="font-mono text-[13px] font-medium text-slate-800">{o.display}</div>
                   <div className="text-xs text-slate-500">Owner account</div>
                 </td>
                 <td className="px-3 py-2.5"><span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${TYPE_TAG.owner}`}>Owner</span></td>

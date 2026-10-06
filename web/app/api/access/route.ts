@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentUser, mayAdminister } from "@/lib/admin";
-import { configuredUsers, isGuest, isSiteUser, plainName } from "@/lib/auth";
+import { configuredUsers, displayUsername, isGuest, isSiteUser, plainName } from "@/lib/auth";
 import { listUsers } from "@/lib/site-users";
 import { query } from "@/lib/db";
 import { displayTimeZone } from "@/lib/queries";
@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export interface AccessMember {
   username: string;
+  display: string;           // how the name is shown (owners keep their capitals)
   allowed: boolean;          // can still sign in (owner in AUTH_USERS, or an active site login)
   role: "owner" | "member" | "guest";
   last_seen: string | null;
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
     kind === "logins" ? "WHERE event IN ('login', 'logout', 'login_failed', 'blocked')" : "";
   try {
     const [members, events, failed] = await Promise.all([
-      query<Omit<AccessMember, "allowed" | "role">>(
+      query<Omit<AccessMember, "allowed" | "role" | "display">>(
         `SELECT username,
                 to_char(max(at) AT TIME ZONE $1, 'YYYY-MM-DD HH24:MI') AS last_seen,
                 to_char(max(at) FILTER (WHERE event = 'login') AT TIME ZONE $1, 'YYYY-MM-DD HH24:MI') AS last_login,
@@ -77,12 +78,13 @@ export async function GET(req: NextRequest) {
     const seen = new Set(members.map((m) => m.username));
     const all: AccessMember[] = [
       ...members.map((m) => {
-        if (!isSiteUser(m.username)) return { ...m, role: "owner" as const, allowed: owners.includes(m.username) };
+        const display = displayUsername(m.username);
+        if (!isSiteUser(m.username)) return { ...m, display, role: "owner" as const, allowed: owners.includes(m.username) };
         const role = isGuest(m.username) ? ("guest" as const) : ("member" as const);
-        return { ...m, role, allowed: active.get(plainName(m.username)) === role };
+        return { ...m, display, role, allowed: active.get(plainName(m.username)) === role };
       }),
       ...owners.filter((u) => !seen.has(u)).map((u) => ({
-        username: u, role: "owner" as const, allowed: true, last_seen: null, last_login: null, logins_30d: 0, pages_30d: 0,
+        username: u, display: displayUsername(u), role: "owner" as const, allowed: true, last_seen: null, last_login: null, logins_30d: 0, pages_30d: 0,
         countries: [], last_place: null, last_ip: null, last_agent: null,
       })),
     ];

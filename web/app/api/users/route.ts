@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentUser, mayAdminister } from "@/lib/admin";
-import { configuredUsers } from "@/lib/auth";
+import { configuredUsers, displayUsername } from "@/lib/auth";
 import { UserError, createUser, deleteUser, listUsers, updateUser, type UserAction } from "@/lib/site-users";
 
 export const dynamic = "force-dynamic";
@@ -16,12 +16,12 @@ function failure(err: unknown) {
   );
 }
 
-export interface OwnerRow { username: string; admin: boolean }
+export interface OwnerRow { username: string; display: string; admin: boolean }
 
 /** Owners (AUTH_USERS, read-only here) and every login made on the Admin page. */
 export async function GET(req: NextRequest) {
   if (!mayAdminister(await currentUser(req))) return forbidden();
-  const owners: OwnerRow[] = configuredUsers().map((u) => ({ username: u, admin: mayAdminister(u) }));
+  const owners: OwnerRow[] = configuredUsers().map((u) => ({ username: u, display: displayUsername(u), admin: mayAdminister(u) }));
   try {
     return NextResponse.json({ owners, users: await listUsers() });
   } catch (err) {

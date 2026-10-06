@@ -50,6 +50,20 @@ function parseUsers(): Map<string, string> {
   return m;
 }
 
+/**
+ * How a username is shown. Sign-in ignores capital letters, but owners appear
+ * exactly as written in AUTH_USERS (e.g. "ObeyBhanu"); site logins without the
+ * "user:" / "guest:" prefix.
+ */
+export function displayUsername(user: string): string {
+  if (isSiteUser(user)) return plainName(user);
+  for (const entry of (process.env.AUTH_USERS ?? "").split(",")) {
+    const name = entry.slice(0, Math.max(0, entry.indexOf(":"))).trim();
+    if (name && name.toLowerCase() === user.toLowerCase()) return name;
+  }
+  return user;
+}
+
 /** Usernames allowed to sign in (from AUTH_USERS), never the passwords. */
 export function configuredUsers(): string[] {
   return [...parseUsers().keys()].sort();

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies, headers } from "next/headers";
 import "./globals.css";
-import { SESSION_COOKIE, authDisabled, isGuest, isSiteUser, plainName, verifySession } from "@/lib/auth";
+import { SESSION_COOKIE, authDisabled, displayUsername, isGuest, isSiteUser, verifySession } from "@/lib/auth";
 import { siteUserStatus } from "@/lib/site-users";
 import { firstPagePath, type GuestPage } from "@/lib/guest-pages";
 import { displayTimeZone } from "@/lib/queries";
@@ -43,8 +43,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ];
   const shellUser = user
     ? {
-        name: site?.label?.trim() || plainName(user),
-        username: plainName(user),
+        name: site?.label?.trim() || displayUsername(user),
+        username: displayUsername(user),
         badge: until,
         role: guest ? "guest" as const : site ? "member" as const : "owner" as const,
       }
@@ -64,7 +64,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 
   const onLoginPage = (await headers()).get("x-otd-login-page") === "1";
-  const displayName = site?.label?.trim() || (user ? plainName(user) : "");
+  const shownUser = user ? displayUsername(user) : "";
+  const displayName = site?.label?.trim() || shownUser;
 
   // Signed in (or login switched off locally): the full app frame.
   if (showNav && !onLoginPage) {
@@ -100,10 +101,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="mx-auto mb-6 flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-slate-700">
               <span>
                 You&apos;re signed in as <b className="text-slate-950">{displayName}</b>
-                {displayName !== plainName(user) && <span className="text-slate-500"> ({plainName(user)})</span>}.
+                {displayName !== shownUser && <span className="text-slate-500"> ({shownUser})</span>}.
                 Sign in below to switch to another account.
               </span>
-              <a href="/" className="rounded-xl bg-brand-600 px-3.5 py-1.5 text-sm text-white">Continue as {plainName(user)} →</a>
+              <a href="/" className="rounded-xl bg-brand-600 px-3.5 py-1.5 text-sm text-white">Continue as {shownUser} →</a>
             </div>
           )}
           {ended ? (

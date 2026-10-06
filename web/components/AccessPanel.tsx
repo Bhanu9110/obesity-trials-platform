@@ -112,7 +112,7 @@ export default function AccessPanel() {
                 ) : data.members.map((m) => (
                   <tr key={m.username} className={m.allowed ? "" : "bg-amber-50/50"}>
                     <td className="px-5 py-2.5 font-medium text-slate-800">
-                      {m.username.replace(/^(guest|user):/, "")}
+                      {m.display ?? m.username.replace(/^(guest|user):/, "")}
                       <span className={`ml-2 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ring-1 ${ROLE_TAG[m.role].style}`}>{ROLE_TAG[m.role].label}</span>
                       {!m.allowed && (
                         <>
