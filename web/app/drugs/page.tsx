@@ -1,5 +1,6 @@
 import { listProducts } from "@/lib/queries";
-import DrugsTable from "@/components/DrugsTable";
+import PageHeader from "@/components/PageHeader";
+import DrugsExplorer from "@/components/DrugsExplorer";
 
 export const dynamic = "force-dynamic";
 
@@ -7,14 +8,13 @@ export default async function DrugsPage() {
   const products = await listProducts();
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Drugs</h1>
-        <p className="text-sm text-slate-500">
-          Every drug found in the trial interventions. Open one to fill in its product information
-          and see all of its trials.
-        </p>
-      </div>
-      <DrugsTable products={products} />
+      <PageHeader
+        eyebrow="Drug intelligence"
+        title="Obesity drugs"
+        highlight="pipeline"
+        description="Every drug found in obesity trial interventions, with how far each has progressed. Open one for its profile, charts and every trial."
+      />
+      <DrugsExplorer products={products} />
     </div>
   );
 }

@@ -41,7 +41,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
             setPage(1);
           }}
           placeholder="Find a drug…"
-          className="w-full flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500"
+          className="w-full flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500"
         />
         <select
           value={info}
@@ -49,14 +49,14 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
             setInfo(e.target.value as typeof info);
             setPage(1);
           }}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm"
+          className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="">All drugs ({visible.length.toLocaleString()})</option>
           <option value="filled">Info filled in ({filled.toLocaleString()})</option>
           <option value="blank">Info still blank ({(visible.length - filled).toLocaleString()})</option>
         </select>
         {otherOnly > 0 && (
-          <label className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-600"
+          <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600"
                  title="Drugs whose trials are all comorbidity / weight-related / not obesity">
             <input
               type="checkbox"
@@ -119,11 +119,11 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
 
       {pages > 1 && (
         <div className="flex items-center justify-center gap-2 text-sm">
-          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 disabled:opacity-40">
+          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 disabled:opacity-40">
             Prev
           </button>
           <span className="text-slate-500">Page {page} of {pages}</span>
-          <button disabled={page >= pages} onClick={() => setPage((p) => p + 1)} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 disabled:opacity-40">
+          <button disabled={page >= pages} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 disabled:opacity-40">
             Next
           </button>
         </div>

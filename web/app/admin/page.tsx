@@ -130,8 +130,13 @@ export default function AdminPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Pipeline dashboard</h1>
-          <p className="text-sm text-slate-500">Last successful sync: {when(data.lastSuccessfulSync)}</p>
+          <div className="eyebrow mb-2 flex items-center gap-2">
+            <span className="h-px w-6 bg-gradient-to-r from-transparent to-brand-500" /> Control centre
+          </div>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-950">
+            Pipeline <span className="text-gradient">dashboard</span>
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">Last successful sync: {when(data.lastSuccessfulSync)}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -146,7 +151,7 @@ export default function AdminPage() {
             type="button"
             onClick={() => startSync(true)}
             disabled={busy !== null}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
             {busy === "full" ? "Starting…" : "Full re-download"}
           </button>
@@ -173,7 +178,7 @@ export default function AdminPage() {
       )}
 
       {/* Health */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-sm font-semibold text-slate-900">Health</h2>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${CHECK_STYLE[data.health.status]}`}>
@@ -211,7 +216,7 @@ export default function AdminPage() {
       </p>
 
       {/* Dead-letter queue */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="mb-1 text-sm font-semibold text-slate-900">Dead-letter queue ({dead.length})</h2>
         <p className="mb-3 text-xs text-slate-500">
           Records that failed several times in a row. Re-queue to try again on the next run, or dismiss.
@@ -224,7 +229,7 @@ export default function AdminPage() {
       </section>
 
       {/* Retry queue */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="mb-1 text-sm font-semibold text-slate-900">Retry queue ({pending.length})</h2>
         <p className="mb-3 text-xs text-slate-500">Failed records that are retried automatically on later runs.</p>
         {pending.length === 0 ? (
@@ -235,7 +240,7 @@ export default function AdminPage() {
       </section>
 
       {/* Runs */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="mb-3 text-sm font-semibold text-slate-900">Recent sync runs</h2>
         {data.runs.length === 0 ? (
           <p className="text-sm text-slate-400">No sync runs yet.</p>
@@ -334,7 +339,7 @@ function FailureTable({
 
 function Tile({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className={`text-2xl font-bold tabular-nums ${color}`}>{value.toLocaleString()}</div>
       <div className="text-xs text-slate-500">{label}</div>
     </div>

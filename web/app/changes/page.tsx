@@ -1,7 +1,33 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { CHANGE_KINDS, displayTimeZone, recentChanges, type ChangeItem } from "@/lib/queries";
 import { NctLink } from "@/components/ui";
 import { ChangeDetail, KIND_LABEL } from "@/components/ChangeDetail";
+import { icons } from "@/components/shell/icons";
+
+const KIND_TONE: Record<string, { text: string; dot: string; icon: React.ReactNode }> = {
+  added: { text: "text-emerald-400", dot: "bg-emerald-50 text-emerald-600", icon: icons.plus },
+  updated: { text: "text-sky-400", dot: "bg-sky-50 text-sky-600", icon: icons.pulse },
+  reclassified: { text: "text-violet-400", dot: "bg-violet-50 text-violet-600", icon: icons.sparkles },
+  removed: { text: "text-rose-400", dot: "bg-rose-50 text-rose-600", icon: icons.close },
+};
+
+function groupByDay(items: ChangeItem[]): [string, ChangeItem[]][] {
+  const m = new Map<string, ChangeItem[]>();
+  for (const c of items) {
+    const d = c.changed_at.slice(0, 10);
+    m.set(d, [...(m.get(d) ?? []), c]);
+  }
+  return [...m.entries()];
+}
+
+function dayLabel(day: string): string {
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: displayTimeZone() });
+  const y = new Date(Date.now() - 86_400_000).toLocaleDateString("en-CA", { timeZone: displayTimeZone() });
+  if (day === today) return "Today";
+  if (day === y) return "Yesterday";
+  return new Date(`${day}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -35,85 +61,96 @@ export default async function ChangesPage({
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Recent changes</h1>
-        <p className="text-sm text-slate-500">
-          What changed in the database: new trials, registry updates (field by field), reclassifications and
-          removals. Recorded automatically by every sync.
-        </p>
+      <PageHeader
+        eyebrow="Registry radar"
+        title="What"
+        highlight="changed"
+        description="New trials, registry updates field by field, reclassifications and removals — recorded automatically by every sync."
+      />
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        {[{ k: null as string | null, label: "All changes", n: all, tone: "text-slate-950", ic: icons.history },
+          ...CHANGE_KINDS.map((k) => ({ k, label: KIND_LABEL[k].label, n: data.counts[k] ?? 0, tone: KIND_TONE[k].text, ic: KIND_TONE[k].icon }))].map((x) => {
+          const on = (x.k ?? undefined) === kind;
+          return (
+            <Link key={x.label} href={href({ kind: x.k })}
+                  className={`glass group relative overflow-hidden rounded-2xl p-4 transition hover:-translate-y-0.5 ${on ? "!border-brand-500/50 shadow-glow" : ""}`}>
+              <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                {x.label}<span className={`${x.tone} opacity-80`}>{x.ic}</span>
+              </div>
+              <div className={`mt-2 font-display text-[26px] font-semibold leading-none tabular-nums ${x.tone}`}>{x.n.toLocaleString()}</div>
+              <div className="mt-1 text-xs text-slate-500">last {days === 365 ? "year" : `${days} days`}</div>
+            </Link>
+          );
+        })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Link href={href({ kind: null })}
-              className={`rounded-full px-3 py-1 ${!kind ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
-          All ({all.toLocaleString()})
-        </Link>
-        {CHANGE_KINDS.map((k) => (
-          <Link key={k} href={href({ kind: k })}
-                className={`rounded-full px-3 py-1 ${kind === k ? "bg-brand-600 text-white" : `${KIND_LABEL[k].style} hover:opacity-80`}`}>
-            {KIND_LABEL[k].label} ({(data.counts[k] ?? 0).toLocaleString()})
-          </Link>
-        ))}
-        <span className="mx-1 h-5 w-px bg-slate-200" />
-        {DAY_CHOICES.map((d) => (
-          <Link key={d} href={href({ days: d })}
-                className={`rounded-md px-2 py-1 ${d === days ? "font-semibold text-slate-900" : "text-slate-500 hover:text-slate-800"}`}>
-            {d === 365 ? "1 year" : `${d} days`}
-          </Link>
-        ))}
-        <form action="/changes" className="ml-auto flex gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1">
+          {DAY_CHOICES.map((d) => (
+            <Link key={d} href={href({ days: d })}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${d === days ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>
+              {d === 365 ? "1 year" : `${d} days`}
+            </Link>
+          ))}
+        </div>
+        <form action="/changes" className="relative ml-auto">
           {kind && <input type="hidden" name="kind" value={kind} />}
           {days !== 30 && <input type="hidden" name="days" value={days} />}
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{icons.search}</span>
           <input name="q" defaultValue={q} placeholder="NCT ID or sponsor…"
-                 className="w-48 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500" />
+                 className="w-64 rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm outline-none" />
         </form>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-3 font-semibold" title={displayTimeZone()}>
-                When <span className="font-normal normal-case text-slate-400">({displayTimeZone() === "Asia/Kolkata" ? "IST" : displayTimeZone()})</span>
-              </th>
-              <th className="px-4 py-3 font-semibold">Trial</th>
-              <th className="px-4 py-3 font-semibold">Change</th>
-              <th className="px-4 py-3 font-semibold">Details</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {data.items.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-slate-400">
-                  No changes in this period. Changes are recorded from the first sync after this feature was installed.
-                </td>
-              </tr>
-            ) : (
-              data.items.map((c) => (
-                <tr key={c.id} className="align-top hover:bg-slate-50">
-                  <td className="whitespace-nowrap px-4 py-2.5 text-slate-500">{c.changed_at}</td>
-                  <td className="px-4 py-2.5">
-                    <NctLink id={c.trial_id} />
-                    {c.sponsor && <div className="text-xs text-slate-400">{c.sponsor}</div>}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${KIND_LABEL[c.change]?.style ?? ""}`}>
-                      {KIND_LABEL[c.change]?.label ?? c.change}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5"><ChangeDetail c={c} /></td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      {data.items.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
+          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-400">{icons.history}</div>
+          <div className="font-display text-base font-semibold text-slate-900">No changes in this period</div>
+          <p className="mt-1 text-sm text-slate-500">Try a longer period. Changes are recorded by every daily sync.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {groupByDay(data.items).map(([day, list]) => (
+            <section key={day}>
+              <div className="sticky top-16 z-10 -mx-1 mb-3 flex items-center gap-3 bg-[rgb(5_9_20/0.85)] px-1 py-2 backdrop-blur">
+                <span className="font-display text-sm font-semibold text-slate-950">{dayLabel(day)}</span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] tabular-nums text-slate-600">{list.length}</span>
+                <span className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
+              </div>
+              <ol className="relative ml-4 space-y-2 border-l border-slate-200 pl-6">
+                {list.map((c) => {
+                  const tone = KIND_TONE[c.change] ?? KIND_TONE.updated;
+                  return (
+                    <li key={c.id} className="relative">
+                      <span className={`absolute -left-[37px] top-3 grid h-6 w-6 place-items-center rounded-full ring-4 ring-[rgb(5_9_20)] ${tone.dot} [&>svg]:h-3.5 [&>svg]:w-3.5`}>
+                        {tone.icon}
+                      </span>
+                      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <NctLink id={c.trial_id} />
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${KIND_LABEL[c.change]?.style ?? ""}`}>
+                            {KIND_LABEL[c.change]?.label ?? c.change}
+                          </span>
+                          {c.sponsor && <span className="truncate text-xs text-slate-500">{c.sponsor}</span>}
+                          <span className="ml-auto text-xs tabular-nums text-slate-400">{c.changed_at.slice(11)}</span>
+                        </div>
+                        <div className="mt-1.5 text-sm"><ChangeDetail c={c} /></div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ))}
+        </div>
+      )}
 
       {pages > 1 && (
         <div className="flex items-center justify-center gap-3 text-sm">
-          {page > 1 ? <Link href={href({ page: page - 1 })} className="rounded-md border border-slate-300 bg-white px-3 py-1.5">Prev</Link> : <span />}
-          <span className="text-slate-500">Page {page} of {pages.toLocaleString()}</span>
-          {page < pages ? <Link href={href({ page: page + 1 })} className="rounded-md border border-slate-300 bg-white px-3 py-1.5">Next</Link> : <span />}
+          {page > 1 ? <Link href={href({ page: page - 1 })} className="rounded-xl border border-slate-200 bg-white px-4 py-2 hover:border-brand-500/50">← Newer</Link> : <span />}
+          <span className="text-slate-500">Page <b className="text-slate-900">{page}</b> of {pages.toLocaleString()}</span>
+          {page < pages ? <Link href={href({ page: page + 1 })} className="rounded-xl border border-slate-200 bg-white px-4 py-2 hover:border-brand-500/50">Older →</Link> : <span />}
         </div>
       )}
     </div>

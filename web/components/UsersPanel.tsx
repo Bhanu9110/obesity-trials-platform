@@ -41,7 +41,7 @@ const btn = "rounded-md px-2.5 py-1.5 text-xs font-medium ring-1 transition";
 const btnPlain = `${btn} bg-white text-slate-700 ring-slate-300 hover:bg-slate-50`;
 const btnBrand = `${btn} bg-brand-600 text-white ring-brand-600 hover:bg-brand-700 disabled:opacity-50`;
 const btnDanger = `${btn} bg-white text-rose-700 ring-rose-200 hover:bg-rose-50`;
-const input = "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500";
+const input = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500";
 
 /** Tick boxes for the pages a guest may open. Admin is shown, locked off. */
 function PagePicker({ value, onChange }: { value: GuestPage[]; onChange: (v: GuestPage[]) => void }) {
@@ -158,7 +158,7 @@ export default function UsersPanel() {
   );
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white">
+    <section className="rounded-2xl border border-slate-200 bg-white">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div className="max-w-3xl">
           <h2 className="text-sm font-semibold text-slate-900">Users &amp; access</h2>
@@ -192,7 +192,7 @@ export default function UsersPanel() {
         <Segmented value={view} onChange={setView}
                    options={[["active", `Active (${counts.active})`], ["ended", `Ended (${counts.ended})`], ["all", "All"]]} />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a user…"
-               className="w-56 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500" />
+               className="w-56 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500" />
       </div>
 
       <div className="overflow-x-auto border-t border-slate-100">
@@ -449,7 +449,7 @@ function AccessTime({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-slate-600">Or until</span>
         <input type="datetime-local" value={until} min={localInput(Date.now() + 120_000)} onChange={(e) => setUntil(e.target.value)}
-               className="rounded-md border border-slate-300 px-2 py-1 text-sm outline-none focus:border-brand-500" />
+               className="rounded-lg border border-slate-200 px-2 py-1 text-sm outline-none focus:border-brand-500" />
         <button type="button" disabled={busy || !until}
                 onClick={() => patch({ action: "set_end", until: new Date(until).toISOString() }, `Access until ${endText(new Date(until).getTime())}`)}
                 className={btnPlain}>Set</button>

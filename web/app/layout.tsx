@@ -7,6 +7,8 @@ import { siteUserStatus } from "@/lib/site-users";
 import { firstPagePath, type GuestPage } from "@/lib/guest-pages";
 import { displayTimeZone } from "@/lib/queries";
 import ActivityTracker from "@/components/ActivityTracker";
+import AppShell, { type ShellNavItem } from "@/components/shell/AppShell";
+import { LogoMark } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Obesity Trials Intelligence",
@@ -31,84 +33,67 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         timeZone: displayTimeZone(),
       })
     : null;
+  const nav: ShellNavItem[] = [
+    ...(can("trials") ? [{ href: "/", label: "Overview", icon: "overview", section: "Intelligence" } as const,
+                         { href: "/trials", label: "Trials explorer", icon: "trials", section: "Intelligence" } as const] : []),
+    ...(can("drugs") ? [{ href: "/drugs", label: "Drugs", icon: "drugs", section: "Intelligence" } as const] : []),
+    ...(can("changes") ? [{ href: "/changes", label: "Registry changes", icon: "changes", section: "Intelligence" } as const] : []),
+    ...(can("quality") ? [{ href: "/quality", label: "Data quality", icon: "quality", section: "Workspace" } as const] : []),
+    ...(showAdmin ? [{ href: "/admin", label: "Admin", icon: "admin", section: "Workspace" } as const] : []),
+  ];
+  const shellUser = user
+    ? { name: plainName(user), badge: until, role: guest ? "guest" as const : site ? "member" as const : "owner" as const }
+    : null;
+  const fonts = (
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+      />
+    </>
+  );
+
+  // Signed in (or login switched off locally): the full app frame.
+  if (showNav) {
+    return (
+      <html lang="en">
+        <head>{fonts}</head>
+        <body>
+          {user && <ActivityTracker endsAt={site?.active && site.expiresAt ? site.expiresAt : undefined} />}
+          <AppShell nav={nav} user={shellUser} homeHref={guest ? firstPagePath(guest.pages) : "/"} canTrials={can("trials")}>
+            {children}
+          </AppShell>
+        </body>
+      </html>
+    );
+  }
+
+  // Sign-in page, or a login whose access has ended: a minimal frame.
   return (
     <html lang="en">
+      <head>{fonts}</head>
       <body>
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-            <Link href={guest ? firstPagePath(guest.pages) : "/"} className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-                OT
-              </span>
-              <div className="leading-tight">
-                <div className="text-sm font-semibold text-slate-900">
-                  Obesity Trials Intelligence
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Drug database · ClinicalTrials.gov
-                </div>
-              </div>
-            </Link>
-            {showNav && (
-            <nav className="flex flex-wrap items-center gap-1 text-sm">
-              {can("trials") && (
-                <Link href="/" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
-                  Trials
-                </Link>
-              )}
-              {can("drugs") && (
-                <Link href="/drugs" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
-                  Drugs
-                </Link>
-              )}
-              {can("changes") && (
-                <Link href="/changes" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
-                  Changes
-                </Link>
-              )}
-              {can("quality") && (
-                <Link href="/quality" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
-                  Data quality
-                </Link>
-              )}
-              {showAdmin && (
-                <Link href="/admin" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
-                  Admin
-                </Link>
-              )}
-              {user && (
-                <form action="/api/auth/logout" method="post" className="ml-2 flex items-center gap-2 border-l border-slate-200 pl-3">
-                  {site ? (
-                    <span className="hidden text-xs text-slate-500 sm:inline" title={guest ? "Temporary view-only access" : undefined}>
-                      {plainName(user)}
-                      {(guest || until) && (
-                        <span className="ml-1.5 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800 ring-1 ring-amber-200">
-                          {guest ? "Guest" : "Access"} · until {until}
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="hidden text-xs text-slate-500 sm:inline">{user}</span>
-                  )}
-                  <button type="submit" className="rounded-md px-2 py-1.5 text-slate-600 hover:bg-slate-100">
-                    Sign out
-                  </button>
-                </form>
-              )}
-            </nav>
-            )}
-          </div>
+        <header className="mx-auto flex h-16 max-w-6xl items-center px-4">
+          <span className="flex items-center gap-2.5">
+            <LogoMark size={34} />
+            <span className="leading-tight">
+              <span className="block font-display text-[14px] font-semibold tracking-tight text-slate-950">Obesity Trials</span>
+              <span className="block font-display text-[12px] font-semibold tracking-[0.2em] text-gradient">INTELLIGENCE</span>
+            </span>
+          </span>
         </header>
-        {user && !ended && <ActivityTracker endsAt={site?.active && site.expiresAt ? site.expiresAt : undefined} />}
-        <main className="mx-auto max-w-7xl px-4 py-6">
+        <main className="mx-auto max-w-6xl animate-fade-up px-4 py-8">
           {ended ? (
-            <div className="mx-auto mt-10 max-w-md rounded-xl border border-slate-200 bg-white p-6 text-center">
-              <h1 className="text-lg font-semibold text-slate-900">Your access has ended</h1>
+            <div className="mx-auto mt-16 max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center">
+              <div className="mx-auto mb-4 w-fit"><LogoMark size={44} /></div>
+              <h1 className="text-xl font-semibold text-slate-900">Your access has ended</h1>
               <p className="mt-2 text-sm text-slate-500">
                 Thanks for taking a look. To continue, ask the person who gave you access.
               </p>
-              <form action="/api/auth/logout" method="post" className="mt-4">
-                <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+              <form action="/api/auth/logout" method="post" className="mt-6">
+                <button type="submit" className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white">
                   Sign out
                 </button>
               </form>
@@ -117,8 +102,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             children
           )}
         </main>
-        <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-slate-400">
-          Trial data from ClinicalTrials.gov (v2 API), updated daily. Product information is curated manually.
+        <footer className="mx-auto max-w-6xl px-4 py-8 text-center text-xs text-slate-400">
+          Trial data from ClinicalTrials.gov (v2 API), synced daily.
         </footer>
       </body>
     </html>

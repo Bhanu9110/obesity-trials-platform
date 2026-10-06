@@ -335,7 +335,7 @@ function AdverseEvents({ ae }: { ae: NonNullable<Results["adverseEventsModule"]>
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-4 rounded-xl border border-slate-200 bg-white p-5">
+    <section id={id} className="scroll-mt-4 rounded-2xl border border-slate-200 bg-white p-5">
       <h3 className="mb-3 text-base font-semibold text-slate-900">{title}</h3>
       {children}
     </section>

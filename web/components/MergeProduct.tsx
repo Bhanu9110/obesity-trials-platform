@@ -61,7 +61,7 @@ export default function MergeProduct({
           onChange={(e) => setTarget(e.target.value)}
           list="merge-targets"
           placeholder="Type the drug to merge into…"
-          className="flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 outline-none focus:border-brand-500"
+          className="flex-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 outline-none focus:border-brand-500"
         />
         <datalist id="merge-targets">
           {choices.map((o) => (
@@ -75,7 +75,7 @@ export default function MergeProduct({
         >
           {busy ? "Merging…" : "Merge"}
         </button>
-        <button onClick={() => setOpen(false)} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-slate-600">
+        <button onClick={() => setOpen(false)} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-600">
           Cancel
         </button>
       </div>

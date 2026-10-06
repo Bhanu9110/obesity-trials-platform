@@ -9,8 +9,13 @@ export interface ProductLink {
 
 export interface TrialListItem {
   nct_id: string;
+  title: string | null;
   phase: string | null;
   sponsor: string | null;
+  lead_sponsor_class: string | null;
+  overall_status: string | null;
+  start_date: string | null;
+  enrollment: number | null;
   indication: string[];
   continents: string[];
   products: ProductLink[];
@@ -30,6 +35,20 @@ export interface FilterOptions {
   continents: { name: string; countries: string[] }[];
   /** stored trials per obesity class */
   classes: { name: string; trials: number }[];
+  /** headline numbers for the home page */
+  stats?: HomeStats;
+  /** trials per phase / status / sponsor type (primary obesity), for the filter panel */
+  facets?: { phases: Record<string, number>; statuses: Record<string, number>; sponsorClasses: Record<string, number> };
+}
+
+export interface HomeStats {
+  trials: number;        // primary-obesity trials shown on the website
+  drugs: number;         // drugs with at least one of those trials
+  industry: number;      // trials sponsored by industry
+  late: number;          // Phase 3 / Phase 4 (incl. Phase 2/3)
+  recruiting: number;    // recruiting or not yet recruiting
+  countries: number;
+  lastSync: string | null;
 }
 
 /** Manually curated product info (all blank until edited on the drug page). */

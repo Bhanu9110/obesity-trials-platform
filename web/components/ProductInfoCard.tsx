@@ -101,7 +101,7 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
     }
   }
 
-  const input = "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-brand-500";
+  const input = "w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-brand-500";
 
   const editor = (key: keyof ProductInfo) => {
     if (key === "candidate") {
@@ -156,7 +156,7 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
   );
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Drug profile</h2>
@@ -167,14 +167,14 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
         {readOnly ? null : !editing ? (
           <button
             onClick={() => { setForm(toForm(product)); setEditing(true); }}
-            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
           >
             Edit
           </button>
         ) : (
           <div className="flex gap-2">
             <button onClick={() => setEditing(false)} disabled={saving}
-                    className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
               Cancel
             </button>
             <button onClick={save} disabled={saving}

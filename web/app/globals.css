@@ -2,17 +2,204 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   Obesity Trials Intelligence — dark "intelligence platform" theme.
+   Colour scales are flipped in tailwind.config.ts; the values are here.
+   ------------------------------------------------------------------ */
 :root {
-  --bg: #f6f8fb;
+  color-scheme: dark;
+
+  --page: 5 9 20;          /* page background */
+  --surface: 12 19 38;     /* "white": cards, inputs */
+
+  /* navy → near-white */
+  --slate-50: 16 24 45;
+  --slate-100: 23 33 58;
+  --slate-200: 32 44 74;
+  --slate-300: 45 60 96;
+  --slate-400: 104 119 158;
+  --slate-500: 134 148 182;
+  --slate-600: 165 177 205;
+  --slate-700: 196 205 225;
+  --slate-800: 221 228 241;
+  --slate-900: 238 242 250;
+  --slate-950: 248 250 253;
+
+  /* brand: electric cyan */
+  --brand-50: 8 47 66;
+  --brand-100: 12 66 88;
+  --brand-200: 18 93 117;
+  --brand-300: 14 125 153;
+  --brand-400: 6 182 212;
+  --brand-500: 34 211 238;
+  --brand-600: 34 211 238;
+  --brand-700: 103 232 249;
+  --brand-800: 165 243 252;
+  --brand-900: 207 250 254;
+  --brand-950: 236 254 255;
+
+  /* accent: violet */
+  --accent-50: 40 18 92;
+  --accent-100: 52 24 120;
+  --accent-200: 76 29 149;
+  --accent-300: 109 40 217;
+  --accent-400: 139 92 246;
+  --accent-500: 167 139 250;
+  --accent-600: 167 139 250;
+  --accent-700: 196 181 253;
+  --accent-800: 221 214 254;
+  --accent-900: 237 233 254;
+  --accent-950: 245 243 255;
 }
 
 html,
 body {
-  background: var(--bg);
-  color: #0f172a;
+  background-color: rgb(var(--page));
+  color: rgb(var(--slate-800));
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(1100px 560px at 8% -12%, rgb(34 211 238 / 0.13), transparent 62%),
+    radial-gradient(900px 520px at 100% -6%, rgb(139 92 246 / 0.16), transparent 60%),
+    radial-gradient(800px 600px at 50% 120%, rgb(34 211 238 / 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Faint blueprint grid behind everything, fading out towards the bottom. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(148 163 184 / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(148 163 184 / 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
 }
 
 * {
   box-sizing: border-box;
+}
+
+h1, h2, h3 {
+  font-family: theme("fontFamily.display");
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: rgb(34 211 238 / 0.3);
+  color: #fff;
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--slate-300)) transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: rgb(var(--slate-300)); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+@layer components {
+  /* Glass panels: every card-like box (rounded + "white" background). */
+  section.bg-white,
+  div.rounded-xl.bg-white,
+  div.rounded-2xl.bg-white,
+  aside.bg-white {
+    background-color: transparent;
+    background-image: linear-gradient(180deg, rgb(19 29 54 / 0.78), rgb(10 16 33 / 0.74));
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      0 24px 48px -28px rgb(0 0 0 / 0.75);
+  }
+
+  /* Inputs */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    color: rgb(var(--slate-900));
+    background-color: rgb(var(--surface) / 0.85);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(var(--slate-400));
+  }
+  input:not([type="checkbox"]):not([type="radio"]):focus,
+  select:focus,
+  textarea:focus {
+    border-color: rgb(var(--brand-500) / 0.7) !important;
+    box-shadow: 0 0 0 3px rgb(var(--brand-500) / 0.16);
+    outline: none;
+  }
+  select option {
+    background: rgb(var(--surface));
+    color: rgb(var(--slate-900));
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: rgb(var(--brand-500));
+  }
+
+  /* Primary buttons: cyan → violet gradient with a soft glow. */
+  .bg-brand-600 {
+    background-image: linear-gradient(135deg, rgb(34 211 238), rgb(167 139 250));
+    color: rgb(4 12 28);
+    font-weight: 600;
+    box-shadow: 0 8px 24px -10px rgb(34 211 238 / 0.55);
+  }
+  .bg-brand-600:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 10px 28px -8px rgb(34 211 238 / 0.7);
+  }
+
+  /* Tables */
+  table thead th {
+    font-family: theme("fontFamily.display");
+    letter-spacing: 0.06em;
+  }
+  table tbody tr {
+    transition: background-color 0.15s ease;
+  }
+  table tbody tr:hover {
+    background-color: rgb(34 211 238 / 0.035);
+  }
+
+  /* Shared building blocks for the redesigned pages */
+  .glass {
+    background-image: linear-gradient(180deg, rgb(19 29 54 / 0.78), rgb(10 16 33 / 0.74));
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid rgb(var(--slate-200));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 24px 48px -28px rgb(0 0 0 / 0.75);
+  }
+  .text-gradient {
+    background-image: linear-gradient(100deg, rgb(103 232 249), rgb(167 139 250) 55%, rgb(244 114 182));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glow-line {
+    background-image: linear-gradient(90deg, transparent, rgb(34 211 238 / 0.6), rgb(167 139 250 / 0.6), transparent);
+  }
+  .eyebrow {
+    font-family: theme("fontFamily.display");
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--brand-500));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

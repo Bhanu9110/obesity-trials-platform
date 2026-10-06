@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, authDisabled, readSession } from "@/lib/auth";
 import { guestMayOpen } from "@/lib/guest-pages";
@@ -92,13 +93,12 @@ export default async function QualityPage({
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Data quality</h1>
-        <p className="text-sm text-slate-500">
-          Every trial is checked automatically each time it is synced. Score 1.00 = no issues.
-          Covers the primary-obesity trials shown on the website. Click a box or an issue to list those trials.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Quality control"
+        title="Data"
+        highlight="quality"
+        description="Every trial is checked automatically each time it is synced (score 1.00 = no issues). Click a tile or an issue to list those trials."
+      />
 
       {o.checked === 0 ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
@@ -129,7 +129,7 @@ export default async function QualityPage({
       )}
 
       {band !== "clean" && (
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5">
           <h2 className="mb-3 text-sm font-semibold text-slate-900">
             Issues found{band ? ` in “${QUALITY_BANDS[band].label}”` : ""}
           </h2>
@@ -162,7 +162,7 @@ export default async function QualityPage({
         </section>
       )}
 
-      <section id="trials" className="rounded-xl border border-slate-200 bg-white">
+      <section id="trials" className="rounded-2xl border border-slate-200 bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
           <div className="text-sm font-semibold text-slate-900">
             {title} ({list.total.toLocaleString()})
@@ -180,12 +180,12 @@ export default async function QualityPage({
                 name="q"
                 defaultValue={q}
                 placeholder="Find — NCT ID, sponsor, indication, drug…"
-                className="w-64 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500"
+                className="w-64 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500"
               />
             </form>
             {canDownload && <a
               href={csvHref}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
               title="Download this list (all pages) as a CSV file for Excel"
             >
               Download CSV
@@ -248,9 +248,9 @@ export default async function QualityPage({
         </div>
         {pages > 1 && (
           <div className="flex items-center justify-center gap-3 border-t border-slate-100 py-3 text-sm">
-            {page > 1 ? <Link href={href({ page: page - 1 })} className="rounded-md border border-slate-300 px-3 py-1.5">Prev</Link> : <span className="px-3 py-1.5 text-slate-300">Prev</span>}
+            {page > 1 ? <Link href={href({ page: page - 1 })} className="rounded-lg border border-slate-200 px-3 py-1.5">Prev</Link> : <span className="px-3 py-1.5 text-slate-300">Prev</span>}
             <span className="text-slate-500">Page {page} of {pages}</span>
-            {page < pages ? <Link href={href({ page: page + 1 })} className="rounded-md border border-slate-300 px-3 py-1.5">Next</Link> : <span className="px-3 py-1.5 text-slate-300">Next</span>}
+            {page < pages ? <Link href={href({ page: page + 1 })} className="rounded-lg border border-slate-200 px-3 py-1.5">Next</Link> : <span className="px-3 py-1.5 text-slate-300">Next</span>}
           </div>
         )}
       </section>

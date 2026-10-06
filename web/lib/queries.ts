@@ -1,5 +1,5 @@
 import { query, pool } from "./db";
-import type {
+import type { HomeStats, ProductLink,
   FilterOptions,
   Product,
   ProductInfo,
@@ -15,11 +15,30 @@ export interface TrialFilters {
   continent?: string[];
   country?: string[];
   sponsorClass?: string[];
+  /** registry overall status, e.g. RECRUITING */
+  status?: string[];
   /** obesity class: "primary" (default), "all", or one class */
   scope?: string;
+  sort?: TrialSort;
   page?: number;
   pageSize?: number;
 }
+
+export const TRIAL_SORTS = {
+  newest: { label: "Newest registered", sql: "t.nct_id DESC" },
+  start_desc: { label: "Start date — latest", sql: "nullif(to_jsonb(t) ->> 'start_date', '') DESC NULLS LAST, t.nct_id DESC" },
+  start_asc: { label: "Start date — earliest", sql: "nullif(to_jsonb(t) ->> 'start_date', '') ASC NULLS LAST, t.nct_id DESC" },
+  enrollment: { label: "Largest enrollment", sql: "(to_jsonb(t) ->> 'enrollment')::int DESC NULLS LAST, t.nct_id DESC" },
+  phase: { label: "Most advanced phase", sql: `CASE
+      WHEN t.phase LIKE '%PHASE4%' THEN 6 WHEN t.phase = 'PHASE2, PHASE3' THEN 5 WHEN t.phase LIKE '%PHASE3%' THEN 5
+      WHEN t.phase LIKE '%PHASE2%' THEN 4 WHEN t.phase LIKE '%PHASE1%' THEN 3 WHEN t.phase = 'EARLY_PHASE1' THEN 2 ELSE 0 END DESC, t.nct_id DESC` },
+  sponsor: { label: "Sponsor A–Z", sql: "t.sponsor ASC NULLS LAST, t.nct_id DESC" },
+} as const;
+export type TrialSort = keyof typeof TRIAL_SORTS;
+export const isTrialSort = (s: unknown): s is TrialSort => typeof s === "string" && s in TRIAL_SORTS;
+
+const TITLE_SQL = `(SELECT r.payload #>> '{protocolSection,identificationModule,briefTitle}'
+                      FROM raw_trials r WHERE r.source = 'CTGOV' AND r.source_id = t.nct_id)`;
 
 // Products of a trial as [{slug, name}], alphabetical.
 const PRODUCTS_JSON = `
@@ -73,6 +92,10 @@ function buildWhere(f: TrialFilters, params: unknown[]): string {
     params.push(f.sponsorClass);
     clauses.push(`t.lead_sponsor_class = ANY($${params.length})`);
   }
+  if (f.status?.length) {
+    params.push(f.status);
+    clauses.push(`(to_jsonb(t) ->> 'overall_status') = ANY($${params.length})`);
+  }
   return "WHERE " + clauses.join(" AND ");
 }
 
@@ -89,10 +112,13 @@ export async function listTrials(
   const [countRows, items] = await Promise.all([
     query<{ count: number }>(`SELECT count(*)::int AS count FROM trials t ${where}`, params),
     query<TrialListItem>(
-      `SELECT t.nct_id, t.phase, t.sponsor, t.conditions AS indication, t.continents,
-              t.obesity_class, t.obesity_reason, ${PRODUCTS_JSON} AS products
+      `SELECT t.nct_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions AS indication, t.continents,
+              t.obesity_class, t.obesity_reason, ${PRODUCTS_JSON} AS products, ${TITLE_SQL} AS title,
+              to_jsonb(t) ->> 'overall_status' AS overall_status,
+              to_jsonb(t) ->> 'start_date' AS start_date,
+              (to_jsonb(t) ->> 'enrollment')::int AS enrollment
          FROM trials t ${where}
-        ORDER BY t.nct_id DESC
+        ORDER BY ${TRIAL_SORTS[isTrialSort(f.sort) ? f.sort : "newest"].sql}
         LIMIT $${pageParams.length - 1} OFFSET $${pageParams.length}`,
       pageParams,
     ),
@@ -101,7 +127,7 @@ export async function listTrials(
 }
 
 export async function filterOptions(): Promise<FilterOptions> {
-  const [phases, countries, classes] = await Promise.all([
+  const [phases, countries, classes, stats, facetRows] = await Promise.all([
     query<{ phase: string }>(
       `SELECT DISTINCT phase FROM trials t WHERE t.is_active AND ${hasDrug("t")} AND coalesce(phase, '') <> ''`,
     ),
@@ -113,7 +139,19 @@ export async function filterOptions(): Promise<FilterOptions> {
     query<{ name: string; trials: number }>(
       `SELECT obesity_class AS name, count(*)::int AS trials FROM trials t WHERE t.is_active AND ${hasDrug("t")} GROUP BY 1`,
     ),
+    homeStats().catch(() => undefined),
+    query<{ kind: string; name: string; n: number }>(
+      `SELECT 'phase' AS kind, coalesce(phase, '') AS name, count(*)::int AS n FROM trials t
+        WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")} GROUP BY 2
+       UNION ALL
+       SELECT 'status', coalesce(to_jsonb(t) ->> 'overall_status', ''), count(*)::int FROM trials t
+        WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")} GROUP BY 2
+       UNION ALL
+       SELECT 'sponsor', coalesce(lead_sponsor_class, ''), count(*)::int FROM trials t
+        WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")} GROUP BY 2`,
+    ).catch(() => []),
   ]);
+  const facet = (kind: string) => Object.fromEntries(facetRows.filter((r) => r.kind === kind).map((r) => [r.name, r.n]));
   const byContinent = new Map<string, string[]>();
   for (const r of countries) {
     const list = byContinent.get(r.continent) ?? [];
@@ -127,6 +165,27 @@ export async function filterOptions(): Promise<FilterOptions> {
       countries: byContinent.get(c)!,
     })),
     classes,
+    stats,
+    facets: { phases: facet("phase"), statuses: facet("status"), sponsorClasses: facet("sponsor") },
+  };
+}
+
+/** Headline numbers for the home page (primary-obesity trials with a drug). */
+export async function homeStats(): Promise<HomeStats> {
+  const r = await query<Omit<HomeStats, "lastSync"> & { last_sync: Date | null }>(
+    `WITH t AS (SELECT * FROM trials t WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")})
+     SELECT (SELECT count(*)::int FROM t) AS trials,
+            (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp JOIN t ON t.nct_id = tp.nct_id) AS drugs,
+            (SELECT count(*)::int FROM t WHERE lead_sponsor_class = 'INDUSTRY') AS industry,
+            (SELECT count(*)::int FROM t WHERE phase IN ('PHASE3', 'PHASE4', 'PHASE2, PHASE3')) AS late,
+            (SELECT count(*)::int FROM t WHERE overall_status IN ('RECRUITING', 'NOT_YET_RECRUITING', 'ENROLLING_BY_INVITATION')) AS recruiting,
+            (SELECT count(DISTINCT c)::int FROM t, unnest(t.countries) c) AS countries,
+            (SELECT max(run_at) FROM sync_runs WHERE status IN ('success', 'partial')) AS last_sync`,
+  );
+  const x = r[0];
+  return {
+    trials: x.trials, drugs: x.drugs, industry: x.industry, late: x.late, recruiting: x.recruiting,
+    countries: x.countries, lastSync: x.last_sync ? new Date(x.last_sync).toISOString() : null,
   };
 }
 
@@ -640,4 +699,150 @@ export async function trialRecord(nctId: string): Promise<TrialRecord> {
     ),
   ]);
   return { stored: rows[0] ?? null, changes };
+}
+
+
+// --------------------------------------------------------------------------- #
+// Overview dashboard, trial preview and global search
+// --------------------------------------------------------------------------- #
+const SHOWN = (a = "t") => `${a}.is_active AND ${a}.obesity_class = 'primary' AND ${hasDrug(a)}`;
+
+export interface Overview {
+  phases: { name: string; count: number }[];
+  statuses: { name: string; count: number }[];
+  startYears: { year: number; count: number }[];
+  sponsors: { name: string; count: number; industry: boolean }[];
+  regions: { name: string; count: number }[];
+  drugs: { slug: string; name: string; trials: number; phases: string[] }[];
+  latest: { nct_id: string; title: string | null; phase: string | null; sponsor: string | null; first_seen: string; products: ProductLink[] }[];
+  changes7d: number;
+}
+
+export async function overview(): Promise<Overview> {
+  const tz = displayTimeZone();
+  const [phases, statuses, years, sponsors, regions, drugs, latest, changes] = await Promise.all([
+    query<{ name: string; count: number }>(
+      `SELECT coalesce(nullif(phase, ''), 'NONE') AS name, count(*)::int AS count FROM trials t WHERE ${SHOWN()} GROUP BY 1`,
+    ),
+    query<{ name: string; count: number }>(
+      `SELECT coalesce(to_jsonb(t) ->> 'overall_status', 'UNKNOWN') AS name, count(*)::int AS count FROM trials t WHERE ${SHOWN()} GROUP BY 1`,
+    ),
+    query<{ year: number; count: number }>(
+      `SELECT left(to_jsonb(t) ->> 'start_date', 4)::int AS year, count(*)::int AS count
+         FROM trials t WHERE ${SHOWN()} AND (to_jsonb(t) ->> 'start_date') ~ '^[0-9]{4}'
+        GROUP BY 1 ORDER BY 1`,
+    ),
+    query<{ name: string; count: number; industry: boolean }>(
+      `SELECT sponsor AS name, count(*)::int AS count, bool_or(lead_sponsor_class = 'INDUSTRY') AS industry
+         FROM trials t WHERE ${SHOWN()} AND sponsor IS NOT NULL
+        GROUP BY sponsor ORDER BY count DESC, sponsor LIMIT 8`,
+    ),
+    query<{ name: string; count: number }>(
+      `SELECT c AS name, count(*)::int AS count FROM trials t, unnest(t.continents) c WHERE ${SHOWN()} GROUP BY c ORDER BY count DESC`,
+    ),
+    query<{ slug: string; name: string; trials: number; phases: string[] }>(
+      `SELECT p.slug, p.name, count(*)::int AS trials,
+              coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL), '{}') AS phases
+         FROM products p JOIN trial_products tp ON tp.product_id = p.id
+         JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}
+        WHERE p.name NOT ILIKE 'undisclosed%' AND p.name NOT ILIKE 'placebo%'
+        GROUP BY p.id ORDER BY trials DESC, p.name LIMIT 8`,
+    ),
+    query<Overview["latest"][number]>(
+      `SELECT t.nct_id, ${TITLE_SQL} AS title, t.phase, t.sponsor,
+              to_char(t.first_seen_at AT TIME ZONE $1, 'YYYY-MM-DD') AS first_seen, ${PRODUCTS_JSON} AS products
+         FROM trials t WHERE ${SHOWN()}
+        ORDER BY t.first_seen_at DESC, t.nct_id DESC LIMIT 6`,
+      [tz],
+    ),
+    query<{ n: number }>(`SELECT count(*)::int AS n FROM trial_changes WHERE changed_at > now() - interval '7 days'`).catch(() => [{ n: 0 }]),
+  ]);
+  const thisYear = new Date().getFullYear();
+  return {
+    phases, statuses,
+    startYears: years.filter((y) => y.year >= thisYear - 14 && y.year <= thisYear + 1),
+    sponsors, regions, drugs, latest, changes7d: changes[0]?.n ?? 0,
+  };
+}
+
+export interface TrialPreview {
+  nct_id: string;
+  title: string | null;
+  official_title: string | null;
+  summary: string | null;
+  phase: string | null;
+  sponsor: string | null;
+  lead_sponsor_class: string | null;
+  overall_status: string | null;
+  start_date: string | null;
+  primary_completion: string | null;
+  completion: string | null;
+  enrollment: number | null;
+  conditions: string[];
+  countries: string[];
+  continents: string[];
+  products: ProductLink[];
+  first_seen: string | null;
+}
+
+/** Everything the quick-preview panel shows, from the stored record. */
+export async function trialPreview(nctId: string): Promise<TrialPreview | null> {
+  const rows = await query<TrialPreview>(
+    `SELECT t.nct_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions, t.countries, t.continents,
+            ${PRODUCTS_JSON} AS products,
+            r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
+            r.payload #>> '{protocolSection,identificationModule,officialTitle}' AS official_title,
+            left(r.payload #>> '{protocolSection,descriptionModule,briefSummary}', 900) AS summary,
+            coalesce(to_jsonb(t) ->> 'overall_status', r.payload #>> '{protocolSection,statusModule,overallStatus}') AS overall_status,
+            coalesce(to_jsonb(t) ->> 'start_date', r.payload #>> '{protocolSection,statusModule,startDateStruct,date}') AS start_date,
+            r.payload #>> '{protocolSection,statusModule,primaryCompletionDateStruct,date}' AS primary_completion,
+            r.payload #>> '{protocolSection,statusModule,completionDateStruct,date}' AS completion,
+            coalesce((to_jsonb(t) ->> 'enrollment')::int, (r.payload #>> '{protocolSection,designModule,enrollmentInfo,count}')::int) AS enrollment,
+            to_char(t.first_seen_at, 'YYYY-MM-DD') AS first_seen
+       FROM trials t
+       LEFT JOIN raw_trials r ON r.source = 'CTGOV' AND r.source_id = t.nct_id
+      WHERE t.nct_id = $1`,
+    [nctId],
+  );
+  return rows[0] ?? null;
+}
+
+export interface SearchResults {
+  trials: { nct_id: string; title: string | null; phase: string | null; sponsor: string | null }[];
+  drugs: { slug: string; name: string; trials: number }[];
+  sponsors: { name: string; trials: number }[];
+}
+
+/** Global search (the Ctrl/⌘ K palette). */
+export async function globalSearch(q: string, opts: { trials: boolean; drugs: boolean }): Promise<SearchResults> {
+  const like = `%${q.replace(/[%_\\]/g, (m) => "\\" + m)}%`;
+  const [trials, drugs, sponsors] = await Promise.all([
+    opts.trials
+      ? query<SearchResults["trials"][number]>(
+          `SELECT t.nct_id, ${TITLE_SQL} AS title, t.phase, t.sponsor FROM trials t
+            WHERE ${SHOWN()} AND (t.nct_id ILIKE $1 OR ${TITLE_SQL} ILIKE $1
+                  OR array_to_string(t.conditions, ' ') ILIKE $1)
+            ORDER BY (t.nct_id ILIKE $1) DESC, t.nct_id DESC LIMIT 6`,
+          [like],
+        )
+      : Promise.resolve([]),
+    opts.drugs
+      ? query<SearchResults["drugs"][number]>(
+          `SELECT p.slug, p.name, count(t.nct_id)::int AS trials
+             FROM products p JOIN trial_products tp ON tp.product_id = p.id
+             JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}
+            WHERE p.name ILIKE $1 OR coalesce(p.aliases, '') ILIKE $1 OR coalesce(p.brand_names, '') ILIKE $1
+            GROUP BY p.id ORDER BY (p.name ILIKE $2) DESC, trials DESC LIMIT 6`,
+          [like, `${q}%`],
+        )
+      : Promise.resolve([]),
+    opts.trials
+      ? query<SearchResults["sponsors"][number]>(
+          `SELECT t.sponsor AS name, count(*)::int AS trials FROM trials t
+            WHERE ${SHOWN()} AND t.sponsor ILIKE $1 GROUP BY t.sponsor ORDER BY trials DESC LIMIT 5`,
+          [like],
+        )
+      : Promise.resolve([]),
+  ]);
+  return { trials, drugs, sponsors };
 }

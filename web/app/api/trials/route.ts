@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listTrials, type TrialFilters } from "@/lib/queries";
+import { isTrialSort, listTrials, type TrialFilters } from "@/lib/queries";
 import { activeUser } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +21,8 @@ export async function GET(req: NextRequest) {
     continent: multi(sp.get("continent")),
     country: multi(sp.get("country")),
     sponsorClass: sp.get("sponsorClass")?.split(/[|,]/).map((s) => s.trim()).filter(Boolean),
+    status: multi(sp.get("status")),
+    sort: isTrialSort(sp.get("sort")) ? (sp.get("sort") as TrialFilters["sort"]) : undefined,
     scope: sp.get("scope") ?? undefined,
     page: sp.get("page") ? Number(sp.get("page")) : 1,
     pageSize: sp.get("pageSize") ? Number(sp.get("pageSize")) : 20,

@@ -70,7 +70,7 @@ export default function AccessPanel() {
   }, [load]);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white">
+    <section className="rounded-2xl border border-slate-200 bg-white">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Who is using the website</h2>

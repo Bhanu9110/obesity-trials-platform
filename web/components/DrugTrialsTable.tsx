@@ -15,7 +15,7 @@ import {
 
 const NO_PHASE = "__none__";
 const ACTIVE = "__active__";
-const SELECT = "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700";
+const SELECT = "rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700";
 const GROUP_PREVIEW = 10;  // trials shown per phase group before "Show all"
 const FLAT_PREVIEW = 50;   // trials shown in the ungrouped list before "Show more"
 
@@ -27,16 +27,14 @@ const phaseLabel = (p: string) => (p === NO_PHASE ? "No phase" : formatPhase(p))
 const rankOf = (p: string) => phaseRank(p === NO_PHASE ? null : p);
 const isIndustry = (t: ProductTrial) => t.lead_sponsor_class === "INDUSTRY";
 
-/** Phase-bar colour: later stage = darker. */
+/** Phase-strip colour: the same phase colours as the phase pills everywhere else. */
 function phaseColour(p: string): string {
-  const r = rankOf(p);
-  if (r >= 4) return "bg-blue-900 text-white";
-  if (r >= 3) return "bg-blue-700 text-white";
-  if (r >= 2) return "bg-blue-500 text-white";
-  if (r >= 1) return "bg-blue-400 text-white";
-  if (r > 0) return "bg-blue-200 text-blue-900";
-  if (r === 0) return "bg-slate-300 text-slate-700";
-  return "bg-slate-200 text-slate-600";
+  const u = p.toUpperCase();
+  if (u.includes("PHASE4")) return "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200";
+  if (u.includes("PHASE3")) return "bg-pink-50 text-pink-700 ring-1 ring-inset ring-pink-200";
+  if (u.includes("PHASE2")) return "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200";
+  if (u.includes("PHASE1")) return "bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-200";
+  return "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200";
 }
 
 const CONTINENT_SHORT: Record<string, string> = {
@@ -284,17 +282,17 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search title, NCT ID, sponsor or condition…"
-              className="w-full flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 lg:min-w-[260px]"
+              className="w-full flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 lg:min-w-[260px]"
             />
             {industryTotal > 0 && industryTotal < scoped.length && (
-              <div className="flex w-full overflow-hidden rounded-lg border border-slate-300 text-sm lg:w-auto" role="group" aria-label="Sponsor type">
+              <div className="flex w-full overflow-hidden rounded-xl border border-slate-200 text-sm lg:w-auto" role="group" aria-label="Sponsor type">
                 {([["", "All sponsors"], ["industry", `Industry (${industryTotal})`], ["academic", "Non-industry"]] as const).map(([v, label]) => (
                   <button
                     key={v}
                     type="button"
                     onClick={() => setSponsor(v)}
                     aria-pressed={sponsor === v}
-                    className={`flex-1 whitespace-nowrap px-2 py-2 text-xs sm:px-3 sm:text-sm lg:flex-none ${sponsor === v ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
+                    className={`flex-1 whitespace-nowrap px-2 py-2 text-xs sm:px-3 sm:text-sm lg:flex-none ${sponsor === v ? "bg-brand-500/15 font-medium text-brand-700" : "bg-white text-slate-600 hover:text-slate-900"}`}
                   >
                     {label}
                   </button>
@@ -340,7 +338,7 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
                 <option value="enrollment:desc">Most participants</option>
                 <option value="sponsor:asc">Sponsor A–Z</option>
               </select>
-              <label className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600">
+              <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
                 <input type="checkbox" checked={grouped} onChange={(e) => { setGrouped(e.target.checked); setFlatLimit(FLAT_PREVIEW); }} />
                 Group by phase
               </label>

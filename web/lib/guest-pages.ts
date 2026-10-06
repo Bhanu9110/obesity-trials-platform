@@ -3,7 +3,7 @@
 // No server-only imports: this runs in the middleware too.
 
 export const GUEST_PAGES = [
-  { key: "trials", label: "Trials", path: "/", hint: "trial list and search" },
+  { key: "trials", label: "Trials", path: "/", hint: "overview dashboard, trial explorer and search" },
   { key: "drugs", label: "Drugs", path: "/drugs", hint: "drug list and drug pages" },
   { key: "changes", label: "Changes", path: "/changes", hint: "what changed in the registry" },
   { key: "quality", label: "Data quality", path: "/quality", hint: "quality scores and issues" },
@@ -30,8 +30,9 @@ export function cleanPages(input: unknown): GuestPage[] {
 export function requiredPage(pathname: string): GuestPage | "always" | "never" {
   const under = (p: string) => pathname === p || pathname.startsWith(p + "/");
   if (["/admin", "/api/sync", "/api/failures", "/api/access", "/api/users", "/api/guests"].some(under)) return "never";
-  if (["/login", "/api/auth", "/api/activity", "/api/health", "/trials"].some(under)) return "always";
-  if (pathname === "/" || under("/api/trials") || under("/api/filters")) return "trials";
+  // The Trials explorer and overview need "trials"; a single trial record opens from any page.
+  if (pathname === "/" || pathname === "/trials" || under("/api/trials") || under("/api/filters")) return "trials";
+  if (["/login", "/api/auth", "/api/activity", "/api/health", "/api/search", "/trials"].some(under)) return "always";
   if (under("/drugs") || under("/api/products")) return "drugs";
   if (under("/changes")) return "changes";
   if (under("/api/quality/export")) return "quality_export";

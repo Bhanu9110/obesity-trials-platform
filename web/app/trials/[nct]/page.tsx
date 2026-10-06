@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Timeline from "@/components/trial/Timeline";
 import { notFound } from "next/navigation";
 import { NCT_RE, fetchStudy, formatRegistryDate, humanize, type Study } from "@/lib/ctgov";
 import { trialRecord, type StoredTrial } from "@/lib/queries";
@@ -47,7 +48,7 @@ function DatabasePanel({ stored, removedAt, nct }: { stored: StoredTrial | null;
   const cls = OBESITY_CLASSES[stored.obesity_class];
   const issues = stored.quality?.issues ?? [];
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-5">
       <h2 className="mb-3 text-sm font-semibold text-slate-900">In this database</h2>
       <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
@@ -134,7 +135,7 @@ function StoredFallback({ stored, error }: { stored: StoredTrial; error: string 
         <div className="font-semibold">Full study details are temporarily unavailable</div>
         <p className="mt-1">{error} The details below come from this database; reload the page in a few minutes for the complete record.</p>
       </div>
-      <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[13rem_1fr]">
           <dt className="text-slate-500">Title</dt><dd className="text-slate-800">{stored.title ?? <Dash />}</dd>
           <dt className="text-slate-500">Conditions</dt><dd><Chips values={stored.conditions} max={20} /></dd>
@@ -176,17 +177,18 @@ export default async function TrialPage({ params, searchParams }: Params) {
 
   return (
     <div className="space-y-4">
-      <Link href="/" className="text-sm text-brand-600 hover:underline">← All trials</Link>
+      <Link href="/trials" className="inline-flex items-center gap-1 text-sm text-slate-500 transition hover:text-brand-600">← All trials</Link>
 
-      <header className="rounded-xl border border-slate-200 bg-white p-5">
+      <header className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6">
+        <span className="pointer-events-none absolute -right-20 -top-24 h-60 w-60 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true" />
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded bg-slate-900 px-2 py-0.5 font-mono font-semibold text-white">{nct}</span>
+          <span className="rounded-md bg-brand-50 px-2 py-0.5 font-mono font-semibold text-brand-700 ring-1 ring-brand-200 shadow-[0_0_16px_-4px_rgb(34_211_238/0.6)]">{nct}</span>
           {st?.overallStatus && <SiteStatus s={st.overallStatus} />}
           {ds?.phases?.length ? <span className="rounded bg-indigo-50 px-1.5 py-0.5 font-medium text-indigo-700">{ds.phases.map(humanize).join(" / ")}</span> : null}
           {ds?.studyType && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">{humanize(ds.studyType)}</span>}
           {hasResults && <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700">Results posted</span>}
         </div>
-        <h1 className="mt-2 text-xl font-semibold leading-snug text-slate-900">
+        <h1 className="mt-3 font-display text-2xl font-semibold leading-snug tracking-tight text-slate-950">
           {title}{id?.acronym && <span className="ml-2 text-base font-normal text-slate-500">({id.acronym})</span>}
         </h1>
         {id?.officialTitle && id.officialTitle !== title && <p className="mt-1 text-sm text-slate-500">{id.officialTitle}</p>}
@@ -199,6 +201,17 @@ export default async function TrialPage({ params, searchParams }: Params) {
           {st?.primaryCompletionDateStruct?.date && <span><span className="text-slate-400">Primary completion</span> {formatRegistryDate(st.primaryCompletionDateStruct.date)}</span>}
           {st?.lastUpdatePostDateStruct?.date && <span><span className="text-slate-400">Last update</span> {formatRegistryDate(st.lastUpdatePostDateStruct.date)}</span>}
         </div>
+        {st && (
+          <div className="mt-5 border-t border-slate-200 pt-1">
+            <Timeline items={[
+              { label: "First posted", date: st.studyFirstPostDateStruct?.date },
+              { label: "Start", date: st.startDateStruct?.date, anticipated: st.startDateStruct?.type === "ANTICIPATED" },
+              { label: "Primary completion", date: st.primaryCompletionDateStruct?.date, anticipated: st.primaryCompletionDateStruct?.type === "ANTICIPATED" },
+              { label: "Completion", date: st.completionDateStruct?.date, anticipated: st.completionDateStruct?.type === "ANTICIPATED" },
+              { label: "Results posted", date: st.resultsFirstPostDateStruct?.date },
+            ]} />
+          </div>
+        )}
       </header>
 
       <DatabasePanel stored={stored} removedAt={removedAt} nct={nct} />
@@ -211,7 +224,7 @@ export default async function TrialPage({ params, searchParams }: Params) {
             scroll={false}
             role="tab"
             aria-selected={tab === t}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${tab === t ? "border-brand-600 text-brand-700" : "border-transparent text-slate-500 hover:text-slate-800"}`}
+            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition ${tab === t ? "border-brand-500 text-slate-950 [text-shadow:0_0_14px_rgb(34_211_238/0.5)]" : "border-transparent text-slate-500 hover:text-slate-800"}`}
           >
             {label}
           </Link>
@@ -248,7 +261,7 @@ export default async function TrialPage({ params, searchParams }: Params) {
 
       {tab === "history" && (
         <div className="space-y-4">
-          <section className="rounded-xl border border-slate-200 bg-white">
+          <section className="rounded-2xl border border-slate-200 bg-white">
             <div className="border-b border-slate-100 px-5 py-3">
               <h3 className="text-sm font-semibold text-slate-900">Changes tracked by this database</h3>
               <p className="text-xs text-slate-500">Every daily sync compares the registry record with the stored one and logs what changed.</p>
@@ -275,7 +288,7 @@ export default async function TrialPage({ params, searchParams }: Params) {
             )}
           </section>
           {st && (
-            <section className="rounded-xl border border-slate-200 bg-white p-5">
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h3 className="mb-3 text-sm font-semibold text-slate-900">Registry record dates</h3>
               <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[16rem_1fr]">
                 {([
