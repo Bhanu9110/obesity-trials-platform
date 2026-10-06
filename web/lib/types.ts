@@ -78,6 +78,8 @@ export const PRODUCT_INFO_FIELDS: (keyof ProductInfo)[] = [
 
 export interface Product extends ProductInfo {
   id: number;
+  summary: string | null;             // hand-written product summary
+  summary_updated_at: string | null;
   trials: number;      // primary-obesity trials (counted automatically)
   all_trials: number;  // all stored trials
   slug: string;

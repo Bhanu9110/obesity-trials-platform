@@ -219,7 +219,9 @@ export async function listProducts(): Promise<ProductSummary[]> {
 
 export async function getProduct(slug: string): Promise<Product | null> {
   const rows = await query<Product>(
+    // summary via to_jsonb: the page keeps working in the minute before migration 0016 runs.
     `SELECT p.id, p.slug, p.name, ${INFO_COLS}, p.info_updated_at,
+            to_jsonb(p) ->> 'summary' AS summary, to_jsonb(p) ->> 'summary_updated_at' AS summary_updated_at,
             (SELECT count(*) FILTER (WHERE t.obesity_class = 'primary')::int
                FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
               WHERE tp.product_id = p.id) AS trials,
@@ -266,6 +268,15 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
       info.approval_date, info.sponsor, info.drug_class,
       info.aliases, info.brand_names, info.candidate, info.parent_drug, info.therapy_subclass, info.indication,
     ],
+  );
+  return rows.length ? getProduct(slug) : null;
+}
+
+/** Save the hand-written product summary (blank = remove). */
+export async function updateProductSummary(slug: string, summary: string | null): Promise<Product | null> {
+  const rows = await query<{ slug: string }>(
+    `UPDATE products SET summary = $2, summary_updated_at = now() WHERE slug = $1 RETURNING slug`,
+    [slug, summary],
   );
   return rows.length ? getProduct(slug) : null;
 }
@@ -343,6 +354,7 @@ export async function mergeProduct(fromSlug: string, intoSlug: string): Promise<
           approved = coalesce(t.approved, f.approved), approval_date = coalesce(t.approval_date, f.approval_date),
           sponsor = coalesce(t.sponsor, f.sponsor), drug_class = coalesce(t.drug_class, f.drug_class),
           aliases = coalesce(t.aliases, f.aliases), brand_names = coalesce(t.brand_names, f.brand_names),
+          summary = coalesce(t.summary, f.summary),
           candidate = coalesce(t.candidate, f.candidate), parent_drug = coalesce(t.parent_drug, f.parent_drug),
           therapy_subclass = coalesce(t.therapy_subclass, f.therapy_subclass), indication = coalesce(t.indication, f.indication)
          FROM products f WHERE t.id = $2 AND f.id = $1`,
