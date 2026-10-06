@@ -10,8 +10,8 @@ import DrugTrialsTable from "@/components/DrugTrialsTable";
 import { Icon, StatTile } from "@/components/PageHeader";
 import { BarList, SplitBar, YearColumns, type Segment } from "@/components/charts";
 import { CHART_VIOLET, SERIES, phaseIndex } from "@/lib/chart-colors";
-import { formatMonthYear, formatPhase } from "@/lib/format";
-import ProductSummaryCard, { type SummaryFacts } from "@/components/ProductSummaryCard";
+import { formatPhase } from "@/lib/format";
+import ProductSummaryCard from "@/components/ProductSummaryCard";
 
 const STATUS_GROUPS = [
   { key: "recruiting", label: "Recruiting or opening", codes: ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION"] },
@@ -20,39 +20,6 @@ const STATUS_GROUPS = [
   { key: "stopped", label: "Stopped", codes: ["TERMINATED", "WITHDRAWN", "SUSPENDED"] },
   { key: "unknown", label: "Status unknown", codes: ["UNKNOWN", ""] },
 ];
-
-/** Counted facts for the Product summary box (primary-obesity trials only). */
-function summaryFacts(trials: { phase: string | null; sponsor: string | null; lead_sponsor_class: string | null;
-  overall_status: string | null; continents: string[]; enrollment: number | null; start_date: string | null; indication: string[] }[]): SummaryFacts {
-  const tally = (keys: string[]) => {
-    const m = new Map<string, number>();
-    keys.forEach((k) => m.set(k, (m.get(k) ?? 0) + 1));
-    return [...m.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-  };
-  const has = (codes: string[]) => trials.filter((t) => codes.includes(t.overall_status ?? "")).length;
-  const phaseRows = tally(trials.map((t) => t.phase || "NONE"))
-    .sort((a, b) => phaseIndex(a.name) - phaseIndex(b.name))
-    .map((p) => ({ label: p.name === "NONE" ? "No phase" : formatPhase(p.name), count: p.count }));
-  const starts = trials.map((t) => t.start_date).filter((d): d is string => Boolean(d && /^\d{4}/.test(d))).sort();
-  const sponsors = tally(trials.map((t) => t.sponsor).filter((x): x is string => Boolean(x)));
-  return {
-    trials: trials.length,
-    topPhase: trials.length ? highestPhase(trials.map((t) => t.phase)) : null,
-    phases: phaseRows,
-    recruiting: has(["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION"]),
-    active: has(["ACTIVE_NOT_RECRUITING"]),
-    completed: has(["COMPLETED"]),
-    stopped: has(["TERMINATED", "WITHDRAWN", "SUSPENDED"]),
-    sponsors: sponsors.length,
-    industry: trials.filter((t) => t.lead_sponsor_class === "INDUSTRY").length,
-    topSponsors: sponsors.slice(0, 5),
-    regions: tally(trials.flatMap((t) => t.continents)),
-    participants: trials.reduce((a, t) => a + (t.enrollment ?? 0), 0),
-    firstStart: starts.length ? formatMonthYear(starts[0]) : null,
-    latestStart: starts.length ? formatMonthYear(starts[starts.length - 1]) : null,
-    topConditions: tally(trials.flatMap((t) => t.indication.map((c) => c.trim())).filter(Boolean)).slice(0, 6),
-  };
-}
 
 function ChartCard({ title, sub, children, className = "" }: { title: string; sub?: string; children: React.ReactNode; className?: string }) {
   return (
@@ -108,7 +75,7 @@ export default async function DrugPage({ params, searchParams }: {
         </div>
       </div>
 
-      <ProductSummaryCard product={product} facts={summaryFacts(primary)} readOnly={viewOnly} />
+      <ProductSummaryCard product={product} readOnly={viewOnly} />
 
       <ProductInfoCard product={product} readOnly={viewOnly} />
 
