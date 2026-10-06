@@ -124,7 +124,9 @@ function TrialRow({ t }: { t: ProductTrial }) {
   );
 }
 
-export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { trials: ProductTrial[]; initialPhase?: string }) {
+export default function DrugTrialsTable({
+  trials: allTrials, initialPhase, initialSponsor,
+}: { trials: ProductTrial[]; initialPhase?: string; initialSponsor?: string }) {
   const classCounts = useMemo(() => {
     const m: Record<string, number> = {};
     for (const t of allTrials) m[t.obesity_class] = (m[t.obesity_class] ?? 0) + 1;
@@ -137,6 +139,8 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
   // The list stays hidden until a phase is picked, a filter is set, or "Show all" is pressed.
   const [showAll, setShowAll] = useState(false);
   const [sponsor, setSponsor] = useState<SponsorFilter>("");
+  // One named sponsor (set from the "Top sponsors" chart).
+  const [sponsorName, setSponsorName] = useState(initialSponsor ?? "");
   const [status, setStatus] = useState("");
   const [continent, setContinent] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("start");
@@ -157,6 +161,7 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
     return scoped.filter((t) => {
       if (sponsor === "industry" && !isIndustry(t)) return false;
       if (sponsor === "academic" && isIndustry(t)) return false;
+      if (sponsorName && (t.sponsor ?? "").toLowerCase() !== sponsorName.toLowerCase()) return false;
       if (status === ACTIVE ? !statusInfo(t.overall_status)?.active : status && t.overall_status !== status) return false;
       if (continent && !t.continents.includes(continent)) return false;
       if (!needle) return true;
@@ -167,7 +172,7 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
         t.indication.some((i) => i.toLowerCase().includes(needle))
       );
     });
-  }, [scoped, q, sponsor, status, continent]);
+  }, [scoped, q, sponsor, sponsorName, status, continent]);
 
   const phaseCounts = useMemo(() => {
     const m = new Map<string, number>();
@@ -221,8 +226,8 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
     return [...g.entries()].sort((a, b) => rankOf(b[0]) - rankOf(a[0])); // latest phase first
   }, [rows, grouped]);
 
-  const filtered = Boolean(q.trim() || phase || sponsor || status || continent);
-  const clear = () => { setQ(""); setPhase(""); setSponsor(""); setStatus(""); setContinent(""); setShowAll(false); };
+  const filtered = Boolean(q.trim() || phase || sponsor || sponsorName || status || continent);
+  const clear = () => { setQ(""); setPhase(""); setSponsor(""); setSponsorName(""); setStatus(""); setContinent(""); setShowAll(false); };
   const reveal = filtered || showAll;
   const toggle = (set: Set<string>, key: string, update: (s: Set<string>) => void) => {
     const n = new Set(set);
@@ -277,6 +282,17 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {sponsorName && (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-slate-500">Sponsor:</span>
+            <button type="button" onClick={() => setSponsorName("")} title="Show all sponsors"
+                    className="group flex items-center gap-1.5 rounded-full bg-brand-500/10 py-1 pl-3 pr-2 text-xs font-medium text-brand-700 ring-1 ring-brand-500/30 hover:bg-brand-500/20">
+              {sponsorName}
+              <span className="grid h-4 w-4 place-items-center rounded-full group-hover:bg-brand-500/20">×</span>
+            </button>
           </div>
         )}
 

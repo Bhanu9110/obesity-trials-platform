@@ -34,10 +34,12 @@ function ChartCard({ title, sub, children, className = "" }: { title: string; su
 export const dynamic = "force-dynamic";
 
 export default async function DrugPage({ params, searchParams }: {
-  params: Promise<{ slug: string }>; searchParams: Promise<{ phase?: string }>;
+  params: Promise<{ slug: string }>; searchParams: Promise<{ phase?: string; sponsor?: string }>;
 }) {
   const { slug } = await params;
-  const pickedPhase = ((await searchParams).phase ?? "").slice(0, 40) || undefined;
+  const sp = await searchParams;
+  const pickedPhase = (sp.phase ?? "").slice(0, 40) || undefined;
+  const pickedSponsor = (sp.sponsor ?? "").slice(0, 200) || undefined;
   const product = await getProduct(decodeURIComponent(slug));
   if (!product) notFound();
   const [trials, names] = await Promise.all([getProductTrials(product.id), productNames()]);
@@ -79,7 +81,7 @@ export default async function DrugPage({ params, searchParams }: {
 
       <ProductInfoCard product={product} readOnly={viewOnly} />
 
-      <DrugTrialsTable key={pickedPhase ?? "none"} trials={trials} initialPhase={pickedPhase} />
+      <DrugTrialsTable key={`${pickedPhase ?? ""}|${pickedSponsor ?? ""}`} trials={trials} initialPhase={pickedPhase} initialSponsor={pickedSponsor} />
 
       {primary.length > 0 && (() => {
         const q = encodeURIComponent(product.name);
@@ -97,7 +99,8 @@ export default async function DrugPage({ params, searchParams }: {
         const bySponsor = new Map<string, number>();
         primary.forEach((t) => { if (t.sponsor) bySponsor.set(t.sponsor, (bySponsor.get(t.sponsor) ?? 0) + 1); });
         const sponsorRows = [...bySponsor.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)
-          .map(([k, v]) => ({ key: k, label: k, title: k, value: v }));
+          .map(([k, v]) => ({ key: k, label: k, title: k, value: v,
+            href: `/drugs/${encodeURIComponent(product.slug)}?sponsor=${encodeURIComponent(k)}#trials` }));
         const years = new Map<number, number>();
         primary.forEach((t) => { const y = Number(t.start_date?.slice(0, 4)); if (y) years.set(y, (years.get(y) ?? 0) + 1); });
         const ys = [...years.keys()];
@@ -109,7 +112,7 @@ export default async function DrugPage({ params, searchParams }: {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <ChartCard title="Trials by phase" sub="Click a phase to list its trials below"><BarList rows={phaseRows} /></ChartCard>
               <ChartCard title="Recruitment status" sub="Where this drug's trials stand"><SplitBar segments={segments} /></ChartCard>
-              <ChartCard title="Top sponsors" sub="Who runs the trials"><BarList rows={sponsorRows} color={CHART_VIOLET} /></ChartCard>
+              <ChartCard title="Top sponsors" sub="Click a sponsor to list its trials"><BarList rows={sponsorRows} color={CHART_VIOLET} /></ChartCard>
             </div>
             {yearData.length > 1 && (
               <ChartCard title="Trial starts per year" sub="By registered start date">
