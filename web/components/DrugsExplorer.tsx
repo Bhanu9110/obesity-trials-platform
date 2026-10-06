@@ -110,7 +110,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-500">{p.trials}</div>
+                        <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600">{p.trials}</div>
                         <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">trials</div>
                       </div>
                     </div>

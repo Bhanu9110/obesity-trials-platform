@@ -98,8 +98,8 @@ export default function CommandPalette({
   let lastGroup = "";
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[12vh]" role="dialog" aria-modal="true" aria-label="Search">
-      <div className="absolute inset-0 bg-[rgb(3_6_14/0.7)] backdrop-blur-sm" onClick={onClose} />
-      <div className="glass relative w-full max-w-2xl overflow-hidden rounded-2xl shadow-[0_40px_120px_-20px_rgb(0_0_0/0.9)]"
+      <div className="absolute inset-0 bg-overlay backdrop-blur-sm" onClick={onClose} />
+      <div className="glass relative w-full max-w-2xl overflow-hidden rounded-2xl shadow-pop"
            onKeyDown={(e) => {
              if (e.key === "ArrowDown") { e.preventDefault(); setActive((a) => Math.min(items.length - 1, a + 1)); }
              else if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(0, a - 1)); }
@@ -107,7 +107,7 @@ export default function CommandPalette({
              else if (e.key === "Escape") { e.preventDefault(); onClose(); }
            }}>
         <div className="flex items-center gap-3 border-b border-slate-200 px-4">
-          <span className="text-brand-500">{icons.search}</span>
+          <span className="text-brand-600">{icons.search}</span>
           <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
                  placeholder="Search trials, drugs, sponsors, NCT IDs…"
                  className="h-14 flex-1 !border-0 !bg-transparent text-[15px] !shadow-none outline-none" />
@@ -127,14 +127,14 @@ export default function CommandPalette({
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
                           i === active ? "bg-brand-500/10 ring-1 ring-brand-500/30" : "hover:bg-slate-100/50"}`}>
                   <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ring-1 ${
-                    i === active ? "bg-brand-500/15 text-brand-500 ring-brand-500/30" : "bg-slate-100/70 text-slate-500 ring-slate-200"}`}>
+                    i === active ? "bg-brand-500/15 text-brand-600 ring-brand-500/30" : "bg-slate-100/70 text-slate-500 ring-slate-200"}`}>
                     {icons[it.icon]}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm text-slate-900">{it.label}</span>
                     {it.hint && <span className="block truncate text-xs text-slate-500">{it.hint}</span>}
                   </span>
-                  {i === active && <span className="text-brand-500">{icons.arrowRight}</span>}
+                  {i === active && <span className="text-brand-600">{icons.arrowRight}</span>}
                 </button>
               </div>
             );

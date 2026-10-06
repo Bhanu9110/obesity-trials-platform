@@ -197,7 +197,7 @@ export async function revealPassword(id: number): Promise<{ username: string; pa
 
 /** Checks a site user's username and password. */
 export async function siteLogin(username: string, password: string): Promise<
-  { user: string; role: Role; expiresAt: number | null; pages: GuestPage[] } | null
+  { user: string; role: Role; expiresAt: number | null; pages: GuestPage[] } | { ended: true } | null
 > {
   const name = (username ?? "").trim().toLowerCase();
   if (!USERNAME_RE.test(name)) return null;
@@ -207,8 +207,10 @@ export async function siteLogin(username: string, password: string): Promise<
        FROM site_users WHERE username = $1`,
     [name],
   );
-  const ok = await verifyPassword(password ?? "", rows[0]?.password_hash);
-  if (!ok || !rows[0].active) return null;
+  const ok = await verifyPassword((password ?? "").trim(), rows[0]?.password_hash);
+  if (!ok) return null;
+  // Right password, but the access has ended or was revoked: say so (only after the password matched).
+  if (!rows[0].active) return { ended: true };
   await query(`UPDATE site_users SET last_login_at = now(), login_count = login_count + 1 WHERE username = $1`, [name]);
   forget(name);
   const r = rows[0];

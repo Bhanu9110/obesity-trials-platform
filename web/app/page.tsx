@@ -5,7 +5,7 @@ import { homeStats, overview } from "@/lib/queries";
 import { formatPhase, phaseRank } from "@/lib/format";
 import PageHeader, { StatTile } from "@/components/PageHeader";
 import { BarList, SplitBar, YearColumns, type Segment } from "@/components/charts";
-import { SERIES, phaseIndex } from "@/lib/chart-colors";
+import { CHART_VIOLET, SERIES, phaseIndex } from "@/lib/chart-colors";
 import { PhaseText } from "@/components/ui";
 import { icons } from "@/components/shell/icons";
 
@@ -126,7 +126,7 @@ export default async function OverviewPage() {
           <YearColumns data={data.startYears} currentYear={year} />
         </Card>
         <Card title="Where trials run" sub="Trials with at least one site in each region">
-          <BarList rows={data.regions.map((r) => ({ key: r.name, label: r.name, title: r.name, value: r.count, href: `/trials?continent=${encodeURIComponent(r.name)}` }))} color="#a78bfa" />
+          <BarList rows={data.regions.map((r) => ({ key: r.name, label: r.name, title: r.name, value: r.count, href: `/trials?continent=${encodeURIComponent(r.name)}` }))} color={CHART_VIOLET} />
         </Card>
       </div>
 

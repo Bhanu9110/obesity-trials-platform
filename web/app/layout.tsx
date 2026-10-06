@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import "./globals.css";
 import { SESSION_COOKIE, authDisabled, isGuest, isSiteUser, plainName, verifySession } from "@/lib/auth";
 import { siteUserStatus } from "@/lib/site-users";
@@ -42,10 +42,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ...(showAdmin ? [{ href: "/admin", label: "Admin", icon: "admin", section: "Workspace" } as const] : []),
   ];
   const shellUser = user
-    ? { name: plainName(user), badge: until, role: guest ? "guest" as const : site ? "member" as const : "owner" as const }
+    ? {
+        name: site?.label?.trim() || plainName(user),
+        username: plainName(user),
+        badge: until,
+        role: guest ? "guest" as const : site ? "member" as const : "owner" as const,
+      }
     : null;
+  // Apply the saved theme before the first paint (light unless the viewer chose dark).
+  const themeScript = `try{var t=localStorage.getItem("otd-theme");if(t==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
   const fonts = (
     <>
+      <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
@@ -55,10 +63,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     </>
   );
 
+  const onLoginPage = (await headers()).get("x-otd-login-page") === "1";
+  const displayName = site?.label?.trim() || (user ? plainName(user) : "");
+
   // Signed in (or login switched off locally): the full app frame.
-  if (showNav) {
+  if (showNav && !onLoginPage) {
     return (
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <head>{fonts}</head>
         <body>
           {user && <ActivityTracker endsAt={site?.active && site.expiresAt ? site.expiresAt : undefined} />}
@@ -72,7 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   // Sign-in page, or a login whose access has ended: a minimal frame.
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>{fonts}</head>
       <body>
         <header className="mx-auto flex h-16 max-w-6xl items-center px-4">
@@ -85,6 +96,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </span>
         </header>
         <main className="mx-auto max-w-6xl animate-fade-up px-4 py-8">
+          {onLoginPage && user && !ended && (
+            <div className="mx-auto mb-6 flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-slate-700">
+              <span>
+                You&apos;re signed in as <b className="text-slate-950">{displayName}</b>
+                {displayName !== plainName(user) && <span className="text-slate-500"> ({plainName(user)})</span>}.
+                Sign in below to switch to another account.
+              </span>
+              <a href="/" className="rounded-xl bg-brand-600 px-3.5 py-1.5 text-sm text-white">Continue as {plainName(user)} →</a>
+            </div>
+          )}
           {ended ? (
             <div className="mx-auto mt-16 max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center">
               <div className="mx-auto mb-4 w-fit"><LogoMark size={44} /></div>

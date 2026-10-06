@@ -56,8 +56,8 @@ export default function TrialPreview({
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={`Trial ${nct}`}>
-      <div className="absolute inset-0 bg-[rgb(3_6_14/0.55)] backdrop-blur-[2px]" onClick={onClose} />
-      <aside className="absolute inset-y-0 right-0 flex w-full max-w-[520px] flex-col border-l border-slate-200 bg-[rgb(8_13_28/0.97)] shadow-[0_0_80px_-10px_rgb(0_0_0/0.9)] animate-[fade-up_.25s_ease-out]">
+      <div className="absolute inset-0 bg-overlay backdrop-blur-[2px]" onClick={onClose} />
+      <aside className="absolute inset-y-0 right-0 flex w-full max-w-[520px] flex-col border-l border-slate-200 bg-panel shadow-pop animate-[fade-up_.25s_ease-out]">
         <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
           <span className="rounded-md bg-brand-50 px-2 py-0.5 font-mono text-xs font-semibold text-brand-700 ring-1 ring-brand-200">{nct}</span>
           <span className="text-xs text-slate-500">Quick preview</span>

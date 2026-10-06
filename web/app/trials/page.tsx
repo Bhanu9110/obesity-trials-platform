@@ -358,8 +358,8 @@ function Explorer() {
       {/* Mobile filters */}
       {filtersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-[rgb(3_6_14/0.7)] backdrop-blur-sm" onClick={() => setFiltersOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-[310px] overflow-y-auto border-r border-slate-200 bg-[rgb(8_13_28)] p-4">
+          <div className="absolute inset-0 bg-overlay backdrop-blur-sm" onClick={() => setFiltersOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-[310px] overflow-y-auto border-r border-slate-200 bg-panel p-4">
             <div className="mb-4 flex items-center justify-between">
               <span className="font-display font-semibold text-slate-950">Filters</span>
               <button type="button" onClick={() => setFiltersOpen(false)} className="rounded-lg p-1.5 text-slate-500">{icons.close}</button>

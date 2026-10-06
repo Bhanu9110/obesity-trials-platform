@@ -29,8 +29,8 @@ export default function Timeline({ items }: { items: Milestone[] }) {
           const up = i % 2 === 0;
           return (
             <div key={p.label} className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${x(p.t)}%` }}>
-              <span className={`block h-3.5 w-3.5 rounded-full ring-4 ring-[rgb(12_19_38)] ${
-                done ? "bg-brand-500 shadow-[0_0_12px_rgb(34_211_238)]" : "border-2 border-accent-500 bg-[rgb(12_19_38)]"}`} />
+              <span className={`block h-3.5 w-3.5 rounded-full ring-4 ring-surface ${
+                done ? "bg-brand-500 shadow-[0_0_12px_rgb(34_211_238)]" : "border-2 border-accent-500 bg-white"}`} />
               <div className={`absolute left-1/2 w-max max-w-[140px] -translate-x-1/2 text-center ${up ? "bottom-6" : "top-6"}`}>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">{p.label}</div>
                 <div className={`text-xs font-medium ${done ? "text-slate-900" : "text-accent-700"}`}>

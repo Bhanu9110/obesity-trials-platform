@@ -13,8 +13,9 @@ export async function POST(req: NextRequest) {
   let password = "";
   try {
     const body = await req.json();
-    username = String(body?.username ?? "");
-    password = String(body?.password ?? "");
+    // Copy-paste often adds a space or line break; real passwords never start or end with one.
+    username = String(body?.username ?? "").trim();
+    password = String(body?.password ?? "").trim();
   } catch {
     return NextResponse.json({ error: "invalid request" }, { status: 400 });
   }
@@ -34,6 +35,13 @@ export async function POST(req: NextRequest) {
   let pages: string[] | undefined;
   if (!user) {
     const site = await siteLogin(username, password).catch(() => null);
+    if (site && "ended" in site) {
+      await logAccess("login_failed", username, req);
+      return NextResponse.json(
+        { error: "This login's access has ended. Ask the person who gave you access for more time." },
+        { status: 403 },
+      );
+    }
     if (site) {
       user = site.user;
       until = sessionUntil(site.role, site.expiresAt);

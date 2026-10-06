@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, isSiteMember, readSession, verifySession } from "@/lib/auth";
+import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, isSiteMember, readSession } from "@/lib/auth";
 import { DEFAULT_GUEST_PAGES, firstPagePath, guestMayOpen, requiredPage } from "@/lib/guest-pages";
 
 // Every page and API requires login, except the login page itself.
@@ -10,13 +10,12 @@ export async function middleware(req: NextRequest) {
 
   const { pathname, search } = req.nextUrl;
 
-  // Already signed in? The login page sends you on to where you were going.
-  if (pathname === "/login" && authConfigured()) {
-    if (await verifySession(req.cookies.get(SESSION_COOKIE)?.value)) {
-      const raw = req.nextUrl.searchParams.get("next") || "/";
-      const dest = raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/login") ? raw : "/";
-      return NextResponse.redirect(new URL(dest, req.url));
-    }
+  // The sign-in page always opens (even when signed in, so you can switch account);
+  // the layout is told so it shows the plain sign-in frame with "signed in as …".
+  if (pathname === "/login") {
+    const headers = new Headers(req.headers);
+    headers.set("x-otd-login-page", "1");
+    return NextResponse.next({ request: { headers } });
   }
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 

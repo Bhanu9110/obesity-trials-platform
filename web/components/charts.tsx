@@ -8,7 +8,8 @@ import { useRef, useState, type ReactNode } from "react";
 // the Trials explorer with that filter applied.
 
 export { SERIES } from "@/lib/chart-colors";
-const BRAND = "#22d3ee";
+import { CHART_BRAND } from "@/lib/chart-colors";
+const BRAND = CHART_BRAND;
 
 type Tip = { x: number; y: number; title: string; value: string } | null;
 
@@ -27,7 +28,7 @@ function useTip() {
     setTip({ x: b.left - r.left + b.width / 2, y: b.top - r.top, title, value });
   };
   const box = tip && (
-    <div className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-[calc(100%+10px)] whitespace-nowrap rounded-lg border border-slate-200 bg-[rgb(8_13_28/0.96)] px-2.5 py-1.5 shadow-xl"
+    <div className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-[calc(100%+10px)] whitespace-nowrap rounded-lg border border-slate-200 bg-panel px-2.5 py-1.5 shadow-xl"
          style={{ left: tip.x, top: tip.y }}>
       <div className="font-display text-sm font-semibold tabular-nums text-slate-950">{tip.value}</div>
       <div className="text-[11px] text-slate-500">{tip.title}</div>
@@ -54,7 +55,7 @@ export function BarList({ rows, unit = "trials", color = BRAND, max }: { rows: B
             </div>
             <div className="mt-1.5 h-2 w-full rounded-full bg-slate-100/70">
               <div className="h-2 rounded-r-[4px] rounded-l-full transition-[filter] group-hover:brightness-125"
-                   style={{ width: `${pct}%`, background: color, boxShadow: `0 0 12px -2px ${color}88` }} />
+                   style={{ width: `${pct}%`, background: color, boxShadow: `0 0 12px -2px color-mix(in srgb, ${color} 55%, transparent)` }} />
             </div>
             {r.extra}
           </>
@@ -95,8 +96,8 @@ export function YearColumns({ data, currentYear, hrefFor, wide = false }: {
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Trials by start year">
         {ticks.map((v) => (
           <g key={v}>
-            <line x1={padL} x2={W} y1={y(v)} y2={y(v)} stroke="rgb(32 44 74)" strokeWidth="1" />
-            <text x={padL - 8} y={y(v) + 4} textAnchor="end" fontSize="10" fill="rgb(104 119 158)">{v.toLocaleString()}</text>
+            <line x1={padL} x2={W} y1={y(v)} y2={y(v)} className="stroke-slate-200" strokeWidth="1" />
+            <text x={padL - 8} y={y(v) + 4} textAnchor="end" fontSize="10" className="fill-slate-400">{v.toLocaleString()}</text>
           </g>
         ))}
         {data.map((d, i) => {
@@ -112,18 +113,18 @@ export function YearColumns({ data, currentYear, hrefFor, wide = false }: {
                onFocus={(e) => t.showAt(e.currentTarget as unknown as HTMLElement, `Trials starting in ${label}`, `${d.count.toLocaleString()} trials`)}
                onBlur={t.hide}>
               <rect x={padL + i * slot} y={padT} width={slot} height={H - padT - padB} fill="transparent" />
-              <path d={path} fill={BRAND} opacity={partial ? 0.45 : 0.9} className="transition-opacity hover:opacity-100" />
+              <path d={path} style={{ fill: BRAND }} opacity={partial ? 0.45 : 0.9} className="transition-opacity hover:opacity-100" />
               {(i % 2 === data.length % 2 || data.length < 10) && (
-                <text x={x + bw / 2} y={H - 8} textAnchor="middle" fontSize="10" fill="rgb(104 119 158)">{`’${String(d.year).slice(2)}`}</text>
+                <text x={x + bw / 2} y={H - 8} textAnchor="middle" fontSize="10" className="fill-slate-400">{`’${String(d.year).slice(2)}`}</text>
               )}
               {d === peak && (
-                <text x={x + bw / 2} y={y(d.count) - 6} textAnchor="middle" fontSize="11" fontWeight="600" fill="rgb(238 242 250)">{d.count}</text>
+                <text x={x + bw / 2} y={y(d.count) - 6} textAnchor="middle" fontSize="11" fontWeight="600" className="fill-slate-900">{d.count}</text>
               )}
             </g>
           );
           return hrefFor ? <a key={d.year} href={hrefFor(d.year)}>{bar}</a> : <g key={d.year}>{bar}</g>;
         })}
-        <line x1={padL} x2={W} y1={y(0)} y2={y(0)} stroke="rgb(45 60 96)" strokeWidth="1" />
+        <line x1={padL} x2={W} y1={y(0)} y2={y(0)} className="stroke-slate-300" strokeWidth="1" />
       </svg>
       {t.box}
     </div>

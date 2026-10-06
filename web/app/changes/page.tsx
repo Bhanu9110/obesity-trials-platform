@@ -6,10 +6,10 @@ import { ChangeDetail, KIND_LABEL } from "@/components/ChangeDetail";
 import { icons } from "@/components/shell/icons";
 
 const KIND_TONE: Record<string, { text: string; dot: string; icon: React.ReactNode }> = {
-  added: { text: "text-emerald-400", dot: "bg-emerald-50 text-emerald-600", icon: icons.plus },
-  updated: { text: "text-sky-400", dot: "bg-sky-50 text-sky-600", icon: icons.pulse },
-  reclassified: { text: "text-violet-400", dot: "bg-violet-50 text-violet-600", icon: icons.sparkles },
-  removed: { text: "text-rose-400", dot: "bg-rose-50 text-rose-600", icon: icons.close },
+  added: { text: "text-emerald-600", dot: "bg-emerald-50 text-emerald-600", icon: icons.plus },
+  updated: { text: "text-sky-600", dot: "bg-sky-50 text-sky-600", icon: icons.pulse },
+  reclassified: { text: "text-violet-600", dot: "bg-violet-50 text-violet-600", icon: icons.sparkles },
+  removed: { text: "text-rose-600", dot: "bg-rose-50 text-rose-600", icon: icons.close },
 };
 
 function groupByDay(items: ChangeItem[]): [string, ChangeItem[]][] {
@@ -113,7 +113,7 @@ export default async function ChangesPage({
         <div className="space-y-6">
           {groupByDay(data.items).map(([day, list]) => (
             <section key={day}>
-              <div className="sticky top-16 z-10 -mx-1 mb-3 flex items-center gap-3 bg-[rgb(5_9_20/0.85)] px-1 py-2 backdrop-blur">
+              <div className="sticky top-16 z-10 -mx-1 mb-3 flex items-center gap-3 bg-page-soft px-1 py-2 backdrop-blur">
                 <span className="font-display text-sm font-semibold text-slate-950">{dayLabel(day)}</span>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] tabular-nums text-slate-600">{list.length}</span>
                 <span className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
@@ -123,7 +123,7 @@ export default async function ChangesPage({
                   const tone = KIND_TONE[c.change] ?? KIND_TONE.updated;
                   return (
                     <li key={c.id} className="relative">
-                      <span className={`absolute -left-[37px] top-3 grid h-6 w-6 place-items-center rounded-full ring-4 ring-[rgb(5_9_20)] ${tone.dot} [&>svg]:h-3.5 [&>svg]:w-3.5`}>
+                      <span className={`absolute -left-[37px] top-3 grid h-6 w-6 place-items-center rounded-full ring-4 ring-page ${tone.dot} [&>svg]:h-3.5 [&>svg]:w-3.5`}>
                         {tone.icon}
                       </span>
                       <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300">

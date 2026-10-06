@@ -269,7 +269,7 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
                   aria-pressed={on}
                   style={{ flexGrow: n, flexBasis: 0 }}
                   className={`flex min-w-[4.5rem] flex-col items-start justify-center rounded-lg px-2.5 py-1.5 text-left leading-tight transition ${phaseColour(p)} ${
-                    on ? "ring-2 ring-brand-500 ring-offset-2 ring-offset-[rgb(12_19_38)] shadow-glow" : phase ? "opacity-40 hover:opacity-80" : "hover:brightness-125"
+                    on ? "ring-2 ring-brand-500 ring-offset-2 ring-offset-white shadow-glow" : phase ? "opacity-40 hover:opacity-80" : "hover:brightness-125"
                   }`}
                 >
                   <span className="text-[15px] font-bold tabular-nums">{n}</span>
@@ -358,7 +358,7 @@ export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { t
 
       {!reveal && scoped.length > 0 ? (
         <div className="px-5 py-12 text-center">
-          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/10 text-brand-500 ring-1 ring-brand-500/30">
+          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/10 text-brand-600 ring-1 ring-brand-500/30">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z" /></svg>
           </div>
           <div className="font-display text-base font-semibold text-slate-950">Choose a phase to see its trials</div>

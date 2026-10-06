@@ -9,7 +9,7 @@ import MergeProduct from "@/components/MergeProduct";
 import DrugTrialsTable from "@/components/DrugTrialsTable";
 import { Icon, StatTile } from "@/components/PageHeader";
 import { BarList, SplitBar, YearColumns, type Segment } from "@/components/charts";
-import { SERIES, phaseIndex } from "@/lib/chart-colors";
+import { CHART_VIOLET, SERIES, phaseIndex } from "@/lib/chart-colors";
 import { formatPhase } from "@/lib/format";
 
 const STATUS_GROUPS = [
@@ -102,7 +102,7 @@ export default async function DrugPage({ params, searchParams }: {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <ChartCard title="Trials by phase" sub="Click a phase to list its trials below"><BarList rows={phaseRows} /></ChartCard>
               <ChartCard title="Recruitment status" sub="Where this drug's trials stand"><SplitBar segments={segments} /></ChartCard>
-              <ChartCard title="Top sponsors" sub="Who runs the trials"><BarList rows={sponsorRows} color="#a78bfa" /></ChartCard>
+              <ChartCard title="Top sponsors" sub="Who runs the trials"><BarList rows={sponsorRows} color={CHART_VIOLET} /></ChartCard>
             </div>
             {yearData.length > 1 && (
               <ChartCard title="Trial starts per year" sub="By registered start date">

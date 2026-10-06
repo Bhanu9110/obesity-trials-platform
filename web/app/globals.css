@@ -3,53 +3,76 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------
-   Obesity Trials Intelligence — dark "intelligence platform" theme.
-   Colour scales are flipped in tailwind.config.ts; the values are here.
+   Obesity Trials Intelligence — light (default) and dark themes.
+   Palette scales come from tailwind.config.ts; the page-level tokens are here.
    ------------------------------------------------------------------ */
 :root {
+  color-scheme: light;
+  --page: 245 247 251;            /* page background */
+  --surface: 255 255 255;         /* "white": cards, inputs */
+  --chrome: 255 255 255;          /* top bar + sidebar (used with transparency) */
+  --panel: 255 255 255;           /* solid drawers, tooltips, menus */
+  --overlay: 15 23 42;            /* dim layer behind dialogs */
+  --overlay-strength: 0.35;
+  --shadow: 15 23 42;
+  --shadow-strength: 0.22;
+  --grid-line: 15 23 42;
+  --grid-strength: 0.045;
+  --glass-from: 255 255 255;
+  --glass-to: 255 255 255;
+  --glass-alpha: 0.86;
+  --glass-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 14px 34px -18px rgb(15 23 42 / 0.16);
+  --glow-cyan: 6 182 212;
+  --glow-violet: 139 92 246;
+  --glow-strength: 0.10;
+  --grad-1: #0891b2;              /* gradient text */
+  --grad-2: #7c3aed;
+  --grad-3: #db2777;
+  --btn-from: #0891b2;            /* primary buttons */
+  --btn-to: #7c3aed;
+  --on-brand: 255 255 255;
+  /* chart marks (validated against each surface) */
+  --chart-brand: 8 145 178;
+  --chart-violet: 124 58 237;
+  --series-1: 42 120 214;
+  --series-2: 235 104 52;
+  --series-3: 27 175 122;
+  --series-4: 237 161 0;
+  --series-5: 232 123 164;
+}
+
+:root[data-theme="dark"] {
   color-scheme: dark;
-
-  --page: 5 9 20;          /* page background */
-  --surface: 12 19 38;     /* "white": cards, inputs */
-
-  /* navy → near-white */
-  --slate-50: 16 24 45;
-  --slate-100: 23 33 58;
-  --slate-200: 32 44 74;
-  --slate-300: 45 60 96;
-  --slate-400: 104 119 158;
-  --slate-500: 134 148 182;
-  --slate-600: 165 177 205;
-  --slate-700: 196 205 225;
-  --slate-800: 221 228 241;
-  --slate-900: 238 242 250;
-  --slate-950: 248 250 253;
-
-  /* brand: electric cyan */
-  --brand-50: 8 47 66;
-  --brand-100: 12 66 88;
-  --brand-200: 18 93 117;
-  --brand-300: 14 125 153;
-  --brand-400: 6 182 212;
-  --brand-500: 34 211 238;
-  --brand-600: 34 211 238;
-  --brand-700: 103 232 249;
-  --brand-800: 165 243 252;
-  --brand-900: 207 250 254;
-  --brand-950: 236 254 255;
-
-  /* accent: violet */
-  --accent-50: 40 18 92;
-  --accent-100: 52 24 120;
-  --accent-200: 76 29 149;
-  --accent-300: 109 40 217;
-  --accent-400: 139 92 246;
-  --accent-500: 167 139 250;
-  --accent-600: 167 139 250;
-  --accent-700: 196 181 253;
-  --accent-800: 221 214 254;
-  --accent-900: 237 233 254;
-  --accent-950: 245 243 255;
+  --page: 5 9 20;
+  --surface: 12 19 38;
+  --chrome: 6 10 22;
+  --panel: 8 13 28;
+  --overlay: 3 6 14;
+  --overlay-strength: 0.7;
+  --shadow: 0 0 0;
+  --shadow-strength: 0.85;
+  --grid-line: 148 163 184;
+  --grid-strength: 0.055;
+  --glass-from: 19 29 54;
+  --glass-to: 10 16 33;
+  --glass-alpha: 0.78;
+  --glass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 24px 48px -28px rgb(0 0 0 / 0.75);
+  --glow-cyan: 34 211 238;
+  --glow-violet: 139 92 246;
+  --glow-strength: 0.15;
+  --grad-1: #67e8f9;
+  --grad-2: #a78bfa;
+  --grad-3: #f472b6;
+  --btn-from: #22d3ee;
+  --btn-to: #a78bfa;
+  --on-brand: 4 12 28;
+  --chart-brand: 34 211 238;
+  --chart-violet: 167 139 250;
+  --series-1: 57 135 229;
+  --series-2: 217 89 38;
+  --series-3: 25 158 112;
+  --series-4: 201 133 0;
+  --series-5: 213 81 129;
 }
 
 html,
@@ -63,9 +86,8 @@ body {
 body {
   min-height: 100vh;
   background-image:
-    radial-gradient(1100px 560px at 8% -12%, rgb(34 211 238 / 0.13), transparent 62%),
-    radial-gradient(900px 520px at 100% -6%, rgb(139 92 246 / 0.16), transparent 60%),
-    radial-gradient(800px 600px at 50% 120%, rgb(34 211 238 / 0.06), transparent 60%);
+    radial-gradient(1100px 560px at 8% -12%, rgb(var(--glow-cyan) / var(--glow-strength)), transparent 62%),
+    radial-gradient(900px 520px at 100% -6%, rgb(var(--glow-violet) / var(--glow-strength)), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -77,8 +99,8 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(rgb(148 163 184 / 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(148 163 184 / 0.055) 1px, transparent 1px);
+    linear-gradient(rgb(var(--grid-line) / var(--grid-strength)) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--grid-line) / var(--grid-strength)) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
@@ -94,11 +116,9 @@ h1, h2, h3 {
 }
 
 ::selection {
-  background: rgb(34 211 238 / 0.3);
-  color: #fff;
+  background: rgb(var(--brand-500) / 0.3);
 }
 
-/* Scrollbars */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgb(var(--slate-300)) transparent;
@@ -107,27 +127,30 @@ h1, h2, h3 {
 *::-webkit-scrollbar-thumb { background: rgb(var(--slate-300)); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
 *::-webkit-scrollbar-track { background: transparent; }
 
+/* Smooth switch between light and dark. */
+html.theme-switching * { transition: background-color .25s ease, border-color .25s ease, color .25s ease !important; }
+
 @layer components {
   /* Glass panels: every card-like box (rounded + "white" background). */
   section.bg-white,
   div.rounded-xl.bg-white,
   div.rounded-2xl.bg-white,
-  aside.bg-white {
+  aside.bg-white,
+  .glass {
     background-color: transparent;
-    background-image: linear-gradient(180deg, rgb(19 29 54 / 0.78), rgb(10 16 33 / 0.74));
+    background-image: linear-gradient(180deg, rgb(var(--glass-from) / var(--glass-alpha)), rgb(var(--glass-to) / var(--glass-alpha)));
     backdrop-filter: blur(14px) saturate(130%);
     -webkit-backdrop-filter: blur(14px) saturate(130%);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.04),
-      0 24px 48px -28px rgb(0 0 0 / 0.75);
+    box-shadow: var(--glass-shadow);
   }
+  .glass { border: 1px solid rgb(var(--slate-200)); }
 
   /* Inputs */
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
     color: rgb(var(--slate-900));
-    background-color: rgb(var(--surface) / 0.85);
+    background-color: rgb(var(--surface) / 0.9);
   }
   input::placeholder,
   textarea::placeholder {
@@ -151,14 +174,14 @@ h1, h2, h3 {
 
   /* Primary buttons: cyan → violet gradient with a soft glow. */
   .bg-brand-600 {
-    background-image: linear-gradient(135deg, rgb(34 211 238), rgb(167 139 250));
-    color: rgb(4 12 28);
+    background-image: linear-gradient(135deg, var(--btn-from), var(--btn-to));
+    color: rgb(var(--on-brand));
     font-weight: 600;
-    box-shadow: 0 8px 24px -10px rgb(34 211 238 / 0.55);
+    box-shadow: 0 8px 24px -10px rgb(var(--brand-500) / 0.55);
   }
   .bg-brand-600:hover:not(:disabled) {
-    filter: brightness(1.08);
-    box-shadow: 0 10px 28px -8px rgb(34 211 238 / 0.7);
+    filter: brightness(1.07);
+    box-shadow: 0 10px 28px -8px rgb(var(--brand-500) / 0.65);
   }
 
   /* Tables */
@@ -170,25 +193,17 @@ h1, h2, h3 {
     transition: background-color 0.15s ease;
   }
   table tbody tr:hover {
-    background-color: rgb(34 211 238 / 0.035);
+    background-color: rgb(var(--brand-500) / 0.04);
   }
 
-  /* Shared building blocks for the redesigned pages */
-  .glass {
-    background-image: linear-gradient(180deg, rgb(19 29 54 / 0.78), rgb(10 16 33 / 0.74));
-    backdrop-filter: blur(14px) saturate(130%);
-    -webkit-backdrop-filter: blur(14px) saturate(130%);
-    border: 1px solid rgb(var(--slate-200));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 24px 48px -28px rgb(0 0 0 / 0.75);
-  }
   .text-gradient {
-    background-image: linear-gradient(100deg, rgb(103 232 249), rgb(167 139 250) 55%, rgb(244 114 182));
+    background-image: linear-gradient(100deg, var(--grad-1), var(--grad-2) 55%, var(--grad-3));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .glow-line {
-    background-image: linear-gradient(90deg, transparent, rgb(34 211 238 / 0.6), rgb(167 139 250 / 0.6), transparent);
+    background-image: linear-gradient(90deg, transparent, rgb(var(--brand-500) / 0.6), rgb(var(--accent-500) / 0.6), transparent);
   }
   .eyebrow {
     font-family: theme("fontFamily.display");
@@ -196,8 +211,16 @@ h1, h2, h3 {
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(var(--brand-500));
+    color: rgb(var(--brand-600));
   }
+
+  /* Theme-aware backgrounds used by the app frame */
+  .bg-chrome { background-color: rgb(var(--chrome) / 0.72); }
+  .bg-panel { background-color: rgb(var(--panel) / 0.97); }
+  .bg-overlay { background-color: rgb(var(--overlay) / var(--overlay-strength)); }
+  .bg-page-soft { background-color: rgb(var(--page) / 0.85); }
+  .ring-page { --tw-ring-color: rgb(var(--page)); }
+  .ring-surface { --tw-ring-color: rgb(var(--surface)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

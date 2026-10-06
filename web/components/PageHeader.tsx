@@ -37,12 +37,12 @@ export default function PageHeader({
 }
 
 const TONE = {
-  cyan: { text: "text-brand-500", line: "from-brand-500/80", glow: "bg-brand-500/20" },
-  violet: { text: "text-accent-500", line: "from-accent-500/80", glow: "bg-accent-500/20" },
-  emerald: { text: "text-emerald-400", line: "from-emerald-400/80", glow: "bg-emerald-400/20" },
-  amber: { text: "text-amber-400", line: "from-amber-400/80", glow: "bg-amber-400/20" },
-  pink: { text: "text-pink-400", line: "from-pink-400/80", glow: "bg-pink-400/20" },
-  sky: { text: "text-sky-400", line: "from-sky-400/80", glow: "bg-sky-400/20" },
+  cyan: { text: "text-brand-600", line: "from-brand-500/80", glow: "bg-brand-500/20" },
+  violet: { text: "text-accent-600", line: "from-accent-500/80", glow: "bg-accent-500/20" },
+  emerald: { text: "text-emerald-600", line: "from-emerald-400/80", glow: "bg-emerald-400/20" },
+  amber: { text: "text-amber-600", line: "from-amber-400/80", glow: "bg-amber-400/20" },
+  pink: { text: "text-pink-600", line: "from-pink-400/80", glow: "bg-pink-400/20" },
+  sky: { text: "text-sky-600", line: "from-sky-400/80", glow: "bg-sky-400/20" },
 } as const;
 export type Tone = keyof typeof TONE;
 

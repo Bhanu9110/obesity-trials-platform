@@ -8,6 +8,7 @@ function LoginForm() {
   const params = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username.trim(), password: password.trim() }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
@@ -41,11 +42,23 @@ function LoginForm() {
     <form onSubmit={submit} className="space-y-4">
       <div>
         <label htmlFor="u" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Username</label>
-        <input id="u" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className={input} autoFocus required />
+        <input id="u" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={username} onChange={(e) => setUsername(e.target.value)} className={input} autoFocus required />
       </div>
       <div>
         <label htmlFor="p" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Password</label>
-        <input id="p" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={input} required />
+        <div className="relative">
+          <input id="p" type={showPw ? "text" : "password"} autoComplete="current-password" value={password}
+                 onChange={(e) => setPassword(e.target.value)} className={`${input} pr-11`} required />
+          <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Hide password" : "Show password"}
+                  title={showPw ? "Hide password" : "Show password"}
+                  className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:text-slate-800">
+            {showPw ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A9.7 9.7 0 0 1 12 5c6 0 9.5 7 9.5 7a17 17 0 0 1-3.2 4.1M6.6 6.6A17 17 0 0 0 2.5 12S6 19 12 19a9.6 9.6 0 0 0 4.3-1" /></svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+            )}
+          </button>
+        </div>
       </div>
       {params.get("ended") && !error && (
         <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800 ring-1 ring-amber-200">
@@ -108,7 +121,7 @@ export default function LoginPage() {
           <ul className="mt-8 space-y-4">
             {FEATURES.map(([t, d], i) => (
               <li key={t} className="flex gap-3">
-                <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white font-display text-xs font-semibold text-brand-500">
+                <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white font-display text-xs font-semibold text-brand-600">
                   0{i + 1}
                 </span>
                 <span>
