@@ -74,6 +74,8 @@ export default async function DrugPage({ params, searchParams }: {
         </div>
       </div>
 
+      <ProductInfoCard product={product} readOnly={viewOnly} />
+
       {primary.length > 0 && (() => {
         const q = encodeURIComponent(product.name);
         const byPhase = new Map<string, number>();
@@ -112,8 +114,6 @@ export default async function DrugPage({ params, searchParams }: {
           </>
         );
       })()}
-
-      <ProductInfoCard product={product} readOnly={viewOnly} />
 
       <DrugTrialsTable key={pickedPhase ?? "none"} trials={trials} initialPhase={pickedPhase} />
 

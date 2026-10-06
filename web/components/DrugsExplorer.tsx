@@ -12,9 +12,9 @@ const level = (p: string) => (p.includes("PHASE4") ? 4 : p.includes("PHASE3") ? 
 const topLevel = (phases: string[]) => phases.reduce((m, p) => Math.max(m, level(p)), 0);
 const STAGES = [
   { key: 0, label: "All stages" },
-  { key: 1, label: "Phase 1+" },
-  { key: 2, label: "Phase 2+" },
-  { key: 3, label: "Phase 3+" },
+  { key: 1, label: "Phase 1" },
+  { key: 2, label: "Phase 2" },
+  { key: 3, label: "Phase 3" },
   { key: 4, label: "Phase 4" },
 ] as const;
 const LADDER = ["P1", "P2", "P3", "P4"];
@@ -31,7 +31,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = base.filter((p) => {
-      if (stage && (stage === 4 ? topLevel(p.trial_phases) !== 4 : topLevel(p.trial_phases) < stage)) return false;
+      if (stage && topLevel(p.trial_phases) !== stage) return false; // most advanced phase is exactly this one
       if (!needle) return true;
       return [p.name, p.aliases, p.brand_names, p.sponsor, p.drug_class, p.therapy_subclass, p.moa]
         .some((v) => v?.toLowerCase().includes(needle));
@@ -43,7 +43,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
   }, [base, q, stage, sort]);
 
   const counts = useMemo(() => STAGES.map((s) => (s.key === 0 ? base.length
-    : base.filter((p) => (s.key === 4 ? topLevel(p.trial_phases) === 4 : topLevel(p.trial_phases) >= s.key)).length)), [base]);
+    : base.filter((p) => topLevel(p.trial_phases) === s.key).length)), [base]);
 
   return (
     <div className="space-y-4">

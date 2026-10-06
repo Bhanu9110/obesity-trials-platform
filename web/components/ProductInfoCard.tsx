@@ -199,10 +199,6 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
           </dd>
         </div>
         {PROFILE.slice(3).map(cell)}
-      </dl>
-
-      <h3 className="mb-1 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">Product details</h3>
-      <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
         {DETAILS.map(cell)}
       </dl>
     </section>
