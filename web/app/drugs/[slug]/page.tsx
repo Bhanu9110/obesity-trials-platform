@@ -32,8 +32,11 @@ function ChartCard({ title, sub, children, className = "" }: { title: string; su
 
 export const dynamic = "force-dynamic";
 
-export default async function DrugPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function DrugPage({ params, searchParams }: {
+  params: Promise<{ slug: string }>; searchParams: Promise<{ phase?: string }>;
+}) {
   const { slug } = await params;
+  const pickedPhase = ((await searchParams).phase ?? "").slice(0, 40) || undefined;
   const product = await getProduct(decodeURIComponent(slug));
   if (!product) notFound();
   const [trials, names] = await Promise.all([getProductTrials(product.id), productNames()]);
@@ -77,7 +80,7 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
         primary.forEach((t) => { const k = t.phase || "NONE"; byPhase.set(k, (byPhase.get(k) ?? 0) + 1); });
         const phaseRows = [...byPhase.entries()].sort((a, b) => phaseIndex(a[0]) - phaseIndex(b[0])).map(([k, v]) => ({
           key: k, label: k === "NONE" ? "Not specified" : formatPhase(k), title: k === "NONE" ? "No phase given" : formatPhase(k), value: v,
-          href: k === "NONE" ? undefined : `/trials?q=${q}&phase=${encodeURIComponent(k)}`,
+          href: `/drugs/${encodeURIComponent(product.slug)}?phase=${encodeURIComponent(k)}#trials`,
         }));
         const segments: Segment[] = STATUS_GROUPS.map((g, i) => ({
           key: g.key, label: g.label, color: SERIES[i],
@@ -97,7 +100,7 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
         return (
           <>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <ChartCard title="Trials by phase" sub="Click a phase to list those trials"><BarList rows={phaseRows} /></ChartCard>
+              <ChartCard title="Trials by phase" sub="Click a phase to list its trials below"><BarList rows={phaseRows} /></ChartCard>
               <ChartCard title="Recruitment status" sub="Where this drug's trials stand"><SplitBar segments={segments} /></ChartCard>
               <ChartCard title="Top sponsors" sub="Who runs the trials"><BarList rows={sponsorRows} color="#a78bfa" /></ChartCard>
             </div>
@@ -112,7 +115,7 @@ export default async function DrugPage({ params }: { params: Promise<{ slug: str
 
       <ProductInfoCard product={product} readOnly={viewOnly} />
 
-      <DrugTrialsTable trials={trials} />
+      <DrugTrialsTable key={pickedPhase ?? "none"} trials={trials} initialPhase={pickedPhase} />
 
       {!viewOnly && <MergeProduct slug={product.slug} name={product.name} options={names} />}
     </div>

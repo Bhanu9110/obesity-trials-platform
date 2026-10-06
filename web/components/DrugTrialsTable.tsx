@@ -124,7 +124,7 @@ function TrialRow({ t }: { t: ProductTrial }) {
   );
 }
 
-export default function DrugTrialsTable({ trials: allTrials }: { trials: ProductTrial[] }) {
+export default function DrugTrialsTable({ trials: allTrials, initialPhase }: { trials: ProductTrial[]; initialPhase?: string }) {
   const classCounts = useMemo(() => {
     const m: Record<string, number> = {};
     for (const t of allTrials) m[t.obesity_class] = (m[t.obesity_class] ?? 0) + 1;
@@ -133,7 +133,9 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
   // Primary-obesity trials by default (all of them if the drug has none).
   const [scope, setScope] = useState(() => (allTrials.some((t) => t.obesity_class === "primary") ? "primary" : "all"));
   const [q, setQ] = useState("");
-  const [phase, setPhase] = useState("");
+  const [phase, setPhase] = useState(() => (initialPhase === "NONE" ? NO_PHASE : initialPhase ?? ""));
+  // The list stays hidden until a phase is picked, a filter is set, or "Show all" is pressed.
+  const [showAll, setShowAll] = useState(false);
   const [sponsor, setSponsor] = useState<SponsorFilter>("");
   const [status, setStatus] = useState("");
   const [continent, setContinent] = useState("");
@@ -220,7 +222,8 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
   }, [rows, grouped]);
 
   const filtered = Boolean(q.trim() || phase || sponsor || status || continent);
-  const clear = () => { setQ(""); setPhase(""); setSponsor(""); setStatus(""); setContinent(""); };
+  const clear = () => { setQ(""); setPhase(""); setSponsor(""); setStatus(""); setContinent(""); setShowAll(false); };
+  const reveal = filtered || showAll;
   const toggle = (set: Set<string>, key: string, update: (s: Set<string>) => void) => {
     const n = new Set(set);
     if (n.has(key)) n.delete(key); else n.add(key);
@@ -229,11 +232,12 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
   const totalInBar = phaseCounts.reduce((s, [, n]) => s + n, 0);
 
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <section id="trials" className="scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200 bg-white">
       <div className="space-y-3 border-b border-slate-100 px-5 py-4">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
           <h2 className="text-base font-semibold text-slate-900">
             Trials ({filtered ? `${rows.length} of ${scoped.length}` : scoped.length})
+            {!reveal && scoped.length > 0 && <span className="ml-2 text-xs font-normal text-slate-500">— pick a phase to see them</span>}
           </h2>
           {rows.length > 0 && (
             <div className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-slate-500">
@@ -265,7 +269,7 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
                   aria-pressed={on}
                   style={{ flexGrow: n, flexBasis: 0 }}
                   className={`flex min-w-[4.5rem] flex-col items-start justify-center rounded-lg px-2.5 py-1.5 text-left leading-tight transition ${phaseColour(p)} ${
-                    on ? "ring-2 ring-slate-900 ring-offset-2" : phase ? "opacity-40 hover:opacity-80" : "hover:brightness-110"
+                    on ? "ring-2 ring-brand-500 ring-offset-2 ring-offset-[rgb(12_19_38)] shadow-glow" : phase ? "opacity-40 hover:opacity-80" : "hover:brightness-125"
                   }`}
                 >
                   <span className="text-[15px] font-bold tabular-nums">{n}</span>
@@ -342,9 +346,9 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
                 <input type="checkbox" checked={grouped} onChange={(e) => { setGrouped(e.target.checked); setFlatLimit(FLAT_PREVIEW); }} />
                 Group by phase
               </label>
-              {filtered && (
+              {reveal && (
                 <button type="button" onClick={clear} className="rounded-lg px-3 py-2 text-sm text-brand-600 hover:bg-slate-50">
-                  Clear filters
+                  {filtered ? "Clear filters" : "Hide trials"}
                 </button>
               )}
             </div>
@@ -352,7 +356,23 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
         )}
       </div>
 
-      {rows.length > 0 && (
+      {!reveal && scoped.length > 0 ? (
+        <div className="px-5 py-12 text-center">
+          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/10 text-brand-500 ring-1 ring-brand-500/30">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z" /></svg>
+          </div>
+          <div className="font-display text-base font-semibold text-slate-950">Choose a phase to see its trials</div>
+          <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+            Click a phase in the coloured bar above — or search, or pick a sponsor type, status or region.
+          </p>
+          <button type="button" onClick={() => setShowAll(true)}
+                  className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 transition hover:border-brand-500/50 hover:text-slate-950">
+            Show all {scoped.length.toLocaleString()} trials
+          </button>
+        </div>
+      ) : null}
+
+      {reveal && rows.length > 0 && (
         <div className={`hidden border-b border-slate-200 bg-white px-5 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 ${GRID}`} role="row">
           {COLUMNS.map((c) => {
             const on = sortKey === c.key;
@@ -373,7 +393,7 @@ export default function DrugTrialsTable({ trials: allTrials }: { trials: Product
         </div>
       )}
 
-      {rows.length === 0 ? (
+      {!reveal && scoped.length > 0 ? null : rows.length === 0 ? (
         <p className="px-5 py-10 text-center text-sm text-slate-400">
           {scoped.length === 0 ? "No active trials currently linked to this drug." : "No trials match these filters."}
         </p>
