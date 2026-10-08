@@ -81,6 +81,19 @@ jobs:
             npm run daily
           fi
 
+      # Automatic drug profiles: fills the BLANK drug-profile fields from the trial data,
+      # ChEMBL and openFDA (hand-entered fields are never changed). Looks up at most
+      # 200 drugs per run (each is re-checked every 30 days) and stops after 15 minutes.
+      # Optional secret OPENFDA_API_KEY raises openFDA's daily limit. A problem here
+      # never fails the daily sync.
+      - name: Auto-fill drug profiles
+        working-directory: sync
+        continue-on-error: true
+        timeout-minutes: 20
+        env:
+          OPENFDA_API_KEY: ${{ secrets.OPENFDA_API_KEY }}
+        run: npm run enrich-products
+
       # Fails the job (GitHub emails you) when something is broken: database,
       # migrations, no successful sync for 3 days, no trials. Warnings (e.g. records
       # in the dead-letter queue) are shown in the log but don't fail the job.

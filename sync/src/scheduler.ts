@@ -8,6 +8,7 @@ import {
   retryFailures,
   type SyncResult,
 } from "./sync.js";
+import { enrichProducts } from "./enrich.js";
 
 function log(msg: string, obj?: unknown) {
   const ts = new Date().toISOString();
@@ -60,6 +61,12 @@ async function runCatchUp(reason: string): Promise<void> {
     if (r.due) log("retry queue", r);
   } catch (err) {
     log("retry queue failed", { error: err instanceof Error ? err.message : String(err) });
+  }
+  // Then the automatic drug profiles (blank fields only; never the hand-entered ones).
+  try {
+    log("drug profiles auto-filled", await enrichProducts({ log }));
+  } catch (err) {
+    log("drug-profile auto-fill failed", { error: err instanceof Error ? err.message : String(err) });
   } finally {
     running = false;
   }

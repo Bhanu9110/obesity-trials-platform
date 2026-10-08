@@ -132,6 +132,7 @@ npm run requeue NCT…        # put dead-letter records back in the retry queue 
 npm run classify            # re-classify stored trials (primary / comorbidity / weight-related / not obesity)
 npm run health              # pipeline health checks (exit code 1 on failure)
 npm run rebuild-products    # re-derive drugs (after editing product_aliases by hand)
+npm run enrich-products     # auto-fill blank drug-profile fields (trials + ChEMBL + openFDA); --no-external = trials only
 npm run reparse             # re-map raw_trials with the current parser (no download); --all for every record
 npm run quality             # recompute the data-quality checks (results: website → Data quality)
 npm run migrate:status      # which migrations are applied / pending / edited
@@ -161,6 +162,14 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
 - **Drug merges** — use the Merge button, or insert into `product_aliases`
   (`alias_slug` = the lower-case alphanumeric name, `product_slug` = target drug's
   slug) and run `rebuild-products`.
+- **Automatic drug profiles** — `sync/src/enrich.ts`, run daily after the sync. Blank
+  drug-profile fields are filled from the trial data, [ChEMBL](https://www.ebi.ac.uk/chembl/)
+  (modality, mechanism, codes, trade names) and [openFDA](https://open.fda.gov/apis/drug/drugsfda/)
+  (US brands, route, first US approval). Values go to `products.auto_info` and show on the
+  drug page with an "auto" tag; a value typed in on the website always wins and is never
+  overwritten. Up to `ENRICH_MAX_LOOKUPS` (200) drugs are looked up per run and each is
+  re-checked every `ENRICH_REFRESH_DAYS` (30). Optional secret `OPENFDA_API_KEY` raises
+  openFDA's daily limit.
 - **Drug-matching rules** — `sync/src/products.ts`. Bump `PRODUCT_RULES_VERSION`
   after changing them; the scheduler rebuilds automatically on next start.
 

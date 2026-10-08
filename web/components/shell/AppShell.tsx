@@ -181,7 +181,7 @@ export default function AppShell({
               {icons.menu}
             </button>
             <button type="button" onClick={() => setPaletteOpen(true)}
-                    className="group flex h-10 w-full max-w-xl items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 text-left text-sm text-slate-400 transition hover:border-brand-500/40 hover:bg-slate-50 hover:text-slate-600">
+                    className="group flex h-10 w-full min-w-0 max-w-xl items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 text-left text-sm text-slate-400 transition hover:border-brand-500/40 hover:bg-slate-50 hover:text-slate-600">
               <span className="text-slate-400 group-hover:text-brand-600">{icons.search}</span>
               <span className="flex-1 truncate">Search trials, drugs, sponsors…</span>
               <kbd className="hidden rounded-md border border-slate-200 bg-slate-100/60 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 sm:inline">

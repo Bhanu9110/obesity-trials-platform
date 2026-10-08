@@ -192,10 +192,21 @@ export async function homeStats(): Promise<HomeStats> {
 // --------------------------------------------------------------------------- #
 // Products (drug pages)
 // --------------------------------------------------------------------------- #
-// Manually curated product info (all blank until edited on the drug page).
-const INFO_COLS = `p.modality, p.phase, p.moa, p.roa, p.approved,
-  to_char(p.approval_date, 'YYYY-MM-DD') AS approval_date, p.sponsor, p.drug_class,
-  p.aliases, p.brand_names, p.candidate, p.parent_drug, p.therapy_subclass, p.indication`;
+// Drug profile: the hand-entered value, or while that is blank the automatic one
+// (products.auto_info, filled daily by `npm run enrich-products`). auto_info is read
+// through to_jsonb so pages keep working in the minute before migration 0017 runs.
+const AUTO_JOIN = `CROSS JOIN LATERAL (SELECT to_jsonb(p) -> 'auto_info' AS ai) x`;
+const autoVal = (f: string) => `(x.ai -> '${f}' ->> 'value')`;
+const INFO_COLS = [
+  "modality", "phase", "moa", "roa", "approved", "approval_date", "sponsor", "drug_class",
+  "aliases", "brand_names", "candidate", "parent_drug", "therapy_subclass", "indication",
+].map((f) => f === "approval_date"
+  ? `coalesce(to_char(p.approval_date, 'YYYY-MM-DD'), ${autoVal(f)}) AS approval_date`
+  : `coalesce(p.${f}, ${autoVal(f)}) AS ${f}`).join(",\n  ");
+// Which shown values are automatic: {field: {value, source}} for every blank hand-entered field.
+const AUTO_SHOWN = `(SELECT coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
+     FROM jsonb_each(CASE WHEN jsonb_typeof(x.ai) = 'object' THEN x.ai ELSE '{}'::jsonb END) e
+    WHERE to_jsonb(p) ->> e.key IS NULL)`;
 
 const HAS_INFO = `(p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
    OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL OR p.drug_class IS NOT NULL
@@ -210,9 +221,10 @@ export async function listProducts(): Promise<ProductSummary[]> {
             coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
             ${HAS_INFO} AS has_info
        FROM products p
+       ${AUTO_JOIN}
        JOIN trial_products tp ON tp.product_id = p.id
        JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
-      GROUP BY p.id
+      GROUP BY p.id, x.ai
       ORDER BY trials DESC, all_trials DESC, p.name`,
   );
 }
@@ -222,13 +234,15 @@ export async function getProduct(slug: string): Promise<Product | null> {
     // summary via to_jsonb: the page keeps working in the minute before migration 0016 runs.
     `SELECT p.id, p.slug, p.name, ${INFO_COLS}, p.info_updated_at,
             to_jsonb(p) ->> 'summary' AS summary, to_jsonb(p) ->> 'summary_updated_at' AS summary_updated_at,
+            ${AUTO_SHOWN} AS auto,
+            (SELECT value FROM app_meta WHERE key = 'product_autofill_at') AS autofill_at,
             (SELECT count(*) FILTER (WHERE t.obesity_class = 'primary')::int
                FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
               WHERE tp.product_id = p.id) AS trials,
             (SELECT count(*)::int
                FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
               WHERE tp.product_id = p.id) AS all_trials
-       FROM products p WHERE p.slug = $1`,
+       FROM products p ${AUTO_JOIN} WHERE p.slug = $1`,
     [slug],
   );
   return rows[0] ?? null;
@@ -843,7 +857,9 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
           `SELECT p.slug, p.name, count(t.nct_id)::int AS trials
              FROM products p JOIN trial_products tp ON tp.product_id = p.id
              JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}
-            WHERE p.name ILIKE $1 OR coalesce(p.aliases, '') ILIKE $1 OR coalesce(p.brand_names, '') ILIKE $1
+            WHERE p.name ILIKE $1
+               OR coalesce(p.aliases, to_jsonb(p) #>> '{auto_info,aliases,value}', '') ILIKE $1
+               OR coalesce(p.brand_names, to_jsonb(p) #>> '{auto_info,brand_names,value}', '') ILIKE $1
             GROUP BY p.id ORDER BY (p.name ILIKE $2) DESC, trials DESC LIMIT 6`,
           [like, `${q}%`],
         )

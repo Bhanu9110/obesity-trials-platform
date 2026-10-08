@@ -40,8 +40,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug
     if (!/^\d{4}-\d{2}-\d{2}$/.test(info.approval_date) || isNaN(Date.parse(info.approval_date))) {
       return NextResponse.json({ error: "approval date must be YYYY-MM-DD" }, { status: 400 });
     }
-    if (info.approved !== "Yes") {
-      return NextResponse.json({ error: "approval date needs Approved = Yes" }, { status: 400 });
+    if (info.approved === "No") {
+      return NextResponse.json({ error: "a drug marked not approved can't have an approval date" }, { status: 400 });
     }
   }
 

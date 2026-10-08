@@ -52,8 +52,8 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
           className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="">All drugs ({visible.length.toLocaleString()})</option>
-          <option value="filled">Info filled in ({filled.toLocaleString()})</option>
-          <option value="blank">Info still blank ({(visible.length - filled).toLocaleString()})</option>
+          <option value="filled">Edited by hand ({filled.toLocaleString()})</option>
+          <option value="blank">Auto-filled only ({(visible.length - filled).toLocaleString()})</option>
         </select>
         {otherOnly > 0 && (
           <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600"

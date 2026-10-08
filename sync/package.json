@@ -19,6 +19,7 @@
     "classify": "tsx src/index.ts classify",
     "health": "tsx src/index.ts health",
     "rebuild-products": "tsx src/index.ts rebuild-products",
+    "enrich-products": "tsx src/index.ts enrich-products",
     "reparse": "tsx src/index.ts reparse",
     "quality": "tsx src/index.ts quality",
     "migrate": "bash ../db/run-migrations.sh",

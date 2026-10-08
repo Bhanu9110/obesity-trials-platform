@@ -12,6 +12,7 @@ import {
 } from "./sync.js";
 import { dismissFailure, failureCounts, requeueFailure } from "./failures.js";
 import { checkHealth, formatHealth } from "./health.js";
+import { enrichProducts } from "./enrich.js";
 import { closePool, pool } from "./db.js";
 
 function log(msg: string, obj?: unknown) {
@@ -31,6 +32,8 @@ const USAGE = `Commands:
   reparse [--all]      re-map stored raw records with the current parser (no download)
   quality              recompute the data-quality checks
   rebuild-products     re-derive drugs (after editing product_aliases)
+  enrich-products      auto-fill blank drug-profile fields (trials + ChEMBL + openFDA)
+                       [--no-external] trial data only; [slug…] only these drugs
   health               pipeline health checks (exit code 1 when a check fails)`;
 
 async function main() {
@@ -110,6 +113,18 @@ async function main() {
       // or when the matching rules change). Manual product info is preserved.
       const r = await rebuildProducts();
       log("Products rebuilt", r);
+      break;
+    }
+    case "enrich-products": {
+      // Automatic drug profiles: fills products.auto_info (hand-entered fields are
+      // never touched). Looks up a limited number of drugs in ChEMBL / openFDA per run.
+      const r = await enrichProducts({
+        log,
+        external: process.argv.includes("--no-external") ? false : undefined,
+        only: args.length ? args : undefined,
+      });
+      log("Drug profiles auto-filled", r);
+      if (r.sourcesDown.length) console.warn(`::warning::Some drug references were unavailable this run: ${r.sourcesDown.join(" | ")}`);
       break;
     }
     case "health": {

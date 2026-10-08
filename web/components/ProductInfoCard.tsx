@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Product, ProductInfo } from "@/lib/types";
 
-// Drug profile and product details, entered by hand with the Edit button. Everything
-// starts blank except "No. of trials", which is counted from the database.
+// Drug profile. Blank fields are filled automatically every day (trial data, ChEMBL,
+// openFDA) and marked "auto"; a value typed in with the Edit button always wins and is
+// never overwritten. "No. of trials" is counted from the database.
 
 // Typing aids only (a dropdown while typing) — every field accepts free text.
 const SUGGEST: Partial<Record<keyof ProductInfo, string[]>> = {
@@ -53,18 +54,25 @@ const DETAILS: Field[] = [
 ];
 const ALL = [...PROFILE, ...DETAILS];
 
+const autoOf = (p: Product, key: keyof ProductInfo) => p.auto?.[key] ?? null;
+
+/** The form holds only hand-entered values: an automatic value stays automatic unless typed over. */
 function toForm(p: Product): Record<keyof ProductInfo, string> {
-  return Object.fromEntries(ALL.map(({ key }) => [key, p[key] ?? ""])) as Record<keyof ProductInfo, string>;
+  return Object.fromEntries(ALL.map(({ key }) => [key, autoOf(p, key) ? "" : p[key] ?? ""])) as Record<keyof ProductInfo, string>;
 }
 
-function display(p: Product, key: keyof ProductInfo): string | null {
-  const v = p[key];
-  if (!v) return null;
+function formatValue(key: keyof ProductInfo, v: string): string {
   if (key === "approval_date") {
+    if (/^\d{4}$/.test(v)) return v; // only the year is known
     const d = new Date(`${v}T00:00:00`);
     return isNaN(d.getTime()) ? v : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   }
   return v;
+}
+
+function display(p: Product, key: keyof ProductInfo): string | null {
+  const v = p[key];
+  return v ? formatValue(key, v) : null;
 }
 
 export default function ProductInfoCard({ product, readOnly = false }: { product: Product; readOnly?: boolean }) {
@@ -77,9 +85,11 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
   const set = (k: keyof ProductInfo, v: string) =>
     setForm((f) => {
       const next = { ...f, [k]: v };
-      if (k === "approved" && v !== "Yes") next.approval_date = ""; // date only applies when approved
+      if (k === "approved" && v === "No") next.approval_date = ""; // no approval date for a drug that is not approved
       return next;
     });
+  const autoCount = ALL.filter(({ key }) => autoOf(product, key)).length;
+  const approvedNow = form.approved || autoOf(product, "approved")?.value || "";
 
   async function save() {
     setSaving(true);
@@ -103,11 +113,17 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
 
   const input = "w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-brand-500";
 
+  // In the editor, a blank field shows the automatic value it will keep ("auto: …").
+  const autoHint = (key: keyof ProductInfo) => {
+    const a = autoOf(product, key);
+    return a ? `auto: ${formatValue(key, a.value)}` : null;
+  };
+
   const editor = (key: keyof ProductInfo) => {
     if (key === "candidate") {
       return (
         <select value={form.candidate} onChange={(e) => set("candidate", e.target.value)} className={input}>
-          <option value="">—</option>
+          <option value="">{autoHint("candidate") ?? "—"}</option>
           <option value="Pipeline">Pipeline</option>
           <option value="Non-pipeline">Non-pipeline</option>
         </select>
@@ -116,7 +132,7 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
     if (key === "approved") {
       return (
         <select value={form.approved} onChange={(e) => set("approved", e.target.value)} className={input}>
-          <option value="">—</option>
+          <option value="">{autoHint("approved") ?? "—"}</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
         </select>
@@ -124,19 +140,25 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
     }
     if (key === "approval_date") {
       return (
-        <input
-          type="date"
-          value={form.approval_date}
-          onChange={(e) => set("approval_date", e.target.value)}
-          disabled={form.approved !== "Yes"}
-          title={form.approved !== "Yes" ? "Set Approved = Yes first" : undefined}
-          className={`${input} disabled:bg-slate-50 disabled:text-slate-400`}
-        />
+        <>
+          <input
+            type="date"
+            value={form.approval_date}
+            onChange={(e) => set("approval_date", e.target.value)}
+            disabled={approvedNow !== "Yes"}
+            title={approvedNow !== "Yes" ? "Set Approved = Yes first" : undefined}
+            className={`${input} disabled:bg-slate-50 disabled:text-slate-400`}
+          />
+          {!form.approval_date && autoHint("approval_date") && (
+            <p className="mt-1 text-[11px] text-slate-400">{autoHint("approval_date")}</p>
+          )}
+        </>
       );
     }
     return (
       <>
-        <input value={form[key]} onChange={(e) => set(key, e.target.value)} list={SUGGEST[key] ? `suggest-${key}` : undefined} className={input} />
+        <input value={form[key]} onChange={(e) => set(key, e.target.value)} list={SUGGEST[key] ? `suggest-${key}` : undefined}
+               placeholder={autoHint(key) ?? undefined} className={`${input} placeholder:text-slate-400`} />
         {SUGGEST[key] && (
           <datalist id={`suggest-${key}`}>
             {SUGGEST[key]!.map((s) => <option key={s} value={s} />)}
@@ -150,7 +172,22 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
     <div key={key} className={`border-t border-slate-100 py-2.5 ${wide ? "sm:col-span-2" : ""}`}>
       <dt className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</dt>
       <dd className="text-sm text-slate-800">
-        {editing ? editor(key) : display(product, key) ?? <span className="text-slate-300">—</span>}
+        {editing ? editor(key) : (() => {
+          const v = display(product, key);
+          if (!v) return <span className="text-slate-300">—</span>;
+          const a = autoOf(product, key);
+          return (
+            <>
+              {v}
+              {a && (
+                <span title={`Filled automatically from ${a.source}. Click Edit to type your own value.`}
+                      className="ml-1.5 inline-flex cursor-help items-center rounded bg-brand-500/10 px-1.5 py-px align-[1px] text-[10px] font-semibold uppercase tracking-wide text-brand-700 ring-1 ring-brand-500/20">
+                  auto
+                </span>
+              )}
+            </>
+          );
+        })()}
       </dd>
     </div>
   );
@@ -161,7 +198,10 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Drug profile</h2>
           <p className="text-xs text-slate-500">
-            {readOnly ? "Curated" : "Entered manually"}{product.info_updated_at ? ` · last edited ${new Date(product.info_updated_at).toLocaleString()}` : " · not filled in yet"}
+            {autoCount > 0
+              ? `${autoCount} field${autoCount === 1 ? "" : "s"} filled automatically from trial data, ChEMBL and openFDA`
+              : readOnly ? "Curated" : "Entered manually"}
+            {product.info_updated_at ? ` · last edited by hand ${new Date(product.info_updated_at).toLocaleString()}` : ""}
           </p>
         </div>
         {readOnly ? null : !editing ? (

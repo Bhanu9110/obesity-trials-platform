@@ -76,8 +76,13 @@ export const PRODUCT_INFO_FIELDS: (keyof ProductInfo)[] = [
 ];
 
 
+/** An automatic drug-profile value and where it came from (ChEMBL, openFDA, Trials, ...). */
+export interface AutoValue { value: string; source: string }
+
 export interface Product extends ProductInfo {
   id: number;
+  auto: Partial<Record<keyof ProductInfo, AutoValue>>; // fields currently shown from the auto-fill
+  autofill_at: string | null;          // last auto-fill run (ISO)
   summary: string | null;             // hand-written product summary
   summary_updated_at: string | null;
   trials: number;      // primary-obesity trials (counted automatically)
@@ -108,5 +113,5 @@ export interface ProductSummary extends ProductInfo {
   trials: number;      // primary-obesity trials
   all_trials: number;  // all stored trials (incl. comorbidity / weight-related / not obesity)
   trial_phases: string[];
-  has_info: boolean;
+  has_info: boolean;   // at least one field entered by hand
 }
