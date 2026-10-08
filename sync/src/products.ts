@@ -16,10 +16,11 @@
 // rebuilds trial_products automatically on its next start. Manually entered
 // product info is keyed by product slug and is never touched by a rebuild.
 
-export const PRODUCT_RULES_VERSION = "3";
+export const PRODUCT_RULES_VERSION = "4";
 // 2: "A ; Placebo" lists split on semicolons
 // 3: a drug class without a drug name ("GLP-1 receptor agonist") becomes an
 //    "Undisclosed …" product, e.g. "Undisclosed GLP-1 receptor agonist"
+// 4: more code names fold into their INN (CT-388/RG6640 -> enicepatide, LY3841136 -> eloralintide, ...)
 
 export interface ProductRef {
   slug: string; // normalized key (also used in the drug-page URL)
@@ -76,6 +77,13 @@ export const BUILTIN_ALIASES: Record<string, ProductRef> = {
   kai9531: { slug: "hrs9531", name: "HRS9531" },
   pf06882961: { slug: "danuglipron", name: "Danuglipron" },
   pf07081532: { slug: "lotiglipron", name: "Lotiglipron" },
+  ct388: { slug: "enicepatide", name: "Enicepatide" }, rg6640: { slug: "enicepatide", name: "Enicepatide" },
+  // code names that registry titles pair with an INN ("Eloralintide (LY3841136)")
+  vrb101: { slug: "ecnoglutide", name: "Ecnoglutide" },
+  ly3841136: { slug: "eloralintide", name: "Eloralintide" },
+  s2367: { slug: "velneperit", name: "Velneperit" },
+  zgn440: { slug: "beloranib", name: "Beloranib" },
+  zt002: { slug: "zovaglutide", name: "Zovaglutide" },
   mk0364: { slug: "taranabant", name: "Taranabant" },
   cp945598: { slug: "otenabant", name: "Otenabant" },
 };

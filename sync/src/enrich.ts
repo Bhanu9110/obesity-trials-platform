@@ -14,7 +14,9 @@
 // products.auto_lookup and refreshed every ENRICH_REFRESH_DAYS days, a limited
 // number per run, so the daily job stays short and polite to both services.
 
+import { readFileSync } from "node:fs";
 import { pool } from "./db.js";
+import { config } from "./config.js";
 import { loadAliases } from "./sync.js";
 import {
   BUILTIN_ALIASES, buildKnownSet, isUndisclosedProduct, productsFromName, slugify, type AliasMap,
@@ -201,15 +203,20 @@ export interface TrialFact {
   conditions: string[];
   names: string[];               // raw intervention names that name THIS product
   soleNames?: string[];          // ... and name nothing else (safe for code names)
+  title?: string | null;         // registry brief title, e.g. "A Study of Enicepatide (CT-388) in ..."
+  otherNames?: string[];         // ClinicalTrials.gov "other names" of this drug's interventions
   status: string | null;
   start: string | null;          // YYYY-MM[-DD]
 }
+
+export interface PipelineAlias { alias: string; company: string }
 
 export interface DeriveInput {
   slug: string;
   name: string;
   trials: TrialFact[];
   aliasKeys: string[];           // alias slugs that fold into this product (built-in + product_aliases)
+  pipelineAliases?: PipelineAlias[]; // code names from company pipeline pages
   lookup: Lookup | null;
   now?: Date;
 }
@@ -281,6 +288,39 @@ function phaseLabelFromTrials(trials: TrialFact[]): { level: number; label: stri
   return { level: max, label: onlyCombined && max > 1 ? `Phase ${max - 1}/${max}` : `Phase ${max}` };
 }
 
+/** Drug-name endings of INNs (international non-proprietary names) worth keeping as aliases. */
+const INN_STEM_RE = /^[a-z]{4,}(tide|glutide|glipron|lintide|mab|siran|rsen|gliflozin|gliptin)$/i;
+
+/** Alias-worthy parts of one "other name": code names and INN-style drug names. */
+export function aliasCandidates(other: string): string[] {
+  const out: string[] = [];
+  const s = other.trim();
+  if (!s || /placebo|vehicle|saline|matching/i.test(s)) return out;
+  for (const m of s.toUpperCase().matchAll(CODE_TOKEN_RE)) {
+    const start = m.index ?? 0;
+    out.push(s.slice(start, start + m[0].length).toUpperCase());
+  }
+  for (const w of s.split(/[\s,;/()]+/)) if (INN_STEM_RE.test(w)) out.push(titleCase(w));
+  return out;
+}
+
+const escapeRe = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Aliases written next to the drug name in trial titles: "Name (CT-388)" / "CT-388 (Name)". */
+export function titleAliases(name: string, titles: string[]): string[] {
+  if (name.includes(" + ") || name.length < 3) return [];
+  const n = escapeRe(name);
+  const after = new RegExp(`\\b${n}\\s*\\(([^()]{2,40})\\)`, "gi");
+  const before = new RegExp(`([A-Za-z][A-Za-z0-9-]{1,30})\\s*\\(\\s*${n}\\s*\\)`, "gi");
+  const out: string[] = [];
+  for (const t of titles) {
+    if (!t) continue;
+    for (const m of t.matchAll(after)) out.push(...aliasCandidates(m[1]));
+    for (const m of t.matchAll(before)) out.push(...aliasCandidates(m[1]));
+  }
+  return out;
+}
+
 export function deriveAuto(input: DeriveInput): AutoInfo {
   const out: AutoInfo = {};
   const set = (k: InfoField, value: string | null | undefined, source: string) => {
@@ -349,11 +389,20 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   // Combination parts ----------------------------------------------------------
   if (combo) set("parent_drug", parts.join(", "), "Drug name");
 
-  // Code names -------------------------------------------------------------------
+  // Code names (aliases) --------------------------------------------------------
+  // Sources in order of trust; the first spelling seen wins ("CT-388" over "CT388").
   const codes: { v: string; src: string }[] = [];
+  const ownSlug = slugify(input.name);
+  // 0) The developer's own pipeline page, then ChEMBL.
+  for (const pa of input.pipelineAliases ?? []) codes.push({ v: pa.alias, src: `Company pipeline (${pa.company})` });
   for (const c of chembl) for (const x of c.codes) codes.push({ v: x, src: "ChEMBL" });
-  for (const k of input.aliasKeys) if (isCode(k)) codes.push({ v: k.toUpperCase(), src: "Alias list" });
-  // A code written next to this drug alone ("Tirzepatide (LY3298176)") in 2+ trials.
+  // 1) ClinicalTrials.gov "other names" registered for this drug's interventions.
+  for (const t of trials) for (const o of t.otherNames ?? []) {
+    for (const a of aliasCandidates(o)) codes.push({ v: a, src: "ClinicalTrials.gov" });
+  }
+  // 2) Trial titles: "Enicepatide (CT-388)" or "CT-388 (Enicepatide)".
+  for (const a of titleAliases(input.name, trials.map((t) => t.title ?? ""))) codes.push({ v: a, src: "Trial titles" });
+  // 3) A code written next to this drug alone in intervention names ("Tirzepatide (LY3298176)") in 2+ trials.
   const codeTrials = new Map<string, { v: string; n: number }>();
   for (const t of trials) {
     const inTrial = new Map<string, string>();
@@ -364,8 +413,9 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
     for (const [k, v] of inTrial) codeTrials.set(k, { v: codeTrials.get(k)?.v ?? v, n: (codeTrials.get(k)?.n ?? 0) + 1 });
   }
   for (const { v, n } of codeTrials.values()) if (n >= 2) codes.push({ v, src: "Trials" });
-  const ownSlug = slugify(input.name);
-  const codeList = uniqBy(codes, (c) => slugify(c.v)).filter((c) => slugify(c.v) !== ownSlug && slugify(c.v) !== input.slug).slice(0, 6);
+  // 4) The built-in alias list and merges made on the website.
+  for (const k of input.aliasKeys) if (isCode(k) || INN_STEM_RE.test(k)) codes.push({ v: isCode(k) ? k.toUpperCase() : titleCase(k), src: "Alias list" });
+  const codeList = uniqBy(codes, (c) => slugify(c.v)).filter((c) => slugify(c.v) !== ownSlug && slugify(c.v) !== input.slug).slice(0, 8);
   if (codeList.length) set("aliases", codeList.map((c) => c.v).join(", "), [...new Set(codeList.map((c) => c.src))].join(" + "));
 
   // Brand names ----------------------------------------------------------------
@@ -608,6 +658,264 @@ export async function fdaByParts(parts: string[]): Promise<FdaInfo | null> {
 }
 
 // --------------------------------------------------------------------------- #
+// ClinicalTrials.gov "other names" (code names) of trial interventions
+// --------------------------------------------------------------------------- #
+/** Parse one CT.gov v2 study into [intervention, otherName] pairs. */
+export function otherNamesOf(study: any): { nct: string; intervention: string; other: string }[] {
+  const nct = study?.protocolSection?.identificationModule?.nctId;
+  const ivs = study?.protocolSection?.armsInterventionsModule?.interventions;
+  if (!nct || !Array.isArray(ivs)) return [];
+  const out: { nct: string; intervention: string; other: string }[] = [];
+  for (const iv of ivs) {
+    const name = typeof iv?.name === "string" ? iv.name.trim() : "";
+    if (!name || !Array.isArray(iv?.otherNames)) continue;
+    for (const o of iv.otherNames) if (typeof o === "string" && o.trim()) out.push({ nct, intervention: name, other: o.trim().slice(0, 200) });
+  }
+  return out;
+}
+
+/** Download the "other names" of every drug trial's interventions (100 trials per request). */
+export async function refreshOtherNames(log: (m: string, o?: unknown) => void = () => {}): Promise<{ trials: number; names: number } | null> {
+  const ids = (await pool.query<{ nct_id: string }>(
+    "SELECT DISTINCT t.nct_id FROM trials t JOIN trial_products tp ON tp.nct_id = t.nct_id WHERE t.is_active ORDER BY 1",
+  )).rows.map((r) => r.nct_id);
+  const rows: { nct: string; intervention: string; other: string }[] = [];
+  const seen = new Set<string>();
+  try {
+    for (let i = 0; i < ids.length; i += 100) {
+      const batch = ids.slice(i, i + 100);
+      const url = `${config.ctgov.baseUrl}/studies?filter.ids=${batch.join(",")}`
+        + "&fields=NCTId,InterventionName,InterventionOtherName&pageSize=100&format=json";
+      const j = await getJson(url);
+      for (const st of Array.isArray(j?.studies) ? j.studies : []) {
+        for (const r of otherNamesOf(st)) {
+          const k = `${r.nct}\u0000${r.intervention}\u0000${r.other}`;
+          if (!seen.has(k)) { seen.add(k); rows.push(r); }
+        }
+      }
+      await sleep(Math.max(enrichConfig.delayMs, 250));
+    }
+  } catch (e) {
+    log("ClinicalTrials.gov other names unavailable — keeping the last copy", String(e));
+    return null;
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM intervention_other_names WHERE nct_id = ANY($1)", [ids]);
+    for (let i = 0; i < rows.length; i += 1000) {
+      const b = rows.slice(i, i + 1000);
+      await client.query(
+        `INSERT INTO intervention_other_names (nct_id, intervention, other_name)
+         SELECT * FROM unnest($1::text[], $2::text[], $3::text[]) ON CONFLICT DO NOTHING`,
+        [b.map((r) => r.nct), b.map((r) => r.intervention), b.map((r) => r.other)],
+      );
+    }
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+  return { trials: ids.length, names: rows.length };
+}
+
+// --------------------------------------------------------------------------- #
+// Company pipeline pages (sync/data/pipeline-sources.json)
+// --------------------------------------------------------------------------- #
+export interface PipelineSources {
+  pages: { company: string; url: string }[];
+  known: { company: string; drug: string; aliases: string[]; url?: string }[];
+}
+
+export function loadPipelineSources(): PipelineSources {
+  try {
+    const j = JSON.parse(readFileSync(new URL("../data/pipeline-sources.json", import.meta.url), "utf8"));
+    return { pages: Array.isArray(j.pages) ? j.pages : [], known: Array.isArray(j.known) ? j.known : [] };
+  } catch {
+    return { pages: [], known: [] };
+  }
+}
+
+const ENTITIES: Record<string, string> = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", reg: "®", trade: "™", ndash: "–", mdash: "—", middot: "·",
+};
+const decodeEntities = (x: string) => x
+  .replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(parseInt(h, 16)))
+  .replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(Number(d)))
+  .replace(/&([a-z]+);/gi, (m, n: string) => ENTITIES[n.toLowerCase()] ?? m);
+
+function flattenStrings(v: unknown, out: string[]) {
+  if (typeof v === "string") { if (v.trim()) out.push(v); }
+  else if (Array.isArray(v)) v.forEach((x) => flattenStrings(x, out));
+  else if (v && typeof v === "object") Object.values(v as Record<string, unknown>).forEach((x) => flattenStrings(x, out));
+}
+
+/** The text of a web page, one block per line, plus the strings of any embedded JSON data. */
+export function pageText(html: string): string {
+  const json: string[] = [];
+  for (const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    if (/application\/(ld\+)?json|__NEXT_DATA__|__NUXT_DATA__/i.test(m[1])) {
+      try { flattenStrings(JSON.parse(m[2]), json); } catch { /* not JSON */ }
+    }
+  }
+  const body = html
+    .replace(/<(script|style|noscript|svg)\b[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<\/?(br|p|div|li|ul|ol|tr|td|th|h[1-6]|section|article|header|footer|span|a|strong|em|button|dt|dd)\b[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ");
+  return decodeEntities(`${body}\n${json.join("\n")}`)
+    .split("\n").map((l) => l.replace(/[ \t ]+/g, " ").trim()).filter(Boolean).join("\n");
+}
+
+/**
+ * Code names a pipeline page writes next to drugs we track:
+ *   "Enicepatide (CT-388)"        same line, in brackets (always taken)
+ *   "RG6640" above "Enicepatide"  a short label line right above or below the drug name
+ *   "Enicepatide · CT-388 · …"    a code on the drug's own line when no other tracked drug is on it
+ */
+export function extractPipelinePairs(text: string, drugs: { slug: string; name: string }[]): { slug: string; alias: string }[] {
+  const lines = text.split("\n");
+  const named = drugs.filter((d) => !d.name.includes(" + ") && !isUndisclosedProduct(d.slug) && !isCode(d.name)
+    && /^[A-Za-z][A-Za-z -]{4,40}$/.test(d.name));
+  const coded = drugs.filter((d) => isCode(d.name));
+  const codeOwner = new Map(coded.map((d) => [slugify(d.name), d.slug]));
+  const matchers = named.map((d) => ({ d, re: new RegExp(`(^|[^A-Za-z])${escapeRe(d.name)}(?![A-Za-z])`, "i") }));
+  const namesIn = (line: string) => matchers.filter((m) => m.re.test(line)).map((m) => m.d);
+  const codesIn = (line: string) =>
+    [...line.toUpperCase().matchAll(CODE_TOKEN_RE)].map((m) => line.substr(m.index ?? 0, m[0].length).toUpperCase());
+  const ownedByOther = (code: string, slug: string) => codeOwner.has(slugify(code)) && codeOwner.get(slugify(code)) !== slug;
+  const out = new Map<string, { slug: string; alias: string }>();
+  const add = (slug: string, alias: string) => {
+    const k = `${slug}|${slugify(alias)}`;
+    if (slugify(alias) && slugify(alias) !== slug && !out.has(k)) out.set(k, { slug, alias });
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const here = namesIn(line);
+    for (const d of here) {
+      for (const a of titleAliases(d.name, [line])) add(d.slug, a);
+      if (here.length !== 1) continue;
+      if (line.length <= 200) for (const c of codesIn(line)) if (!ownedByOther(c, d.slug)) add(d.slug, c);
+      for (const j of [i - 1, i + 1]) {
+        const nb = lines[j];
+        if (!nb || nb.length > 40 || namesIn(nb).length) continue;
+        // A label below the name could belong to the next drug ("code above name" layout): skip then.
+        if (j === i + 1 && lines[i + 2] && namesIn(lines[i + 2]).length) continue;
+        const cs = codesIn(nb);
+        if (cs.length >= 1 && cs.length <= 2) for (const c of cs) if (!ownedByOther(c, d.slug)) add(d.slug, c);
+      }
+    }
+    // A drug tracked under its code ("HRS9531"): an INN written beside it is an alias.
+    const lineCodes = new Set(codesIn(line).map(slugify));
+    for (const d of coded) {
+      if (!lineCodes.has(slugify(d.name))) continue;
+      for (const w of line.split(/[\s,;/()·|]+/)) if (INN_STEM_RE.test(w)) add(d.slug, titleCase(w));
+    }
+  }
+  return [...out.values()];
+}
+
+/** robots.txt allows a generic crawler to fetch this path? (Missing robots.txt = allowed.) */
+async function robotsAllow(url: string): Promise<boolean> {
+  try {
+    const u = new URL(url);
+    const res = await fetch(`${u.origin}/robots.txt`, { signal: AbortSignal.timeout(enrichConfig.timeoutMs) });
+    if (!res.ok) return true;
+    let applies = false;
+    for (const raw of (await res.text()).split(/\r?\n/)) {
+      const line = raw.replace(/#.*/, "").trim();
+      const idx = line.indexOf(":");
+      if (idx < 0) continue;
+      const k = line.slice(0, idx).trim().toLowerCase(), v = line.slice(idx + 1).trim();
+      if (k === "user-agent") applies = v === "*";
+      else if (applies && k === "disallow" && v && u.pathname.startsWith(v)) return false;
+    }
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+async function fetchPage(url: string): Promise<string> {
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "obesity-trials-platform/1.0 (+https://obesity-trials.vercel.app; drug code names)",
+      Accept: "text/html,application/xhtml+xml",
+    },
+    signal: AbortSignal.timeout(enrichConfig.timeoutMs),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.text();
+}
+
+/** Code names already confirmed on a company's pipeline page ("known" in pipeline-sources.json). */
+export async function upsertKnownPipelineAliases(src: PipelineSources = loadPipelineSources()): Promise<number> {
+  let n = 0;
+  for (const k of src.known) for (const a of k.aliases ?? []) {
+    if (!a?.trim()) continue;
+    await pool.query(
+      `INSERT INTO pipeline_code_names (product_slug, alias, company, source_url) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (product_slug, alias, company) DO UPDATE SET last_seen = now(), source_url = EXCLUDED.source_url`,
+      [slugify(k.drug), a.trim(), k.company, k.url ?? null],
+    );
+    n++;
+  }
+  return n;
+}
+
+export interface PipelineReport { company: string; url: string; status: string; found: number }
+
+/**
+ * Refresh pipeline_code_names: the confirmed "known" entries every run, the pages once a
+ * month (or every run with ENRICH_PIPELINES_FORCE=true).
+ */
+export async function refreshPipelineAliases(
+  drugs: { slug: string; name: string }[], log: (m: string, o?: unknown) => void = () => {},
+  opts: { force?: boolean; sources?: PipelineSources } = {},
+): Promise<PipelineReport[] | null> {
+  const src = opts.sources ?? loadPipelineSources();
+  const upsert = (slug: string, alias: string, company: string, url: string | null) => pool.query(
+    `INSERT INTO pipeline_code_names (product_slug, alias, company, source_url) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (product_slug, alias, company) DO UPDATE SET last_seen = now(), source_url = EXCLUDED.source_url`,
+    [slug, alias, company, url],
+  );
+  await upsertKnownPipelineAliases(src);
+
+  const last = await pool.query<{ value: string }>("SELECT value FROM app_meta WHERE key = 'pipeline_pages_checked_at'");
+  const age = last.rowCount ? Date.now() - Date.parse(last.rows[0].value) : Infinity;
+  const force = opts.force ?? (process.env.ENRICH_PIPELINES_FORCE ?? "").toLowerCase() === "true";
+  if (!force && age < 30 * 86_400_000) return null;
+
+  const report: PipelineReport[] = [];
+  for (const pg of src.pages) {
+    const r: PipelineReport = { company: pg.company, url: pg.url, status: "ok", found: 0 };
+    try {
+      if (!(await robotsAllow(pg.url))) {
+        r.status = "skipped (robots.txt)";
+      } else {
+        const text = pageText(await fetchPage(pg.url));
+        const pairs = extractPipelinePairs(text, drugs);
+        if (!pairs.length) r.status = text.length < 2000 ? "no text (page built with JavaScript?)" : "no code names next to tracked drugs";
+        for (const p of pairs) await upsert(p.slug, p.alias, pg.company, pg.url);
+        r.found = pairs.length;
+      }
+    } catch (e) {
+      r.status = `failed (${e instanceof Error ? e.message : e})`;
+    }
+    report.push(r);
+    await sleep(Math.max(enrichConfig.delayMs, 500));
+  }
+  await pool.query("DELETE FROM pipeline_code_names WHERE last_seen < now() - interval '180 days'");
+  await pool.query(
+    `INSERT INTO app_meta (key, value) VALUES ('pipeline_pages_checked_at', $1)
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [new Date().toISOString()],
+  );
+  log("Company pipeline pages", report);
+  return report;
+}
+
+// --------------------------------------------------------------------------- #
 // The job
 // --------------------------------------------------------------------------- #
 /** Names worth looking up: drug-like (an INN, a code), not a sentence or a class. */
@@ -625,6 +933,8 @@ export interface EnrichResult {
   filledFields: number;
   sourcesDown: string[];
   stoppedEarly: boolean;
+  otherNames?: { trials: number; names: number } | null;
+  pipelines?: PipelineReport[] | null;
 }
 
 export async function enrichProducts(
@@ -652,18 +962,55 @@ export async function enrichProducts(
   res.products = prods.rowCount ?? 0;
   if (!res.products) return res;
 
+  // Confirmed company-pipeline code names (no network needed).
+  if (!opts.only?.length) {
+    try { await upsertKnownPipelineAliases(); } catch { /* table not created yet */ }
+  }
+  // Code names registered on ClinicalTrials.gov (used for aliases and ChEMBL look-ups).
+  if (external && !opts.only?.length) {
+    res.otherNames = await refreshOtherNames(log);
+    if (res.otherNames === null) res.sourcesDown.push("ClinicalTrials.gov other names");
+    try {
+      res.pipelines = await refreshPipelineAliases(prods.rows.map((p) => ({ slug: p.slug, name: p.name })), log);
+    } catch (e) {
+      log("Company pipeline pages skipped", String(e));
+    }
+  }
+
   // Trial facts per product (what the profile is worked out from, besides the lookups).
   const aliases: AliasMap = await loadAliases();
   const trialRows = await pool.query<{
     product_id: number; phase: string | null; sponsor: string | null; lead_sponsor_class: string | null;
     conditions: string[]; interventions: string[]; overall_status: string | null; start_date: string | null;
+    nct_id: string; title: string | null;
   }>(
-    `SELECT tp.product_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions, t.interventions,
-            t.overall_status, t.start_date
+    `SELECT tp.product_id, t.nct_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions, t.interventions,
+            t.overall_status, t.start_date, r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title
        FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+       LEFT JOIN raw_trials r ON r.source = 'CTGOV' AND r.source_id = t.nct_id
       WHERE tp.product_id = ANY($1)`,
     [prods.rows.map((p) => p.id)],
   );
+  // ClinicalTrials.gov "other names" per trial intervention (table from migration 0018).
+  const otherByTrial = new Map<string, Map<string, string[]>>();
+  try {
+    const on = await pool.query<{ nct_id: string; intervention: string; other_name: string }>(
+      "SELECT nct_id, intervention, other_name FROM intervention_other_names WHERE nct_id = ANY($1)",
+      [[...new Set(trialRows.rows.map((r) => r.nct_id))]],
+    );
+    for (const o of on.rows) {
+      const m = otherByTrial.get(o.nct_id) ?? new Map<string, string[]>();
+      m.set(o.intervention, [...(m.get(o.intervention) ?? []), o.other_name]);
+      otherByTrial.set(o.nct_id, m);
+    }
+  } catch { /* table not created yet */ }
+  const pipelineBySlug = new Map<string, PipelineAlias[]>();
+  try {
+    const pl = await pool.query<{ product_slug: string; alias: string; company: string }>(
+      "SELECT product_slug, alias, company FROM pipeline_code_names ORDER BY first_seen",
+    );
+    for (const r of pl.rows) pipelineBySlug.set(r.product_slug, [...(pipelineBySlug.get(r.product_slug) ?? []), { alias: r.alias, company: r.company }]);
+  } catch { /* table not created yet */ }
   const allNames = await pool.query<{ interventions: string[] }>("SELECT interventions FROM trials WHERE is_active");
   const known = buildKnownSet(allNames.rows.map((r) => r.interventions ?? []), aliases);
   const aliasRows = await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases");
@@ -687,7 +1034,8 @@ export async function enrichProducts(
     const list = facts.get(r.product_id) ?? [];
     list.push({
       phase: r.phase, sponsor: r.sponsor, sponsorClass: r.lead_sponsor_class, conditions: r.conditions ?? [],
-      names, soleNames, status: r.overall_status, start: r.start_date,
+      names, soleNames, status: r.overall_status, start: r.start_date, title: r.title,
+      otherNames: soleNames.flatMap((n) => otherByTrial.get(r.nct_id)?.get(n) ?? []),
     });
     facts.set(r.product_id, list);
   }
@@ -695,15 +1043,17 @@ export async function enrichProducts(
   // Work out every product's automatic profile from trials + cached lookups and save
   // what changed. Runs first (trial-based values show right away), every 25 lookups
   // (the site fills in while the run goes on) and at the end.
+  const altNames = new Map<number, string[]>(); // code names to try in ChEMBL when the name isn't found
   const writeAll = async () => {
     const ids: number[] = [], infos: string[] = [];
     let filled = 0;
     for (const p of prods.rows) {
       const auto = deriveAuto({
         slug: p.slug, name: p.name, trials: facts.get(p.id) ?? [],
-        aliasKeys: bySlugAliases.get(p.slug) ?? [], lookup: p.auto_lookup,
+        aliasKeys: bySlugAliases.get(p.slug) ?? [], lookup: p.auto_lookup, pipelineAliases: pipelineBySlug.get(p.slug),
       });
       filled += Object.keys(auto).length;
+      if (auto.aliases) altNames.set(p.id, auto.aliases.value.split(", ").filter((a) => a && !/\s/.test(a)).slice(0, 3));
       ids.push(p.id);
       infos.push(JSON.stringify(auto));
     }
@@ -739,7 +1089,12 @@ export async function enrichProducts(
       if (chemblUp) {
         try {
           const found: (ChemblInfo | null)[] = [];
-          for (const part of parts) found.push(await chemblByName(part));
+          for (const part of parts) {
+            let hit = await chemblByName(part);
+            // A new INN may not be in ChEMBL yet: try the drug's code names (e.g. CT-388).
+            if (!hit && parts.length === 1) for (const alt of altNames.get(p.id) ?? []) { hit = await chemblByName(alt); if (hit) break; }
+            found.push(hit);
+          }
           next.chembl = found;
         } catch (e) {
           chemblUp = false; complete = false;

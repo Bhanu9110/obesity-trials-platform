@@ -170,6 +170,10 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   overwritten. Up to `ENRICH_MAX_LOOKUPS` (200) drugs are looked up per run and each is
   re-checked every `ENRICH_REFRESH_DAYS` (30). Optional secret `OPENFDA_API_KEY` raises
   openFDA's daily limit.
+- **Drug code names (Alias field)** — collected automatically from the drug's company
+  pipeline page (`sync/data/pipeline-sources.json`, re-checked monthly; add confirmed
+  pairs under `known`), ChEMBL, ClinicalTrials.gov "other names", trial titles such as
+  "Enicepatide (CT-388)" and the built-in alias list. Each value shows its source.
 - **Drug-matching rules** — `sync/src/products.ts`. Bump `PRODUCT_RULES_VERSION`
   after changing them; the scheduler rebuilds automatically on next start.
 

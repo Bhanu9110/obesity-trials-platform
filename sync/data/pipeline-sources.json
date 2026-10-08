@@ -1,0 +1,31 @@
+{
+  "_about": [
+    "Public pipeline pages of companies developing obesity drugs. Once a month the drug-profile",
+    "auto-fill (npm run enrich-products) downloads each page, finds the code names written next to",
+    "drug names we track (e.g. 'Enicepatide (CT-388)', 'RG6640 Enicepatide') and shows them in the",
+    "drug's Alias field, marked 'Company pipeline (<company>)'. Pages that only build their content",
+    "with JavaScript yield nothing and are reported in the job log. Add, fix or remove pages freely.",
+    "'known' lists code names already confirmed on a company's pipeline page (always used)."
+  ],
+  "pages": [
+    { "company": "Roche", "url": "https://www.roche.com/solutions/pipeline" },
+    { "company": "Eli Lilly", "url": "https://www.lilly.com/innovation/clinical-development-pipeline" },
+    { "company": "Novo Nordisk", "url": "https://www.novonordisk.com/science-and-technology/r-d-pipeline.html" },
+    { "company": "Amgen", "url": "https://www.amgenpipeline.com/" },
+    { "company": "AstraZeneca", "url": "https://www.astrazeneca.com/our-therapy-areas/pipeline.html" },
+    { "company": "Pfizer", "url": "https://www.pfizer.com/science/drug-product-pipeline" },
+    { "company": "Boehringer Ingelheim", "url": "https://www.boehringer-ingelheim.com/science-innovation/human-health-pipeline" },
+    { "company": "Regeneron", "url": "https://www.regeneron.com/pipeline-medicines/investigational-pipeline" },
+    { "company": "Zealand Pharma", "url": "https://www.zealandpharma.com/pipeline/" },
+    { "company": "Structure Therapeutics", "url": "https://structuretx.com/pipeline/" },
+    { "company": "Viking Therapeutics", "url": "https://vikingtherapeutics.com/pipeline/" },
+    { "company": "Altimmune", "url": "https://altimmune.com/pipeline/" },
+    { "company": "Wave Life Sciences", "url": "https://wavelifesciences.com/pipeline/" },
+    { "company": "Arrowhead Pharmaceuticals", "url": "https://arrowheadpharma.com/pipeline/" },
+    { "company": "Skye Bioscience", "url": "https://skyebioscience.com/pipeline/" },
+    { "company": "Hanmi Pharmaceutical", "url": "https://www.hanmipharm.com/en/rnd/pipeline.do" }
+  ],
+  "known": [
+    { "company": "Roche", "drug": "Enicepatide", "aliases": ["RG6640", "CT-388"], "url": "https://www.roche.com/solutions/pipeline" }
+  ]
+}

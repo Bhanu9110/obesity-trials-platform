@@ -6,10 +6,12 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import {
   deriveAuto, parseFda, parseChemblMolecule, normalizeCondition, subclassFrom, enrichConfig, enrichProducts,
+  aliasCandidates, titleAliases, otherNamesOf, refreshOtherNames, pageText, extractPipelinePairs, refreshPipelineAliases,
   type ChemblInfo, type Lookup, type TrialFact,
 } from "./enrich.js";
 import { runSyncForStudies } from "./sync.js";
 import { pool } from "./db.js";
+import { config } from "./config.js";
 
 const trial = (over: Partial<TrialFact> = {}): TrialFact => ({
   phase: "PHASE3", sponsor: "Novo Nordisk A/S", sponsorClass: "INDUSTRY", conditions: ["Obesity"],
@@ -140,6 +142,58 @@ test("autofill: pipeline = industry drug, non-pipeline = academic drug", () => {
   assert.deepEqual(industry.candidate, { value: "Pipeline", source: "Industry (Acme Bio)" });
 });
 
+test("autofill: aliases from ClinicalTrials.gov other names and trial titles", () => {
+  assert.deepEqual(aliasCandidates("CT-388"), ["CT-388"]);
+  assert.deepEqual(aliasCandidates("ribupatide; HRS-9531 injection"), ["HRS-9531", "Ribupatide"]);
+  assert.deepEqual(aliasCandidates("Matching placebo"), []);
+  assert.deepEqual(titleAliases("Enicepatide", ["A Study of Enicepatide (CT-388) in Participants With Obesity"]), ["CT-388"]);
+  assert.deepEqual(titleAliases("Enicepatide", ["A Study of CT-388 (Enicepatide) in Adults"]), ["CT-388"]);
+  assert.deepEqual(titleAliases("Enicepatide", ["Enicepatide (Once-Weekly) in Obesity"]), []);   // no code inside
+  assert.deepEqual(otherNamesOf({ protocolSection: { identificationModule: { nctId: "NCT1" },
+    armsInterventionsModule: { interventions: [{ name: "Enicepatide", otherNames: ["CT-388", "RO7795081"] }, { name: "Placebo" }] } } }),
+    [{ nct: "NCT1", intervention: "Enicepatide", other: "CT-388" }, { nct: "NCT1", intervention: "Enicepatide", other: "RO7795081" }]);
+
+  const a = deriveAuto({
+    slug: "enicepatide", name: "Enicepatide", aliasKeys: ["ct388", "rg6640"], lookup: null,
+    trials: [
+      trial({ sponsor: "Carmot Therapeutics, Inc.", names: ["Enicepatide"], soleNames: ["Enicepatide"],
+              title: "A Study of Enicepatide (CT-388) in Participants With Obesity", otherNames: ["CT-388", "RO7795081"] }),
+      trial({ sponsor: "Hoffmann-La Roche", names: ["Enicepatide"], soleNames: ["Enicepatide"], title: "A Study of Enicepatide in Obesity" }),
+    ],
+  });
+  // CT.gov spelling wins over the alias-list spelling (CT-388, not CT388); RG6640 comes from the alias list.
+  assert.deepEqual(a.aliases, { value: "CT-388, RO7795081, RG6640", source: "ClinicalTrials.gov + Alias list" });
+  const b = deriveAuto({
+    slug: "enicepatide", name: "Enicepatide", aliasKeys: ["ct388", "rg6640"], lookup: null,
+    pipelineAliases: [{ alias: "RG6640", company: "Roche" }, { alias: "CT-388", company: "Roche" }], trials: [trial()],
+  });
+  assert.deepEqual(b.aliases, { value: "RG6640, CT-388", source: "Company pipeline (Roche)" });
+});
+
+test("company pipeline pages: code names next to tracked drugs", () => {
+  const html = `<html><head><style>.x{}</style><script>var a = "RG9999 Enicepatide";</script></head><body>
+    <div class="row"><span>RG6640</span><h3>Enicepatide (CT-388)</h3><p>obesity +/- Type 2 diabetes</p></div>
+    <div class="row"><span>RG7777</span><h3>Petrelintide &amp; partners</h3></div>
+    <table><tr><td>LY3437943</td><td>Retatrutide</td><td>Phase 3</td></tr>
+           <tr><td>Tirzepatide / Retatrutide combination LY9999999</td></tr></table>
+    <p>HRS9531 (ribupatide) Phase 3</p>
+    <script id="__NEXT_DATA__" type="application/json">{"props":{"items":[{"name":"Orforglipron","code":"LY3502970"}]}}</script>
+  </body></html>`;
+  const text = pageText(html);
+  assert.ok(!text.includes("RG9999"));                       // script code is ignored
+  assert.ok(text.includes("Orforglipron") && text.includes("LY3502970")); // embedded JSON data is read
+  const drugs = [
+    { slug: "enicepatide", name: "Enicepatide" }, { slug: "petrelintide", name: "Petrelintide" },
+    { slug: "retatrutide", name: "Retatrutide" }, { slug: "tirzepatide", name: "Tirzepatide" },
+    { slug: "hrs9531", name: "HRS9531" }, { slug: "orforglipron", name: "Orforglipron" },
+  ];
+  const pairs = extractPipelinePairs(text, drugs).map((p) => `${p.slug}=${p.alias}`).sort();
+  assert.deepEqual(pairs, [
+    "enicepatide=CT-388", "enicepatide=RG6640", "hrs9531=Ribupatide", "orforglipron=LY3502970",
+    "petrelintide=RG7777", "retatrutide=LY3437943",
+  ]);   // the combination line names two drugs, so LY9999999 is not given to either
+});
+
 test("autofill: conditions are normalised and merged", () => {
   assert.deepEqual(normalizeCondition("Diabetes Mellitus, Type 2"), ["Type 2 diabetes"]);
   assert.deepEqual(normalizeCondition("Overweight and Obesity"), ["Obesity", "Overweight"]);
@@ -218,6 +272,14 @@ const server = http.createServer((req, res) => {
       { mechanism_of_action: "Glucagon-like peptide 1 receptor agonist", action_type: "AGONIST", molecule_chembl_id: "CHEMBL900001" },
       { mechanism_of_action: "Gastric inhibitory polypeptide receptor agonist", action_type: "AGONIST", molecule_chembl_id: "CHEMBL900001" },
     ] : [] });
+  }
+  if (u.pathname === "/robots.txt") { res.writeHead(200, { "Content-Type": "text/plain" }); return res.end("User-agent: *\nDisallow: /private/\n"); }
+  if (u.pathname === "/pipeline") { res.writeHead(200, { "Content-Type": "text/html" }); return res.end("<html><body>" + "<p>filler</p>".repeat(200) + "<li>Testaglutide (TG-777) – obesity – Phase 3</li></body></html>"); }
+  if (u.pathname === "/ctgov/studies") {
+    const ids = (u.searchParams.get("filter.ids") ?? "").split(",");
+    return send(200, { studies: ids.filter((id) => id === "NCT09999901").map((id) => ({ protocolSection: {
+      identificationModule: { nctId: id },
+      armsInterventionsModule: { interventions: [{ name: "Testaglutide (TG-101) subcutaneous injection", otherNames: ["TG-101", "Testavy"] }] } } })) });
   }
   if (u.pathname === "/fda/drug/drugsfda.json") {
     if (fdaDown) return send(503, { error: "down" });
@@ -308,6 +370,30 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   assert.match(r3.sourcesDown[0], /openFDA/);
   assert.equal((await row("obscurazine")).auto_checked_at, null);
   fdaDown = false;
+
+  // ClinicalTrials.gov other names are stored per trial intervention.
+  (config.ctgov as { baseUrl: string }).baseUrl = `${base}/ctgov`;
+  const on = await refreshOtherNames();
+  assert.ok(on && on.names >= 2);
+  const stored = await pool.query("SELECT other_name FROM intervention_other_names WHERE nct_id = 'NCT09999901' ORDER BY 1");
+  assert.deepEqual(stored.rows.map((r) => r.other_name), ["TG-101", "Testavy"]);
+
+  // Company pipeline pages: known entries + a page, robots.txt respected.
+  const rep = await refreshPipelineAliases([{ slug: "testaglutide", name: "Testaglutide" }], undefined, {
+    force: true,
+    sources: {
+      pages: [{ company: "Acme", url: `${base}/pipeline` }, { company: "Hidden", url: `${base}/private/pipeline` }],
+      known: [{ company: "Acme", drug: "Testaglutide", aliases: ["AC-101"] }],
+    },
+  });
+  assert.deepEqual(rep?.map((r) => [r.company, r.status, r.found]), [["Acme", "ok", 1], ["Hidden", "skipped (robots.txt)", 0]]);
+  const codes = await pool.query("SELECT alias, company FROM pipeline_code_names WHERE product_slug = 'testaglutide' ORDER BY alias");
+  assert.deepEqual(codes.rows.map((r) => `${r.alias}/${r.company}`), ["AC-101/Acme", "TG-777/Acme"]);
+  await enrichProducts({ only: ["testaglutide"], external: false });
+  const al = (await pool.query("SELECT auto_info->'aliases' AS a FROM products WHERE slug = 'testaglutide'")).rows[0].a;
+  assert.equal(al.value, "AC-101, TG-777, TG-101");
+  assert.equal(al.source, "Company pipeline (Acme) + ChEMBL");
+  await pool.query("DELETE FROM pipeline_code_names WHERE product_slug = 'testaglutide'");
 
   // Trial data only (no network).
   const r4 = await enrichProducts({ only: ["obscurazine"], external: false });
