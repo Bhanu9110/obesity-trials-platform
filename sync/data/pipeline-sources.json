@@ -5,27 +5,499 @@
     "drug names we track (e.g. 'Enicepatide (CT-388)', 'RG6640 Enicepatide') and shows them in the",
     "drug's Alias field, marked 'Company pipeline (<company>)'. Pages that only build their content",
     "with JavaScript yield nothing and are reported in the job log. Add, fix or remove pages freely.",
-    "'known' lists code names already confirmed on a company's pipeline page (always used)."
+    "'known' = code names confirmed on the company's own pipeline page, pipeline PDF or press release (URL given); always used."
   ],
   "pages": [
-    { "company": "Roche", "url": "https://www.roche.com/solutions/pipeline" },
-    { "company": "Eli Lilly", "url": "https://www.lilly.com/innovation/clinical-development-pipeline" },
-    { "company": "Novo Nordisk", "url": "https://www.novonordisk.com/science-and-technology/r-d-pipeline.html" },
-    { "company": "Amgen", "url": "https://www.amgenpipeline.com/" },
-    { "company": "AstraZeneca", "url": "https://www.astrazeneca.com/our-therapy-areas/pipeline.html" },
-    { "company": "Pfizer", "url": "https://www.pfizer.com/science/drug-product-pipeline" },
-    { "company": "Boehringer Ingelheim", "url": "https://www.boehringer-ingelheim.com/science-innovation/human-health-pipeline" },
-    { "company": "Regeneron", "url": "https://www.regeneron.com/pipeline-medicines/investigational-pipeline" },
-    { "company": "Zealand Pharma", "url": "https://www.zealandpharma.com/pipeline/" },
-    { "company": "Structure Therapeutics", "url": "https://structuretx.com/pipeline/" },
-    { "company": "Viking Therapeutics", "url": "https://vikingtherapeutics.com/pipeline/" },
-    { "company": "Altimmune", "url": "https://altimmune.com/pipeline/" },
-    { "company": "Wave Life Sciences", "url": "https://wavelifesciences.com/pipeline/" },
-    { "company": "Arrowhead Pharmaceuticals", "url": "https://arrowheadpharma.com/pipeline/" },
-    { "company": "Skye Bioscience", "url": "https://skyebioscience.com/pipeline/" },
-    { "company": "Hanmi Pharmaceutical", "url": "https://www.hanmipharm.com/en/rnd/pipeline.do" }
+    {
+      "company": "Roche",
+      "url": "https://www.roche.com/solutions/pipeline"
+    },
+    {
+      "company": "Novo Nordisk",
+      "url": "https://www.novonordisk.com/science-and-technology/r-d-pipeline.html"
+    },
+    {
+      "company": "Amgen",
+      "url": "https://www.amgenpipeline.com/"
+    },
+    {
+      "company": "AstraZeneca",
+      "url": "https://www.astrazeneca.com/our-therapy-areas/pipeline.html"
+    },
+    {
+      "company": "Pfizer",
+      "url": "https://www.pfizer.com/science/drug-product-pipeline"
+    },
+    {
+      "company": "Boehringer Ingelheim",
+      "url": "https://www.boehringer-ingelheim.com/science-innovation/human-health-pipeline"
+    },
+    {
+      "company": "Zealand Pharma",
+      "url": "https://www.zealandpharma.com/pipeline/"
+    },
+    {
+      "company": "Structure Therapeutics",
+      "url": "https://structuretx.com/pipeline/"
+    },
+    {
+      "company": "Altimmune",
+      "url": "https://altimmune.com/pipeline/"
+    },
+    {
+      "company": "Wave Life Sciences",
+      "url": "https://wavelifesciences.com/pipeline/"
+    },
+    {
+      "company": "Skye Bioscience",
+      "url": "https://skyebioscience.com/pipeline/"
+    },
+    {
+      "company": "Eli Lilly",
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Regeneron",
+      "url": "https://www.regeneron.com/science/investigational-pipeline"
+    },
+    {
+      "company": "Viking Therapeutics",
+      "url": "https://vikingtherapeutics.com/pipeline/overview/"
+    },
+    {
+      "company": "Arrowhead Pharmaceuticals",
+      "url": "https://arrowheadpharma.com/en-us/pipeline"
+    },
+    {
+      "company": "Sciwind Biosciences",
+      "url": "https://www.sciwindbio.com/portal/index/pipeline/category_id/3.html"
+    },
+    {
+      "company": "Kailera Therapeutics",
+      "url": "https://www.kailera.com/development-pipeline/"
+    },
+    {
+      "company": "Hanmi Pharmaceutical",
+      "url": "https://hanmipharm.com/science/pipeline/focused/hm15275.hm"
+    }
   ],
   "known": [
-    { "company": "Roche", "drug": "Enicepatide", "aliases": ["RG6640", "CT-388"], "url": "https://www.roche.com/solutions/pipeline" }
+    {
+      "company": "Altimmune",
+      "drug": "Pemvidutide",
+      "aliases": [
+        "ALT-801"
+      ],
+      "url": "https://ir.altimmune.com/news-releases/news-release-details/altimmune-announces-fda-clearance-pemvidutide-alt-801-ind"
+    },
+    {
+      "company": "Amgen",
+      "drug": "Maridebart cafraglutide",
+      "aliases": [
+        "AMG 133"
+      ],
+      "url": "https://www.amgen.com/newsroom/press-releases/2024/11/amgen-announces-robust-weight-loss-with-maritide-in-people-living-with-obesity-or-overweight-at-52-weeks-in-a-phase-2-study"
+    },
+    {
+      "company": "AstraZeneca",
+      "drug": "Elecoglipron",
+      "aliases": [
+        "AZD5004",
+        "ECC5004"
+      ],
+      "url": "https://www.astrazeneca.com/content/dam/az/Investor_Relations/annual-report-2025/pdf/AstraZeneca_Development_Pipeline_2025.pdf"
+    },
+    {
+      "company": "Biohaven",
+      "drug": "Taldefgrobep alfa",
+      "aliases": [
+        "BHV-2000"
+      ],
+      "url": "https://ir.biohaven.com/news-releases/news-release-details/biohaven-presents-preclinical-data-demonstrating-taldefgrobep"
+    },
+    {
+      "company": "Boehringer Ingelheim",
+      "drug": "Survodutide",
+      "aliases": [
+        "BI 456906"
+      ],
+      "url": "https://www.boehringer-ingelheim.com/science-innovation/human-health-innovation/clinical-pipeline/survodutide-bi-456906-gcgr-glp1-agonist-0"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Bimagrumab",
+      "aliases": [
+        "LY3985863"
+      ],
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Eloralintide",
+      "aliases": [
+        "LY3841136"
+      ],
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Macupatide",
+      "aliases": [
+        "LY3532226"
+      ],
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Mazdutide",
+      "aliases": [
+        "LY3305677"
+      ],
+      "url": "https://investor.lilly.com/static-files/75718118-4339-4ea6-9086-cb9201a2d926"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Naperiglipron",
+      "aliases": [
+        "LY3549492"
+      ],
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Orforglipron",
+      "aliases": [
+        "LY3502970"
+      ],
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Retatrutide",
+      "aliases": [
+        "LY3437943"
+      ],
+      "url": "https://www.lilly.com/science/research-development/pipeline"
+    },
+    {
+      "company": "Eli Lilly",
+      "drug": "Tirzepatide",
+      "aliases": [
+        "LY3298176"
+      ],
+      "url": "https://investor.lilly.com/static-files/45a92498-43d0-4e2d-a4e6-a9131841cfd6"
+    },
+    {
+      "company": "Gan & Lee",
+      "drug": "Bofanglutide",
+      "aliases": [
+        "GZR18"
+      ],
+      "url": "https://www.ganlee.com/detail/778.html"
+    },
+    {
+      "company": "Hansoh",
+      "drug": "Olatorepatide",
+      "aliases": [
+        "HS-20094"
+      ],
+      "url": "https://www.hspharm.com/news/news-detail-513424.htm"
+    },
+    {
+      "company": "Hengrui",
+      "drug": "HRS-4729",
+      "aliases": [
+        "KAI-4729"
+      ],
+      "url": "https://www.hengrui.com/media/detail-958.html"
+    },
+    {
+      "company": "Hengrui",
+      "drug": "HRS-7535",
+      "aliases": [
+        "KAI-7535"
+      ],
+      "url": "https://www.hengrui.com/en/media/detail-986.html"
+    },
+    {
+      "company": "Hengrui",
+      "drug": "Ribupatide",
+      "aliases": [
+        "HRS9531",
+        "KAI-9531",
+        "KAI-9531-T"
+      ],
+      "url": "https://www.hengrui.com/images/investor/Investor%20Presentation%20FY2025.pdf"
+    },
+    {
+      "company": "Innovent Biologics",
+      "drug": "Mazdutide",
+      "aliases": [
+        "IBI362"
+      ],
+      "url": "https://img.innoventbio.com/Innovent_2024_Interim_Results_Presentation_vff.pdf"
+    },
+    {
+      "company": "Kailera Therapeutics",
+      "drug": "KAI-4729",
+      "aliases": [
+        "HRS-4729"
+      ],
+      "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    },
+    {
+      "company": "Kailera Therapeutics",
+      "drug": "KAI-7535",
+      "aliases": [
+        "HRS-7535"
+      ],
+      "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-therapeutics-announces-positive-topline-data-two-hengrui"
+    },
+    {
+      "company": "Kailera Therapeutics",
+      "drug": "Ribupatide",
+      "aliases": [
+        "KAI-9531",
+        "KAI-9531-T"
+      ],
+      "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "Amycretin",
+      "aliases": [
+        "Zenagamtide",
+        "NN9487",
+        "NN9490",
+        "NNC0487-0111"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/irmaterial/cmd/2024/P2-Research-and-Early-Development.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "Cagrilintide",
+      "aliases": [
+        "NN9833"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q4-2025-investor-presentation-4Feb.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "CagriSema",
+      "aliases": [
+        "NN9388",
+        "NN9838"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q4-2025-investor-presentation-4Feb.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "INV-347",
+      "aliases": [
+        "NN9441"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/irmaterial/cmd/2024/P2-Research-and-Early-Development.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "Monlunabant",
+      "aliases": [
+        "NN9440",
+        "INV-202"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q4-2025-investor-presentation-4Feb.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "Semaglutide",
+      "aliases": [
+        "NN9536",
+        "NN9932",
+        "NN9924"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q4-2025-investor-presentation-4Feb.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "UBT251",
+      "aliases": [
+        "NN9559"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q4-2025-investor-presentation-4Feb.pdf"
+    },
+    {
+      "company": "Novo Nordisk",
+      "drug": "Zenagamtide",
+      "aliases": [
+        "Amycretin",
+        "NN9490",
+        "NN9487"
+      ],
+      "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q4-2025-investor-presentation-4Feb.pdf"
+    },
+    {
+      "company": "Pfizer",
+      "drug": "Berobenatide",
+      "aliases": [
+        "MET-097i",
+        "PF-08653944"
+      ],
+      "url": "https://cdn.pfizer.com/pfizercom/product-pipeline/Q1%202026%20Pipeline%20Update_vFinal_0.pdf?VersionId=9ggml9Bl6OEGJ6u6UsXkTgJTL6Q17eT."
+    },
+    {
+      "company": "Pfizer",
+      "drug": "Danuglipron",
+      "aliases": [
+        "PF-06882961"
+      ],
+      "url": "https://www.pfizer.com/news/press-release/press-release-detail/pfizer-provides-update-glp-1-ra-clinical-development"
+    },
+    {
+      "company": "Pfizer",
+      "drug": "Lotiglipron",
+      "aliases": [
+        "PF-07081532"
+      ],
+      "url": "https://www.pfizer.com/news/press-release/press-release-detail/pfizer-provides-update-glp-1-ra-clinical-development"
+    },
+    {
+      "company": "Pfizer",
+      "drug": "MET-034i",
+      "aliases": [
+        "PF-08654696"
+      ],
+      "url": "https://cdn.pfizer.com/pfizercom/product-pipeline/Q2_2026_Pipeline_Update_Final.pdf"
+    },
+    {
+      "company": "Pfizer",
+      "drug": "MET-224o",
+      "aliases": [
+        "PF-08656796"
+      ],
+      "url": "https://cdn.pfizer.com/pfizercom/product-pipeline/Q2_2026_Pipeline_Update_Final.pdf"
+    },
+    {
+      "company": "Pfizer",
+      "drug": "MET-233i",
+      "aliases": [
+        "PF-08653945"
+      ],
+      "url": "https://www.pfizer.com/news/press-release/press-release-detail/pfizers-ultra-long-acting-injectable-glp-1-ra-shows-robust"
+    },
+    {
+      "company": "Pfizer",
+      "drug": "MET-815i",
+      "aliases": [
+        "PF-08656795"
+      ],
+      "url": "https://cdn.pfizer.com/pfizercom/product-pipeline/Q2_2026_Pipeline_Update_Final.pdf"
+    },
+    {
+      "company": "Regeneron",
+      "drug": "Olatorepatide",
+      "aliases": [
+        "HS-20094"
+      ],
+      "url": "https://www.regeneron.com/science/investigational-pipeline"
+    },
+    {
+      "company": "Regeneron",
+      "drug": "Trevogrumab",
+      "aliases": [
+        "REGN1033"
+      ],
+      "url": "https://www.regeneron.com/science/investigational-pipeline"
+    },
+    {
+      "company": "Rhythm Pharmaceuticals",
+      "drug": "Bivamelagon",
+      "aliases": [
+        "LB54640"
+      ],
+      "url": "https://ir.rhythmtx.com/news-releases/news-release-details/rhythm-pharmaceuticals-announces-oral-mc4r-agonist-bivamelagon"
+    },
+    {
+      "company": "Roche",
+      "drug": "CT-996",
+      "aliases": [
+        "RG6652"
+      ],
+      "url": "https://assets.roche.com/f/176343/x/5f28882119/pharmaq126.pdf"
+    },
+    {
+      "company": "Roche",
+      "drug": "Emugrobart",
+      "aliases": [
+        "RG6237",
+        "GYM 329"
+      ],
+      "url": "https://assets.roche.com/f/176343/x/5f28882119/pharmaq126.pdf"
+    },
+    {
+      "company": "Roche",
+      "drug": "Enicepatide",
+      "aliases": [
+        "RG6640",
+        "CT-388"
+      ],
+      "url": "https://www.roche.com/solutions/pipeline"
+    },
+    {
+      "company": "Roche",
+      "drug": "Petrelintide",
+      "aliases": [
+        "RG6849"
+      ],
+      "url": "https://assets.roche.com/f/176343/x/5f28882119/pharmaq126.pdf"
+    },
+    {
+      "company": "Scholar Rock",
+      "drug": "Apitegromab",
+      "aliases": [
+        "SRK-015"
+      ],
+      "url": "https://scholarrock.com/wp-content/uploads/2025/03/20250315-MDA-Poster-Final-1.pdf"
+    },
+    {
+      "company": "Sciwind Biosciences",
+      "drug": "Ecnoglutide",
+      "aliases": [
+        "XW003",
+        "XW004"
+      ],
+      "url": "https://www.sciwindbio.com/portal/index/pipeline/category_id/3.html"
+    },
+    {
+      "company": "Structure Therapeutics",
+      "drug": "Aleniglipron",
+      "aliases": [
+        "GSBR-1290"
+      ],
+      "url": "https://ir.structuretx.com/news-releases/news-release-details/structure-therapeutics-reports-fourth-quarter-and-full-year-2025"
+    },
+    {
+      "company": "Verdiva Bio",
+      "drug": "Ecnoglutide",
+      "aliases": [
+        "VRB-101"
+      ],
+      "url": "https://verdivabio.com/wp-content/uploads/VRB-101-Enrollment-Completion-Release.pdf"
+    },
+    {
+      "company": "Zealand Pharma",
+      "drug": "Petrelintide",
+      "aliases": [
+        "ZP8396"
+      ],
+      "url": "https://www.zealandpharma.com/pipeline/petrelintide/"
+    },
+    {
+      "company": "Zealand Pharma",
+      "drug": "Survodutide",
+      "aliases": [
+        "BI 456906"
+      ],
+      "url": "https://www.zealandpharma.com/rd/survodutide-bi-456906-glp-1-glucagon-dual-agonist/"
+    }
   ]
 }

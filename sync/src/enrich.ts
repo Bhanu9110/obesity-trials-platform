@@ -416,7 +416,13 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   // 4) The built-in alias list and merges made on the website.
   for (const k of input.aliasKeys) if (isCode(k) || INN_STEM_RE.test(k)) codes.push({ v: isCode(k) ? k.toUpperCase() : titleCase(k), src: "Alias list" });
   const codeList = uniqBy(codes, (c) => slugify(c.v)).filter((c) => slugify(c.v) !== ownSlug && slugify(c.v) !== input.slug).slice(0, 8);
-  if (codeList.length) set("aliases", codeList.map((c) => c.v).join(", "), [...new Set(codeList.map((c) => c.src))].join(" + "));
+  if (codeList.length) {
+    // "Company pipeline (Roche) + Company pipeline (Zealand)" -> "Company pipeline (Roche, Zealand)"
+    const companies = [...new Set(codeList.map((c) => /^Company pipeline \((.*)\)$/.exec(c.src)?.[1]).filter((x): x is string => !!x))];
+    const others = [...new Set(codeList.map((c) => c.src).filter((x) => !x.startsWith("Company pipeline")))];
+    set("aliases", codeList.map((c) => c.v).join(", "),
+      [...(companies.length ? [`Company pipeline (${companies.join(", ")})`] : []), ...others].join(" + "));
+  }
 
   // Brand names ----------------------------------------------------------------
   const brands: { v: string; src: string }[] = [];
@@ -846,20 +852,39 @@ async function fetchPage(url: string): Promise<string> {
     signal: AbortSignal.timeout(enrichConfig.timeoutMs),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (/pdf/i.test(res.headers.get("content-type") ?? "") || /\.pdf($|\?)/i.test(url)) throw new Error("PDF — add its code names under \"known\"");
   return await res.text();
 }
 
-/** Code names already confirmed on a company's pipeline page ("known" in pipeline-sources.json). */
+/**
+ * Code names already confirmed on a company's pipeline page ("known" in pipeline-sources.json).
+ * Each entry is attached to every drug page it names: the INN page ("Ribupatide") and/or the
+ * page kept under a code ("HRS9531"); the other names become that page's aliases.
+ */
 export async function upsertKnownPipelineAliases(src: PipelineSources = loadPipelineSources()): Promise<number> {
+  const slugs = new Set((await pool.query<{ slug: string }>("SELECT slug FROM products")).rows.map((r) => r.slug));
+  const merged = new Map<string, string>();
+  for (const [k, ref] of Object.entries(BUILTIN_ALIASES)) merged.set(k, ref.slug);
+  for (const r of (await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases")).rows)
+    merged.set(r.alias_slug, r.product_slug);
   let n = 0;
-  for (const k of src.known) for (const a of k.aliases ?? []) {
-    if (!a?.trim()) continue;
-    await pool.query(
-      `INSERT INTO pipeline_code_names (product_slug, alias, company, source_url) VALUES ($1, $2, $3, $4)
-       ON CONFLICT (product_slug, alias, company) DO UPDATE SET last_seen = now(), source_url = EXCLUDED.source_url`,
-      [slugify(k.drug), a.trim(), k.company, k.url ?? null],
-    );
-    n++;
+  for (const k of src.known) {
+    const names = [k.drug, ...(k.aliases ?? [])].map((x) => (x ?? "").trim()).filter(Boolean);
+    const targets = new Set<string>();
+    for (const x of names) {
+      const sl = merged.get(slugify(x)) ?? slugify(x);
+      if (slugs.has(sl)) targets.add(sl);
+    }
+    if (!targets.size) targets.add(slugify(k.drug));
+    for (const t of targets) for (const a of names) {
+      if (slugify(a) === t) continue;
+      await pool.query(
+        `INSERT INTO pipeline_code_names (product_slug, alias, company, source_url) VALUES ($1, $2, $3, $4)
+         ON CONFLICT (product_slug, alias, company) DO UPDATE SET last_seen = now(), source_url = EXCLUDED.source_url`,
+        [t, a, k.company, k.url ?? null],
+      );
+      n++;
+    }
   }
   return n;
 }
