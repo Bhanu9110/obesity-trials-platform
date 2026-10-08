@@ -214,7 +214,6 @@ export interface DeriveInput {
   now?: Date;
 }
 
-const ACTIVE = new Set(["RECRUITING", "NOT_YET_RECRUITING", "ACTIVE_NOT_RECRUITING", "ENROLLING_BY_INVITATION"]);
 
 function topSponsor(trials: TrialFact[], fdaSponsors: string[]): string | null {
   const counts = new Map<string, number>();
@@ -323,20 +322,25 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
     else if (tp && tp.level < 4) set("phase", tp.label, "Trials");
   }
 
-  // Pipeline / non-pipeline ----------------------------------------------------
-  const active = trials.some((t) => ACTIVE.has((t.status ?? "").toUpperCase()));
-  const latestStart = trials.map((t) => t.start ?? "").filter(Boolean).sort().at(-1) ?? null;
-  const recent = latestStart ? now.getFullYear() - Number(latestStart.slice(0, 4)) <= 3 : false;
-  if (isApproved || withdrawn) set("candidate", "Non-pipeline", isApproved ? approved!.source : "ChEMBL");
-  else if (active || recent) set("candidate", "Pipeline", "Trials");
-  else if (latestStart && now.getFullYear() - Number(latestStart.slice(0, 4)) >= 6) set("candidate", "Non-pipeline", "Trials (no trial in 6+ years)");
-
   // Company -------------------------------------------------------------------
   if (fda && fda.generics >= 3 && !trials.some((t) => (t.sponsorClass ?? "").toUpperCase() === "INDUSTRY")) {
     set("sponsor", "Generic (several companies)", "openFDA");
   } else {
     const s = topSponsor(trials, fda?.sponsors ?? []);
     if (s) set("sponsor", s, trials.some((t) => t.sponsor === s) ? "Trials" : "openFDA");
+  }
+
+  // Pipeline / non-pipeline ----------------------------------------------------
+  // Pipeline = a drug a company is developing (industry); Non-pipeline = an academic
+  // drug (only universities / hospitals / public funders run its trials, or a generic
+  // with no single developing company). Decided by who sponsors the drug's trials.
+  const industryTrials = trials.filter((t) => (t.sponsorClass ?? "").toUpperCase() === "INDUSTRY").length;
+  const company = out.sponsor && out.sponsor.value !== "Generic (several companies)" ? out.sponsor.value : null;
+  if (company) set("candidate", "Pipeline", `Industry (${company})`);
+  else if (trials.length) {
+    set("candidate", "Non-pipeline",
+      out.sponsor ? "Generic, no developing company"
+        : industryTrials ? "Academic (no single developing company)" : "Academic (no industry-sponsored trials)");
   }
 
   // Indication -----------------------------------------------------------------
@@ -648,7 +652,74 @@ export async function enrichProducts(
   res.products = prods.rowCount ?? 0;
   if (!res.products) return res;
 
-  // 1) External lookups for the products that are due, most-studied first. ----
+  // Trial facts per product (what the profile is worked out from, besides the lookups).
+  const aliases: AliasMap = await loadAliases();
+  const trialRows = await pool.query<{
+    product_id: number; phase: string | null; sponsor: string | null; lead_sponsor_class: string | null;
+    conditions: string[]; interventions: string[]; overall_status: string | null; start_date: string | null;
+  }>(
+    `SELECT tp.product_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions, t.interventions,
+            t.overall_status, t.start_date
+       FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+      WHERE tp.product_id = ANY($1)`,
+    [prods.rows.map((p) => p.id)],
+  );
+  const allNames = await pool.query<{ interventions: string[] }>("SELECT interventions FROM trials WHERE is_active");
+  const known = buildKnownSet(allNames.rows.map((r) => r.interventions ?? []), aliases);
+  const aliasRows = await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases");
+
+  const bySlugAliases = new Map<string, string[]>();
+  for (const [k, ref] of Object.entries(BUILTIN_ALIASES)) bySlugAliases.set(ref.slug, [...(bySlugAliases.get(ref.slug) ?? []), k]);
+  for (const a of aliasRows.rows) bySlugAliases.set(a.product_slug, [...(bySlugAliases.get(a.product_slug) ?? []), a.alias_slug]);
+
+  const facts = new Map<number, TrialFact[]>();
+  const slugOf = new Map(prods.rows.map((p) => [p.id, p.slug]));
+  const nameCache = new Map<string, string[]>();
+  for (const r of trialRows.rows) {
+    const slug = slugOf.get(r.product_id)!;
+    const slugsOf = (n: string) => {
+      let slugs = nameCache.get(n);
+      if (!slugs) { slugs = productsFromName(n, aliases, known).map((x) => x.slug); nameCache.set(n, slugs); }
+      return slugs;
+    };
+    const names = (r.interventions ?? []).filter((n) => slugsOf(n).includes(slug));
+    const soleNames = names.filter((n) => slugsOf(n).length === 1);
+    const list = facts.get(r.product_id) ?? [];
+    list.push({
+      phase: r.phase, sponsor: r.sponsor, sponsorClass: r.lead_sponsor_class, conditions: r.conditions ?? [],
+      names, soleNames, status: r.overall_status, start: r.start_date,
+    });
+    facts.set(r.product_id, list);
+  }
+
+  // Work out every product's automatic profile from trials + cached lookups and save
+  // what changed. Runs first (trial-based values show right away), every 25 lookups
+  // (the site fills in while the run goes on) and at the end.
+  const writeAll = async () => {
+    const ids: number[] = [], infos: string[] = [];
+    let filled = 0;
+    for (const p of prods.rows) {
+      const auto = deriveAuto({
+        slug: p.slug, name: p.name, trials: facts.get(p.id) ?? [],
+        aliasKeys: bySlugAliases.get(p.slug) ?? [], lookup: p.auto_lookup,
+      });
+      filled += Object.keys(auto).length;
+      ids.push(p.id);
+      infos.push(JSON.stringify(auto));
+    }
+    const upd = await pool.query(
+      `UPDATE products p SET auto_info = v.info, auto_updated_at = now()
+         FROM (SELECT unnest($1::int[]) AS id, unnest($2::jsonb[]) AS info) v
+        WHERE p.id = v.id AND p.auto_info IS DISTINCT FROM v.info`,
+      [ids, infos],
+    );
+    res.updated += upd.rowCount ?? 0;
+    res.filledFields = filled;
+  };
+
+  await writeAll();
+
+  // External lookups for the products that are due, most-studied first. ----
   if (external) {
     const maxAge = enrichConfig.refreshDays * 86_400_000;
     const due = prods.rows
@@ -694,67 +765,14 @@ export async function enrichProducts(
         `UPDATE products SET auto_lookup = $2, auto_checked_at = CASE WHEN $3 THEN now() ELSE auto_checked_at END WHERE id = $1`,
         [p.id, JSON.stringify(next), complete],
       );
-      if (res.lookedUp % 25 === 0) log(`looked up ${res.lookedUp}/${due.length}`);
+      if (res.lookedUp % 25 === 0) {
+        await writeAll();
+        log(`looked up ${res.lookedUp}/${due.length}`);
+      }
     }
   }
 
-  // 2) Derive every product's automatic profile from trials + cached lookups. ----
-  const aliases: AliasMap = await loadAliases();
-  const trialRows = await pool.query<{
-    product_id: number; phase: string | null; sponsor: string | null; lead_sponsor_class: string | null;
-    conditions: string[]; interventions: string[]; overall_status: string | null; start_date: string | null;
-  }>(
-    `SELECT tp.product_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions, t.interventions,
-            t.overall_status, t.start_date
-       FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
-      WHERE tp.product_id = ANY($1)`,
-    [prods.rows.map((p) => p.id)],
-  );
-  const allNames = await pool.query<{ interventions: string[] }>("SELECT interventions FROM trials WHERE is_active");
-  const known = buildKnownSet(allNames.rows.map((r) => r.interventions ?? []), aliases);
-  const aliasRows = await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases");
-
-  const bySlugAliases = new Map<string, string[]>();
-  for (const [k, ref] of Object.entries(BUILTIN_ALIASES)) bySlugAliases.set(ref.slug, [...(bySlugAliases.get(ref.slug) ?? []), k]);
-  for (const a of aliasRows.rows) bySlugAliases.set(a.product_slug, [...(bySlugAliases.get(a.product_slug) ?? []), a.alias_slug]);
-
-  const facts = new Map<number, TrialFact[]>();
-  const slugOf = new Map(prods.rows.map((p) => [p.id, p.slug]));
-  const nameCache = new Map<string, string[]>();
-  for (const r of trialRows.rows) {
-    const slug = slugOf.get(r.product_id)!;
-    const slugsOf = (n: string) => {
-      let slugs = nameCache.get(n);
-      if (!slugs) { slugs = productsFromName(n, aliases, known).map((x) => x.slug); nameCache.set(n, slugs); }
-      return slugs;
-    };
-    const names = (r.interventions ?? []).filter((n) => slugsOf(n).includes(slug));
-    const soleNames = names.filter((n) => slugsOf(n).length === 1);
-    const list = facts.get(r.product_id) ?? [];
-    list.push({
-      phase: r.phase, sponsor: r.sponsor, sponsorClass: r.lead_sponsor_class, conditions: r.conditions ?? [],
-      names, soleNames, status: r.overall_status, start: r.start_date,
-    });
-    facts.set(r.product_id, list);
-  }
-
-  const ids: number[] = [], infos: string[] = [];
-  for (const p of prods.rows) {
-    const auto = deriveAuto({
-      slug: p.slug, name: p.name, trials: facts.get(p.id) ?? [],
-      aliasKeys: bySlugAliases.get(p.slug) ?? [], lookup: p.auto_lookup,
-    });
-    res.filledFields += Object.keys(auto).length;
-    ids.push(p.id);
-    infos.push(JSON.stringify(auto));
-  }
-  const upd = await pool.query(
-    `UPDATE products p SET auto_info = v.info, auto_updated_at = now()
-       FROM (SELECT unnest($1::int[]) AS id, unnest($2::jsonb[]) AS info) v
-      WHERE p.id = v.id AND p.auto_info IS DISTINCT FROM v.info`,
-    [ids, infos],
-  );
-  res.updated = upd.rowCount ?? 0;
+  if (res.lookedUp) await writeAll();
   await pool.query(
     `INSERT INTO app_meta (key, value) VALUES ('product_autofill_at', $1)
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,

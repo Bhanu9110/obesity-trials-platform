@@ -37,7 +37,7 @@ test("autofill: an approved peptide gets its full profile, with sources", () => 
   assert.deepEqual(a.approved, { value: "Yes", source: "openFDA" });
   assert.equal(a.approval_date?.value, "2017-12-05");
   assert.equal(a.phase?.value, "Approved");
-  assert.equal(a.candidate?.value, "Non-pipeline");
+  assert.deepEqual(a.candidate, { value: "Pipeline", source: "Industry (Novo Nordisk A/S)" }); // a company's drug
   assert.equal(a.sponsor?.value, "Novo Nordisk A/S");           // FDA "NOVO" written as the trials write it
   assert.equal(a.brand_names?.value, "Wegovy, Ozempic, Rybelsus");
   assert.equal(a.modality?.value, "Peptide");
@@ -87,7 +87,7 @@ test("autofill: withdrawn, combination and generic drugs", () => {
     lookup: lookup([chembl({ type: "Small molecule", withdrawn: true, mechanisms: [{ moa: "Cannabinoid CB1 receptor inverse agonist", action: "INVERSE AGONIST" }] })]),
   });
   assert.equal(w.phase?.value, "Withdrawn");
-  assert.equal(w.candidate?.value, "Non-pipeline");
+  assert.equal(w.candidate?.value, "Pipeline");            // industry drug (Sanofi), even though withdrawn
   assert.equal(w.therapy_subclass?.value, "CB1 receptor antagonist");
   assert.equal(w.drug_class?.value, "Centrally acting anti-obesity agent");
   assert.equal(w.modality?.value, "Small molecule");
@@ -115,6 +115,29 @@ test("autofill: withdrawn, combination and generic drugs", () => {
   assert.equal(g.sponsor?.value, "Generic (several companies)");
   assert.equal(g.therapy_subclass?.value, "Biguanide");
   assert.equal(g.drug_class?.value, "Antidiabetic");
+  assert.deepEqual(g.candidate, { value: "Non-pipeline", source: "Generic, no developing company" });
+});
+
+test("autofill: pipeline = industry drug, non-pipeline = academic drug", () => {
+  const academic = deriveAuto({
+    slug: "berberine", name: "Berberine", aliasKeys: [], lookup: null,
+    trials: [trial({ sponsor: "University of X", sponsorClass: "OTHER" }), trial({ sponsor: "NIH", sponsorClass: "NIH" })],
+  });
+  assert.deepEqual(academic.candidate, { value: "Non-pipeline", source: "Academic (no industry-sponsored trials)" });
+  assert.equal(academic.sponsor, undefined);
+
+  const scattered = deriveAuto({
+    slug: "vitamin_d", name: "Vitamin D", aliasKeys: [], lookup: null,
+    trials: [trial({ sponsor: "Pharma A", sponsorClass: "INDUSTRY" }), trial({ sponsor: "Pharma B", sponsorClass: "INDUSTRY" }),
+             trial({ sponsor: "Pharma C", sponsorClass: "INDUSTRY" }), trial({ sponsor: "Uni", sponsorClass: "OTHER" })],
+  });
+  assert.deepEqual(scattered.candidate, { value: "Non-pipeline", source: "Academic (no single developing company)" });
+
+  const industry = deriveAuto({
+    slug: "zentaglutide", name: "Zentaglutide", aliasKeys: [], lookup: null,
+    trials: [trial({ sponsor: "Acme Bio", start: "2012-01", status: "COMPLETED" }), trial({ sponsor: "Uni", sponsorClass: "OTHER" })],
+  });
+  assert.deepEqual(industry.candidate, { value: "Pipeline", source: "Industry (Acme Bio)" });
 });
 
 test("autofill: conditions are normalised and merged", () => {

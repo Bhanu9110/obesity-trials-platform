@@ -124,8 +124,8 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
       return (
         <select value={form.candidate} onChange={(e) => set("candidate", e.target.value)} className={input}>
           <option value="">{autoHint("candidate") ?? "—"}</option>
-          <option value="Pipeline">Pipeline</option>
-          <option value="Non-pipeline">Non-pipeline</option>
+          <option value="Pipeline">Pipeline (industry drug)</option>
+          <option value="Non-pipeline">Non-pipeline (academic drug)</option>
         </select>
       );
     }
