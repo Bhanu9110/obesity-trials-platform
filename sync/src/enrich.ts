@@ -651,9 +651,9 @@ class SourceDown extends Error {}
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** GET JSON. null = "not found" (404); throws SourceDown after retries on 429/5xx/network errors. */
-async function getJson(url: string): Promise<any | null> {
+async function getJson(url: string, attempts = 3): Promise<any | null> {
   let last = "";
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     if (attempt) await sleep(1500 * attempt);
     try {
       const res = await fetch(url, {
@@ -714,18 +714,35 @@ function nameVariants(name: string): string[] {
   return [...new Set(v.map((x) => x.toUpperCase()))];
 }
 
+const chemblKey = (s: unknown) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+/** Search results that really are this drug: its preferred name or one of its synonyms, exactly ("HDM-1002" = "HDM1002"). */
+export function pickChembl(molecules: any[], name: string): any[] {
+  const want = chemblKey(name);
+  if (!want) return [];
+  return (molecules ?? []).filter((m) => chemblKey(m?.pref_name) === want
+    || (Array.isArray(m?.molecule_synonyms) ? m.molecule_synonyms : []).some((x: any) => chemblKey(x?.molecule_synonym) === want));
+}
+
+/**
+ * ChEMBL record for a drug name. Uses the indexed exact preferred-name filter (ChEMBL writes them in
+ * capitals), then ChEMBL's text search checked for an exact name / synonym match. (Its case-insensitive
+ * "__iexact" filters scan the whole table: slow, and often answered with HTTP 500 or a time-out.)
+ */
 export async function chemblByName(name: string): Promise<ChemblInfo | null> {
   const base = enrichConfig.chemblBase;
   const enc = encodeURIComponent;
   let found: any[] = [];
   for (const v of nameVariants(name)) {
-    for (const filter of ["pref_name__iexact", "molecule_synonyms__molecule_synonym__iexact"]) {
-      const r = await getJson(`${base}/molecule.json?${filter}=${enc(v)}&limit=5`);
-      await sleep(enrichConfig.delayMs);
-      found = Array.isArray(r?.molecules) ? r.molecules : [];
-      if (found.length) break;
-    }
+    const r = await getJson(`${base}/molecule.json?pref_name__exact=${enc(v)}&limit=5`, 2);
+    await sleep(enrichConfig.delayMs);
+    found = Array.isArray(r?.molecules) ? r.molecules : [];
     if (found.length) break;
+  }
+  if (!found.length) {
+    const r = await getJson(`${base}/molecule/search.json?q=${enc(name.trim())}&limit=20`, 2);
+    await sleep(enrichConfig.delayMs);
+    found = pickChembl(Array.isArray(r?.molecules) ? r.molecules : [], name);
   }
   if (!found.length) return null;
   // Prefer the parent compound (not a salt) and the most advanced record.

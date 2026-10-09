@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import {
-  deriveAuto, parseFda, parseChemblMolecule, normalizeCondition, subclassFrom, enrichConfig, enrichProducts,
+  deriveAuto, parseFda, parseChemblMolecule, pickChembl, normalizeCondition, subclassFrom, enrichConfig, enrichProducts,
   aliasCandidates, titleAliases, otherNamesOf, refreshOtherNames, pageText, extractPipelinePairs, refreshPipelineAliases,
   pickInxight, parseInxight, inxightPhaseLevel, phaseFromStage, industrySponsor,
   type AbstractFact, type ChemblInfo, type InxightInfo, type Lookup, type TrialFact,
@@ -333,6 +333,18 @@ const INX_FACETS_TIRZ = [
   { name: "Condition", values: [{ label: "Type 2 diabetes mellitus", count: 1 }] },
 ];
 
+test("ChEMBL text search: only exact name / synonym matches count", () => {
+  const mols = [
+    { molecule_chembl_id: "C1", pref_name: "SITAGLIPTIN PHOSPHATE", molecule_synonyms: [] },
+    { molecule_chembl_id: "C2", pref_name: "SITAGLIPTIN", molecule_synonyms: [{ molecule_synonym: "MK-0431" }] },
+    { molecule_chembl_id: "C3", pref_name: null, molecule_synonyms: [{ molecule_synonym: "HDM-1002" }] },
+  ];
+  assert.deepEqual(pickChembl(mols, "Sitagliptin").map((m) => m.molecule_chembl_id), ["C2"]);
+  assert.deepEqual(pickChembl(mols, "MK0431").map((m) => m.molecule_chembl_id), ["C2"]);
+  assert.deepEqual(pickChembl(mols, "HDM1002").map((m) => m.molecule_chembl_id), ["C3"]);
+  assert.deepEqual(pickChembl(mols, "Rocuronium"), []);
+});
+
 test("Inxight Drugs: the right record, its codes, brands, targets and status", () => {
   assert.equal(inxightPhaseLevel("Phase III"), 3);
   assert.equal(inxightPhaseLevel("Phase II"), 2);
@@ -428,8 +440,20 @@ const server = http.createServer((req, res) => {
   const send = (code: number, body: unknown) => { res.writeHead(code, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
   if (u.pathname === "/chembl/molecule.json") {
     if (chemblBad && (u.search.toUpperCase().includes(chemblBad))) return send(500, { error: "server error" });
-    const q = (u.searchParams.get("pref_name__iexact") ?? u.searchParams.get("molecule_synonyms__molecule_synonym__iexact") ?? "").toUpperCase();
+    if (u.searchParams.has("pref_name__iexact") || [...u.searchParams.keys()].some((k) => k.endsWith("__iexact"))) {
+      return send(500, { error: "slow query" }); // the live service struggles with these; the code must not use them
+    }
+    const q = u.searchParams.get("pref_name__exact") ?? "";
     return send(200, { molecules: MOLS[q] ? [MOLS[q]] : [], page_meta: { total_count: MOLS[q] ? 1 : 0 } });
+  }
+  if (u.pathname === "/chembl/molecule/search.json") {
+    if (chemblBad && (u.search.toUpperCase().includes(chemblBad))) return send(500, { error: "server error" });
+    const k = (x: string) => x.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const q = (u.searchParams.get("q") ?? "").toUpperCase();
+    // text search: loose matches too (the code keeps only exact name / synonym matches)
+    const hits = Object.values(MOLS).filter((m: any) => m.pref_name.includes(q.slice(0, 4))
+      || m.molecule_synonyms.some((x: any) => k(x.molecule_synonym).startsWith(k(q).slice(0, 2))));
+    return send(200, { molecules: hits, page_meta: { total_count: hits.length } });
   }
   if (u.pathname === "/chembl/mechanism.json") {
     const ids = (u.searchParams.get("molecule_chembl_id__in") ?? "").split(",");
