@@ -25,7 +25,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
     return visible.filter((p) => {
       if (info === "filled" && !p.has_info) return false;
       if (info === "blank" && p.has_info) return false;
-      if (info === "abstracts" && !(p.abstracts > 0 && p.all_trials === 0)) return false;
+      if (info === "abstracts" && !(p.abstracts > 0 && p.nct_trials === 0)) return false;
       if (!needle) return true;
       return [p.name, p.sponsor, p.drug_class, p.modality].some((v) => v?.toLowerCase().includes(needle));
     });
@@ -34,7 +34,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
   const filled = visible.filter((p) => p.has_info).length;
-  const abstractOnly = visible.filter((p) => p.abstracts > 0 && p.all_trials === 0).length;
+  const abstractOnly = visible.filter((p) => p.abstracts > 0 && p.nct_trials === 0).length;
 
   return (
     <div className="space-y-4">
@@ -59,7 +59,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
           <option value="">All drugs ({visible.length.toLocaleString()})</option>
           <option value="filled">Edited by hand ({filled.toLocaleString()})</option>
           <option value="blank">Auto-filled only ({(visible.length - filled).toLocaleString()})</option>
-          {abstractOnly > 0 && <option value="abstracts">Conference abstracts only, no trial yet ({abstractOnly.toLocaleString()})</option>}
+          {abstractOnly > 0 && <option value="abstracts">From conference abstracts, no NCT trial yet ({abstractOnly.toLocaleString()})</option>}
         </select>
         {otherOnly > 0 && (
           <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600"
@@ -77,7 +77,12 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
         )}
       </div>
 
-      <div className="text-sm text-slate-500">{rows.length.toLocaleString()} drugs</div>
+      <div className="text-sm text-slate-500">
+        {rows.length.toLocaleString()} drugs
+        {rows.some((p) => p.conference_trials > 0) && (
+          <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported at a conference (e.g. ADA 2026), no ClinicalTrials.gov record yet</span>
+        )}
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full min-w-[760px] text-left text-sm">
@@ -112,6 +117,9 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">
                     {p.trials}
+                    {p.conference_trials > 0 && (
+                      <span className="text-[10px] text-amber-600" title={`Reported at ${p.abstract_sources ?? "a conference"} — no ClinicalTrials.gov record yet`}>*</span>
+                    )}
                     {p.all_trials > p.trials && (
                       <span className="ml-1 text-xs text-slate-400" title="Other stored trials (comorbidity / weight-related / not obesity)">
                         +{p.all_trials - p.trials}

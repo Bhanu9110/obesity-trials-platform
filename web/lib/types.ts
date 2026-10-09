@@ -87,6 +87,8 @@ export interface Product extends ProductInfo {
   summary_updated_at: string | null;
   trials: number;      // primary-obesity trials (counted automatically)
   all_trials: number;  // all stored trials
+  nct_trials: number;  // ClinicalTrials.gov trials in the database
+  conference_trials: number; // no NCT trial yet: clinical trials reported in conference abstracts (counted in trials)
   slug: string;
   name: string;
   info_updated_at: string | null;
@@ -117,6 +119,8 @@ export interface ProductSummary extends ProductInfo {
   all_trials: number;  // all stored trials (incl. comorbidity / weight-related / not obesity)
   trial_phases: string[];
   has_info: boolean;   // at least one field entered by hand
+  nct_trials: number;  // ClinicalTrials.gov trials in the database (all classes)
+  conference_trials: number; // no NCT trial yet: clinical trials its conference abstracts report (counted in trials)
   abstracts: number;   // conference abstracts naming the drug (e.g. ADA 2026)
   abstract_sources: string | null; // "ADA 2026"
 }

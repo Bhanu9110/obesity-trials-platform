@@ -46,6 +46,9 @@ export default async function DrugPage({ params, searchParams }: {
   if (!product) notFound();
   const [trials, names, abstracts] = await Promise.all([getProductTrials(product.id), productNames(), getProductAbstracts(product.slug)]);
   const primary = trials.filter((t) => t.obesity_class === "primary");
+  // No ClinicalTrials.gov trial yet: the clinical trials its conference abstracts report.
+  const confTrials = trials.length === 0 ? product.conference_trials : 0;
+  const confSources = [...new Set(abstracts.map((a) => a.source))].join(", ");
   const viewOnly = !authDisabled() && isGuest(await verifySession((await cookies()).get(SESSION_COOKIE)?.value));
 
   return (
@@ -64,16 +67,19 @@ export default async function DrugPage({ params, searchParams }: {
             </div>
             <h1 className="font-display text-4xl font-semibold tracking-tight text-slate-950">{product.name}</h1>
             <p className="mt-2 text-sm text-slate-500">
-              {primary.length.toLocaleString()} primary-obesity trial{primary.length === 1 ? "" : "s"}
+              {confTrials > 0
+                ? <>{confTrials} clinical trial{confTrials === 1 ? "" : "s"} reported at {confSources} (no ClinicalTrials.gov record yet)</>
+                : <>{primary.length.toLocaleString()} primary-obesity trial{primary.length === 1 ? "" : "s"}</>}
               {trials.length > primary.length && <> · +{trials.length - primary.length} other stored</>}
               {abstracts.length > 0 && <> · <a href="#abstracts" className="hover:text-brand-600">{abstracts.length} conference abstract{abstracts.length === 1 ? "" : "s"}</a></>}
             </p>
           </div>
         </div>
         <div className="relative mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatTile label="Trials" value={primary.length.toLocaleString()} sub="primary obesity" tone="cyan" icon={Icon.flask} />
+          <StatTile label="Trials" value={(confTrials || primary.length).toLocaleString()}
+                    sub={confTrials ? `reported at ${confSources}` : "primary obesity"} tone="cyan" icon={Icon.flask} />
           <StatTile label="Most advanced" value={primary.length ? highestPhase(primary.map((t) => t.phase)) : trials.length === 0 && product.phase ? product.phase : "—"} tone="pink" icon={Icon.rocket} />
-          <StatTile label="Sponsors" value={new Set(primary.map((t) => t.sponsor).filter(Boolean)).size.toLocaleString()}
+          <StatTile label="Sponsors" value={(confTrials && product.sponsor ? 1 : new Set(primary.map((t) => t.sponsor).filter(Boolean)).size).toLocaleString()}
                     sub={`${primary.filter((t) => t.lead_sponsor_class === "INDUSTRY").length} industry trials`} tone="violet" icon={Icon.building} />
           <StatTile label="Recruiting" value={primary.filter((t) => ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION"].includes(t.overall_status ?? "")).length.toLocaleString()}
                     sub="open or opening" tone="emerald" icon={Icon.pulse} />
@@ -90,11 +96,13 @@ export default async function DrugPage({ params, searchParams }: {
 
       {trials.length === 0 && abstracts.length > 0 && (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          No trial on ClinicalTrials.gov yet — this drug is known from conference abstracts. Its profile is filled from them.
+          {confTrials > 0
+            ? <>No ClinicalTrials.gov record in the database yet — {confTrials} clinical trial{confTrials === 1 ? " was" : "s were"} reported at {confSources} (see Conference abstracts below). The profile is filled from the abstracts.</>
+            : <>No trial yet — this drug is known from preclinical work presented at {confSources}. The profile is filled from the abstracts.</>}
         </p>
       )}
 
-      <DrugTrialsTable key={`${pickedPhase ?? ""}|${pickedSponsor ?? ""}`} trials={trials} initialPhase={pickedPhase} initialSponsor={pickedSponsor} />
+      {!(trials.length === 0 && abstracts.length > 0) && <DrugTrialsTable key={`${pickedPhase ?? ""}|${pickedSponsor ?? ""}`} trials={trials} initialPhase={pickedPhase} initialSponsor={pickedSponsor} />}
 
       {primary.length > 0 && (() => {
         const q = encodeURIComponent(product.name);

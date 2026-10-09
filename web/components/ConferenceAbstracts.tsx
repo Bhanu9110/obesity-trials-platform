@@ -34,7 +34,22 @@ export default function ConferenceAbstracts({ abstracts }: { abstracts: Conferen
                   ) : <span className="font-medium text-slate-800">{a.title ?? a.abstract_no}</span>}
                   <div className="mt-0.5 text-xs text-slate-400">{a.source} · {a.abstract_no}</div>
                 </td>
-                <td className="whitespace-nowrap py-2.5 pr-3 text-slate-700">{a.stage ?? "—"}</td>
+                <td className="py-2.5 pr-3 text-slate-700">
+                  <div className="whitespace-nowrap">{a.stage ?? "—"}</div>
+                  {a.trial_ids?.length > 0 && (
+                    <div className="mt-0.5 text-xs text-slate-500">
+                      {a.trial_ids.map((id, i) => (
+                        <span key={id}>
+                          {i > 0 && ", "}
+                          {/^NCT\d{8}$/.test(id)
+                            ? <a href={`https://clinicaltrials.gov/study/${id}`} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">{id}</a>
+                            : id}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {a.study_type && /post hoc/i.test(a.study_type) && <div className="text-xs text-slate-400">{a.study_type}</div>}
+                </td>
                 <td className="py-2.5 pr-3 text-slate-700">
                   <div>{a.program ?? "—"}</div>
                   {a.sponsor && <div className="text-xs text-slate-500">{a.sponsor}</div>}

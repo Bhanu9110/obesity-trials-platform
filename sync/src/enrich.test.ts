@@ -11,7 +11,7 @@ import {
   type AbstractFact, type ChemblInfo, type InxightInfo, type Lookup, type TrialFact,
 } from "./enrich.js";
 import { runSyncForStudies, rebuildProducts } from "./sync.js";
-import { importAbstracts, slugForName } from "./abstracts.js";
+import { canonicalTrials, importAbstracts, slugForName } from "./abstracts.js";
 import { pool } from "./db.js";
 import { config } from "./config.js";
 
@@ -268,6 +268,11 @@ test("abstracts: stage, sponsor and a drug known only from a meeting", () => {
   assert.equal(industrySponsor("National Institutes of Health"), null);
   assert.equal(industrySponsor("Not stated"), null);
   assert.deepEqual(slugForName("Celecoxib + Valsartan + Metformin"), { slug: "celecoxib_metformin_valsartan", name: "Celecoxib + Metformin + Valsartan" });
+  // One ID per reported trial: "ENLIGHT; NCT06921486" is one trial, also where only "ENLIGHT" is given.
+  const tr = (abstract_no: string, trials: string[]) => ({ abstract_no, drugs: [], trials });
+  assert.deepEqual(Object.fromEntries(canonicalTrials([
+    tr("1", ["ENLIGHT", "nct06921486"]), tr("2", ["ENLIGHT"]), tr("3", ["STEP 1", "SELECT"]), tr("4", ["NCT05096598", "NCT05613387"]), tr("5", []),
+  ])), { 1: ["NCT06921486"], 2: ["NCT06921486"], 3: ["STEP 1", "SELECT"], 4: ["NCT05096598", "NCT05613387"], 5: [] });
 
   const a = deriveAuto({ slug: "rv8451", name: "RV-8451", aliasKeys: [], trials: [], lookup: null, abstracts: [abs()] });
   assert.deepEqual(a.phase, { value: "Preclinical", source: "ADA 2026 abstract" });

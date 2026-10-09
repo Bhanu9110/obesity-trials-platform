@@ -214,11 +214,25 @@ const HAS_INFO = `(p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT
    OR p.aliases IS NOT NULL OR p.brand_names IS NOT NULL OR p.candidate IS NOT NULL OR p.parent_drug IS NOT NULL
    OR p.therapy_subclass IS NOT NULL OR p.indication IS NOT NULL)`;
 
+/**
+ * Clinical trials a drug's conference abstracts report (e.g. ADA 2026): distinct trial IDs / names,
+ * abstracts that name no trial counting as one. Used only while the drug has no ClinicalTrials.gov
+ * trial in the database (a trial presented at a meeting before it has an NCT record here).
+ */
+const CONF_TRIALS = `(SELECT count(DISTINCT coalesce(upper(tr.id), '#unnamed'))::int
+     FROM product_abstracts pa JOIN conference_abstracts ca USING (source, abstract_no)
+     LEFT JOIN LATERAL unnest(nullif(ca.trial_ids, '{}')) AS tr(id) ON true
+    WHERE pa.product_slug = p.slug AND ca.stage ILIKE 'clinical%')`;
+
 export async function listProducts(): Promise<ProductSummary[]> {
   return query<ProductSummary>(
     `SELECT p.slug, p.name, ${INFO_COLS},
-            count(t.nct_id) FILTER (WHERE t.obesity_class = 'primary')::int AS trials,
-            count(t.nct_id)::int AS all_trials,
+            -- no ClinicalTrials.gov trial yet: the clinical trials its conference abstracts report
+            CASE WHEN count(t.nct_id) = 0 THEN ${CONF_TRIALS}
+                 ELSE count(t.nct_id) FILTER (WHERE t.obesity_class = 'primary')::int END AS trials,
+            CASE WHEN count(t.nct_id) = 0 THEN ${CONF_TRIALS} ELSE count(t.nct_id)::int END AS all_trials,
+            count(t.nct_id)::int AS nct_trials,
+            CASE WHEN count(t.nct_id) = 0 THEN ${CONF_TRIALS} ELSE 0 END AS conference_trials,
             coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
             ${HAS_INFO} AS has_info,
             (SELECT count(*)::int FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstracts,
@@ -247,11 +261,18 @@ export async function getProduct(slug: string): Promise<Product | null> {
               WHERE tp.product_id = p.id) AS trials,
             (SELECT count(*)::int
                FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
-              WHERE tp.product_id = p.id) AS all_trials
+              WHERE tp.product_id = p.id) AS all_trials,
+            ${CONF_TRIALS} AS conference_trials
        FROM products p ${AUTO_JOIN} WHERE p.slug = $1`,
     [slug],
   );
-  return rows[0] ?? null;
+  const p = rows[0];
+  if (!p) return null;
+  // No ClinicalTrials.gov trial yet: count the clinical trials its conference abstracts report.
+  p.nct_trials = p.all_trials;
+  if (p.all_trials === 0) { p.trials = p.conference_trials; p.all_trials = p.conference_trials; }
+  else p.conference_trials = 0;
+  return p;
 }
 
 export async function getProductTrials(productId: number): Promise<ProductTrial[]> {
@@ -335,6 +356,7 @@ export async function dashboardCounts(): Promise<{
 
 export interface ConferenceAbstractRow {
   source: string; abstract_no: string; title: string | null; link: string | null; program: string | null;
+  trial_ids: string[]; study_type: string | null;
   sponsor: string | null; indication: string | null; stage: string | null; mechanism: string | null;
   model: string | null; key_finding: string | null;
 }
@@ -343,7 +365,7 @@ export interface ConferenceAbstractRow {
 export async function getProductAbstracts(slug: string): Promise<ConferenceAbstractRow[]> {
   return query<ConferenceAbstractRow>(
     `SELECT a.source, a.abstract_no, a.title, a.link, a.program, a.sponsor, a.indication, a.stage, a.mechanism,
-            a.model, a.key_finding
+            a.model, a.key_finding, a.trial_ids, a.study_type
        FROM product_abstracts pa JOIN conference_abstracts a USING (source, abstract_no)
       WHERE pa.product_slug = $1
       ORDER BY a.source DESC, a.stage NULLS LAST, a.abstract_no`,

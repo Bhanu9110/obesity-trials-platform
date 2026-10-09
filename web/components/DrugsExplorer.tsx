@@ -10,8 +10,9 @@ import { icons } from "@/components/shell/icons";
 
 const level = (p: string) => (p.includes("PHASE4") ? 4 : p.includes("PHASE3") ? 3 : p.includes("PHASE2") ? 2 : p.includes("PHASE1") ? 1 : 0);
 const topLevel = (phases: string[]) => phases.reduce((m, p) => Math.max(m, level(p)), 0);
-// A drug with no trial yet, known from conference abstracts (e.g. ADA 2026).
-const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.all_trials === 0;
+// A drug with no ClinicalTrials.gov trial yet, known from conference abstracts (e.g. ADA 2026);
+// its trial count is the clinical trials those abstracts report.
+const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.nct_trials === 0;
 // Most advanced phase: from its trials, else from its profile ("Phase 1/2" -> 2).
 const topOf = (p: ProductSummary) => p.trial_phases.length ? topLevel(p.trial_phases)
   : Math.max(0, ...[...(p.phase ?? "").matchAll(/\d/g)].map((m) => Number(m[0])).filter((n) => n <= 4));
@@ -21,7 +22,7 @@ const STAGES = [
   { key: 2, label: "Phase 2" },
   { key: 3, label: "Phase 3" },
   { key: 4, label: "Phase 4" },
-  { key: 5, label: "No trial yet (abstracts)" },
+  { key: 5, label: "No NCT yet (conference)" },
 ] as const;
 const LADDER = ["P1", "P2", "P3", "P4"];
 const STEP = 24;
@@ -93,6 +94,9 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
 
           <p className="px-1 text-sm text-slate-500">
             <b className="font-display text-base font-semibold text-slate-950">{rows.length.toLocaleString()}</b> drugs
+            {rows.some((p) => p.conference_trials > 0) && (
+              <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported at a conference (e.g. ADA 2026), no ClinicalTrials.gov record yet</span>
+            )}
           </p>
 
           {rows.length === 0 ? (
@@ -118,8 +122,20 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600">{onlyAbs ? p.abstracts : p.trials}</div>
-                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">{onlyAbs ? (p.abstracts === 1 ? "abstract" : "abstracts") : "trials"}</div>
+                        {onlyAbs && p.trials === 0 ? (
+                          <>
+                            <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600">{p.abstracts}</div>
+                            <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">{p.abstracts === 1 ? "abstract" : "abstracts"}</div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600"
+                                 title={onlyAbs ? `Clinical trial${p.trials === 1 ? "" : "s"} reported at ${p.abstract_sources ?? "a conference"} — no ClinicalTrials.gov record yet` : undefined}>
+                              {p.trials}{onlyAbs && <span className="align-super text-[10px] text-amber-600">*</span>}
+                            </div>
+                            <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">{p.trials === 1 ? "trial" : "trials"}</div>
+                          </>
+                        )}
                       </div>
                     </div>
 

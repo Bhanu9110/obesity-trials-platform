@@ -23,6 +23,8 @@ export interface ConferenceAbstract {
   key_finding?: string | null;
   title?: string | null;
   link?: string | null;
+  trials?: string[];         // clinical trial(s) reported: NCT IDs or trial names ("ACCESS II")
+  study_type?: string | null; // "Clinical trial" | "Post hoc analysis of SELECT" | ...
 }
 export interface ConferenceFile { source: string; description?: string; url?: string; abstracts: ConferenceAbstract[] }
 
@@ -41,6 +43,34 @@ export function slugForName(name: string): { slug: string; name: string } {
   if (parts.length < 2) return { slug: slugify(name), name: name.trim() };
   const sorted = parts.map((p) => ({ slug: slugify(p), name: p })).sort((a, b) => a.slug.localeCompare(b.slug));
   return { slug: sorted.map((p) => p.slug).join("_"), name: sorted.map((p) => p.name).join(" + ") };
+}
+
+const NCT_RE = /^NCT\d{8}$/i;
+
+/**
+ * The trials each abstract reports, one ID per trial: an abstract naming a trial and its NCT ID
+ * ("ENLIGHT; NCT06921486") reports one trial, so the name is replaced by the NCT ID — also in other
+ * abstracts of the same meeting that give only the name.
+ */
+export function canonicalTrials(abstracts: ConferenceAbstract[]): Map<string, string[]> {
+  const clean = (a: ConferenceAbstract) => (a.trials ?? []).map((t) => t.trim()).filter(Boolean)
+    .map((t) => (NCT_RE.test(t) ? t.toUpperCase() : t));
+  const nctOf = new Map<string, string>(); // trial name (lower case) -> NCT ID
+  for (const a of abstracts) {
+    const ids = clean(a), ncts = ids.filter((t) => NCT_RE.test(t)), names = ids.filter((t) => !NCT_RE.test(t));
+    if (ncts.length === 1 && names.length === 1) nctOf.set(names[0].toLowerCase(), ncts[0]);
+  }
+  const out = new Map<string, string[]>();
+  for (const a of abstracts) {
+    const ids = clean(a);
+    const ncts = ids.filter((t) => NCT_RE.test(t));
+    const named = ids.filter((t) => !NCT_RE.test(t)).map((t) => nctOf.get(t.toLowerCase()) ?? t);
+    // As many NCT IDs as names ("ENLIGHT; NCT06921486"): the names are those same trials.
+    const sameTrials = ncts.length > 0 && ncts.length >= ids.length - ncts.length;
+    const list = sameTrials ? [...ncts, ...named.filter((n) => NCT_RE.test(n))] : [...ncts, ...named];
+    out.set(a.abstract_no, [...new Set(list)]);
+  }
+  return out;
 }
 
 export interface ImportResult { sources: number; abstracts: number; links: number; created: string[] }
@@ -78,14 +108,16 @@ export async function importAbstracts(
     for (const f of files) {
       res.sources++;
       await c.query("DELETE FROM conference_abstracts WHERE source = $1", [f.source]); // cascades the links
+      const trialsOf = canonicalTrials(f.abstracts);
       for (const a of f.abstracts) {
         if (!a.abstract_no || !a.drugs?.length) continue;
         await c.query(
           `INSERT INTO conference_abstracts (source, abstract_no, title, link, program, sponsor, sponsor_basis, indication,
-                                             stage, mechanism, model, key_finding)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+                                             stage, mechanism, model, key_finding, trial_ids, study_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
           [f.source, a.abstract_no, a.title ?? null, a.link ?? null, a.program ?? null, a.sponsor ?? null, a.sponsor_basis ?? null,
-           a.indication ?? null, a.stage ?? null, a.mechanism ?? null, a.model ?? null, a.key_finding ?? null],
+           a.indication ?? null, a.stage ?? null, a.mechanism ?? null, a.model ?? null, a.key_finding ?? null,
+           trialsOf.get(a.abstract_no) ?? [], a.study_type ?? null],
         );
         res.abstracts++;
         for (const d of a.drugs) {
