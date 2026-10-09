@@ -4,6 +4,7 @@ import { SESSION_COOKIE, authDisabled, isGuest, verifySession } from "@/lib/auth
 import { notFound } from "next/navigation";
 import { getProduct, getProductAbstracts, getProductTrials, productNames } from "@/lib/queries";
 import ConferenceAbstracts from "@/components/ConferenceAbstracts";
+import ProductKind from "@/components/ProductKind";
 import { highestPhase } from "@/lib/format";
 import ProductInfoCard from "@/components/ProductInfoCard";
 import MergeProduct from "@/components/MergeProduct";
@@ -78,6 +79,10 @@ export default async function DrugPage({ params, searchParams }: {
                     sub="open or opening" tone="emerald" icon={Icon.pulse} />
         </div>
       </div>
+
+      {(product.kind || !viewOnly) && (
+        <ProductKind slug={product.slug} kind={product.kind} source={product.kind_source} note={product.kind_note} readOnly={viewOnly} />
+      )}
 
       <ProductSummaryCard product={product} readOnly={viewOnly} />
 

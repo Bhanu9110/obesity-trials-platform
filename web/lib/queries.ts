@@ -175,7 +175,8 @@ export async function homeStats(): Promise<HomeStats> {
   const r = await query<Omit<HomeStats, "lastSync"> & { last_sync: Date | null }>(
     `WITH t AS (SELECT * FROM trials t WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")})
      SELECT (SELECT count(*)::int FROM t) AS trials,
-            (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp JOIN t ON t.nct_id = tp.nct_id) AS drugs,
+            (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp JOIN t ON t.nct_id = tp.nct_id
+               JOIN products p ON p.id = tp.product_id AND p.kind IS NULL) AS drugs,
             (SELECT count(*)::int FROM t WHERE lead_sponsor_class = 'INDUSTRY') AS industry,
             (SELECT count(*)::int FROM t WHERE phase IN ('PHASE3', 'PHASE4', 'PHASE2, PHASE3')) AS late,
             (SELECT count(*)::int FROM t WHERE overall_status IN ('RECRUITING', 'NOT_YET_RECRUITING', 'ENROLLING_BY_INVITATION')) AS recruiting,
@@ -225,6 +226,7 @@ export async function listProducts(): Promise<ProductSummary[]> {
        FROM products p
        ${AUTO_JOIN}
        LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active) ON tp.product_id = p.id
+      WHERE p.kind IS NULL -- diets, procedures, tests and supplements are not listed (products.kind)
       GROUP BY p.id, x.ai
      -- drugs with trials, and drugs known only from conference abstracts (e.g. preclinical programs)
      HAVING count(t.nct_id) > 0 OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug)
@@ -237,6 +239,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
     // summary via to_jsonb: the page keeps working in the minute before migration 0016 runs.
     `SELECT p.id, p.slug, p.name, ${INFO_COLS}, p.info_updated_at,
             to_jsonb(p) ->> 'summary' AS summary, to_jsonb(p) ->> 'summary_updated_at' AS summary_updated_at,
+            p.kind, p.kind_source, p.kind_note,
             ${AUTO_SHOWN} AS auto,
             (SELECT value FROM app_meta WHERE key = 'product_autofill_at') AS autofill_at,
             (SELECT count(*) FILTER (WHERE t.obesity_class = 'primary')::int
@@ -289,6 +292,15 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
   return rows.length ? getProduct(slug) : null;
 }
 
+/** Keep a product in the drug list, or leave it out as a supplement / not a drug (a choice the automatic clean-up never changes). */
+export async function updateProductKind(slug: string, kind: "drug" | "supplement" | "not_drug"): Promise<Product | null> {
+  const rows = await query<{ slug: string }>(
+    `UPDATE products SET kind = $2, kind_source = 'manual', kind_note = $3 WHERE slug = $1 RETURNING slug`,
+    [slug, kind === "drug" ? null : kind, kind === "drug" ? null : "set on the drug page"],
+  );
+  return rows.length ? getProduct(slug) : null;
+}
+
 /** Save the hand-written product summary (blank = remove). */
 export async function updateProductSummary(slug: string, summary: string | null): Promise<Product | null> {
   const rows = await query<{ slug: string }>(
@@ -306,7 +318,8 @@ export async function dashboardCounts(): Promise<{
             (SELECT count(*)::int FROM trials t WHERE t.is_active AND ${hasDrug("t")}) AS stored,
             (SELECT count(*)::int FROM trials t WHERE t.is_active AND NOT ${hasDrug("t")}) AS no_drug,
             (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp
-               JOIN trials t ON t.nct_id = tp.nct_id AND t.obesity_class = 'primary') AS products,
+               JOIN trials t ON t.nct_id = tp.nct_id AND t.obesity_class = 'primary'
+               JOIN products p ON p.id = tp.product_id AND p.kind IS NULL) AS products,
             (SELECT count(*)::int FROM products p
               WHERE EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id
                              WHERE tp.product_id = p.id AND t.obesity_class = 'primary')
@@ -801,7 +814,7 @@ export async function overview(): Promise<Overview> {
               coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL), '{}') AS phases
          FROM products p JOIN trial_products tp ON tp.product_id = p.id
          JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}
-        WHERE p.name NOT ILIKE 'undisclosed%' AND p.name NOT ILIKE 'placebo%'
+        WHERE p.name NOT ILIKE 'undisclosed%' AND p.name NOT ILIKE 'placebo%' AND p.kind IS NULL
         GROUP BY p.id ORDER BY trials DESC, p.name LIMIT 8`,
     ),
     query<Overview["latest"][number]>(
@@ -887,9 +900,10 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
           `SELECT p.slug, p.name, count(t.nct_id)::int AS trials
              FROM products p
              LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}) ON tp.product_id = p.id
-            WHERE p.name ILIKE $1
+            WHERE p.kind IS NULL
+              AND (p.name ILIKE $1
                OR coalesce(p.aliases, to_jsonb(p) #>> '{auto_info,aliases,value}', '') ILIKE $1
-               OR coalesce(p.brand_names, to_jsonb(p) #>> '{auto_info,brand_names,value}', '') ILIKE $1
+               OR coalesce(p.brand_names, to_jsonb(p) #>> '{auto_info,brand_names,value}', '') ILIKE $1)
             GROUP BY p.id
            HAVING count(t.nct_id) > 0 OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug)
             ORDER BY (p.name ILIKE $2) DESC, trials DESC LIMIT 6`,
@@ -905,4 +919,95 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
       : Promise.resolve([]),
   ]);
   return { trials, drugs, sponsors };
+}
+
+// --------------------------------------------------------------------------- #
+// Drug-profile auto-fill overview (Quality page)
+// --------------------------------------------------------------------------- #
+export const AUTOFILL_FIELDS = [
+  "candidate", "sponsor", "phase", "indication", "drug_class", "therapy_subclass", "moa", "modality", "roa",
+  "aliases", "brand_names", "approved", "approval_date", "parent_drug",
+] as const;
+
+export interface AutofillOverview {
+  last: {
+    at: string; minutes: number; products: number; updated: number; stoppedEarly: boolean; sourcesDown: string[];
+    openFDA?: { checked: number; found: number }; ChEMBL?: { checked: number; found: number };
+    "Inxight Drugs"?: { checked: number; found: number };
+    merged?: number; hiddenByRule?: number; abstracts?: number; newFromAbstracts?: number;
+  } | null;
+  sources: Record<string, { ok: boolean; detail: string; checkedAt: string; lastOkAt: string | null; failingSince: string | null; skipped?: boolean }>;
+  drugs: number;
+  coverage: { field: string; manual: number; auto: number; sources: Record<string, number> }[];
+  hidden: { not_drug: number; supplement: number; manual: number };
+  review: { slug: string; name: string; kind: string; note: string | null }[]; // hidden by a name rule: worth a look
+}
+
+/** Where an automatic value came from, in a few groups ("Company pipeline (Roche) + ChEMBL" -> Company pipelines). */
+export function sourceGroup(label: string): string {
+  if (/Company pipeline/i.test(label)) return "Company pipelines";
+  if (/openFDA/i.test(label)) return "openFDA";
+  if (/ChEMBL/i.test(label)) return "ChEMBL";
+  if (/Inxight/i.test(label)) return "Inxight Drugs";
+  if (/abstract/i.test(label)) return "Conference abstracts";
+  if (/ClinicalTrials\.gov|Trial|Industry|Academic|Generic/i.test(label)) return "Trials";
+  return "Name rules";
+}
+
+export async function autofillOverview(): Promise<AutofillOverview> {
+  const meta = await query<{ key: string; value: string }>(
+    "SELECT key, value FROM app_meta WHERE key IN ('product_autofill_last', 'source_status')",
+  );
+  const json = (k: string) => { try { const v = meta.find((m) => m.key === k)?.value; return v ? JSON.parse(v) : null; } catch { return null; } };
+  const listed = `p.kind IS NULL AND (
+      EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active WHERE tp.product_id = p.id)
+      OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug))`;
+  const fields = [...AUTOFILL_FIELDS];
+  const [cov, src, total, hidden, review] = await Promise.all([
+    query<{ field: string; manual: number; auto: number }>(
+      `WITH d AS (SELECT to_jsonb(p) AS j FROM products p WHERE ${listed})
+       SELECT f AS field,
+              count(*) FILTER (WHERE d.j ->> f IS NOT NULL)::int AS manual,
+              count(*) FILTER (WHERE d.j ->> f IS NULL AND d.j #>> ARRAY['auto_info', f, 'value'] IS NOT NULL)::int AS auto
+         FROM d, unnest($1::text[]) f GROUP BY f`,
+      [fields],
+    ),
+    query<{ field: string; source: string; n: number }>(
+      `WITH d AS (SELECT to_jsonb(p) AS j FROM products p WHERE ${listed})
+       SELECT f AS field, d.j #>> ARRAY['auto_info', f, 'source'] AS source, count(*)::int AS n
+         FROM d, unnest($1::text[]) f
+        WHERE d.j ->> f IS NULL AND d.j #>> ARRAY['auto_info', f, 'value'] IS NOT NULL
+        GROUP BY 1, 2`,
+      [fields],
+    ),
+    query<{ n: number }>(`SELECT count(*)::int AS n FROM products p WHERE ${listed}`),
+    query<{ not_drug: number; supplement: number; manual: number }>(
+      `SELECT count(*) FILTER (WHERE kind = 'not_drug')::int AS not_drug,
+              count(*) FILTER (WHERE kind = 'supplement')::int AS supplement,
+              count(*) FILTER (WHERE kind_source = 'manual')::int AS manual
+         FROM products p
+        WHERE EXISTS (SELECT 1 FROM trial_products tp WHERE tp.product_id = p.id) OR kind_source = 'manual'`,
+    ),
+    query<{ slug: string; name: string; kind: string; note: string | null }>(
+      `SELECT slug, name, kind, kind_note AS note FROM products WHERE kind_source = 'rule' ORDER BY created_at DESC, name LIMIT 100`,
+    ),
+  ]);
+  const bySource = new Map<string, Record<string, number>>();
+  for (const r of src) {
+    const m = bySource.get(r.field) ?? {};
+    const g = sourceGroup(r.source ?? "");
+    m[g] = (m[g] ?? 0) + r.n;
+    bySource.set(r.field, m);
+  }
+  return {
+    last: json("product_autofill_last"),
+    sources: json("source_status") ?? {},
+    drugs: total[0]?.n ?? 0,
+    coverage: fields.map((f) => {
+      const c = cov.find((x) => x.field === f);
+      return { field: f, manual: c?.manual ?? 0, auto: c?.auto ?? 0, sources: bySource.get(f) ?? {} };
+    }),
+    hidden: hidden[0] ?? { not_drug: 0, supplement: 0, manual: 0 },
+    review,
+  };
 }

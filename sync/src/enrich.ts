@@ -21,6 +21,7 @@ import { pool } from "./db.js";
 import { config } from "./config.js";
 import { loadAliases } from "./sync.js";
 import { importAbstracts, type ImportResult } from "./abstracts.js";
+import { applyCuration, type CurationResult } from "./curation.js";
 import {
   BUILTIN_ALIASES, buildKnownSet, isUndisclosedProduct, productsFromName, slugify, type AliasMap,
 } from "./products.js";
@@ -40,6 +41,8 @@ export const enrichConfig = {
   maxInxight: Number(process.env.ENRICH_MAX_INXIGHT ?? 100),
   inxightDelayMs: Number(process.env.INXIGHT_REQUEST_DELAY_MS ?? 2500), // it answers 503 to quick bursts
   inxightRetryMs: Number(process.env.INXIGHT_RETRY_MS ?? 20_000),
+  // Sources to leave out, e.g. "inxight" while that service blocks us: openfda, chembl, inxight.
+  skipSources: new Set((process.env.ENRICH_SKIP_SOURCES ?? "").toLowerCase().split(/[\s,]+/).filter(Boolean)),
   delayMs: Number(process.env.ENRICH_REQUEST_DELAY_MS ?? 150),
   timeoutMs: Number(process.env.ENRICH_TIMEOUT_MS ?? 25_000),
 };
@@ -1203,6 +1206,76 @@ export async function refreshPipelineAliases(
 // --------------------------------------------------------------------------- #
 // The job
 // --------------------------------------------------------------------------- #
+// --------------------------------------------------------------------------- #
+// Canary check + source status (Quality page, health check)
+// --------------------------------------------------------------------------- #
+export type SourceName = "openFDA" | "ChEMBL" | "Inxight Drugs";
+export const SOURCE_KEY: Record<SourceName, string> = { openFDA: "openfda", ChEMBL: "chembl", "Inxight Drugs": "inxight" };
+
+/**
+ * Look up a drug every source is sure to know, before using the source. A source that is down
+ * fails here; one whose data format changed comes back empty — then the run leaves that
+ * source's cached values alone instead of overwriting them with blanks.
+ */
+export async function canary(source: SourceName): Promise<{ ok: boolean; detail: string }> {
+  try {
+    if (source === "openFDA") {
+      const r = await fdaByParts(["SEMAGLUTIDE"]);
+      return r?.brands.length && r.firstApproval
+        ? { ok: true, detail: `semaglutide: ${r.brands.slice(0, 3).join(", ")}` }
+        : { ok: false, detail: "semaglutide came back empty (data format changed?)" };
+    }
+    if (source === "ChEMBL") {
+      const r = await chemblByName("SEMAGLUTIDE");
+      return r?.mechanisms.length
+        ? { ok: true, detail: `semaglutide: ${r.id}` }
+        : { ok: false, detail: "semaglutide came back empty (data format changed?)" };
+    }
+    const r = await inxightByName("Tirzepatide");
+    return r?.targets.length
+      ? { ok: true, detail: `tirzepatide: ${r.unii}` }
+      : { ok: false, detail: "tirzepatide came back empty (data format changed?)" };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export interface SourceState {
+  ok: boolean;
+  detail: string;
+  checkedAt: string;
+  lastOkAt: string | null;
+  failingSince: string | null;  // first failed run of the current failing streak
+  skipped?: boolean;            // left out with ENRICH_SKIP_SOURCES
+}
+export type SourceStatus = Partial<Record<SourceName, SourceState>>;
+
+export async function loadSourceStatus(): Promise<SourceStatus> {
+  const r = await pool.query<{ value: string }>("SELECT value FROM app_meta WHERE key = 'source_status'");
+  try { return r.rowCount ? JSON.parse(r.rows[0].value) : {}; } catch { return {}; }
+}
+
+/** Remember how each source did this run (a failing streak keeps its start date). */
+export async function recordSourceStatus(
+  results: Partial<Record<SourceName, { ok: boolean; detail: string; skipped?: boolean }>>, now: Date = new Date(),
+): Promise<SourceStatus> {
+  const status = await loadSourceStatus();
+  const at = now.toISOString();
+  for (const [name, r] of Object.entries(results) as [SourceName, { ok: boolean; detail: string; skipped?: boolean }][]) {
+    const prev = status[name];
+    status[name] = r.skipped
+      ? { ok: true, detail: "left out (ENRICH_SKIP_SOURCES)", checkedAt: at, lastOkAt: prev?.lastOkAt ?? null, failingSince: null, skipped: true }
+      : r.ok
+        ? { ok: true, detail: r.detail, checkedAt: at, lastOkAt: at, failingSince: null }
+        : { ok: false, detail: r.detail.slice(0, 300), checkedAt: at, lastOkAt: prev?.lastOkAt ?? null, failingSince: prev?.failingSince ?? at };
+  }
+  await pool.query(
+    `INSERT INTO app_meta (key, value) VALUES ('source_status', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    [JSON.stringify(status)],
+  );
+  return status;
+}
+
 /** Names worth looking up: drug-like (an INN, a code), not a sentence or a class. */
 export function lookupable(slug: string, name: string): boolean {
   if (isUndisclosedProduct(slug)) return false;
@@ -1224,6 +1297,7 @@ export interface EnrichResult {
   otherNames?: { trials: number; names: number } | null;
   pipelines?: PipelineReport[] | null;
   abstracts?: ImportResult | null;
+  curation?: CurationResult | null;
 }
 
 export async function enrichProducts(
@@ -1236,8 +1310,15 @@ export async function enrichProducts(
     products: 0, lookedUp: 0, fdaChecked: 0, inxightChecked: 0, inxightFound: 0, chemblFound: 0, fdaFound: 0, updated: 0, filledFields: 0, sourcesDown: [], stoppedEarly: false,
   };
 
-  // Conference abstracts (sync/data/conference/*.json): new drug pages for programs with no trial yet.
+  // Drug list clean-up first (non-drugs hidden, duplicates merged), then conference abstracts
+  // (sync/data/conference/*.json): new drug pages for programs with no trial yet.
   if (!opts.only?.length) {
+    try {
+      res.curation = await applyCuration(undefined, log);
+    } catch (e) {
+      res.curation = null;
+      log("Drug list clean-up skipped", String(e));
+    }
     try {
       res.abstracts = await importAbstracts(undefined, log);
     } catch (e) {
@@ -1254,7 +1335,8 @@ export async function enrichProducts(
             (SELECT count(*) FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
               WHERE tp.product_id = p.id AND t.obesity_class = 'primary')::int AS primary_trials
        FROM products p
-      WHERE (EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active WHERE tp.product_id = p.id)
+      WHERE p.kind IS NULL -- not diets, procedures, tests or supplements (products.kind)
+        AND (EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active WHERE tp.product_id = p.id)
              OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug))
       ${opts.only?.length ? "AND p.slug = ANY($1)" : ""}`,
     opts.only?.length ? [opts.only] : [],
@@ -1422,6 +1504,8 @@ export async function enrichProducts(
       let streak = 0, failed = 0, last = "";
       return {
         ok() { streak = 0; },
+        down: () => streak >= 3,
+        lastError: () => last,
         /** true = stop this source for the rest of the run */
         fail(e: unknown, drug: string): boolean {
           failed++; streak++; last = e instanceof Error ? e.message : String(e);
@@ -1436,13 +1520,30 @@ export async function enrichProducts(
       };
     };
 
+    // Each source: skipped on request, then a canary look-up of a well-known drug before its pass.
+    const results: Partial<Record<SourceName, { ok: boolean; detail: string; skipped?: boolean }>> = {};
+    const ready = async (name: SourceName, dueCount: number): Promise<boolean> => {
+      if (enrichConfig.skipSources.has(SOURCE_KEY[name])) { results[name] = { ok: true, detail: "", skipped: true }; return false; }
+      if (!dueCount) return false; // nothing to do: no requests at all
+      const c = await canary(name);
+      results[name] = c;
+      if (!c.ok) {
+        res.sourcesDown.push(`${name}: check look-up failed — ${c.detail}`);
+        log(`${name}: check look-up failed — leaving its saved values as they are this run`, c.detail);
+      }
+      return c.ok;
+    };
+    const finish = (name: SourceName, t: { down: () => boolean; lastError: () => string }) => {
+      if (results[name]?.ok && t.down()) results[name] = { ok: false, detail: t.lastError() };
+    };
+
     // 1) openFDA
     const fdaDue = candidates.filter((p) => { const c = current(p); return due(c, c?.fdaAt); })
       .slice(0, enrichConfig.fdaKey ? 100_000 : 900);
     let done = 0;
     const fdaT = tracker("openFDA");
     log(`openFDA: ${fdaDue.length} drugs due`);
-    for (const p of fdaDue) {
+    if (await ready("openFDA", fdaDue.length)) for (const p of fdaDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
       const cur = current(p);
@@ -1462,6 +1563,7 @@ export async function enrichProducts(
       if (done % 100 === 0) { await writeAll(); log(`openFDA: ${done}/${fdaDue.length} drugs checked`); }
     }
     fdaT.done();
+    finish("openFDA", fdaT);
     res.fdaChecked = done;
     if (done) await writeAll();
 
@@ -1470,7 +1572,7 @@ export async function enrichProducts(
       .slice(0, opts.maxLookups ?? enrichConfig.maxLookups);
     const chemblT = tracker("ChEMBL");
     log(`ChEMBL: ${chemblDue.length} drugs this run (up to ${opts.maxLookups ?? enrichConfig.maxLookups})`);
-    for (const p of chemblDue) {
+    if (await ready("ChEMBL", chemblDue.length)) for (const p of chemblDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
       const next: Lookup = { ...(current(p) ?? blank()) };
@@ -1495,6 +1597,7 @@ export async function enrichProducts(
       if (res.lookedUp % 25 === 0) { await writeAll(); log(`ChEMBL: ${res.lookedUp}/${chemblDue.length} drugs checked`); }
     }
     chemblT.done();
+    finish("ChEMBL", chemblT);
     if (res.lookedUp) await writeAll();
 
     // 3) Inxight Drugs
@@ -1503,7 +1606,7 @@ export async function enrichProducts(
     let checked = 0;
     const inxT = tracker("Inxight Drugs");
     log(`Inxight Drugs: ${inxightDue.length} drugs this run (up to ${opts.maxInxight ?? enrichConfig.maxInxight})`);
-    for (const p of inxightDue) {
+    if (await ready("Inxight Drugs", inxightDue.length)) for (const p of inxightDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
       const next: Lookup = { ...(current(p) ?? blank()) };
@@ -1527,7 +1630,11 @@ export async function enrichProducts(
       if (checked % 25 === 0) { await writeAll(); log(`Inxight Drugs: ${checked}/${inxightDue.length} drugs checked`); }
     }
     inxT.done();
+    finish("Inxight Drugs", inxT);
     res.inxightChecked = checked;
+    if (Object.keys(results).length && !opts.only?.length) {
+      try { await recordSourceStatus(results); } catch (e) { log("Source status not saved", String(e)); }
+    }
   }
 
   if (res.lookedUp || res.fdaChecked || res.inxightChecked) await writeAll();
@@ -1536,5 +1643,22 @@ export async function enrichProducts(
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
     [new Date().toISOString()],
   );
+  // A short record of the last full run, for the Quality page.
+  if (!opts.only?.length) {
+    const last = {
+      at: new Date().toISOString(), external, minutes: Math.round((Date.now() - started) / 6000) / 10,
+      products: res.products, updated: res.updated, filledFields: res.filledFields,
+      openFDA: { checked: res.fdaChecked ?? 0, found: res.fdaFound },
+      ChEMBL: { checked: res.lookedUp, found: res.chemblFound },
+      "Inxight Drugs": { checked: res.inxightChecked ?? 0, found: res.inxightFound ?? 0 },
+      sourcesDown: res.sourcesDown, stoppedEarly: res.stoppedEarly,
+      merged: res.curation?.merged ?? 0, hiddenByRule: res.curation?.byRule.length ?? 0,
+      abstracts: res.abstracts?.abstracts ?? 0, newFromAbstracts: res.abstracts?.created.length ?? 0,
+    };
+    await pool.query(
+      `INSERT INTO app_meta (key, value) VALUES ('product_autofill_last', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [JSON.stringify(last)],
+    );
+  }
   return res;
 }

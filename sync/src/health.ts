@@ -11,7 +11,7 @@ import { pool } from "./db.js";
 import { MAX_ATTEMPTS } from "./failures.js";
 
 /** Latest migration this code needs. Update when adding a migration. */
-export const REQUIRED_SCHEMA_VERSION = "0019";
+export const REQUIRED_SCHEMA_VERSION = "0020";
 
 export type HealthStatus = "ok" | "warn" | "fail";
 export interface HealthCheck {
@@ -29,6 +29,8 @@ const HOURS = 3600_000;
 
 /** Thresholds (hours since the last successful sync). */
 export const SYNC_AGE = { warn: 36, fail: 72 };
+/** A drug-profile source failing since this many hours (= 3 daily runs) fails the health check. */
+export const SOURCE_DOWN_FAIL_HOURS = 47;
 
 function worst(checks: HealthCheck[]): HealthStatus {
   if (checks.some((c) => c.status === "fail")) return "fail";
@@ -113,6 +115,21 @@ export async function checkHealth(now: Date = new Date()): Promise<HealthReport>
   if (guard.rows[0]) {
     const g = JSON.parse(guard.rows[0].value);
     add("removal guard", "warn", `last full sync did not remove ${g.count} trial(s) CT.gov stopped returning (limit ${g.limit}) — check, then run once with SYNC_ALLOW_LARGE_PRUNE=true`);
+  }
+
+  // 8. Drug-profile sources (openFDA, ChEMBL, Inxight Drugs): checked by the daily auto-fill.
+  //    Down for 3 runs/days in a row = fail, so GitHub emails you; once = a warning.
+  const ss = await pool.query<{ value: string }>("SELECT value FROM app_meta WHERE key = 'source_status'").catch(() => null);
+  if (ss?.rows[0]) {
+    let status: Record<string, { ok: boolean; detail: string; failingSince: string | null; lastOkAt: string | null; skipped?: boolean }> = {};
+    try { status = JSON.parse(ss.rows[0].value); } catch { /* ignore */ }
+    const down = Object.entries(status).filter(([, v]) => v && !v.ok && !v.skipped);
+    const long = down.filter(([, v]) => v.failingSince && now.getTime() - Date.parse(v.failingSince) >= SOURCE_DOWN_FAIL_HOURS * HOURS);
+    const fmt = ([k, v]: [string, { detail: string; failingSince: string | null; lastOkAt: string | null }]) =>
+      `${k} since ${v.failingSince?.slice(0, 10)}${v.lastOkAt ? ` (last worked ${v.lastOkAt.slice(0, 10)})` : ""}: ${v.detail.slice(0, 120)}`;
+    if (long.length) add("drug-profile sources", "fail", `not working for 3+ days — ${long.map(fmt).join("; ")}. Their saved values are kept. If a service stays blocked, leave it out with the repository variable ENRICH_SKIP_SOURCES (e.g. inxight).`);
+    else if (down.length) add("drug-profile sources", "warn", `not working on the last run — ${down.map(fmt).join("; ")}`);
+    else add("drug-profile sources", "ok", Object.entries(status).map(([k, v]) => `${k} ${v.skipped ? "left out" : "ok"}`).join(", ") || "not checked yet");
   }
 
   return { status: worst(checks), checkedAt: now.toISOString(), checks };

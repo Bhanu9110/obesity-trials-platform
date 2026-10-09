@@ -101,10 +101,13 @@ jobs:
           ENRICH_MAX_LOOKUPS: ${{ inputs.all_drugs && '10000' || '200' }}
           ENRICH_MAX_INXIGHT: ${{ inputs.all_drugs && '10000' || '100' }}
           ENRICH_BUDGET_MIN: ${{ inputs.all_drugs && '290' || '15' }}
+          # Repository variable: sources to leave out, e.g. "inxight" (see README)
+          ENRICH_SKIP_SOURCES: ${{ vars.ENRICH_SKIP_SOURCES }}
         run: npm run enrich-products
 
       # Fails the job (GitHub emails you) when something is broken: database,
-      # migrations, no successful sync for 3 days, no trials. Warnings (e.g. records
+      # migrations, no successful sync for 3 days, no trials, or a drug-profile source
+      # (openFDA, ChEMBL, Inxight Drugs) not working for 3 days in a row. Warnings (e.g. records
       # in the dead-letter queue) are shown in the log but don't fail the job.
       - name: Health check
         working-directory: sync

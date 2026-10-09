@@ -1,0 +1,974 @@
+{
+ "about": "Reviewed list of product names that are not drugs. 'not_drug' and 'supplement' entries stay in the database but are left out of the drug list, dashboard counts, search and the auto-fill (products.kind). 'merge' folds duplicate pages of the same drug into one (like 'Merge' on a drug page). 'drug' lists names that must stay in the drug list even if a name rule would hide them. Applied on every auto-fill run (npm run enrich-products) or with npm run curate-products. A choice made on a drug page always wins over this file.",
+ "reviewed": "2026-10-08",
+ "not_drug": {
+  "18fdgpet_coldstimulation_ct": "18FDG-PET + Cold Stimulation + CT",
+  "abdomen": "Abdomen",
+  "acdp_pharmacologicalobesity": "ACDP + Pharmacological Obesity — ACDP appears to be a care programme combined with unspecified pharmacotherapy",
+  "actiheartcalibration": "Actiheart Calibration",
+  "acupuncture": "Acupuncture",
+  "added_bwlcontinued": "Added + BWL Continued",
+  "advancedmedical": "Advanced Medical — generic 'Advanced Medical Therapy', no specific drug",
+  "alcohol": "Alcohol — ethanol used in drug-interaction study",
+  "analgesia": "Analgesia — generic analgesia procedure term",
+  "analysisarterialcompliance": "Analysis Arterial Compliance",
+  "analysisvasomotorendothelialfunction": "Analysis Vasomotor Endothelial Function",
+  "ancillary": "Ancillary",
+  "anxiety_depression": "Anxiety + Depression",
+  "appliedinspiratorypressure": "Applied Inspiratory Pressure",
+  "arterialpressuremeasurement": "Arterial Pressure Measurement",
+  "autologousgreateromentum": "Autologous Greater Omentum",
+  "b6": "B6 — fragment 'Formulation B6'",
+  "behavioral": "Behavioral",
+  "behavioral_cognitive": "Behavioral + Cognitive",
+  "behavioral_guidedselfhelpcognitivebehavioral": "Behavioral + Guided self-help Cognitive-behavioral",
+  "bingeeatingscale": "Binge Eating Scale",
+  "bioimpedance": "Bioimpedance",
+  "biologicaldata": "Biological Data",
+  "biologicaldosage": "Biological Dosage",
+  "biologicalsampling": "Biological Sampling",
+  "blindpalpation": "Blind Palpation",
+  "blocked": "Blocked",
+  "bloodanalysis": "Blood Analysis",
+  "bloodsamples": "Blood Samples",
+  "bloodsamplesanalysis": "Blood Samples Analysis",
+  "bloodsampling": "Blood Sampling",
+  "bloodtests": "Blood Tests",
+  "blp": "BLP",
+  "bodyweightmonitoring": "Body Weight Monitoring",
+  "bs": "BS",
+  "bwlcontinued": "BWL Continued",
+  "caloricrestriction": "Caloric Restriction",
+  "calorieanimalproteinmeals": "Calorie Animal Protein Meals",
+  "calorieplantproteinmeals": "Calorie Plant Protein Meals",
+  "calorierestriction": "Calorie Restriction",
+  "cannulation": "Cannulation",
+  "carbohydrate": "Carbohydrate",
+  "cbte": "CBTe",
+  "cessation": "Cessation",
+  "ceus": "CEUS",
+  "chronicweightmanagement": "Chronic Weight Management — fragment of 'Medication for chronic weight management'",
+  "circadianrhythm": "Circadian Rhythm",
+  "cli": "CLI — likely lifestyle intervention",
+  "cmh2o": "cmH2O",
+  "cmsintensivebehavior": "CMS Intensive Behavior",
+  "cold": "Cold",
+  "coldexposure": "Cold Exposure",
+  "coloradoweigh": "Colorado Weigh",
+  "comprehensiveweightloss": "Comprehensive Weight Loss",
+  "computertasks": "Computer Tasks",
+  "controlcondition": "Control Condition",
+  "controlvignette": "Control Vignette",
+  "cookdoubleballooncatheter": "Cook Double Balloon Catheter",
+  "coronaryctangiography": "Coronary CT Angiography",
+  "cpap": "CPAP",
+  "cpplai": "CPPLAI — local anesthetic infusion technique",
+  "ct_fdgpet": "CT + FDG PET",
+  "ct_h2opet": "CT + H2 O PET",
+  "deferredweightloss": "Deferred Weight Loss",
+  "depressionscale": "Depression Scale",
+  "deuteratedwater": "Deuterated Water — isotope tracer",
+  "diary": "Diary",
+  "dieticianconsultation": "Dietician Consultation",
+  "dietologicmeasures": "Dietologic Measures",
+  "dietpro": "DietPro — unknown; assumed diet product",
+  "digiphysicaltool": "Digi-physical Tool",
+  "directlaryngoscopy": "Direct Laryngoscopy",
+  "dose2": "DOSE2 — dose-arm fragment of NA-931",
+  "drk": "Dr.K — unclear treatment",
+  "duralpunctureepidural": "Dural Puncture Epidural",
+  "echocardiography": "Echocardiography",
+  "edi": "EDI",
+  "effectinsulinpeptidetransport": "Effect Insulin Peptide Transport",
+  "electroencephalography": "Electroencephalography",
+  "emotionregulation": "Emotion Regulation",
+  "emulsion": "Emulsion — fragment of Intralipid emulsion",
+  "energymonitoring": "Energy Monitoring",
+  "energyrestrictednutritional": "Energy-restricted Nutritional",
+  "energyrestriction": "Energy Restriction",
+  "epidural": "Epidural",
+  "epiduralanalgesia": "Epidural Analgesia",
+  "espb": "ESPB",
+  "estrogensuppression": "Estrogen Suppression — pharmacologic method unspecified",
+  "euglycemic": "Euglycemic",
+  "evaluationendocannabinoidsystem": "Evaluation Endocannabinoid System",
+  "evaluationmetabolicparameters": "Evaluation Metabolic Parameters",
+  "evira": "Evira",
+  "explorationmicrocirculation": "Exploration Microcirculation",
+  "explorationneuropathy": "Exploration Neuropathy",
+  "f18": "F-18 — PET radiotracer",
+  "f18fallypride": "F-18 Fallypride — PET radiotracer",
+  "facemask": "Facemask",
+  "fallypride": "Fallypride — PET radiotracer",
+  "fat": "Fat",
+  "fecalmicrobialtransplant": "Fecal Microbial Transplant — FMT: procedure/biologic, not classed as drug",
+  "fecalmicrobiotatransplantation": "Fecal Microbiota Transplantation — FMT: procedure/biologic, not classed as drug",
+  "fibrecereal": "Fibre Cereal — food/diet arm",
+  "fmd": "FMD",
+  "fmri": "fMRI",
+  "fmt": "FMT — FMT: procedure/biologic",
+  "foodrx": "FoodRx",
+  "freetier": "Free Tier",
+  "fructosecornsyrup": "Fructose Corn Syrup — dietary sugar challenge",
+  "gastricbypass": "Gastric By-Pass",
+  "gastroduodenoscopy": "Gastroduodenoscopy",
+  "gastrojejunoscopy": "Gastrojejunoscopy",
+  "gelesis100": "Gelesis100 — Gelesis100 is a hydrogel device",
+  "genotyping": "Genotyping",
+  "ggt": "GGT — ambiguous abbreviation",
+  "glucose": "Glucose — lab measurement",
+  "glucosebeads": "Glucose Beads — glucose challenge formulation",
+  "glucoseuncoatedbeads": "Glucose Uncoated Beads — glucose challenge formulation",
+  "glycerol": "Glycerol — stable isotope tracer",
+  "goaldirectedhemodynamictargetingcardiacindex": "Goal-directed Hemodynamic Targeting Cardiac Index",
+  "hba1c": "HBA1c",
+  "healthone": "Health One",
+  "healthyfoodhabitspromotion": "Healthy Food Habits Promotion",
+  "heavywater": "Heavy Water — deuterium tracer",
+  "higherdose": "Higher-dose",
+  "highesttolerableadditionaldietologicalmeasures": "Highest Tolerable Additional Dietological Measures",
+  "hospitalanxiety": "Hospital Anxiety",
+  "hotwater_taken": "Hot Water + Taken — fragment",
+  "human": "Human — fragment of 'LEAP-2 Protein, Human'",
+  "hyperinsulinemic": "Hyperinsulinemic",
+  "ili": "ILI",
+  "immediateweightloss": "Immediate Weight Loss",
+  "inactivesupplement": "Inactive Supplement — placebo supplement",
+  "indirectcalorimetry": "Indirect Calorimetry",
+  "inhalationnaturalodour": "Inhalation Natural Odour",
+  "insufflationpressure": "Insufflation Pressure",
+  "intact": "Intact",
+  "intensivemedicalobesity": "Intensive Medical Obesity",
+  "intermittentfasting": "Intermittent Fasting",
+  "intermittentfastingwithoutweightloss": "Intermittent Fasting Without Weight Loss",
+  "intimamediathicknessmeasurement": "Intima-Media Thickness Measurement",
+  "intraoperativerescueanalgesia": "Intraoperative Rescue Analgesia",
+  "kcal": "Kcal",
+  "laparoscopic": "Laparoscopic",
+  "lark": "Lark",
+  "laseracupuncture": "Laser Acupuncture",
+  "lcd": "LCD",
+  "led": "LED",
+  "leftlateraldecubitusposition": "Left Lateral Decubitus Position",
+  "lessoxidizedoil": "Less Oxidized Oil",
+  "levelphysicalactivity": "Level Physical Activity",
+  "lifestylemodification": "Life Style Modification",
+  "liking": "Liking",
+  "lipidprofile": "Lipid Profile",
+  "lllt": "LLLT",
+  "lowdose": "low-dose",
+  "lsg": "LSG",
+  "lsmt": "LSMT",
+  "magnetsystem": "Magnet System",
+  "maltodextrin": "Maltodextrin — used as placebo",
+  "mealreplacement": "Meal Replacement",
+  "mealreplacements": "Meal Replacements",
+  "medicalcrisiscouncelling": "Medical Crisis Councelling",
+  "medicalnutrition": "Medical Nutrition",
+  "mentropyguidanceanesthesiadepth_typevolatileanesthetics": "M-Entropy Guidance Anesthesia Depth + Type Volatile Anesthetics",
+  "metabolicchamber": "Metabolic Chamber",
+  "metabolizingenzyme": "Metabolizing Enzyme",
+  "metabolomicanalysis": "Metabolomic Analysis",
+  "metabolomics": "Metabolomics",
+  "methyld9choline": "methyl-D9-choline — stable isotope tracer for muscle mass",
+  "microdialysis": "Microdialysis",
+  "middledose": "Middle-dose",
+  "mindfulnesstraining": "Mindfulness Training",
+  "mindfulnesstraining_realtdcs": "Mindfulness Training + Real tDCS — tDCS device + behavioural",
+  "mirna": "miRNA",
+  "mixedmeal": "Mixed Meal",
+  "monogenicobesity": "Monogenic Obesity",
+  "moreoxidizedoil": "More Oxidized Oil",
+  "motivationalsupport": "Motivational Support",
+  "move": "MOVE",
+  "movies": "Movies",
+  "mre_pdff": "MRE + PDFF",
+  "multidisciplinarynutrition": "Multi-Disciplinary Nutrition",
+  "multiplekcalmeals": "Multiple Kcal Meals",
+  "mutiple_single": "Mutiple + Single",
+  "myfitnesspal": "MyFitnessPal",
+  "nervestimulatorperipheralnerveblocks": "Nerve Stimulator Peripheral Nerve Blocks",
+  "neuromuscularmonitoring": "Neuromuscular Monitoring",
+  "nonpharmacologicalrecommendationsgerd": "Non-pharmacological Recommendations GERD",
+  "nonthiamine": "Non-thiamine — control arm label (no thiamine)",
+  "noomweight": "Noom Weight",
+  "nordicwalkingtraining4x45min": "Nordic Walking Training 4X45 Min",
+  "nordicwalkingtrainingxmin": "Nordic Walking Training X Min",
+  "normalcontrol": "Normal Control",
+  "npp": "NPP",
+  "nutritional": "Nutritional",
+  "obesesubjects": "Obese Subjects",
+  "oggt": "OGGT",
+  "ogtt": "OGTT",
+  "onlinesupportsystem": "Online Support System",
+  "onqpainball": "On-Q Pain Ball",
+  "opioidbasedanesthesia": "Opioid-Based Anesthesia",
+  "opioidfreeanaesthesia": "Opioid Free Anaesthesia",
+  "opioidfreeanesthesia": "Opioid Free Anesthesia",
+  "optiflowf_p850tmsystem": "Optiflow F + P 850TM System",
+  "optimizedmedicalmanagement": "Optimized Medical Management",
+  "overfeeding": "Overfeeding",
+  "overstitchendoscopicsuturingsystem": "Overstitch Endoscopic Suturing System",
+  "painscale": "Pain Scale",
+  "palcebo": "Palcebo — misspelled placebo",
+  "pbo": "PBO — placebo",
+  "peripheraladiposetissue": "Peripheral Adipose Tissue",
+  "personcentredcare": "Person-centred Care",
+  "pet": "PET",
+  "phenotypicalapproach": "Phenotypical Approach",
+  "phrenicsparingblock": "Phrenic-Sparing Block — regional nerve block procedure",
+  "physicalactivitymonitoring": "Physical Activity Monitoring",
+  "placibo": "Placibo — misspelled placebo",
+  "plocebo": "Plocebo — misspelled placebo",
+  "pose20endoscopicgastricremodeling": "POSE2.0 Endoscopic Gastric Remodeling",
+  "postoperativecare": "Postoperative Care",
+  "postprandialmealtests": "Post-Prandial Meal Tests",
+  "promotionhealthyfoodhabits": "Promotion Healthy Food Habits",
+  "promotionphysicalactivity": "Promotion Physical Activity",
+  "psychologistconsultation": "Psychologist Consultation",
+  "pupillography": "Pupillography",
+  "q2w": "Q 2W",
+  "q3w": "Q 3W",
+  "questionnaires": "Questionnaires",
+  "rcd": "RCD",
+  "recommendedphase": "Recommended Phase",
+  "recreationcenterpasses": "Recreation Center Passes",
+  "resistancetraining": "Resistance Training",
+  "robotic": "Robotic",
+  "rootplanning_scaling": "Root Planning + Scaling",
+  "rygb": "RYGB",
+  "salivarysampling": "Salivary Sampling",
+  "salts": "Salts — fragment ('Citrate Salts')",
+  "selfadministeredauricularacupressureintegrated_smartphoneapplication": "Self-administered Auricular Acupressure Integrated + Smartphone Application",
+  "selfhelpcbt": "Self-help CBT",
+  "serialbloodsamplingpkanalysis": "Serial Blood Sampling PK Analysis",
+  "sessions": "Sessions",
+  "shorttermmildcooling": "Short Term Mild Cooling",
+  "singleballoonfoleycatheter": "Single Balloon Foley Catheter",
+  "singlekcalmeal": "Single Kcal Meal",
+  "sittingposition": "Sitting Position",
+  "sleeve": "Sleeve",
+  "sniffingemotionaltears": "Sniffing Emotional Tears",
+  "sniffingfastingplasma": "Sniffing Fasting Plasma",
+  "sniffingpostprandialplasma": "Sniffing Postprandial Plasma",
+  "solidmeal": "Solid Meal",
+  "sowi": "SOWI",
+  "soybeanoil": "Soybean Oil — placebo vehicle",
+  "specialistobesitymanagementservices": "Specialist Obesity Management Services",
+  "sucromalt": "Sucromalt — test carbohydrate/sweetener",
+  "sugarpill": "Sugar Pill — placebo",
+  "tapwater": "Tap Water",
+  "tbw": "TBW",
+  "tcmfmd": "TCM-FMD — TCM fasting-mimicking diet",
+  "tcoc": "TCOC — unclear abbreviation; unsure",
+  "tdcs": "tDCS",
+  "thoracicscanner": "Thoracic Scanner",
+  "traditionalcare": "Traditional Care",
+  "training": "Training",
+  "transcutaneousnervestimulation": "Transcutaneous Nerve Stimulation",
+  "transnasalendoscopy": "Transnasal Endoscopy",
+  "transversusabdominisplaneblock": "Transversus Abdominis Plane Block",
+  "trial": "Trial",
+  "uf": "UF",
+  "videolaryngoscopy": "Video Laryngoscopy",
+  "visceraladiposetissuebiopsies": "Visceral Adipose Tissue Biopsies",
+  "weight": "Weight",
+  "weightbased": "Weight Based",
+  "weightlosswithoutpharmacotherapy": "Weight Loss Without Pharmacotherapy",
+  "weightstigmavignette": "Weight Stigma Vignette",
+  "whiteadiposetissuesampling": "White Adipose Tissue Sampling",
+  "wholebodycryotherapy": "Whole Body Cryotherapy",
+  "withoutobesity": "Without OBesity",
+  "wmp": "WMP",
+  "wristactimeter": "Wrist Actimeter",
+  "wwclinic": "WW Clinic"
+ },
+ "supplement": {
+  "5hydroxytryptophan": "5-HYDROXYTRYPTOPHAN",
+  "acaciagum_pgx_resistantmaltodextrin_supplementalfibermixturecomposedoligofructose": "Acacia Gum + PGX + Resistant Maltodextrin + Supplemental Fiber Mixture Composed Oligofructose",
+  "akk": "AKK — likely Akkermansia muciniphila probiotic",
+  "alphalipoicacid": "Alpha-lipoic Acid",
+  "aminosterilhepa": "Aminosteril Hepa — amino-acid infusion solution",
+  "ascorbicacid": "Ascorbic Acid",
+  "ascorbicacid_tocopherolalpha": "Ascorbic Acid + Tocopherol Alpha",
+  "asiaticoside": "Asiaticoside",
+  "berberine": "Berberine",
+  "betaine": "Betaine",
+  "bifidobacteriumbreveb632_br03": "Bifidobacterium Breve B632 + BR03",
+  "biolean": "Biolean — assumed weight-loss supplement product",
+  "bioleanfree": "Biolean Free — assumed weight-loss supplement product",
+  "butyrate": "Butyrate",
+  "calcc": "Calc C — homeopathic remedy (Calcarea carbonica)",
+  "calcinedmagnesia": "Calcined Magnesia",
+  "calcium_vitamind": "Calcium + Vitamin D",
+  "calciumbetahydroxybetamethylbutyrate": "Calcium beta-hydroxy-beta-methylbutyrate",
+  "calciumcarbonate": "Calcium Carbonate",
+  "calciumsupplement": "Calcium Supplement",
+  "caltrate": "Caltrate",
+  "capsaicin": "Capsaicin",
+  "capsimax": "Capsimax",
+  "carduusmarianus12ch": "Carduus Marianus 12cH",
+  "carduusmarianus30ch": "Carduus Marianus 30cH",
+  "carduusmarianus6ch": "Carduus Marianus 6cH",
+  "cellulose": "Cellulose",
+  "cholecalciferol": "Cholecalciferol",
+  "cholecalciferolos": "Cholecalciferol Os",
+  "chromiumpicolinate": "Chromium Picolinate",
+  "cissusquadrangularia": "Cissus Quadrangularia",
+  "con": "Con — homeopathic remedy (Conium) fragment",
+  "conjugatedlinoleicacid": "Conjugated Linoleic Acid",
+  "consumptioncajanuscajan_standardizedphysicalactivityprotocolassociated": "Consumption Cajanus Cajan + Standardized Physical Activity Protocol Associated",
+  "dairy": "Dairy",
+  "dandelionextract": "Dandelion Extract",
+  "deltagoldtocotrienol": "DeltaGold Tocotrienol",
+  "dextrin": "Dextrin",
+  "dichrostachysglomerata": "Dichrostachys Glomerata",
+  "docosahexaenoicacidsupplementation": "Docosahexaenoic Acid Supplementation",
+  "drisdolvitamind2": "Drisdol Vitamin D2 — vitamin D2 (Rx brand)",
+  "epa_fishoilenriched": "EPA + Fish Oil Enriched",
+  "ergocalciferol": "Ergocalciferol",
+  "ergocalciferols": "Ergocalciferols",
+  "euiiyintang": "Euiiyin-tang",
+  "extractgreentea": "Extract Green Tea",
+  "fenugreekcumin": "Fenugreek Cumin",
+  "fiber": "Fiber",
+  "fiberjelly": "Fiber Jelly",
+  "fibrebreakfastcereal": "Fibre Breakfast Cereal — fibre-rich food",
+  "fiixedchineseherbalmedicine": "Fiixed Chinese Herbal Medicine",
+  "folicacid_myoinositol": "Folic Acid + myo-inositol",
+  "fromediblemushrooms": "From Edible Mushrooms",
+  "genistein": "Genistein",
+  "glucosamine": "Glucosamine",
+  "glylow": "Gly-low — Gly-Low nutraceutical",
+  "greentea": "Green Tea",
+  "gutbrainaxisactivatingfoodcarbohydrate": "gut-brain Axis Activating Food Carbohydrate — functional food ingredient",
+  "hesperidin": "Hesperidin",
+  "homeopathic": "Homeopathic — homeopathy",
+  "homeopathy": "Homeopathy — homeopathy",
+  "immunofos": "Immunofos — nutritional supplement",
+  "ironsupplement": "Iron Supplement",
+  "lackt": "Lack T — homeopathic remedy (Lac caninum)",
+  "larginine": "L-arginine",
+  "leucine": "Leucine",
+  "lglutamine": "L-glutamine",
+  "libramed": "Libramed — marketed as medical device (natural fibre)",
+  "lyc": "Lyc — homeopathic remedy (Lycopodium)",
+  "magepaoil": "MAG-EPA Oil",
+  "magnesiacalcinada": "Magnesia Calcinada — magnesium oxide",
+  "milkpolarlipidrichdairy": "Milk Polar Lipid-Rich Dairy",
+  "mixedaminoacids": "Mixed Amino Acids",
+  "myoinositol": "Myoinositol",
+  "nuxv": "Nux V — homeopathic remedy",
+  "obex": "Obex — likely nutraceutical/fibre supplement; unsure",
+  "omega3fattyacid": "Omega-3 Fatty Acid",
+  "omega3fishoil": "Omega-3 Fish Oil",
+  "omega_symbiter": "Omega + Symbiter",
+  "onionpeelextract": "Onion Peel Extract",
+  "phenylalanine": "Phenylalanine — amino acid; used as stable-isotope tracer",
+  "phos": "Phos — homeopathic remedy",
+  "plantstanolminidrinks": "Plant Stanol Mini Drinks",
+  "polyglucosamine": "Polyglucosamine",
+  "polyglucosamineglucomannan": "Polyglucosamine Glucomannan",
+  "polyglucosamineglucomannannormal": "Polyglucosamine Glucomannan Normal",
+  "polyglucosaminel112": "Polyglucosamine L112",
+  "prebioticfiber": "Prebiotic Fiber",
+  "prebioticsachet": "Prebiotic Sachet",
+  "probiotic": "Probiotic",
+  "probioticblend": "Probiotic Blend",
+  "probioticformula": "Probiotic Formula",
+  "propionate": "Propionate",
+  "psiguavin": "Psiguavin — guava leaf extract",
+  "psyllium": "Psyllium",
+  "puerarin": "Puerarin — kudzu isoflavone",
+  "puls": "Puls — homeopathic remedy",
+  "pyrroloquinolinequinone": "Pyrroloquinoline Quinone",
+  "quercetin": "Quercetin",
+  "resveratrol": "Resveratrol",
+  "ricegerm": "Rice Germ",
+  "riduzone": "RiduZone",
+  "ruminococcustorques": "Ruminococcus Torques — bacterial strain",
+  "saccharomycesboulardii_sod": "Saccharomyces Boulardii + SOD",
+  "seagrapesextractbw": "Sea Grapes Extract BW",
+  "sep": "Sep — homeopathic remedy",
+  "sodiumpentaboratepentahydrate": "Sodium Pentaborate Pentahydrate",
+  "spermidine": "Spermidine",
+  "spiceblend": "SPICE BLEND",
+  "sulph": "Sulph — homeopathic remedy",
+  "supplement": "Supplement — generic unspecified supplement",
+  "synbiotic": "Synbiotic",
+  "thiamine": "Thiamine",
+  "threedifferentmixture": "Three Different Mixture — short-chain fatty acid mixture",
+  "tocopherolalpha": "Tocopherol Alpha",
+  "tocotrienolrichfractionvitamine": "Tocotrienol-rich Fraction Vitamin E",
+  "tonalinconjugatedlinoleicacid": "Tonalin Conjugated Linoleic Acid",
+  "triticumaestivum": "Triticum Aestivum — wheat preparation; unsure",
+  "tulsi": "Tulsi",
+  "tyrosine": "Tyrosine",
+  "visiblins": "Vi-Siblin S — psyllium fibre product",
+  "vitaminc": "Vitamin C",
+  "vitamind": "Vitamin D",
+  "vitamind3": "Vitamin D3",
+  "vitamindsupplementation": "Vitamin D Supplementation",
+  "vitamineunt": "Vitamin E UNT",
+  "ws1442": "WS 1442 — hawthorn extract (Crataegus)",
+  "wst01strain": "WST01 Strain",
+  "xianhuacha": "Xian-Hua-Cha",
+  "xinjuxiaogaoprescription": "Xinju Xiaogao Prescription",
+  "zinc": "Zinc"
+ },
+ "drug": [],
+ "merge": {
+  "acetazolamidefirst": {
+   "into": "acetazolamide",
+   "name": "Acetazolamide"
+  },
+  "amiloridepill": {
+   "into": "amiloride",
+   "name": "Amiloride"
+  },
+  "anidulafunginsingle": {
+   "into": "anidulafungin",
+   "name": "Anidulafungin"
+  },
+  "antibioticsexposure": {
+   "into": "antibiotics",
+   "name": "Antibiotics"
+  },
+  "antiobesity": {
+   "into": "antiobesitymedication",
+   "name": "Anti-obesity medication"
+  },
+  "aom": {
+   "into": "antiobesitymedication",
+   "name": "Anti-obesity medication"
+  },
+  "asc": {
+   "into": "asc41",
+   "name": "ASC41"
+  },
+  "assessinggsk1521498": {
+   "into": "gsk1521498",
+   "name": "GSK1521498"
+  },
+  "bagjinlidatimes": {
+   "into": "jinlidagranules",
+   "name": "Jinlida granules"
+  },
+  "ballooncatheter_misoprostol": {
+   "into": "misoprostol",
+   "name": "Misoprostol"
+  },
+  "based_incretin": {
+   "into": "incretinbasedtherapy",
+   "name": "Incretin-based therapy"
+  },
+  "behavioral_cognitive_ldx": {
+   "into": "lisdexamfetamine",
+   "name": "Lisdexamfetamine"
+  },
+  "behavioral_orlistat": {
+   "into": "orlistat",
+   "name": "Orlistat"
+  },
+  "behavioral_semaglutide": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "bgm0504bgm0504": {
+   "into": "bgm0504",
+   "name": "BGM0504"
+  },
+  "bgm0504multidose": {
+   "into": "bgm0504",
+   "name": "BGM0504"
+  },
+  "bgm0504singledose": {
+   "into": "bgm0504",
+   "name": "BGM0504"
+  },
+  "bilateraleoib_fentanylloading": {
+   "into": "fentanyl",
+   "name": "Fentanyl"
+  },
+  "botoxunt": {
+   "into": "botox",
+   "name": "Botox"
+  },
+  "botulinumtoxintype": {
+   "into": "botulinumtoxintypea",
+   "name": "Botulinum Toxin Type A"
+  },
+  "bsglp": {
+   "into": "glp1receptoragonist",
+   "name": "GLP-1 receptor agonist"
+  },
+  "bsglp1ra": {
+   "into": "glp1receptoragonist",
+   "name": "GLP-1 receptor agonist"
+  },
+  "carbetocinmicrogram": {
+   "into": "carbetocin",
+   "name": "Carbetocin"
+  },
+  "chlorhexidine_onestagefullmouthdisinfection": {
+   "into": "chlorhexidine",
+   "name": "Chlorhexidine"
+  },
+  "clonidinepill": {
+   "into": "clonidine",
+   "name": "Clonidine"
+  },
+  "cocktail": {
+   "into": "probedrugcocktail",
+   "name": "Probe drug cocktail"
+  },
+  "cocktailalreadyapproveddrugs": {
+   "into": "cocktailofapproveddrugs",
+   "name": "Cocktail of approved drugs"
+  },
+  "cocktailninecypprobedrugs": {
+   "into": "cypprobedrugcocktail",
+   "name": "CYP probe drug cocktail"
+  },
+  "compound_metobes": {
+   "into": "metobescompound",
+   "name": "Metobes compound"
+  },
+  "conventionalorlistat": {
+   "into": "orlistat",
+   "name": "Orlistat"
+  },
+  "cp945598b": {
+   "into": "cp945598",
+   "name": "CP-945598"
+  },
+  "deepneuromuscularblockade_rocuronium": {
+   "into": "rocuronium",
+   "name": "Rocuronium"
+  },
+  "dehydratech_dehydratechcbd_semaglutide": {
+   "into": "cannabidiol_semaglutide",
+   "name": "Cannabidiol + Semaglutide"
+  },
+  "dehydratech_semaglutide": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "dehydratechcbd": {
+   "into": "cannabidiol",
+   "name": "Cannabidiol"
+  },
+  "differenttypeconductiongeneralanesthesia": {
+   "into": "generalanestheticagents",
+   "name": "General anesthetic agents"
+  },
+  "dosagesevelamercarbonate_irbesartan": {
+   "into": "irbesartan_sevelamercarbonate",
+   "name": "Irbesartan + Sevelamer Carbonate"
+  },
+  "ecnoglutidedosage": {
+   "into": "ecnoglutide",
+   "name": "Ecnoglutide"
+  },
+  "escalationsa030": {
+   "into": "sa030",
+   "name": "SA030"
+  },
+  "estrone_oleoyl": {
+   "into": "oleoylestrone",
+   "name": "Oleoyl-estrone"
+  },
+  "exogenousleap2hormone": {
+   "into": "leap2",
+   "name": "LEAP2"
+  },
+  "fmri_naltrexone": {
+   "into": "naltrexone",
+   "name": "Naltrexone"
+  },
+  "foleyballoon_vaginalmisoprostol": {
+   "into": "misoprostol",
+   "name": "Misoprostol"
+  },
+  "furosemidefirst": {
+   "into": "furosemide",
+   "name": "Furosemide"
+  },
+  "gft505new": {
+   "into": "gft505",
+   "name": "GFT505"
+  },
+  "gft505old": {
+   "into": "gft505",
+   "name": "GFT505"
+  },
+  "glp1reduction": {
+   "into": "glp1receptoragonist",
+   "name": "GLP-1 receptor agonist"
+  },
+  "gzr18gzr18": {
+   "into": "gzr18",
+   "name": "GZR18"
+  },
+  "hdm100212weeks": {
+   "into": "hdm1002",
+   "name": "HDM1002"
+  },
+  "hdm1005level": {
+   "into": "hdm1005",
+   "name": "HDM1005"
+  },
+  "highdoseoliceridine": {
+   "into": "oliceridine",
+   "name": "Oliceridine"
+  },
+  "hrs9531placebo": {
+   "into": "hrs9531",
+   "name": "HRS9531"
+  },
+  "hs20094ai": {
+   "into": "hs20094",
+   "name": "HS-20094"
+  },
+  "hs20094mdv": {
+   "into": "hs20094",
+   "name": "HS-20094"
+  },
+  "immediatetopiramate": {
+   "into": "topiramate",
+   "name": "Topiramate"
+  },
+  "inductionagentgeneralanesthesiaetomidate": {
+   "into": "etomidate",
+   "name": "Etomidate"
+  },
+  "institutionalimmuneglobulin": {
+   "into": "intravenousimmuneglobulin",
+   "name": "Intravenous Immune Globulin"
+  },
+  "insulineglargineu100": {
+   "into": "insulinglargineu100",
+   "name": "Insulin Glargine U100"
+  },
+  "intraduodenaldenatoniumbenzoate": {
+   "into": "denatoniumbenzoate",
+   "name": "Denatonium Benzoate"
+  },
+  "intraduodenalquinine": {
+   "into": "quinine",
+   "name": "Quinine"
+  },
+  "intragastricbotulinumtoxintype": {
+   "into": "botulinumtoxintypea",
+   "name": "Botulinum Toxin Type A"
+  },
+  "intragastricdenatoniumbenzoate": {
+   "into": "denatoniumbenzoate",
+   "name": "Denatonium Benzoate"
+  },
+  "intragastricquinine": {
+   "into": "quinine",
+   "name": "Quinine"
+  },
+  "intrathecalmorphine": {
+   "into": "morphine",
+   "name": "Morphine"
+  },
+  "intrathecalmorphine_nalbuphine": {
+   "into": "morphine_nalbuphine",
+   "name": "Morphine + Nalbuphine"
+  },
+  "itsmetabolitesscheme1_paracetamol": {
+   "into": "paracetamol",
+   "name": "Paracetamol"
+  },
+  "itsmetabolitesscheme_paracetamol": {
+   "into": "paracetamol",
+   "name": "Paracetamol"
+  },
+  "jnj64565111level": {
+   "into": "jnj64565111",
+   "name": "JNJ-64565111"
+  },
+  "k757_openlabelsitagliptin": {
+   "into": "k757_sitagliptin",
+   "name": "K-757 + Sitagliptin"
+  },
+  "lae102multiple": {
+   "into": "lae102",
+   "name": "LAE102"
+  },
+  "levonorgestrelemergencycontraception": {
+   "into": "levonorgestrel",
+   "name": "Levonorgestrel"
+  },
+  "levonorgestrelmouth": {
+   "into": "levonorgestrel",
+   "name": "Levonorgestrel"
+  },
+  "levonorgestrelreleasingintrauterinesystem": {
+   "into": "levonorgestrel",
+   "name": "Levonorgestrel"
+  },
+  "lidocain": {
+   "into": "lidocaine",
+   "name": "Lidocaine"
+  },
+  "lidocainedexmedetomidine": {
+   "into": "dexmedetomidine_lidocaine",
+   "name": "Dexmedetomidine + Lidocaine"
+  },
+  "liraglutid": {
+   "into": "liraglutide",
+   "name": "Liraglutide"
+  },
+  "liraglutideoncedaily": {
+   "into": "liraglutide",
+   "name": "Liraglutide"
+  },
+  "liraglutidesubq": {
+   "into": "liraglutide",
+   "name": "Liraglutide"
+  },
+  "lngiud": {
+   "into": "levonorgestrel",
+   "name": "Levonorgestrel"
+  },
+  "lowdoseoliceridine": {
+   "into": "oliceridine",
+   "name": "Oliceridine"
+  },
+  "lsgmazdutide": {
+   "into": "mazdutide",
+   "name": "Mazdutide"
+  },
+  "lsgsemaglutide": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "lsgtirzepatide": {
+   "into": "tirzepatide",
+   "name": "Tirzepatide"
+  },
+  "magnesiumthroughcorrectedidealweight": {
+   "into": "magnesiumsulfate",
+   "name": "Magnesium Sulfate"
+  },
+  "magnesiumthroughrealweight": {
+   "into": "magnesiumsulfate",
+   "name": "Magnesium Sulfate"
+  },
+  "medi0382mid": {
+   "into": "medi0382",
+   "name": "MEDI0382"
+  },
+  "medicalnutrition_metformin": {
+   "into": "metformin",
+   "name": "Metformin"
+  },
+  "metfomin": {
+   "into": "metformin",
+   "name": "Metformin"
+  },
+  "metformine": {
+   "into": "metformin",
+   "name": "Metformin"
+  },
+  "methyphenidate": {
+   "into": "methylphenidate",
+   "name": "Methylphenidate"
+  },
+  "microcrystallinecellulose_sibutramine": {
+   "into": "sibutramine",
+   "name": "Sibutramine"
+  },
+  "morphinelevobupivacaine": {
+   "into": "levobupivacaine_morphine",
+   "name": "Levobupivacaine + Morphine"
+  },
+  "mph": {
+   "into": "methylphenidate",
+   "name": "Methylphenidate"
+  },
+  "mrorlistat": {
+   "into": "orlistat",
+   "name": "Orlistat"
+  },
+  "mulberrytwigalkaloids_multipleoverweight": {
+   "into": "mulberrytwigalkaloids",
+   "name": "Mulberry Twig Alkaloids"
+  },
+  "nb": {
+   "into": "bupropion_naltrexone",
+   "name": "Bupropion + Naltrexone"
+  },
+  "neostigmine_reversal": {
+   "into": "neostigmine",
+   "name": "Neostigmine"
+  },
+  "niacinfirst": {
+   "into": "niacin",
+   "name": "Niacin"
+  },
+  "nitroglycrin": {
+   "into": "nitroglycerin",
+   "name": "Nitroglycerin"
+  },
+  "nonglpweightloss": {
+   "into": "nonglp1weightlossmedication",
+   "name": "Non-GLP-1 weight-loss medication"
+  },
+  "normalneuromuscularblockadereversal_rocuronium": {
+   "into": "rocuronium",
+   "name": "Rocuronium"
+  },
+  "oadmetformin": {
+   "into": "metformin",
+   "name": "Metformin"
+  },
+  "omeprazoleentericcoated": {
+   "into": "omeprazole",
+   "name": "Omeprazole"
+  },
+  "openlabelsitagliptin": {
+   "into": "sitagliptin",
+   "name": "Sitagliptin"
+  },
+  "oxytocinmiu": {
+   "into": "oxytocin",
+   "name": "Oxytocin"
+  },
+  "paracetamol_ratiopharm": {
+   "into": "paracetamol",
+   "name": "Paracetamol"
+  },
+  "peripheralpeptideyy": {
+   "into": "peptideyy",
+   "name": "Peptide YY"
+  },
+  "pg102obesity_rt114ranipill": {
+   "into": "pg102",
+   "name": "PG-102"
+  },
+  "phenterminepill": {
+   "into": "phentermine",
+   "name": "Phentermine"
+  },
+  "piperacillintazobactamprolonged": {
+   "into": "piperacillintazobactam",
+   "name": "Piperacillin-tazobactam"
+  },
+  "preoperativecefazolin": {
+   "into": "cefazolin",
+   "name": "Cefazolin"
+  },
+  "preoperativeppi_sleeve": {
+   "into": "protonpumpinhibitor",
+   "name": "Proton pump inhibitor"
+  },
+  "propofolremifentanyl": {
+   "into": "propofol_remifentanil",
+   "name": "Propofol + Remifentanil"
+  },
+  "reversal_sugammadex": {
+   "into": "sugammadex",
+   "name": "Sugammadex"
+  },
+  "s2367qd": {
+   "into": "s2367",
+   "name": "S-2367"
+  },
+  "sedation_sevoflurane": {
+   "into": "sevoflurane",
+   "name": "Sevoflurane"
+  },
+  "selfhelpcbt_sibutramine": {
+   "into": "sibutramine",
+   "name": "Sibutramine"
+  },
+  "semaglutidec": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "semaglutided": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "semaglutidedosetapering": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "semaglutidemaintenancedose": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
+  },
+  "serumdosageantibioticprophylaxiscefoxitin": {
+   "into": "cefoxitin",
+   "name": "Cefoxitin"
+  },
+  "sibsibus": {
+   "into": "sibutramine",
+   "name": "Sibutramine"
+  },
+  "t3repletion": {
+   "into": "t3",
+   "name": "T3"
+  },
+  "te8105mad": {
+   "into": "te8105",
+   "name": "TE-8105"
+  },
+  "te8105sad": {
+   "into": "te8105",
+   "name": "TE-8105"
+  },
+  "thenacetazolamide": {
+   "into": "acetazolamide",
+   "name": "Acetazolamide"
+  },
+  "thenfurosemide": {
+   "into": "furosemide",
+   "name": "Furosemide"
+  },
+  "tirzepatideprehabilitation": {
+   "into": "tirzepatide",
+   "name": "Tirzepatide"
+  },
+  "topiramatepill": {
+   "into": "topiramate",
+   "name": "Topiramate"
+  },
+  "trevogrumabpart": {
+   "into": "trevogrumab",
+   "name": "Trevogrumab"
+  },
+  "trevogrumabpartb": {
+   "into": "trevogrumab",
+   "name": "Trevogrumab"
+  },
+  "vaginalmisoprostol": {
+   "into": "misoprostol",
+   "name": "Misoprostol"
+  },
+  "vascepafishoil": {
+   "into": "vascepa",
+   "name": "Vascepa"
+  },
+  "vi0521mid": {
+   "into": "vi0521",
+   "name": "VI-0521"
+  },
+  "vi0521top": {
+   "into": "vi0521",
+   "name": "VI-0521"
+  },
+  "waxmatrixniacin": {
+   "into": "niacin",
+   "name": "Niacin"
+  },
+  "zt003part1": {
+   "into": "zt003",
+   "name": "ZT003"
+  }
+ }
+}

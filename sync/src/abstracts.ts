@@ -57,6 +57,7 @@ export async function importAbstracts(
   const prods = await pool.query<{ slug: string; name: string; aliases: string | null; auto: string | null }>(
     "SELECT slug, name, aliases, auto_info #>> '{aliases,value}' AS auto FROM products",
   );
+  const pages = new Set(prods.rows.map((p) => p.slug)); // combination pages have "_" in the slug
   for (const p of prods.rows) { put(p.slug, p.slug); put(p.name, p.slug); }
   for (const [k, ref] of Object.entries(BUILTIN_ALIASES)) put(k, ref.slug);
   for (const r of (await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases")).rows) put(r.alias_slug, r.product_slug);
@@ -68,6 +69,7 @@ export async function importAbstracts(
 
   const resolve = (d: AbstractDrug): string | null => {
     const own = slugForName(d.name).slug;
+    if (pages.has(own)) return own;
     for (const k of [own, ...(d.aliases ?? []).map(slugify)]) if (owner.has(k)) return owner.get(k)!;
     return null;
   };
@@ -91,10 +93,11 @@ export async function importAbstracts(
           if (!slug) {
             if (d.create === false) continue; // background drug that isn't tracked: no new page for it
             const ref = slugForName(d.name);
-            await c.query("INSERT INTO products (slug, name) VALUES ($1, $2) ON CONFLICT (slug) DO NOTHING", [ref.slug, ref.name]);
+            const ins = await c.query("INSERT INTO products (slug, name) VALUES ($1, $2) ON CONFLICT (slug) DO NOTHING", [ref.slug, ref.name]);
+            pages.add(ref.slug);
             owner.set(ref.slug, ref.slug);
             for (const al of d.aliases ?? []) put(al, ref.slug);
-            res.created.push(ref.name);
+            if (ins.rowCount) res.created.push(ref.name);
             slug = ref.slug;
           }
           const ins = await c.query(

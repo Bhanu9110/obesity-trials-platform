@@ -3,7 +3,9 @@ import PageHeader from "@/components/PageHeader";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, authDisabled, readSession } from "@/lib/auth";
 import { guestMayOpen } from "@/lib/guest-pages";
+import AutofillPanel from "@/components/AutofillPanel";
 import {
+  autofillOverview,
   QUALITY_BANDS,
   isQualityBand,
   qualityIssueCounts,
@@ -57,10 +59,11 @@ export default async function QualityPage({
   const q = (sp.q ?? "").trim().slice(0, 100) || undefined;
   const page = Math.max(1, Number(sp.page) || 1);
 
-  const [o, issues, list] = await Promise.all([
+  const [o, issues, list, autofill] = await Promise.all([
     qualityOverview(),
     qualityIssueCounts(band),
     qualityTrials({ code, band, q }, page, PAGE_SIZE),
+    autofillOverview().catch(() => null), // before migration 0020
   ]);
   const pct = (n: number) => (o.checked ? `${Math.round((n / o.checked) * 100)}%` : "—");
   const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
@@ -97,7 +100,7 @@ export default async function QualityPage({
         eyebrow="Quality control"
         title="Data"
         highlight="quality"
-        description="Every trial is checked automatically each time it is synced (score 1.00 = no issues). Click a tile or an issue to list those trials."
+        description="Every trial is checked automatically each time it is synced (score 1.00 = no issues). Click a tile or an issue to list those trials. Drug-profile auto-fill status is further down."
       />
 
       {o.checked === 0 ? (
@@ -161,6 +164,8 @@ export default async function QualityPage({
           )}
         </section>
       )}
+
+      {autofill && <AutofillPanel o={autofill} />}
 
       <section id="trials" className="rounded-2xl border border-slate-200 bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">

@@ -90,6 +90,9 @@ export interface Product extends ProductInfo {
   slug: string;
   name: string;
   info_updated_at: string | null;
+  kind: "supplement" | "not_drug" | null;     // null = a drug (listed); else left out of the drug list
+  kind_source: "list" | "rule" | "manual" | null;
+  kind_note: string | null;
 }
 
 export interface ProductTrial {

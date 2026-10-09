@@ -184,6 +184,25 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   sync → Run workflow and tick **all_drugs** (one-time catch-up, up to ~4 hours).
   A look-up that fails for one drug skips only that drug (retried next run); three
   failures in a row stop that source for the run.
+- **Drug list clean-up** — trial registrations list diets, procedures, tests and supplements
+  as interventions, so they became drug pages. `products.kind` keeps them in the database (their
+  trials still name them) but out of the drug list, dashboard counts, search and the auto-fill.
+  Source of truth: `sync/data/product-curation.json` (reviewed list: `not_drug`, `supplement`,
+  duplicate pages to `merge`, and `drug` overrides), applied on every auto-fill run or with
+  `npm run curate-products`; new entries are checked with name rules (placebo, surgery, MRI,
+  diet, exercise…). On a drug page, "This is …" changes it by hand — that choice is never undone
+  automatically. The Quality page lists what the name rules hid.
+- **Source checks and alerts** — before using openFDA, ChEMBL or Inxight Drugs the auto-fill looks
+  up a drug each one certainly knows (semaglutide / tirzepatide). If that fails — the service is
+  down, or its data format changed and it comes back empty — the source is skipped for the run and
+  its saved values are kept, never overwritten with blanks. Each source's state is kept in
+  `app_meta.source_status`; when one has not worked for 3 daily runs the health check fails, so the
+  GitHub job fails and GitHub emails you. To leave a source out on purpose (e.g. while Inxight blocks
+  GitHub), set the repository variable `ENRICH_SKIP_SOURCES` (Settings → Secrets and variables →
+  Actions → Variables), e.g. `inxight` or `inxight,chembl`.
+- **Quality page → Drug profile auto-fill** — last run, each source's state, how full every
+  profile field is (typed in vs automatic, and from which source), and what was left out of the
+  drug list.
 - **Conference abstracts (ADA 2026 and later meetings)** — `sync/data/conference/*.json`,
   one file per meeting (drug programs from the abstracts: abstract no., drugs named, sponsor,
   stage, mechanism, model, finding, DOI link). Imported by every auto-fill run (or

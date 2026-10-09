@@ -14,6 +14,7 @@ import { dismissFailure, failureCounts, requeueFailure } from "./failures.js";
 import { checkHealth, formatHealth } from "./health.js";
 import { enrichProducts } from "./enrich.js";
 import { importAbstracts } from "./abstracts.js";
+import { applyCuration } from "./curation.js";
 import { closePool, pool } from "./db.js";
 
 function log(msg: string, obj?: unknown) {
@@ -35,6 +36,7 @@ const USAGE = `Commands:
   rebuild-products     re-derive drugs (after editing product_aliases)
   enrich-products      auto-fill blank drug-profile fields (trials + ChEMBL + openFDA)
                        [--no-external] trial data only; [slug…] only these drugs
+  curate-products      hide non-drugs and merge duplicate drug pages (sync/data/product-curation.json)
   import-abstracts     load conference abstracts (sync/data/conference/*.json) into drug pages
   health               pipeline health checks (exit code 1 when a check fails)`;
 
@@ -108,6 +110,11 @@ async function main() {
     }
     case "quality": {
       log("Data-quality checks refreshed", { trials: await refreshQuality() });
+      break;
+    }
+    case "curate-products": {
+      const r = await applyCuration(undefined, log);
+      log("Drug list clean-up", r);
       break;
     }
     case "import-abstracts": {

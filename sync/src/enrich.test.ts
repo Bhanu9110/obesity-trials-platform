@@ -407,7 +407,13 @@ const MOLS: Record<string, any> = {
     molecule_hierarchy: { molecule_chembl_id: "CHEMBL900001", parent_chembl_id: "CHEMBL900001" },
     molecule_synonyms: [{ molecule_synonym: "TG-101", syn_type: "RESEARCH_CODE" }],
   },
+  // the canary drug
+  SEMAGLUTIDE: {
+    molecule_chembl_id: "CHEMBL2108724", pref_name: "SEMAGLUTIDE", molecule_type: "Protein", max_phase: "4.0",
+    molecule_hierarchy: { molecule_chembl_id: "CHEMBL2108724", parent_chembl_id: "CHEMBL2108724" }, molecule_synonyms: [],
+  },
 };
+let fdaChanged = false; // openFDA answers in a format we don't know
 let fdaDown = false;
 let chemblBad = "";
 let calls = 0;
@@ -422,6 +428,8 @@ const server = http.createServer((req, res) => {
   }
   if (u.pathname === "/chembl/mechanism.json") {
     const ids = (u.searchParams.get("molecule_chembl_id__in") ?? "").split(",");
+    if (ids.includes("CHEMBL2108724")) return send(200, { mechanisms: [
+      { mechanism_of_action: "Glucagon-like peptide 1 receptor agonist", action_type: "AGONIST", molecule_chembl_id: "CHEMBL2108724" }] });
     return send(200, { mechanisms: ids.includes("CHEMBL900001") ? [
       { mechanism_of_action: "Glucagon-like peptide 1 receptor agonist", action_type: "AGONIST", molecule_chembl_id: "CHEMBL900001" },
       { mechanism_of_action: "Gastric inhibitory polypeptide receptor agonist", action_type: "AGONIST", molecule_chembl_id: "CHEMBL900001" },
@@ -442,6 +450,8 @@ const server = http.createServer((req, res) => {
       relationships: [{ type: "TARGET->AGONIST", relatedSubstance: { name: "MELANOCORTIN RECEPTOR 4", approvalID: "MC4R000001" } },
         { type: "ACTIVE MOIETY", relatedSubstance: { name: "Obscurazine", approvalID: "OBZ0000001" } }] };
     if (q.includes("OBSCURAZINE")) return send(200, { total: 1, content: [rec] });
+    if (q.includes("TIRZEPATIDE")) return send(200, { total: 1, content: [{ approvalID: "OYN3CCI6QE", _name: "Tirzepatide", substanceClass: "protein",
+      names: [{ name: "Tirzepatide", type: "of" }], relationships: [{ type: "TARGET->AGONIST", relatedSubstance: { name: "GIP RECEPTOR" } }] }] });
     if (q.includes("OBZ0000001")) return send(200, { total: 1, content: [], facets: [
       { name: "Development Status", values: [{ label: "Clinical", count: 1 }] }, { name: "Highest Phase", values: [{ label: "Phase II", count: 1 }] }] });
     return send(200, { total: 0, content: [], facets: [] });
@@ -449,6 +459,12 @@ const server = http.createServer((req, res) => {
   if (u.pathname === "/fda/drug/drugsfda.json") {
     if (fdaDown) return send(503, { error: "down" });
     const search = u.searchParams.get("search") ?? "";
+    if (fdaChanged) return send(200, { data: [{ something: "else" }] });
+    if (search.includes("SEMAGLUTIDE")) return send(200, { results: [{
+      application_number: "NDA209637", sponsor_name: "NOVO",
+      products: [{ brand_name: "OZEMPIC", route: "SUBCUTANEOUS", marketing_status: "Prescription", active_ingredients: [{ name: "SEMAGLUTIDE" }] }],
+      submissions: [{ submission_type: "ORIG", submission_status: "AP", submission_status_date: "20171205" }],
+    }] });
     if (search.includes("TESTAGLUTIDE")) return send(200, { results: [{
       application_number: "NDA299999", sponsor_name: "ACME",
       products: [{ brand_name: "TESTAVY", route: "SUBCUTANEOUS", marketing_status: "Prescription", active_ingredients: [{ name: "TESTAGLUTIDE" }] }],
@@ -542,6 +558,16 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   assert.match(r3.sourcesDown[0], /openFDA/);
   assert.equal((await row("obscurazine")).auto_checked_at, null);
   fdaDown = false;
+
+  // openFDA answers in a format we don't know: the check look-up comes back empty, so the
+  // saved openFDA values stay as they are (not overwritten with blanks).
+  await pool.query(`UPDATE products SET auto_lookup = jsonb_set(auto_lookup, '{fdaAt}', '"2020-01-01T00:00:00Z"') WHERE slug = 'testaglutide'`);
+  fdaChanged = true;
+  const rc = await enrichProducts({ only: ["testaglutide"] });
+  fdaChanged = false;
+  assert.equal(rc.fdaChecked, 0);
+  assert.match(rc.sourcesDown.join(" | "), /openFDA: check look-up failed/);
+  assert.equal((await row("testaglutide")).auto_info.brand_names.value, "Testavy");
 
   // One drug's look-up failing (ChEMBL answers 500 for its query) skips that drug only.
   await pool.query("UPDATE products SET auto_lookup = NULL WHERE slug IN ('testaglutide', 'obscurazine')");
