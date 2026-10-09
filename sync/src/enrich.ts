@@ -1298,11 +1298,32 @@ export async function enrichProducts(
     // A look-up saved before each source kept its own date has only `at` (it covered openFDA and ChEMBL).
     const legacy = (c: Lookup) => !c.fdaAt && !c.chemblAt && !c.inxightAt;
     const due = (c: Lookup | null, t: string | undefined) => !c || (t ? stale(t) : legacy(c) ? stale(c.at) : true);
+    // One drug's failed look-up (e.g. a query a service answers with an error) skips that
+    // drug only — it is retried next run. Three failures in a row = the service is down.
+    const tracker = (label: string) => {
+      let streak = 0, failed = 0, last = "";
+      return {
+        ok() { streak = 0; },
+        /** true = stop this source for the rest of the run */
+        fail(e: unknown, drug: string): boolean {
+          failed++; streak++; last = e instanceof Error ? e.message : String(e);
+          if (streak >= 3) { log(`${label} unavailable — skipping it for the rest of this run`, last); return true; }
+          log(`${label}: ${drug} skipped this run (will retry)`, last);
+          return false;
+        },
+        done() {
+          if (streak >= 3) res.sourcesDown.push(`${label}: ${last}`);
+          else if (failed) res.sourcesDown.push(`${label}: ${failed} drug(s) skipped, e.g. ${last}`);
+        },
+      };
+    };
 
     // 1) openFDA
     const fdaDue = candidates.filter((p) => { const c = current(p); return due(c, c?.fdaAt); })
       .slice(0, enrichConfig.fdaKey ? 100_000 : 900);
     let done = 0;
+    const fdaT = tracker("openFDA");
+    log(`openFDA: ${fdaDue.length} drugs due`);
     for (const p of fdaDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
@@ -1311,10 +1332,10 @@ export async function enrichProducts(
       try {
         next.fda = await fdaByParts(parts);
       } catch (e) {
-        res.sourcesDown.push(`openFDA: ${e instanceof Error ? e.message : e}`);
-        log("openFDA unavailable — skipping it for the rest of this run", String(e));
-        break;
+        if (fdaT.fail(e, p.name)) break;
+        continue;
       }
+      fdaT.ok();
       next.fdaAt = new Date().toISOString();
       if (cur && legacy(cur)) next.chemblAt = cur.at; // keep the old ChEMBL date
       await save(p, next);
@@ -1322,12 +1343,15 @@ export async function enrichProducts(
       if (next.fda) res.fdaFound++;
       if (done % 100 === 0) { await writeAll(); log(`openFDA: ${done}/${fdaDue.length} drugs checked`); }
     }
+    fdaT.done();
     res.fdaChecked = done;
     if (done) await writeAll();
 
     // 2) ChEMBL
     const chemblDue = candidates.filter((p) => { const c = current(p); return due(c, c?.chemblAt); })
       .slice(0, opts.maxLookups ?? enrichConfig.maxLookups);
+    const chemblT = tracker("ChEMBL");
+    log(`ChEMBL: ${chemblDue.length} drugs this run (up to ${opts.maxLookups ?? enrichConfig.maxLookups})`);
     for (const p of chemblDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
@@ -1342,22 +1366,25 @@ export async function enrichProducts(
         }
         next.chembl = found;
       } catch (e) {
-        res.sourcesDown.push(`ChEMBL: ${e instanceof Error ? e.message : e}`);
-        log("ChEMBL unavailable — skipping it for the rest of this run", String(e));
-        break;
+        if (chemblT.fail(e, p.name)) break;
+        continue;
       }
+      chemblT.ok();
       next.chemblAt = new Date().toISOString();
       await save(p, next);
       res.lookedUp++;
       if (next.chembl.some(Boolean)) res.chemblFound++;
       if (res.lookedUp % 25 === 0) { await writeAll(); log(`ChEMBL: ${res.lookedUp}/${chemblDue.length} drugs checked`); }
     }
+    chemblT.done();
     if (res.lookedUp) await writeAll();
 
     // 3) Inxight Drugs
     const inxightDue = candidates.filter((p) => { const c = current(p); return !c || !c.inxightAt || stale(c.inxightAt); })
       .slice(0, opts.maxInxight ?? enrichConfig.maxInxight);
     let checked = 0;
+    const inxT = tracker("Inxight Drugs");
+    log(`Inxight Drugs: ${inxightDue.length} drugs this run (up to ${opts.maxInxight ?? enrichConfig.maxInxight})`);
     for (const p of inxightDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
@@ -1371,16 +1398,17 @@ export async function enrichProducts(
         }
         next.inxight = found;
       } catch (e) {
-        res.sourcesDown.push(`Inxight Drugs: ${e instanceof Error ? e.message : e}`);
-        log("Inxight Drugs unavailable — skipping it for the rest of this run", String(e));
-        break;
+        if (inxT.fail(e, p.name)) break;
+        continue;
       }
+      inxT.ok();
       next.inxightAt = new Date().toISOString();
       await save(p, next);
       checked++;
       if (next.inxight!.some(Boolean)) res.inxightFound = (res.inxightFound ?? 0) + 1;
       if (checked % 25 === 0) { await writeAll(); log(`Inxight Drugs: ${checked}/${inxightDue.length} drugs checked`); }
     }
+    inxT.done();
     res.inxightChecked = checked;
   }
 

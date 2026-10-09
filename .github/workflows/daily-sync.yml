@@ -24,6 +24,10 @@ on:
         description: "Full re-download of every trial (instead of the daily update)"
         type: boolean
         default: false
+      all_drugs:
+        description: "Auto-fill: check EVERY drug profile in ChEMBL and Inxight Drugs now (one-time catch-up, takes up to ~4 hours)"
+        type: boolean
+        default: false
 
 concurrency:
   group: ctgov-sync
@@ -35,7 +39,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: ${{ inputs.all_drugs && 330 || 60 }}
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
@@ -82,16 +86,21 @@ jobs:
           fi
 
       # Automatic drug profiles: fills the BLANK drug-profile fields from the trial data,
-      # ChEMBL and openFDA (hand-entered fields are never changed). Looks up at most
-      # 200 drugs per run (each is re-checked every 30 days) and stops after 15 minutes.
+      # openFDA, ChEMBL and NCATS Inxight Drugs (hand-entered fields are never changed).
+      # Daily: openFDA for every drug that is due, ChEMBL for up to 200 and Inxight for up
+      # to 100 drugs (each drug is re-checked every 30 days), stopping after 15 minutes.
+      # "Run workflow" with all_drugs ticked checks every drug at once (up to ~4 hours).
       # Optional secret OPENFDA_API_KEY raises openFDA's daily limit. A problem here
       # never fails the daily sync.
       - name: Auto-fill drug profiles
         working-directory: sync
         continue-on-error: true
-        timeout-minutes: 20
+        timeout-minutes: ${{ inputs.all_drugs && 300 || 20 }}
         env:
           OPENFDA_API_KEY: ${{ secrets.OPENFDA_API_KEY }}
+          ENRICH_MAX_LOOKUPS: ${{ inputs.all_drugs && '10000' || '200' }}
+          ENRICH_MAX_INXIGHT: ${{ inputs.all_drugs && '10000' || '100' }}
+          ENRICH_BUDGET_MIN: ${{ inputs.all_drugs && '290' || '15' }}
         run: npm run enrich-products
 
       # Fails the job (GitHub emails you) when something is broken: database,

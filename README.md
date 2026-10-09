@@ -179,6 +179,11 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   investigational drugs too. It asks not to be bulk-downloaded, so the job is slow on
   purpose: two requests per drug, 2.5 s apart, `ENRICH_MAX_INXIGHT` (100) drugs per run,
   each re-checked every 30 days; a 503 ("too quick") makes it back off and try next run.
+  Per-run limits keep the daily job under 15 minutes: openFDA every drug that is due,
+  ChEMBL 200, Inxight 100. To check every drug at once, open Actions → Daily CT.gov
+  sync → Run workflow and tick **all_drugs** (one-time catch-up, up to ~4 hours).
+  A look-up that fails for one drug skips only that drug (retried next run); three
+  failures in a row stop that source for the run.
 - **Drug code names (Alias field)** — collected automatically from the drug's company
   pipeline page (`sync/data/pipeline-sources.json`, re-checked monthly; add confirmed
   pairs under `known`), ChEMBL, ClinicalTrials.gov "other names", trial titles such as

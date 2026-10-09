@@ -357,12 +357,14 @@ const MOLS: Record<string, any> = {
   },
 };
 let fdaDown = false;
+let chemblBad = "";
 let calls = 0;
 const server = http.createServer((req, res) => {
   calls++;
   const u = new URL(req.url ?? "/", "http://x");
   const send = (code: number, body: unknown) => { res.writeHead(code, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
   if (u.pathname === "/chembl/molecule.json") {
+    if (chemblBad && (u.search.toUpperCase().includes(chemblBad))) return send(500, { error: "server error" });
     const q = (u.searchParams.get("pref_name__iexact") ?? u.searchParams.get("molecule_synonyms__molecule_synonym__iexact") ?? "").toUpperCase();
     return send(200, { molecules: MOLS[q] ? [MOLS[q]] : [], page_meta: { total_count: MOLS[q] ? 1 : 0 } });
   }
@@ -487,6 +489,16 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   assert.match(r3.sourcesDown[0], /openFDA/);
   assert.equal((await row("obscurazine")).auto_checked_at, null);
   fdaDown = false;
+
+  // One drug's look-up failing (ChEMBL answers 500 for its query) skips that drug only.
+  await pool.query("UPDATE products SET auto_lookup = NULL WHERE slug IN ('testaglutide', 'obscurazine')");
+  chemblBad = "OBSCURAZINE";
+  const r5 = await enrichProducts({ only: ["obscurazine", "testaglutide"] });
+  chemblBad = "";
+  assert.equal(r5.chemblFound, 1);   // testaglutide still looked up
+  assert.equal(r5.lookedUp, 1);
+  assert.equal(r5.sourcesDown.length, 1);
+  assert.match(r5.sourcesDown[0], /^ChEMBL: 1 drug\(s\) skipped/);
 
   // ClinicalTrials.gov other names are stored per trial intervention.
   (config.ctgov as { baseUrl: string }).baseUrl = `${base}/ctgov`;
