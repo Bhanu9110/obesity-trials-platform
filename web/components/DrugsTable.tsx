@@ -9,19 +9,23 @@ const PAGE = 50;
 
 export default function DrugsTable({ products }: { products: ProductSummary[] }) {
   const [q, setQ] = useState("");
-  const [info, setInfo] = useState<"" | "filled" | "blank">("");
+  const [info, setInfo] = useState<"" | "filled" | "blank" | "abstracts">("");
   const [page, setPage] = useState(1);
   // Drugs that only appear in non-primary trials (comorbidity, weight-related, not obesity)
-  // are hidden unless asked for.
+  // are hidden unless asked for. Drugs known only from conference abstracts (no trial yet) are shown.
   const [includeOther, setIncludeOther] = useState(false);
-  const otherOnly = useMemo(() => products.filter((p) => p.trials === 0).length, [products]);
-  const visible = useMemo(() => (includeOther ? products : products.filter((p) => p.trials > 0)), [products, includeOther]);
+  const otherOnly = useMemo(() => products.filter((p) => p.trials === 0 && !p.abstracts).length, [products]);
+  const visible = useMemo(
+    () => (includeOther ? products : products.filter((p) => p.trials > 0 || p.abstracts > 0)),
+    [products, includeOther],
+  );
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return visible.filter((p) => {
       if (info === "filled" && !p.has_info) return false;
       if (info === "blank" && p.has_info) return false;
+      if (info === "abstracts" && !(p.abstracts > 0 && p.all_trials === 0)) return false;
       if (!needle) return true;
       return [p.name, p.sponsor, p.drug_class, p.modality].some((v) => v?.toLowerCase().includes(needle));
     });
@@ -30,6 +34,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
   const filled = visible.filter((p) => p.has_info).length;
+  const abstractOnly = visible.filter((p) => p.abstracts > 0 && p.all_trials === 0).length;
 
   return (
     <div className="space-y-4">
@@ -54,6 +59,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
           <option value="">All drugs ({visible.length.toLocaleString()})</option>
           <option value="filled">Edited by hand ({filled.toLocaleString()})</option>
           <option value="blank">Auto-filled only ({(visible.length - filled).toLocaleString()})</option>
+          {abstractOnly > 0 && <option value="abstracts">Conference abstracts only, no trial yet ({abstractOnly.toLocaleString()})</option>}
         </select>
         {otherOnly > 0 && (
           <label className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600"
@@ -97,6 +103,12 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
                     <Link href={`/drugs/${encodeURIComponent(p.slug)}`} className="font-medium text-brand-600 hover:underline">
                       {p.name}
                     </Link>
+                    {p.abstracts > 0 && (
+                      <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 ring-1 ring-amber-200"
+                            title={`${p.abstracts} conference abstract${p.abstracts === 1 ? "" : "s"} (e.g. ADA 2026)`}>
+                        {p.abstracts} abstract{p.abstracts === 1 ? "" : "s"}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">
                     {p.trials}
@@ -106,7 +118,9 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5 text-slate-700">{highestPhase(p.trial_phases)}</td>
+                  <td className="px-4 py-2.5 text-slate-700">
+                    {p.trial_phases.length ? highestPhase(p.trial_phases) : p.phase ? <span title="From the drug profile (no trial yet)">{p.phase}</span> : "—"}
+                  </td>
                   <td className="px-4 py-2.5 text-slate-700">{p.modality || <span className="text-slate-300">—</span>}</td>
                   <td className="px-4 py-2.5 text-slate-700">{p.drug_class || <span className="text-slate-300">—</span>}</td>
                   <td className="px-4 py-2.5 text-slate-700">{p.approved || <span className="text-slate-300">—</span>}</td>

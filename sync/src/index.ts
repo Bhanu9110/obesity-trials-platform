@@ -13,6 +13,7 @@ import {
 import { dismissFailure, failureCounts, requeueFailure } from "./failures.js";
 import { checkHealth, formatHealth } from "./health.js";
 import { enrichProducts } from "./enrich.js";
+import { importAbstracts } from "./abstracts.js";
 import { closePool, pool } from "./db.js";
 
 function log(msg: string, obj?: unknown) {
@@ -34,6 +35,7 @@ const USAGE = `Commands:
   rebuild-products     re-derive drugs (after editing product_aliases)
   enrich-products      auto-fill blank drug-profile fields (trials + ChEMBL + openFDA)
                        [--no-external] trial data only; [slug…] only these drugs
+  import-abstracts     load conference abstracts (sync/data/conference/*.json) into drug pages
   health               pipeline health checks (exit code 1 when a check fails)`;
 
 async function main() {
@@ -106,6 +108,11 @@ async function main() {
     }
     case "quality": {
       log("Data-quality checks refreshed", { trials: await refreshQuality() });
+      break;
+    }
+    case "import-abstracts": {
+      const r = await importAbstracts(undefined, log);
+      log("Conference abstracts imported", r);
       break;
     }
     case "rebuild-products": {

@@ -7,10 +7,11 @@ import type { AddressInfo } from "node:net";
 import {
   deriveAuto, parseFda, parseChemblMolecule, normalizeCondition, subclassFrom, enrichConfig, enrichProducts,
   aliasCandidates, titleAliases, otherNamesOf, refreshOtherNames, pageText, extractPipelinePairs, refreshPipelineAliases,
-  pickInxight, parseInxight, inxightPhaseLevel,
-  type ChemblInfo, type InxightInfo, type Lookup, type TrialFact,
+  pickInxight, parseInxight, inxightPhaseLevel, phaseFromStage, industrySponsor,
+  type AbstractFact, type ChemblInfo, type InxightInfo, type Lookup, type TrialFact,
 } from "./enrich.js";
-import { runSyncForStudies } from "./sync.js";
+import { runSyncForStudies, rebuildProducts } from "./sync.js";
+import { importAbstracts, slugForName } from "./abstracts.js";
 import { pool } from "./db.js";
 import { config } from "./config.js";
 
@@ -247,6 +248,57 @@ test("parsers: ChEMBL molecule and openFDA applications", () => {
 });
 
 // --------------------------------------------------------------------------- #
+// Conference abstracts (ADA 2026)
+// --------------------------------------------------------------------------- #
+const abs = (over: Partial<AbstractFact> = {}): AbstractFact => ({
+  source: "ADA 2026", sponsor: "Rivus Pharmaceuticals", indication: "Obesity", stage: "Preclinical – in vivo",
+  mechanism: "Oral small-molecule (non-peptide) GLP-1RA", program: "RV-8451", aliases: [], solo: true, ...over,
+});
+
+test("abstracts: stage, sponsor and a drug known only from a meeting", () => {
+  assert.deepEqual(phaseFromStage("Clinical – Phase 2b"), { level: 2, label: "Phase 2" });
+  assert.deepEqual(phaseFromStage("Clinical – Phase 1b/2a"), { level: 2, label: "Phase 1/2" });
+  assert.deepEqual(phaseFromStage("Clinical – FIH Phase 1b"), { level: 1, label: "Phase 1" });
+  assert.deepEqual(phaseFromStage("Clinical – First-in-human"), { level: 1, label: "Phase 1" });
+  assert.deepEqual(phaseFromStage("Preclinical – in vitro + in vivo"), { level: 0, label: "Preclinical" });
+  assert.equal(phaseFromStage("Clinical – phase not stated"), null);
+  assert.equal(industrySponsor("Structure Therapeutics (inferred)"), "Structure Therapeutics");
+  assert.equal(industrySponsor("Eccogene (with AstraZeneca)"), "Eccogene");
+  assert.equal(industrySponsor("Academic (funded by NIGMS)"), null);
+  assert.equal(industrySponsor("National Institutes of Health"), null);
+  assert.equal(industrySponsor("Not stated"), null);
+  assert.deepEqual(slugForName("Celecoxib + Valsartan + Metformin"), { slug: "celecoxib_metformin_valsartan", name: "Celecoxib + Metformin + Valsartan" });
+
+  const a = deriveAuto({ slug: "rv8451", name: "RV-8451", aliasKeys: [], trials: [], lookup: null, abstracts: [abs()] });
+  assert.deepEqual(a.phase, { value: "Preclinical", source: "ADA 2026 abstract" });
+  assert.deepEqual(a.sponsor, { value: "Rivus Pharmaceuticals", source: "ADA 2026 abstract" });
+  assert.deepEqual(a.candidate, { value: "Pipeline", source: "Industry (Rivus Pharmaceuticals)" });
+  assert.equal(a.therapy_subclass?.value, "Oral small-molecule GLP-1 RA");
+  assert.equal(a.modality?.value, "Small molecule");
+  assert.equal(a.roa?.value, "Oral");
+  assert.equal(a.indication?.value, "Obesity");
+
+  // Academic program: non-pipeline. A siRNA's modality from the mechanism.
+  const b = deriveAuto({ slug: "x1", name: "X-1", aliasKeys: [], trials: [], lookup: null,
+    abstracts: [abs({ sponsor: "Academic / not stated", mechanism: "INHBE siRNA", program: "X-1", stage: "Clinical – Phase 1" })] });
+  assert.equal(b.sponsor, undefined);
+  assert.deepEqual(b.candidate, { value: "Non-pipeline", source: "Academic (conference abstract only)" });
+  assert.equal(b.modality?.value, "Oligonucleotide (siRNA / ASO)");
+  assert.equal(b.phase?.value, "Phase 1");
+
+  // A drug with trials: an abstract about a combination with it never changes its own company or class.
+  const c = deriveAuto({ slug: "semaglutide", name: "Semaglutide", aliasKeys: [], trials: [trial()], lookup: null,
+    abstracts: [abs({ program: "RV-202 + semaglutide", mechanism: "Oral mitochondrial uncoupler", solo: false })] });
+  assert.equal(c.sponsor?.value, "Novo Nordisk A/S");
+  assert.notEqual(c.moa?.source, "ADA 2026 abstract");
+  // A clinical abstract ahead of the trials moves the phase forward; aliases come along.
+  const d = deriveAuto({ slug: "zz", name: "Zz", aliasKeys: [], trials: [trial({ phase: "PHASE1", names: ["Zz"] })], lookup: null,
+    abstracts: [abs({ stage: "Clinical – Phase 2b", aliases: ["ZZ-101"] })] });
+  assert.deepEqual(d.phase, { value: "Phase 2", source: "ADA 2026 abstract" });
+  assert.match(d.aliases?.value ?? "", /ZZ-101/);
+});
+
+// --------------------------------------------------------------------------- #
 // NCATS Inxight Drugs
 // --------------------------------------------------------------------------- #
 const inxRecord = (unii: string, name: string, over: any = {}) => ({
@@ -410,7 +462,8 @@ const server = http.createServer((req, res) => {
 after(async () => {
   server.close();
   await pool.query("DELETE FROM trials WHERE nct_id LIKE 'NCT0999990%'");
-  await pool.query("DELETE FROM products WHERE slug IN ('testaglutide', 'obscurazine')");
+  await pool.query("DELETE FROM products WHERE slug IN ('testaglutide', 'obscurazine', 'tst9000')");
+  await pool.query("DELETE FROM conference_abstracts WHERE source = 'TEST 2026'");
   await pool.end();
 });
 
@@ -527,4 +580,32 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   // Trial data only (no network).
   const r4 = await enrichProducts({ only: ["obscurazine"], external: false });
   assert.equal(r4.lookedUp, 0);
+
+  // Conference abstracts: an existing drug found by its code name, a new drug page for an unknown program,
+  // no page for an untracked background drug; the new page survives a product rebuild and gets a profile.
+  await pool.query("DELETE FROM products WHERE slug = 'tst9000'");
+  const imp = await importAbstracts([{ source: "TEST 2026", abstracts: [
+    { abstract_no: "1-OR", program: "TG-101", drugs: [{ name: "TG-101" }], stage: "Clinical – Phase 2", sponsor: "Acme Pharma" },
+    { abstract_no: "2-P", program: "TST-9000 + untrackedumab", drugs: [{ name: "TST-9000", aliases: ["TST9K"] }, { name: "Untrackedumab", create: false }],
+      stage: "Preclinical – in vivo", sponsor: "Tiny Biotech (inferred)", mechanism: "Oral small-molecule GLP-1RA", indication: "Obesity" },
+  ] }]);
+  assert.deepEqual(imp.created, ["TST-9000"]);
+  assert.equal(imp.links, 2);
+  const links = await pool.query("SELECT product_slug, abstract_no FROM product_abstracts WHERE source = 'TEST 2026' ORDER BY 2");
+  assert.deepEqual(links.rows.map((r) => `${r.abstract_no}:${r.product_slug}`), ["1-OR:testaglutide", "2-P:tst9000"]);
+  await rebuildProducts();
+  assert.equal((await pool.query("SELECT count(*)::int AS n FROM products WHERE slug = 'tst9000'")).rows[0].n, 1);
+  const r6 = await enrichProducts({ only: ["tst9000"], external: false });
+  assert.equal(r6.products, 1);
+  const tst = (await pool.query("SELECT auto_info FROM products WHERE slug = 'tst9000'")).rows[0].auto_info;
+  assert.equal(tst.sponsor.value, "Tiny Biotech");
+  assert.equal(tst.phase.value, "Preclinical");
+  assert.equal(tst.candidate.value, "Pipeline");
+  assert.equal(tst.aliases.value, "TST9K");
+  assert.equal(tst.therapy_subclass, undefined); // the abstract is about a combination, not TST-9000 alone
+  // Re-import replaces the meeting's rows (idempotent).
+  const again = await importAbstracts([{ source: "TEST 2026", abstracts: [] }]);
+  assert.equal(again.abstracts, 0);
+  assert.equal((await pool.query("SELECT count(*)::int AS n FROM product_abstracts WHERE source = 'TEST 2026'")).rows[0].n, 0);
+  await pool.query("DELETE FROM products WHERE slug = 'tst9000'");
 });

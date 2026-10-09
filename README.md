@@ -184,6 +184,16 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   sync → Run workflow and tick **all_drugs** (one-time catch-up, up to ~4 hours).
   A look-up that fails for one drug skips only that drug (retried next run); three
   failures in a row stop that source for the run.
+- **Conference abstracts (ADA 2026 and later meetings)** — `sync/data/conference/*.json`,
+  one file per meeting (drug programs from the abstracts: abstract no., drugs named, sponsor,
+  stage, mechanism, model, finding, DOI link). Imported by every auto-fill run (or
+  `npm run import-abstracts`) into `conference_abstracts` / `product_abstracts`. Each drug
+  is matched to its existing page by name or code name; a program with no
+  ClinicalTrials.gov trial yet (most preclinical work) gets its own drug page, shown under
+  "No trial yet (abstracts)" on the Drugs page and kept by product rebuilds. Its profile
+  (company, stage, mechanism, modality, indication) is filled from the abstracts; an
+  abstract about a combination (e.g. "X + semaglutide") never changes the profile of the
+  background drug. To add a meeting, add another JSON file in the same format.
 - **Drug code names (Alias field)** — collected automatically from the drug's company
   pipeline page (`sync/data/pipeline-sources.json`, re-checked monthly; add confirmed
   pairs under `known`), ChEMBL, ClinicalTrials.gov "other names", trial titles such as

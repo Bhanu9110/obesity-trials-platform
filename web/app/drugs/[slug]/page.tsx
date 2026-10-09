@@ -2,7 +2,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, authDisabled, isGuest, verifySession } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { getProduct, getProductTrials, productNames } from "@/lib/queries";
+import { getProduct, getProductAbstracts, getProductTrials, productNames } from "@/lib/queries";
+import ConferenceAbstracts from "@/components/ConferenceAbstracts";
 import { highestPhase } from "@/lib/format";
 import ProductInfoCard from "@/components/ProductInfoCard";
 import MergeProduct from "@/components/MergeProduct";
@@ -42,7 +43,7 @@ export default async function DrugPage({ params, searchParams }: {
   const pickedSponsor = (sp.sponsor ?? "").slice(0, 200) || undefined;
   const product = await getProduct(decodeURIComponent(slug));
   if (!product) notFound();
-  const [trials, names] = await Promise.all([getProductTrials(product.id), productNames()]);
+  const [trials, names, abstracts] = await Promise.all([getProductTrials(product.id), productNames(), getProductAbstracts(product.slug)]);
   const primary = trials.filter((t) => t.obesity_class === "primary");
   const viewOnly = !authDisabled() && isGuest(await verifySession((await cookies()).get(SESSION_COOKIE)?.value));
 
@@ -64,12 +65,13 @@ export default async function DrugPage({ params, searchParams }: {
             <p className="mt-2 text-sm text-slate-500">
               {primary.length.toLocaleString()} primary-obesity trial{primary.length === 1 ? "" : "s"}
               {trials.length > primary.length && <> · +{trials.length - primary.length} other stored</>}
+              {abstracts.length > 0 && <> · <a href="#abstracts" className="hover:text-brand-600">{abstracts.length} conference abstract{abstracts.length === 1 ? "" : "s"}</a></>}
             </p>
           </div>
         </div>
         <div className="relative mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatTile label="Trials" value={primary.length.toLocaleString()} sub="primary obesity" tone="cyan" icon={Icon.flask} />
-          <StatTile label="Most advanced" value={primary.length ? highestPhase(primary.map((t) => t.phase)) : "—"} tone="pink" icon={Icon.rocket} />
+          <StatTile label="Most advanced" value={primary.length ? highestPhase(primary.map((t) => t.phase)) : trials.length === 0 && product.phase ? product.phase : "—"} tone="pink" icon={Icon.rocket} />
           <StatTile label="Sponsors" value={new Set(primary.map((t) => t.sponsor).filter(Boolean)).size.toLocaleString()}
                     sub={`${primary.filter((t) => t.lead_sponsor_class === "INDUSTRY").length} industry trials`} tone="violet" icon={Icon.building} />
           <StatTile label="Recruiting" value={primary.filter((t) => ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION"].includes(t.overall_status ?? "")).length.toLocaleString()}
@@ -80,6 +82,12 @@ export default async function DrugPage({ params, searchParams }: {
       <ProductSummaryCard product={product} readOnly={viewOnly} />
 
       <ProductInfoCard product={product} readOnly={viewOnly} />
+
+      {trials.length === 0 && abstracts.length > 0 && (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          No trial on ClinicalTrials.gov yet — this drug is known from conference abstracts. Its profile is filled from them.
+        </p>
+      )}
 
       <DrugTrialsTable key={`${pickedPhase ?? ""}|${pickedSponsor ?? ""}`} trials={trials} initialPhase={pickedPhase} initialSponsor={pickedSponsor} />
 
@@ -123,6 +131,8 @@ export default async function DrugPage({ params, searchParams }: {
         );
       })()}
 
+
+      <ConferenceAbstracts abstracts={abstracts} />
 
       {!viewOnly && <MergeProduct slug={product.slug} name={product.name} options={names} />}
     </div>

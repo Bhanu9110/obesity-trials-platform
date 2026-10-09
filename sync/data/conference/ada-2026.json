@@ -1,0 +1,2982 @@
+{
+ "source": "ADA 2026",
+ "description": "American Diabetes Association 86th Scientific Sessions (June 2026), Diabetes 75 (Supplement 1). Obesity drug programs (clinical and preclinical) from the abstracts; lifestyle, surgery and unnamed (undisclosed) programs are not included.",
+ "url": "https://diabetesjournals.org/diabetes/issue/75/Supplement_1",
+ "abstracts": [
+  {
+   "abstract_no": "1032-OR",
+   "program": "Aleniglipron",
+   "drugs": [
+    {
+     "name": "Aleniglipron",
+     "aliases": [
+      "GSBR-1290"
+     ]
+    }
+   ],
+   "sponsor": "Structure Therapeutics (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Obesity or overweight with >=1 weight-related comorbidity",
+   "stage": "Clinical – Phase 2b",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Obesity or overweight with >=1 weight-related comorbidity",
+   "key_finding": null,
+   "title": "ACCESS Trial: Dose-Ranging Evaluation of Aleniglipron, an Oral Small Molecule Nonpeptide GLP-1RA, Demonstrates Meaningful Weight Reductions in People Living with Obesity and Overweight",
+   "link": "https://doi.org/10.2337/db26-1032-or"
+  },
+  {
+   "abstract_no": "2637-P",
+   "program": "Aleniglipron",
+   "drugs": [
+    {
+     "name": "Aleniglipron",
+     "aliases": [
+      "GSBR-1290"
+     ]
+    }
+   ],
+   "sponsor": "Structure Therapeutics (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Obesity or overweight with >=1 weight-related comorbidity",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Obesity or overweight with >=1 weight-related comorbidity",
+   "key_finding": null,
+   "title": "Safety, Tolerability, and Efficacy of Aleniglipron in Doses up to 240 mg in People Living with Obesity: The Phase 2 ACCESS II Trial",
+   "link": "https://doi.org/10.2337/db26-2637-p"
+  },
+  {
+   "abstract_no": "3101-LB",
+   "program": "Aleniglipron",
+   "drugs": [
+    {
+     "name": "Aleniglipron",
+     "aliases": [
+      "GSBR-1290"
+     ]
+    }
+   ],
+   "sponsor": "Structure Therapeutics (inferred)",
+   "sponsor_basis": "drug owner (inferred); disclosure truncated",
+   "indication": "Adults with obesity",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Adults with obesity",
+   "key_finding": "Lower 2.5 mg starting dose explored to improve GI tolerability (interim)",
+   "title": "Exploring a Lower Starting Dose of Aleniglipron, an Oral Small Molecule GLP-1RA, to Improve GI Tolerability in Obesity: Beyond the ACCESS Trials",
+   "link": "https://doi.org/10.2337/db26-3101-lb"
+  },
+  {
+   "abstract_no": "1672-P",
+   "program": "ASC30",
+   "drugs": [
+    {
+     "name": "ASC30"
+    }
+   ],
+   "sponsor": "Ascletis (inferred)",
+   "sponsor_basis": "ASC30 discovered by Ascletis; no funding statement",
+   "indication": "Obesity",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Obesity",
+   "key_finding": "-7.7% placebo-adjusted weight loss at 13 wk",
+   "title": "Oral Small Molecule GLP-1, ASC30, Demonstrated Placebo-Adjusted Weight Loss of 7.7% with Better Gastrointestinal Tolerability in Its 13-Week U.S. Phase II Study in Participants with Obesity",
+   "link": "https://doi.org/10.2337/db26-1672-p"
+  },
+  {
+   "abstract_no": "1228-OR",
+   "program": "AT7687",
+   "drugs": [
+    {
+     "name": "AT7687"
+    }
+   ],
+   "sponsor": "Antag Therapeutics",
+   "sponsor_basis": "authors employed by/consultants to Antag",
+   "indication": "People living with obesity",
+   "stage": "Clinical – First-in-human",
+   "mechanism": "GIP receptor antagonist peptide",
+   "model": "People living with obesity",
+   "key_finding": null,
+   "title": "First-in-Human Study Demonstrates GIP Receptor (GIPR) Antagonist AT7687 as Well-Tolerated and Suitable for Once-Weekly Subcutaneous Injection for Treatment in People Living with Obesity",
+   "link": "https://doi.org/10.2337/db26-1228-or"
+  },
+  {
+   "abstract_no": "1782-P",
+   "program": "ATX-304",
+   "drugs": [
+    {
+     "name": "ATX-304"
+    }
+   ],
+   "sponsor": "Cambrian Biopharma",
+   "sponsor_basis": "authors employed by Cambrian Biopharma",
+   "indication": "Obesity with prediabetes",
+   "stage": "Clinical – Phase 1b",
+   "mechanism": "AMPK/mitochondrial activator",
+   "model": "Obesity with prediabetes",
+   "key_finding": null,
+   "title": "Phase 1b Study of AMPK/Mitochondrial Activator ATX-304 in Prediabetic Obese Participants",
+   "link": "https://doi.org/10.2337/db26-1782-p"
+  },
+  {
+   "abstract_no": "2837-LB",
+   "program": "AUL009 (monthly semaglutide microspheres)",
+   "drugs": [
+    {
+     "name": "AUL009"
+    }
+   ],
+   "sponsor": "AULBIO",
+   "sponsor_basis": "authors employed by/board of AULBIO",
+   "indication": "Healthy male volunteers (formulation for T2D/obesity)",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1RA (long-acting semaglutide formulation)",
+   "model": "Healthy male volunteers (formulation for T2D/obesity)",
+   "key_finding": "Delayed absorption, prolonged exposure, reduced peak vs weekly semaglutide",
+   "title": "Pharmacokinetic and Safety Evaluation of AUL009, a Monthly Semaglutide-Loaded Microsphere Injectables Utilizing ExTenna Drug Delivery Technology in Healthy Male Subjects",
+   "link": "https://doi.org/10.2337/db26-2837-lb"
+  },
+  {
+   "abstract_no": "1785-P",
+   "program": "BC-006",
+   "drugs": [
+    {
+     "name": "BC-006"
+    }
+   ],
+   "sponsor": "BaseCure Therapeutics",
+   "sponsor_basis": "author employed by BaseCure Therapeutics",
+   "indication": "Elevated BMI (overweight/obesity)",
+   "stage": "Clinical – FIH Phase 1b",
+   "mechanism": "INHBE siRNA",
+   "model": "Elevated BMI (overweight/obesity)",
+   "key_finding": null,
+   "title": "Safety, Tolerability, PK, PD, and Exploratory Efficacy of BC-006, an INHBE siRNA: FIH Randomized, Double-Blind, Placebo-Controlled, Single Dose-Escalation Study",
+   "link": "https://doi.org/10.2337/db26-1785-p"
+  },
+  {
+   "abstract_no": "1786-P",
+   "program": "BGE-102",
+   "drugs": [
+    {
+     "name": "BGE-102"
+    }
+   ],
+   "sponsor": "BioAge Labs",
+   "sponsor_basis": "authors employed by BioAge Labs",
+   "indication": "Healthy volunteers and participants with obesity",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "NLRP3 inhibitor",
+   "model": "Healthy volunteers and participants with obesity",
+   "key_finding": null,
+   "title": "BGE-102, a Novel NLRP3 Inhibitor, Demonstrated Robust Anti-Inflammatory Activity in an Ongoing Phase 1 Study in Healthy Volunteers and Participants with Obesity",
+   "link": "https://doi.org/10.2337/db26-1786-p"
+  },
+  {
+   "abstract_no": "2845-LB",
+   "program": "BGM0504, oral",
+   "drugs": [
+    {
+     "name": "BGM0504"
+    }
+   ],
+   "sponsor": "BrightGene BioMedical",
+   "sponsor_basis": "authors employed by BrightGene",
+   "indication": "Healthy and overweight/obese adults",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "Oral GLP-1/GIP dual agonist",
+   "model": "Healthy and overweight/obese adults",
+   "key_finding": null,
+   "title": "Safety, Pharmacokinetics, and Weight Loss Effects of the Oral GLP-1/GIP Dual Agonist BGM0504 in Healthy and Overweight or Obese Adults: A Phase 1 Multiple-Ascending Dose Study",
+   "link": "https://doi.org/10.2337/db26-2845-lb"
+  },
+  {
+   "abstract_no": "1699-P",
+   "program": "Bofanglutide",
+   "drugs": [
+    {
+     "name": "Bofanglutide",
+     "aliases": [
+      "GZR18"
+     ]
+    }
+   ],
+   "sponsor": "Gan & Lee Pharmaceuticals (inferred)",
+   "sponsor_basis": "author research support from Gan & Lee; drug owner (inferred)",
+   "indication": "Healthy participants, BMI 24-33 (drug for T2D and overweight/obesity)",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1 analogue (bi-weekly)",
+   "model": "Healthy participants, BMI 24-33 (drug for T2D and overweight/obesity)",
+   "key_finding": null,
+   "title": "Effect of Bofanglutide on the Pharmacokinetics of Metformin in Healthy Participants",
+   "link": "https://doi.org/10.2337/db26-1699-p"
+  },
+  {
+   "abstract_no": "1720-P",
+   "program": "Bofanglutide",
+   "drugs": [
+    {
+     "name": "Bofanglutide",
+     "aliases": [
+      "GZR18"
+     ]
+    }
+   ],
+   "sponsor": "Gan & Lee Pharmaceuticals (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Renal impairment PK; drug in development for T2D and overweight/obesity",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1 analogue (bi-weekly)",
+   "model": "Renal impairment PK; drug in development for T2D and overweight/obesity",
+   "key_finding": "Exposure comparable across renal function groups",
+   "title": "Effect of Renal Impairment on the Pharmacokinetics and Safety of Bofanglutide",
+   "link": "https://doi.org/10.2337/db26-1720-p"
+  },
+  {
+   "abstract_no": "1035-OR",
+   "program": "CagriSema (cagrilintide + semaglutide)",
+   "drugs": [
+    {
+     "name": "Cagrilintide"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "authors employed by Novo Nordisk",
+   "indication": "Overweight/obesity (BMI >=27)",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Amylin analogue + GLP-1RA combination",
+   "model": "Overweight/obesity (BMI >=27)",
+   "key_finding": null,
+   "title": "Effects of CagriSema on Appetite and Functional Brain Activity in People with Overweight/Obesity",
+   "link": "https://doi.org/10.2337/db26-1035-or"
+  },
+  {
+   "abstract_no": "1695-P",
+   "program": "CagriSema (cagrilintide + semaglutide)",
+   "drugs": [
+    {
+     "name": "Cagrilintide"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "author employed by Novo Nordisk",
+   "indication": "Obesity/overweight",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "Amylin analogue + GLP-1RA combination",
+   "model": "Obesity/overweight",
+   "key_finding": null,
+   "title": "Effect of CagriSema on Eating Control and Behavior: REDEFINE 1",
+   "link": "https://doi.org/10.2337/db26-1695-p"
+  },
+  {
+   "abstract_no": "2813-LB",
+   "program": "CT-388",
+   "drugs": [
+    {
+     "name": "Enicepatide",
+     "aliases": [
+      "CT-388",
+      "RG6640"
+     ]
+    }
+   ],
+   "sponsor": "Roche (inferred)",
+   "sponsor_basis": "drug owner (inferred); disclosure truncated",
+   "indication": "Overweight/obesity without T2D",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "cAMP-biased GLP-1/GIP dual agonist",
+   "model": "Overweight/obesity without T2D",
+   "key_finding": null,
+   "title": "CT-388, a cAMP Signal-Biased GLP-1/GIP Receptor Agonist, Achieves Clinically Meaningful Weight Loss in People With Overweight/Obesity: A 48-Week Phase 2 Study",
+   "link": "https://doi.org/10.2337/db26-2813-lb"
+  },
+  {
+   "abstract_no": "3102-LB",
+   "program": "DA-1726",
+   "drugs": [
+    {
+     "name": "DA-1726"
+    }
+   ],
+   "sponsor": "MetaVia (Dong-A ST)",
+   "sponsor_basis": "authors employed by MetaVia/Dong-A ST",
+   "indication": "Obese otherwise healthy adults",
+   "stage": "Clinical – Phase 1 (first-in-human)",
+   "mechanism": "Oxyntomodulin analogue (GLP-1/glucagon dual agonist)",
+   "model": "Obese otherwise healthy adults",
+   "key_finding": null,
+   "title": "Safety, Tolerability, Pharmacokinetics, and Pharmacodynamics of DA-1726, an Oxyntomodulin Analogue: Phase 1 Higher-Dose Cohort Results",
+   "link": "https://doi.org/10.2337/db26-3102-lb"
+  },
+  {
+   "abstract_no": "2608-P",
+   "program": "DA-302168S",
+   "drugs": [
+    {
+     "name": "DA-302168S"
+    }
+   ],
+   "sponsor": "Chengdu DIAO Pharmaceutical Group",
+   "sponsor_basis": "Funding: Chengdu DIAO Pharmaceutical Group",
+   "indication": "Overweight/obesity without diabetes",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Overweight/obesity without diabetes",
+   "key_finding": null,
+   "title": "Efficacy and Safety of DA-302168S, a Novel Oral GLP-1 Receptor Agonist, in Chinese Adults with Overweight or Obesity: A Phase 2 Trial",
+   "link": "https://doi.org/10.2337/db26-2608-p"
+  },
+  {
+   "abstract_no": "2849-LB",
+   "program": "Ecnoglutide vs semaglutide",
+   "drugs": [
+    {
+     "name": "Ecnoglutide",
+     "aliases": [
+      "XW003"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Sciwind Biosciences (inferred)",
+   "sponsor_basis": "drug owner (inferred); disclosure truncated",
+   "indication": "Adults with obesity (BMI >=30)",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "cAMP-biased GLP-1 analogue",
+   "model": "Adults with obesity (BMI >=30)",
+   "key_finding": null,
+   "title": "Efficacy and Safety of cAMP-Biased Ecnoglutide vs. Unbiased Semaglutide in Adults with Obesity: Twenty-Week Results from a Multicenter, Randomized, Open-Label, Phase 2 Study",
+   "link": "https://doi.org/10.2337/db26-2849-lb"
+  },
+  {
+   "abstract_no": "2636-P",
+   "program": "Efsubaglutide alfa",
+   "drugs": [
+    {
+     "name": "Efsubaglutide alfa"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": null,
+   "indication": "Overweight or obesity",
+   "stage": "Clinical – Phase 2b",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight or obesity",
+   "key_finding": null,
+   "title": "Efsubaglutide Alfa in Overweight or Obesity: Phase 2b ENLIGHT Study",
+   "link": "https://doi.org/10.2337/db26-2636-p"
+  },
+  {
+   "abstract_no": "2844-LB",
+   "program": "Elecoglipron (ECC5004/AZD5004)",
+   "drugs": [
+    {
+     "name": "Elecoglipron",
+     "aliases": [
+      "ECC5004",
+      "AZD5004"
+     ]
+    }
+   ],
+   "sponsor": "Eccogene (with AstraZeneca)",
+   "sponsor_basis": "authors employed by Eccogene and AstraZeneca",
+   "indication": "Chinese adults with obesity/overweight with or without T2D",
+   "stage": "Clinical – Phase 1b",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Chinese adults with obesity/overweight with or without T2D",
+   "key_finding": null,
+   "title": "Safety, Tolerability, PK, and PD of Elecoglipron, an Oral Small-Molecule GLP-1 Receptor Agonist, in Chinese Adults Living with Obesity or Overweight With or Without Type 2 Diabetes",
+   "link": "https://doi.org/10.2337/db26-2844-lb"
+  },
+  {
+   "abstract_no": "2609-P",
+   "program": "HDM1002",
+   "drugs": [
+    {
+     "name": "HDM1002"
+    }
+   ],
+   "sponsor": "Huadong Medicine",
+   "sponsor_basis": "authors employed by Huadong Medicine",
+   "indication": "Overweight/obesity without diabetes",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Overweight/obesity without diabetes",
+   "key_finding": null,
+   "title": "Efficacy and Safety of a Novel Oral Small Molecule GLP-1 Receptor Agonist HDM1002 in Chinese Overweight and Obese Adults: A Randomized, Double-Blind, Placebo-Controlled, Phase 2 Trial",
+   "link": "https://doi.org/10.2337/db26-2609-p"
+  },
+  {
+   "abstract_no": "1034-OR",
+   "program": "HDM1005",
+   "drugs": [
+    {
+     "name": "HDM1005"
+    }
+   ],
+   "sponsor": "Huadong Pharmaceutical",
+   "sponsor_basis": "authors employed by Huadong",
+   "indication": "Obesity without diabetes (BMI 28-40)",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "GLP-1/GIP dual agonist",
+   "model": "Obesity without diabetes (BMI 28-40)",
+   "key_finding": null,
+   "title": "Efficacy and Safety of Dual GLP-1/GIP Receptor Agonist HDM1005 in Obese Participants without Diabetes: A Randomized, Double-Blind, Placebo-Controlled, Phase 2 Trial",
+   "link": "https://doi.org/10.2337/db26-1034-or"
+  },
+  {
+   "abstract_no": "1690-P",
+   "program": "IBI3032",
+   "drugs": [
+    {
+     "name": "IBI3032"
+    }
+   ],
+   "sponsor": "Innovent Biologics",
+   "sponsor_basis": "authors employed by Innovent",
+   "indication": "Chinese adults with/without overweight or obesity",
+   "stage": "Clinical – First-in-human",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Chinese adults with/without overweight or obesity",
+   "key_finding": null,
+   "title": "Safety, Tolerability, Pharmacokinetics, and Pharmacodynamics of IBI3032, a Novel Oral Nonpeptide GLP-1 Receptor Agonist: Single- and Multiple-Ascending Dose Studies in Chinese Adults",
+   "link": "https://doi.org/10.2337/db26-1690-p"
+  },
+  {
+   "abstract_no": "1682-P",
+   "program": "ID110521156",
+   "drugs": [
+    {
+     "name": "ID110521156"
+    }
+   ],
+   "sponsor": "YUNOVIA Co., Ltd.",
+   "sponsor_basis": "author employed by YUNOVIA",
+   "indication": "Healthy participants (drug for T2D/obesity)",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Healthy participants (drug for T2D/obesity)",
+   "key_finding": "Dose-dependent body weight reduction over 28 days",
+   "title": "ID110521156, a Novel Oral Small-Molecule GLP-1RA: Evidence of Favorable Safety Profile and Dose-Dependent Reduction in Body Weight and Glycemic Control after 28 Days of Treatment",
+   "link": "https://doi.org/10.2337/db26-1682-p"
+  },
+  {
+   "abstract_no": "2453-P",
+   "program": "Intranasal insulin",
+   "drugs": [
+    {
+     "name": "Insulin",
+     "create": false
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "no funding/employer stated",
+   "indication": "Adults with overweight/obesity",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Intranasal insulin",
+   "model": "Adults with overweight/obesity",
+   "key_finding": "Reduced subcutaneous adipose tissue vs placebo (p=0.01)",
+   "title": "Long-Term Intranasal Insulin Enhances Hypothalamic Insulin Sensitivity and Reduces Adiposity in Adults with Overweight or Obesity",
+   "link": "https://doi.org/10.2337/db26-2453-p"
+  },
+  {
+   "abstract_no": "2648-P",
+   "program": "KAI-9531",
+   "drugs": [
+    {
+     "name": "Ribupatide",
+     "aliases": [
+      "HRS9531",
+      "KAI-9531"
+     ]
+    }
+   ],
+   "sponsor": "Kailera Therapeutics",
+   "sponsor_basis": "authors employed by Kailera Therapeutics",
+   "indication": "Adults BMI 22.6-34.0 (Asian and non-Asian); drug for overweight/obesity",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "GLP-1/GIP dual agonist",
+   "model": "Adults BMI 22.6-34.0 (Asian and non-Asian); drug for overweight/obesity",
+   "key_finding": null,
+   "title": "A Phase 1, Randomized, Double-Blind, Single-Ascending Dose Study of KAI-9531, a Novel Dual GLP-1/GIP Receptor Agonist in Development for People Living with Overweight/Obesity",
+   "link": "https://doi.org/10.2337/db26-2648-p"
+  },
+  {
+   "abstract_no": "1133-OR",
+   "program": "Mazdutide",
+   "drugs": [
+    {
+     "name": "Mazdutide",
+     "aliases": [
+      "IBI362",
+      "LY3305677"
+     ]
+    }
+   ],
+   "sponsor": "Innovent Biologics",
+   "sponsor_basis": "authors employed by Innovent Biologics",
+   "indication": "Adolescents (12-<18 y) with obesity",
+   "stage": "Clinical – Phase 1b",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "Adolescents (12-<18 y) with obesity",
+   "key_finding": null,
+   "title": "Safety, Tolerability, and Pharmacokinetics of Once-Weekly Mazdutide in Chinese Adolescents with Obesity: A Phase 1b Trial",
+   "link": "https://doi.org/10.2337/db26-1133-or"
+  },
+  {
+   "abstract_no": "1225-OR",
+   "program": "Mazdutide",
+   "drugs": [
+    {
+     "name": "Mazdutide",
+     "aliases": [
+      "IBI362",
+      "LY3305677"
+     ]
+    }
+   ],
+   "sponsor": "Innovent Biologics",
+   "sponsor_basis": "authors employed by Innovent",
+   "indication": "Chinese adults with obesity (BMI >=30)",
+   "stage": "Clinical – Phase 3",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "Chinese adults with obesity (BMI >=30)",
+   "key_finding": null,
+   "title": "Efficacy and Safety of Mazdutide 9 mg in Chinese Adults with Obesity: Results from the Phase 3 GLORY-2 Trial",
+   "link": "https://doi.org/10.2337/db26-1225-or"
+  },
+  {
+   "abstract_no": "1693-P",
+   "program": "Mazdutide",
+   "drugs": [
+    {
+     "name": "Mazdutide",
+     "aliases": [
+      "IBI362",
+      "LY3305677"
+     ]
+    }
+   ],
+   "sponsor": "Eli Lilly and Company",
+   "sponsor_basis": "authors employed by Eli Lilly",
+   "indication": "Obesity/overweight without T2D",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "Obesity/overweight without T2D",
+   "key_finding": "Up to 22.3% weight reduction at 48 wk",
+   "title": "Mazdutide Improves Markers of Insulin Sensitivity in Adults with Obesity without Type 2 Diabetes",
+   "link": "https://doi.org/10.2337/db26-1693-p"
+  },
+  {
+   "abstract_no": "1733-P",
+   "program": "Mazdutide",
+   "drugs": [
+    {
+     "name": "Mazdutide",
+     "aliases": [
+      "IBI362",
+      "LY3305677"
+     ]
+    }
+   ],
+   "sponsor": "Eli Lilly and Company (inferred)",
+   "sponsor_basis": "Lilly compound code LY3305677 (inferred)",
+   "indication": "Obesity/overweight without T2D",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "Obesity/overweight without T2D",
+   "key_finding": "Up to 22.3% weight reduction at 48 wk (prior report)",
+   "title": "Effect of Mazdutide on Kidney Function in Adults with Obesity or Overweight",
+   "link": "https://doi.org/10.2337/db26-1733-p"
+  },
+  {
+   "abstract_no": "1226-OR",
+   "program": "Mazdutide vs semaglutide",
+   "drugs": [
+    {
+     "name": "Mazdutide",
+     "aliases": [
+      "IBI362",
+      "LY3305677"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Innovent Biologics",
+   "sponsor_basis": "authors employed by Innovent",
+   "indication": "Chinese adults with T2D and obesity (BMI >=28)",
+   "stage": "Clinical – Phase 3b",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "Chinese adults with T2D and obesity (BMI >=28)",
+   "key_finding": null,
+   "title": "Mazdutide vs. Semaglutide in Chinese Adults with Type 2 Diabetes and Obesity (DREAMS-3): A Randomised, Open-Label, Phase 3b Trial",
+   "link": "https://doi.org/10.2337/db26-1226-or"
+  },
+  {
+   "abstract_no": "1793-P",
+   "program": "MD-18",
+   "drugs": [
+    {
+     "name": "MD-18"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": null,
+   "indication": "Healthy volunteers (drug for obesity/T2D)",
+   "stage": "Clinical – Phase 1a",
+   "mechanism": "PTP-1B inhibitor",
+   "model": "Healthy volunteers (drug for obesity/T2D)",
+   "key_finding": "MD-18 significantly reduced ALT; no safety signal reported",
+   "title": "Results of Phase 1a Trial of MD-18, a Specific PTP-1B Inhibitor",
+   "link": "https://doi.org/10.2337/db26-1793-p"
+  },
+  {
+   "abstract_no": "2620-P",
+   "program": "MDR-001",
+   "drugs": [
+    {
+     "name": "MDR-001"
+    }
+   ],
+   "sponsor": "MindRank AI (inferred)",
+   "sponsor_basis": "drug owner (inferred); no sponsor statement",
+   "indication": "Overweight/obesity without diabetes",
+   "stage": "Clinical – Phase 2b",
+   "mechanism": "Oral small-molecule biased GLP-1RA",
+   "model": "Overweight/obesity without diabetes",
+   "key_finding": "LSM body weight change -8.0% to ~-9.6% across doses at wk 24",
+   "title": "MDR-001, an AI-Enabled β-arrestin2-Biased Oral GLP-1RA: Efficacy and Safety in Chinese Adults with Overweight or Obesity",
+   "link": "https://doi.org/10.2337/db26-2620-p"
+  },
+  {
+   "abstract_no": "2517-P",
+   "program": "Metformin",
+   "drugs": [
+    {
+     "name": "Metformin"
+    }
+   ],
+   "sponsor": "National Institute on Aging",
+   "sponsor_basis": "Funding: National Institute of Aging (R21 AG060139)",
+   "indication": "Older adults (60-85 y) with overweight/obesity and impaired fasting glucose",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Biguanide",
+   "model": "Older adults (60-85 y) with overweight/obesity and impaired fasting glucose",
+   "key_finding": "Metformin improved systemic and hepatic insulin sensitivity vs placebo; no change in mitochondrial function",
+   "title": "Forty Weeks of Metformin Alters Regional Insulin Sensitivity but Not Mitochondrial Function in Insulin-Resistant Adults",
+   "link": "https://doi.org/10.2337/db26-2517-p"
+  },
+  {
+   "abstract_no": "2643-P",
+   "program": "Nimacimab + semaglutide",
+   "drugs": [
+    {
+     "name": "Nimacimab"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Skye Bioscience",
+   "sponsor_basis": "authors employed by Skye Bioscience",
+   "indication": "Overweight and obesity",
+   "stage": "Clinical – Phase 2a",
+   "mechanism": "Peripherally restricted CB1R inverse agonist antibody (+ GLP-1RA)",
+   "model": "Overweight and obesity",
+   "key_finding": "Continued weight loss at 52 wk and durable weight loss off therapy with combination (preliminary)",
+   "title": "Preliminary Data on Continuing Weight Loss at 52 Weeks and Durable Weight Loss Off Therapy with Nimacimab, a CB1R Antibody, in Combination with Semaglutide",
+   "link": "https://doi.org/10.2337/db26-2643-p"
+  },
+  {
+   "abstract_no": "3093-LB",
+   "program": "Oral semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "authors report Novo Nordisk research support",
+   "indication": "Adults with BMI >=25 and normoglycemia or prediabetes",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1RA (oral)",
+   "model": "Adults with BMI >=25 and normoglycemia or prediabetes",
+   "key_finding": null,
+   "title": "Metabolic Response to Oral Semaglutide in Adults with Obesity—Weight Loss and Beyond: The GAROS Prospective Study",
+   "link": "https://doi.org/10.2337/db26-3093-lb"
+  },
+  {
+   "abstract_no": "2838-LB",
+   "program": "Oral semaglutide 25 mg",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug owner / OASIS trial sponsor (inferred)",
+   "indication": "Overweight/obesity (by BMI class)",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA (oral)",
+   "model": "Overweight/obesity (by BMI class)",
+   "key_finding": null,
+   "title": "Cardiometabolic Effects of Semaglutide in OASIS 4 Participants by BMI Class",
+   "link": "https://doi.org/10.2337/db26-2838-lb"
+  },
+  {
+   "abstract_no": "1666-P",
+   "program": "Orforglipron",
+   "drugs": [
+    {
+     "name": "Orforglipron",
+     "aliases": [
+      "LY3502970"
+     ]
+    }
+   ],
+   "sponsor": "Eli Lilly and Company (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Obesity/overweight without T2D, with or without prediabetes",
+   "stage": "Clinical – Phase 3",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Obesity/overweight without T2D, with or without prediabetes",
+   "key_finding": null,
+   "title": "Orforglipron and Markers of Insulin Sensitivity and Beta-Cell Function by Prediabetes Status in Adults with Obesity: A Post Hoc Analysis of the ATTAIN-1 Trial",
+   "link": "https://doi.org/10.2337/db26-1666-p"
+  },
+  {
+   "abstract_no": "1716-P",
+   "program": "Orforglipron",
+   "drugs": [
+    {
+     "name": "Orforglipron",
+     "aliases": [
+      "LY3502970"
+     ]
+    }
+   ],
+   "sponsor": "Eli Lilly and Company (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Women with obesity/overweight by menopausal stage",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Women with obesity/overweight by menopausal stage",
+   "key_finding": null,
+   "title": "Menopausal Stage and Weight Outcomes with Orforglipron vs. Placebo: Post Hoc Subgroup Analysis from ATTAIN-1 and ATTAIN-2",
+   "link": "https://doi.org/10.2337/db26-1716-p"
+  },
+  {
+   "abstract_no": "2624-P",
+   "program": "Orforglipron",
+   "drugs": [
+    {
+     "name": "Orforglipron",
+     "aliases": [
+      "LY3502970"
+     ]
+    }
+   ],
+   "sponsor": "Eli Lilly and Company",
+   "sponsor_basis": "authors employed by Eli Lilly",
+   "indication": "Obesity or overweight with weight-related comorbidities",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "Obesity or overweight with weight-related comorbidities",
+   "key_finding": null,
+   "title": "Safety, Tolerability, Pharmacokinetics, and Pharmacodynamics of Orforglipron: A Multiple Dose Titration Study in Chinese Participants with Obesity or Overweight with Weight-Related Comorbidities",
+   "link": "https://doi.org/10.2337/db26-2624-p"
+  },
+  {
+   "abstract_no": "1843-P",
+   "program": "Orlistat + liraglutide",
+   "drugs": [
+    {
+     "name": "Orlistat"
+    },
+    {
+     "name": "Liraglutide"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": null,
+   "indication": "Adults with obesity and MASLD",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Lipase inhibitor + GLP-1RA",
+   "model": "Adults with obesity and MASLD",
+   "key_finding": "Combination -6.4% weight vs -4.5% orlistat alone",
+   "title": "Clinical Efficacy Study of Orlistat Combined with Liraglutide in Patients with Metabolic Syndrome-Associated Steatohepatitis (MASLD)",
+   "link": "https://doi.org/10.2337/db26-1843-p"
+  },
+  {
+   "abstract_no": "2598-P",
+   "program": "Petrelintide",
+   "drugs": [
+    {
+     "name": "Petrelintide",
+     "aliases": [
+      "ZP8396",
+      "RG6849"
+     ]
+    }
+   ],
+   "sponsor": "Zealand Pharma",
+   "sponsor_basis": "authors employed by Zealand Pharma",
+   "indication": "Healthy participants incl. overweight/obesity (BMI 27-39.9) - weight management drug",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Amylin analogue (long-acting)",
+   "model": "Healthy participants incl. overweight/obesity (BMI 27-39.9) - weight management drug",
+   "key_finding": "Petrelintide did not delay gastric emptying",
+   "title": "Long-Acting Amylin Analog Petrelintide Does Not Delay Gastric Emptying",
+   "link": "https://doi.org/10.2337/db26-2598-p"
+  },
+  {
+   "abstract_no": "3083-LB",
+   "program": "Petrelintide",
+   "drugs": [
+    {
+     "name": "Petrelintide",
+     "aliases": [
+      "ZP8396",
+      "RG6849"
+     ]
+    }
+   ],
+   "sponsor": "Zealand Pharma (inferred)",
+   "sponsor_basis": "drug owner (inferred); disclosure truncated",
+   "indication": "Obesity or overweight with complications",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Amylin analogue",
+   "model": "Obesity or overweight with complications",
+   "key_finding": null,
+   "title": "Petrelintide, a Human Amylin Analog for the Treatment of Obesity: Efficacy and Safety from the Phase 2 Trial, ZUPREME 1",
+   "link": "https://doi.org/10.2337/db26-3083-lb"
+  },
+  {
+   "abstract_no": "2067-P",
+   "program": "Phentermine/topiramate",
+   "drugs": [
+    {
+     "name": "Phentermine"
+    },
+    {
+     "name": "Topiramate"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "funding text truncated",
+   "indication": "Adolescents with youth-onset T2D and obesity",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Sympathomimetic/anticonvulsant combination",
+   "model": "Adolescents with youth-onset T2D and obesity",
+   "key_finding": null,
+   "title": "Effect of Phentermine/Topiramate on BMI Reduction in Adolescents with Youth-Onset Type 2 Diabetes and Obesity",
+   "link": "https://doi.org/10.2337/db26-2067-p"
+  },
+  {
+   "abstract_no": "2068-P",
+   "program": "Phentermine/topiramate",
+   "drugs": [
+    {
+     "name": "Phentermine"
+    },
+    {
+     "name": "Topiramate"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "funding text truncated",
+   "indication": "Adolescents with youth-onset T2D and obesity",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "Sympathomimetic/anticonvulsant combination",
+   "model": "Adolescents with youth-onset T2D and obesity",
+   "key_finding": null,
+   "title": "Effect of Phentermine/Topiramate on Insulin Sensitivity and Beta-Cell Function in Adolescents with Youth-Onset Type 2 Diabetes and Obesity",
+   "link": "https://doi.org/10.2337/db26-2068-p"
+  },
+  {
+   "abstract_no": "2847-LB",
+   "program": "PT403 (monthly semaglutide)",
+   "drugs": [
+    {
+     "name": "PT403"
+    }
+   ],
+   "sponsor": "Peptron",
+   "sponsor_basis": "author employed by Peptron",
+   "indication": "Healthy subjects (formulation for T2D/obesity); plus DIO mice",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1RA (long-acting semaglutide formulation)",
+   "model": "Healthy subjects (formulation for T2D/obesity); plus DIO mice",
+   "key_finding": "Interim safety/tolerability in healthy subjects",
+   "title": "PT403, a Once-Monthly Long-Acting Semaglutide: Preclinical Efficacy and Interim Safety and Tolerability in Healthy Subjects",
+   "link": "https://doi.org/10.2337/db26-2847-lb"
+  },
+  {
+   "abstract_no": "1227-OR",
+   "program": "RAY1225",
+   "drugs": [
+    {
+     "name": "RAY1225"
+    }
+   ],
+   "sponsor": "Guangdong Raynovent",
+   "sponsor_basis": "authors employed by Raynovent",
+   "indication": "Chinese overweight/obese adults without diabetes",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Biased GLP-1/GIP dual agonist",
+   "model": "Chinese overweight/obese adults without diabetes",
+   "key_finding": null,
+   "title": "RAY1225, a Biweekly Biased GLP-1/GIP RA for Weight Management: A Phase 2 Trial in Chinese Overweight/Obese Adults (REBUILDING-1)",
+   "link": "https://doi.org/10.2337/db26-1227-or"
+  },
+  {
+   "abstract_no": "2827-LB",
+   "program": "RDSY1801",
+   "drugs": [
+    {
+     "name": "RDSY1801"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "no sponsor named in abstract",
+   "indication": "Healthy volunteers (oral GLP-1RA in development)",
+   "stage": "Clinical – First-in-human (Phase 1)",
+   "mechanism": "Oral GLP-1RA peptide",
+   "model": "Healthy volunteers (oral GLP-1RA in development)",
+   "key_finding": "Tmax ~3 h across doses",
+   "title": "First-in-Human Study of Oral GLP-1 Receptor Agonist RDSY1801",
+   "link": "https://doi.org/10.2337/db26-2827-lb"
+  },
+  {
+   "abstract_no": "1815-P",
+   "program": "Ribupatide (HRS9531)",
+   "drugs": [
+    {
+     "name": "Ribupatide",
+     "aliases": [
+      "HRS9531",
+      "KAI-9531"
+     ]
+    }
+   ],
+   "sponsor": "Jiangsu Hengrui Pharmaceuticals (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Overweight/obesity with PCOS (women)",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1/GIP dual agonist",
+   "model": "Overweight/obesity with PCOS (women)",
+   "key_finding": "-21.38% body weight change at wk 28",
+   "title": "Efficacy and Safety of the GlP-1/GIP Dual Agonist HRS9531 in Overweight/Obese Chinese Patients with Polycystic Ovary Syndrome",
+   "link": "https://doi.org/10.2337/db26-1815-p"
+  },
+  {
+   "abstract_no": "2816-LB",
+   "program": "Ribupatide (HRS9531), oral",
+   "drugs": [
+    {
+     "name": "Ribupatide",
+     "aliases": [
+      "HRS9531",
+      "KAI-9531"
+     ]
+    }
+   ],
+   "sponsor": "Jiangsu Hengrui Pharmaceuticals",
+   "sponsor_basis": "authors employed by Jiangsu Hengrui",
+   "indication": "Adults with obesity without diabetes",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Oral GLP-1/GIP dual agonist peptide",
+   "model": "Adults with obesity without diabetes",
+   "key_finding": "LS mean weight loss 6.7%, 11.9%, 11.4% (10/25/50 mg) vs 2.1% placebo at wk 26",
+   "title": "Efficacy and Safety of Oral Ribupatide (HRS9531) in Adults with Obesity: A Phase 2 Trial",
+   "link": "https://doi.org/10.2337/db26-2816-lb"
+  },
+  {
+   "abstract_no": "1291-OR",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "SELECT trial sponsor (inferred)",
+   "indication": "Overweight/obesity (BMI >=27) with CVD, without diabetes",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity (BMI >=27) with CVD, without diabetes",
+   "key_finding": "Protein changes partly mediate MACE reduction",
+   "title": "Serum Proteomics Suggest Novel Mechanisms of Action of Semaglutide in Reducing the Risk of MACE in the SELECT Trial",
+   "link": "https://doi.org/10.2337/db26-1291-or"
+  },
+  {
+   "abstract_no": "1669-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Overweight/obesity with uncontrolled hypertension, without T2D",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity with uncontrolled hypertension, without T2D",
+   "key_finding": null,
+   "title": "Effect of Semaglutide for Weight Management on Blood Pressure in Adults with Uncontrolled Hypertension and Overweight/Obesity: A Post Hoc Analysis from the STEP and OASIS Programs",
+   "link": "https://doi.org/10.2337/db26-1669-p"
+  },
+  {
+   "abstract_no": "1685-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "authors employed by Novo Nordisk",
+   "indication": "Overweight/obesity with ASCVD without diabetes",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity with ASCVD without diabetes",
+   "key_finding": null,
+   "title": "Exploring Semaglutide's Effect on the ASCVD-Related Proteomic Signature and Their Prediction of MACE in SELECT",
+   "link": "https://doi.org/10.2337/db26-1685-p"
+  },
+  {
+   "abstract_no": "1696-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug/trial owner (inferred); disclosure truncated",
+   "indication": "Overweight/obesity with ASCVD (SELECT) pooled with T2D/CKD trials",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity with ASCVD (SELECT) pooled with T2D/CKD trials",
+   "key_finding": "Effect on COVID-19 complications and all-cause death",
+   "title": "Effect of Semaglutide on COVID-19–Related Complications and All-Cause Death: Pooled Analyses of the SELECT, FLOW, and SOUL Trials",
+   "link": "https://doi.org/10.2337/db26-1696-p"
+  },
+  {
+   "abstract_no": "1702-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "authors employed by Novo Nordisk",
+   "indication": "Overweight/obesity with prediabetes and established CVD",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity with prediabetes and established CVD",
+   "key_finding": "Semaglutide reduced T2D risk by 73% vs placebo",
+   "title": "Molecular Basis of Type 2 Diabetes Prevention by Semaglutide in SELECT",
+   "link": "https://doi.org/10.2337/db26-1702-p"
+  },
+  {
+   "abstract_no": "1703-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "authors employed by Novo Nordisk",
+   "indication": "Overweight/obesity (SELECT, STEP 1, STEP 2 participants)",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "SELECT, STEP 1, STEP 2 participants",
+   "key_finding": "Semaglutide reduced proteomic biological-age clocks",
+   "title": "Semaglutide Reduces Multiorgan Proteomic-Based Biological Age across Cohorts",
+   "link": "https://doi.org/10.2337/db26-1703-p"
+  },
+  {
+   "abstract_no": "1711-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "author employed by Novo Nordisk; drug owner",
+   "indication": "Women with overweight/obesity without T2D (menopausal status)",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Women with overweight/obesity without T2D (menopausal status)",
+   "key_finding": null,
+   "title": "Menopausal Hormonal Status and Estradiol Use Modulate Semaglutide-Associated Weight Loss in Women: Analyses from STEP1 and SELECT",
+   "link": "https://doi.org/10.2337/db26-1711-p"
+  },
+  {
+   "abstract_no": "1723-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Overweight/obesity with asthma and established CVD (no diabetes)",
+   "stage": "Clinical – Phase 3",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity with asthma and established CVD (no diabetes)",
+   "key_finding": null,
+   "title": "Semaglutide Reduces Asthma-Related Adverse Outcomes in Patients with Comorbid Asthma and Obesity: A Post Hoc Analysis of the SELECT Trial",
+   "link": "https://doi.org/10.2337/db26-1723-p"
+  },
+  {
+   "abstract_no": "1728-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Obesity with CVD (CKD biomarkers)",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Obesity with CVD (CKD biomarkers)",
+   "key_finding": null,
+   "title": "Large-Scale Proteomic Discovery of Prognostic and Treatment-Responsive CKD Biomarkers in SELECT",
+   "link": "https://doi.org/10.2337/db26-1728-p"
+  },
+  {
+   "abstract_no": "2592-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug owner / STEP trial sponsor (inferred)",
+   "indication": "Overweight/obesity",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity",
+   "key_finding": "FLI change to wk 68: -29.13 sema vs -6.95 placebo",
+   "title": "Impact of Once-Weekly Injectable Semaglutide vs. Placebo on Fatty Liver Index Scores in People with Overweight/Obesity: A Post Hoc Analysis (STEP1)",
+   "link": "https://doi.org/10.2337/db26-2592-p"
+  },
+  {
+   "abstract_no": "2656-P",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "NIH (R01DK130238)",
+   "sponsor_basis": "Funding: R01DK130238",
+   "indication": "Overweight/obesity without diabetes (BMI >=27)",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity without diabetes (BMI >=27)",
+   "key_finding": "Group mean daily weights strongly linear over time (r=-0.97); regression slope improves individual weight-loss estimates",
+   "title": "Analyzing Daily Weights to Improve Estimates of Weight Loss while Minimizing Impact of Random Day-to-Day Variation in Weight",
+   "link": "https://doi.org/10.2337/db26-2656-p"
+  },
+  {
+   "abstract_no": "2840-LB",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "authors employed by Novo Nordisk A/S",
+   "indication": "Overweight/obesity (BMI >=27) with established CVD without diabetes; OSA subgroup",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity (BMI >=27) with established CVD without diabetes; OSA subgroup",
+   "key_finding": null,
+   "title": "Semaglutide and Obstructive Sleep Apnea (OSA): A Post Hoc Analysis from SELECT",
+   "link": "https://doi.org/10.2337/db26-2840-lb"
+  },
+  {
+   "abstract_no": "2846-LB",
+   "program": "Semaglutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug/trial owner (inferred); disclosure truncated",
+   "indication": "Overweight/obesity with CVD without diabetes, by race/ethnicity",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obesity with CVD without diabetes, by race/ethnicity",
+   "key_finding": "MACE efficacy/safety by race/ethnicity",
+   "title": "Efficacy and Safety of Semaglutide by Race and Ethnicity in the SELECT Trial",
+   "link": "https://doi.org/10.2337/db26-2846-lb"
+  },
+  {
+   "abstract_no": "2700-LB",
+   "program": "Semaglutide 7.2 mg",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk (inferred)",
+   "sponsor_basis": "drug owner / STEP trial sponsor (inferred)",
+   "indication": "Obesity without diabetes",
+   "stage": "Clinical – post hoc analysis",
+   "mechanism": "GLP-1RA",
+   "model": "Obesity without diabetes",
+   "key_finding": "Sema 7.2 mg associated with preservation of kidney function (eGFR)",
+   "title": "High-Dose Semaglutide Is Associated with Preservation of Kidney Function in People Living with Obesity without Diabetes",
+   "link": "https://doi.org/10.2337/db26-2700-lb"
+  },
+  {
+   "abstract_no": "2829-LB",
+   "program": "Semaglutide 7.2 mg",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "author employed by Novo Nordisk",
+   "indication": "Obesity with T2D",
+   "stage": "Clinical – Phase 3",
+   "mechanism": "GLP-1RA",
+   "model": "Obesity with T2D",
+   "key_finding": "Proportions achieving BMI <27 and WHtR <0.53 targets at wk 72",
+   "title": "STEP UP T2D: Participants Achieving BMI, WHtR, and Cardiometabolic Treatment Targets",
+   "link": "https://doi.org/10.2337/db26-2829-lb"
+  },
+  {
+   "abstract_no": "2631-P",
+   "program": "SNA-003 (nanoparticle semaglutide)",
+   "drugs": [
+    {
+     "name": "SNA-003"
+    }
+   ],
+   "sponsor": "SN BioScience",
+   "sponsor_basis": "author employed by SN BioScience",
+   "indication": "Healthy adults (semaglutide formulation)",
+   "stage": "Clinical – Phase 1 (pilot)",
+   "mechanism": "GLP-1RA (new formulation)",
+   "model": "Healthy adults (semaglutide formulation)",
+   "key_finding": null,
+   "title": "Phase 1 Study and Modelling of a Novel Drug Delivery System for GLP-1RA with Lower Adverse Events and Higher Efficacy",
+   "link": "https://doi.org/10.2337/db26-2631-p"
+  },
+  {
+   "abstract_no": "1265-OR",
+   "program": "Tirzepatide",
+   "drugs": [
+    {
+     "name": "Tirzepatide",
+     "aliases": [
+      "LY3298176"
+     ]
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "no funding/employer stated",
+   "indication": "Adults with obesity/overweight (BMI 27-39.9) without diabetes",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1/GIP dual agonist",
+   "model": "Adults with obesity/overweight (BMI 27-39.9) without diabetes",
+   "key_finding": null,
+   "title": "Tirzepatide: Effect on Insulin Resistance and Human Fat Cells",
+   "link": "https://doi.org/10.2337/db26-1265-or"
+  },
+  {
+   "abstract_no": "1676-P",
+   "program": "Tirzepatide",
+   "drugs": [
+    {
+     "name": "Tirzepatide",
+     "aliases": [
+      "LY3298176"
+     ]
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "no funding statement",
+   "indication": "Adults with obesity",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1/GIP dual agonist",
+   "model": "Adults with obesity",
+   "key_finding": null,
+   "title": "Changes in Body Composition During and After Weight Loss with Tirzepatide",
+   "link": "https://doi.org/10.2337/db26-1676-p"
+  },
+  {
+   "abstract_no": "2869-LB",
+   "program": "TLC-6740 + tirzepatide",
+   "drugs": [
+    {
+     "name": "TLC-6740"
+    },
+    {
+     "name": "Tirzepatide"
+    }
+   ],
+   "sponsor": "OrsoBio",
+   "sponsor_basis": "authors employed by OrsoBio",
+   "indication": "Adults with obesity (BMI >=30) without diabetes",
+   "stage": "Clinical – Phase 2a",
+   "mechanism": "Liver-targeted mitochondrial protonophore + GLP-1/GIP dual agonist",
+   "model": "Adults with obesity (BMI >=30) without diabetes",
+   "key_finding": "-13.3% vs -8.8% weight change at W24 (additional -4.5%, p=0.018)",
+   "title": "Increasing Energy Expenditure with the Liver-Targeted Mitochondrial Protonophore TLC-6740 Enhances Weight Loss and Metabolic Benefits in Combination with Tirzepatide in Obesity: A Phase 2a Study",
+   "link": "https://doi.org/10.2337/db26-2869-lb"
+  },
+  {
+   "abstract_no": "1230-OR",
+   "program": "Trevogrumab ± garetosmab + semaglutide",
+   "drugs": [
+    {
+     "name": "Trevogrumab",
+     "aliases": [
+      "REGN1033"
+     ]
+    },
+    {
+     "name": "Garetosmab",
+     "aliases": [
+      "REGN2477"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Regeneron",
+   "sponsor_basis": "authors employed by Regeneron",
+   "indication": "Obesity without T2D, by low lean mass status",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Anti-GDF8 mAb ± anti-activin A mAb + GLP-1RA",
+   "model": "Obesity without T2D, by low lean mass status",
+   "key_finding": "Significantly less lean mass loss with combination vs semaglutide at wk 26",
+   "title": "Lean Mass Effects of Anti-GDF8 (Trevogrumab) ± Anti-Activin A (Garetosmab) in People Living with Obesity Treated with Semaglutide with or without Low Lean Mass at Baseline",
+   "link": "https://doi.org/10.2337/db26-1230-or"
+  },
+  {
+   "abstract_no": "2646-P",
+   "program": "Trevogrumab ± garetosmab + semaglutide",
+   "drugs": [
+    {
+     "name": "Trevogrumab",
+     "aliases": [
+      "REGN1033"
+     ]
+    },
+    {
+     "name": "Garetosmab",
+     "aliases": [
+      "REGN2477"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Regeneron Pharmaceuticals",
+   "sponsor_basis": "authors employed by Regeneron",
+   "indication": "Obesity",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Anti-GDF8 mAb ± anti-activin A mAb + GLP-1RA",
+   "model": "Obesity",
+   "key_finding": "8.6% of baseline DXA scans initially failed, requiring repeat",
+   "title": "Optimizing DXA Imaging in Obese Populations: Lessons from the COURAGE Study",
+   "link": "https://doi.org/10.2337/db26-2646-p"
+  },
+  {
+   "abstract_no": "2649-P",
+   "program": "Trevogrumab ± garetosmab + semaglutide",
+   "drugs": [
+    {
+     "name": "Trevogrumab",
+     "aliases": [
+      "REGN1033"
+     ]
+    },
+    {
+     "name": "Garetosmab",
+     "aliases": [
+      "REGN2477"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Regeneron Pharmaceuticals",
+   "sponsor_basis": "authors employed by Regeneron",
+   "indication": "Obesity",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "Anti-GDF8 mAb ± anti-activin A mAb + GLP-1RA",
+   "model": "Obesity",
+   "key_finding": "Population-normed z-scores increased sensitivity/effect size for TFM and TLM changes",
+   "title": "Population-Normed Z-scores for Body Composition Enhance Sensitivity and Effect Size: Analysis of a Phase 2 RCT Testing Anti-GDF8 and Anti-Activin A on Top of Semaglutide (COURAGE)",
+   "link": "https://doi.org/10.2337/db26-2649-p"
+  },
+  {
+   "abstract_no": "3090-LB",
+   "program": "UBT251",
+   "drugs": [
+    {
+     "name": "UBT251"
+    }
+   ],
+   "sponsor": "The United Laboratories International Holdings",
+   "sponsor_basis": "author(s) employed by The United Laboratories",
+   "indication": "Overweight (with >=1 weight-related condition) or obesity",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "GIP/GLP-1/glucagon triple agonist",
+   "model": "Overweight (with >=1 weight-related condition) or obesity",
+   "key_finding": null,
+   "title": "UBT251, a Triple Hormone Receptor Agonist in Adults with Overweight or Obesity: A Multicenter, Double-Blind, Placebo-Controlled, Randomized, Phase 2 Trial",
+   "link": "https://doi.org/10.2337/db26-3090-lb"
+  },
+  {
+   "abstract_no": "1700-P",
+   "program": "Utreglutide (GL0034)",
+   "drugs": [
+    {
+     "name": "Utreglutide",
+     "aliases": [
+      "GL0034"
+     ]
+    }
+   ],
+   "sponsor": "Sun Pharmaceutical Industries Ltd.",
+   "sponsor_basis": "authors employed by Sun Pharma",
+   "indication": "Obesity with MASLD (nondiabetic/prediabetic)",
+   "stage": "Clinical – Phase 1b/2a",
+   "mechanism": "GLP-1RA",
+   "model": "Obesity with MASLD (nondiabetic/prediabetic)",
+   "key_finding": null,
+   "title": "Durable Cardiometabolic Effects of Utreglutide in Metabolic Dysfunction–Associated Steatotic Liver Disease Patients with Nondiabetic and Prediabetic Status",
+   "link": "https://doi.org/10.2337/db26-1700-p"
+  },
+  {
+   "abstract_no": "2833-LB",
+   "program": "Utreglutide (GL0034)",
+   "drugs": [
+    {
+     "name": "Utreglutide",
+     "aliases": [
+      "GL0034"
+     ]
+    }
+   ],
+   "sponsor": "Sun Pharmaceutical Industries",
+   "sponsor_basis": "authors employed by Sun Pharma",
+   "indication": "Overweight/obese adults with T2D on metformin and/or SGLT2i",
+   "stage": "Clinical – phase not stated",
+   "mechanism": "GLP-1RA",
+   "model": "Overweight/obese adults with T2D on metformin and/or SGLT2i",
+   "key_finding": "Significant body weight and glycemic reductions at 16 wk (interim)",
+   "title": "Utreglutide (GL0034) Shows Comparable Tolerability and Efficacy with Different Dose Escalation Regimens in Overweight and Obese Adults with Type 2 Diabetes (T2DM)",
+   "link": "https://doi.org/10.2337/db26-2833-lb"
+  },
+  {
+   "abstract_no": "1792-P",
+   "program": "WVE-007",
+   "drugs": [
+    {
+     "name": "WVE-007"
+    }
+   ],
+   "sponsor": "Wave Life Sciences",
+   "sponsor_basis": "authors employed by Wave Life Sciences; \"Wave Life Sciences is evaluating WVE-007\"",
+   "indication": "Overweight/obesity",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "INHBE siRNA",
+   "model": "Overweight/obesity",
+   "key_finding": "Safe and well tolerated up to 600 mg, no discontinuations",
+   "title": "Interim Results from INLIGHT, a Phase 1 Study of Investigational WVE-007, an INHBE Galnac siRNA for the Treatment of Overweight and Obesity",
+   "link": "https://doi.org/10.2337/db26-1792-p"
+  },
+  {
+   "abstract_no": "2594-P",
+   "program": "XTL6001",
+   "drugs": [
+    {
+     "name": "XTL6001"
+    }
+   ],
+   "sponsor": "Shaanxi Micot Pharmaceutical Technology",
+   "sponsor_basis": "authors employed by Shaanxi Micot Pharmaceutical",
+   "indication": "Healthy participants (drug for obesity)",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "MasR/GCGR/GLP-1R triple agonist",
+   "model": "Healthy participants (drug for obesity)",
+   "key_finding": "Favorable safety and tolerability in SAD",
+   "title": "XTL6001: A Novel Triple MasR/GCGR/GLP-1R Agonist for Weight Loss and Obesity-Related Complications",
+   "link": "https://doi.org/10.2337/db26-2594-p"
+  },
+  {
+   "abstract_no": "1725-P",
+   "program": "Zovaglutide (ZT002)",
+   "drugs": [
+    {
+     "name": "Zovaglutide",
+     "aliases": [
+      "ZT002"
+     ]
+    }
+   ],
+   "sponsor": "Beijing QL Biopharmaceutical (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Overweight/obesity with prediabetes (without diabetes)",
+   "stage": "Clinical – Phase 2",
+   "mechanism": "GLP-1RA (once-monthly)",
+   "model": "Overweight/obesity with prediabetes (without diabetes)",
+   "key_finding": null,
+   "title": "Once-Monthly Zovaglutide (ZT002) in Adults with Overweight or Obesity and Prediabetes: A Phase 2 Subgroup Analysis",
+   "link": "https://doi.org/10.2337/db26-1725-p"
+  },
+  {
+   "abstract_no": "1721-P",
+   "program": "ZT006",
+   "drugs": [
+    {
+     "name": "ZT006"
+    }
+   ],
+   "sponsor": "Beijing QL Biopharmaceutical (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Healthy participants and participants with overweight/obesity",
+   "stage": "Clinical – Phase 1",
+   "mechanism": "Oral GLP-1RA peptide",
+   "model": "Healthy participants and participants with overweight/obesity",
+   "key_finding": null,
+   "title": "Safety, Tolerability, Pharmacokinetics, and Pharmacodynamics of ZT006 Tablet, an Oral GLP-1 Receptor Agonist Peptide, in Healthy Participants, Participants with Overweight or Obesity: A Phase 1 Study",
+   "link": "https://doi.org/10.2337/db26-1721-p"
+  },
+  {
+   "abstract_no": "2501-P",
+   "program": "AAV-CARF",
+   "drugs": [
+    {
+     "name": "AAV-CARF"
+    }
+   ],
+   "sponsor": "Academic (funded by NIGMS)",
+   "sponsor_basis": "funding: NIGMS",
+   "indication": "Obesity + MASLD",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Liver-directed AAV gene therapy (CARF overexpression)",
+   "model": "Hepatocytes (Seahorse), DIO mice",
+   "key_finding": "CARF reprogrammed hepatic oxidative metabolism to limit steatosis",
+   "title": "CARF (CDKN2AIP) Reprograms Hepatic Oxidative Metabolism to Limit Steatosis in Obese Mice",
+   "link": "https://doi.org/10.2337/db26-2501-p"
+  },
+  {
+   "abstract_no": "3070-LB",
+   "program": "ABK-GIPR-1 (± GLP-1RA)",
+   "drugs": [
+    {
+     "name": "ABK-GIPR-1"
+    }
+   ],
+   "sponsor": "Abbisko Therapeutics",
+   "sponsor_basis": "authors employed by Abbisko",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral small-molecule GIPR antagonist",
+   "model": "Preclinical obesity models",
+   "key_finding": "Enhanced GLP-1RA weight loss and metabolic profile",
+   "title": "ABK-GIPR-1, an Oral Small-Molecule GIPR Antagonist, Enhanced GLP-1RA’s Efficacy in Reducing Body Weight and Improving Metabolic Profile in Preclinical Obesity Models",
+   "link": "https://doi.org/10.2337/db26-3070-lb"
+  },
+  {
+   "abstract_no": "3062-LB",
+   "program": "ACCG-2728",
+   "drugs": [
+    {
+     "name": "ACCG-2728"
+    }
+   ],
+   "sponsor": "Structure Therapeutics",
+   "sponsor_basis": "authors employed by Structure",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral small-molecule amylin receptor agonist",
+   "model": "Lean rats",
+   "key_finding": "CTA profile compared with GLP-1 and amylin peptides",
+   "title": "Comparison of Conditioned Taste Avoidance Profiles between GLP-1 Peptides, Amylin Peptides, and Small Molecule Amylin Receptor Agonists",
+   "link": "https://doi.org/10.2337/db26-3062-lb"
+  },
+  {
+   "abstract_no": "1267-OR",
+   "program": "Ademaglitazone (ADM)",
+   "drugs": [
+    {
+     "name": "Ademaglitazone"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP/funding stated",
+   "indication": "Obesity / T2D (diabesity)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Indole-TZD hybrid PPAR-γ agonist",
+   "model": "Diet-induced diabesity mice",
+   "key_finding": "Improved insulin sensitivity while limiting adipogenesis",
+   "title": "Ademaglitazone Improves Whole-Body Insulin Sensitivity while Limiting Adipogenesis and Promoting Neuroprotection in Diet-Induced Diabesity",
+   "link": "https://doi.org/10.2337/db26-1267-or"
+  },
+  {
+   "abstract_no": "3061-LB",
+   "program": "Aleniglipron + ACCG-2671",
+   "drugs": [
+    {
+     "name": "Aleniglipron",
+     "aliases": [
+      "GSBR-1290"
+     ]
+    },
+    {
+     "name": "ACCG-2671"
+    }
+   ],
+   "sponsor": "Structure Therapeutics",
+   "sponsor_basis": "Disclosure: Employee; Current; Structure Therapeutics",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral small-molecule GLP-1RA + oral small-molecule amylin receptor agonist",
+   "model": "Obese NHPs",
+   "key_finding": "Combination gave additional weight loss vs monotherapy; supports oral fixed-dose combination",
+   "title": "Combination Treatment of Oral Small Molecule GLP-1 Receptor Agonist Aleniglipron and Small Molecule Amylin Receptor Agonist ACCG-2671 Demonstrated Additional Weight Loss than Monotreatment in Obese NHPs",
+   "link": "https://doi.org/10.2337/10.2337/db26-3061-lb"
+  },
+  {
+   "abstract_no": "2830-LB",
+   "program": "AM-710 (ultra-long-acting orforglipron prodrug)",
+   "drugs": [
+    {
+     "name": "AM-710"
+    }
+   ],
+   "sponsor": "Aion Medicines",
+   "sponsor_basis": "authors employed by Aion Medicines",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Ultra-long-acting small-molecule GLP-1RA prodrug",
+   "model": "Obese NHPs, DIO mice",
+   "key_finding": "Single injection produced durable >20% weight loss in obese NHPs",
+   "title": "A Single Injection of Ultra-Long-Acting GLP-1 Receptor Agonist AM-710 Produces Durable >20% Weight Loss in Obese Nonhuman Primates",
+   "link": "https://doi.org/10.2337/db26-2830-lb"
+  },
+  {
+   "abstract_no": "3065-LB",
+   "program": "AMB-702",
+   "drugs": [
+    {
+     "name": "AMB-702"
+    }
+   ],
+   "sponsor": "Ambrosia Biosciences",
+   "sponsor_basis": "authors employed by Ambrosia",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral small-molecule GLP-1RA",
+   "model": "In vitro assays, mice, NHPs",
+   "key_finding": null,
+   "title": "Nonclinical Profile of AMB-702, a Potent and Novel Oral GLP-1 Receptor Agonist",
+   "link": "https://doi.org/10.2337/db26-3065-lb"
+  },
+  {
+   "abstract_no": "2556-P",
+   "program": "AN465/42243987",
+   "drugs": [
+    {
+     "name": "AN465/42243987"
+    }
+   ],
+   "sponsor": "Academic (funded by China National S&T Major Project)",
+   "sponsor_basis": "funding: Noncommunicable Chronic Diseases National S&T Major Project",
+   "indication": "Obesity-associated metabolic dysfunction",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "GPSM1 antagonist",
+   "model": "Human aortic endothelial cells; endothelial GPSM1 KO mice; obese mice",
+   "key_finding": null,
+   "title": "GPSM1 in Adipose Endothelium Drives Obesity-Associated Metabolic Dysfunction via cAMP/PKA/ERK-Mediated EndMT",
+   "link": "https://doi.org/10.2337/db26-2556-p"
+  },
+  {
+   "abstract_no": "3067-LB",
+   "program": "ASC39",
+   "drugs": [
+    {
+     "name": "ASC39"
+    }
+   ],
+   "sponsor": "Ascletis Pharma (inferred)",
+   "sponsor_basis": "Disclosures \"None\"; ASC-coded compound of Ascletis",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral small-molecule amylin receptor agonist",
+   "model": "Human amylin/calcitonin receptor cAMP assays; in vivo models",
+   "key_finding": "Selective, potent oral amylin receptor agonist profiled vs eloralintide",
+   "title": "ASC39: An Eloralintide-Like Selective and Potent Oral Small Molecule Amylin Receptor Agonist for the Treatment of Obesity",
+   "link": "https://doi.org/10.2337/10.2337/db26-3067-lb"
+  },
+  {
+   "abstract_no": "1713-P",
+   "program": "AT7687 + cagrilintide",
+   "drugs": [
+    {
+     "name": "AT7687"
+    },
+    {
+     "name": "Cagrilintide"
+    }
+   ],
+   "sponsor": "Antag Therapeutics",
+   "sponsor_basis": "Disclosure: Employee; Current; Antag Therapeutics",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GIPR peptide antagonist + amylin analogue",
+   "model": "High-fat-fed obese insulin-resistant NHPs",
+   "key_finding": "Combination produced robust weight loss with improved insulin sensitivity and body composition vs monotherapies",
+   "title": "AT7687, a Novel GIP-Receptor Antagonist, Combined with Cagrilintide, Leads to Robust Weight Loss and Substantial Improvements in Insulin Sensitivity and Body Composition in Obese Insulin-Resistant Monkeys",
+   "link": "https://doi.org/10.2337/10.2337/db26-1713-p"
+  },
+  {
+   "abstract_no": "3032-LB",
+   "program": "ATR-258",
+   "drugs": [
+    {
+     "name": "ATR-258"
+    }
+   ],
+   "sponsor": "Atrogi AB",
+   "sponsor_basis": "authors employed by Atrogi",
+   "indication": "Obesity / insulin resistance",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "β2-adrenergic receptor modulator",
+   "model": "DIO mice, PI3K-mutant mice",
+   "key_finding": "Improved insulin sensitivity in obese mice",
+   "title": "ß2-Adrenergic Receptor Modulators Improve Insulin Sensitivity in Obese and PI3K-Mutant Mice",
+   "link": "https://doi.org/10.2337/db26-3032-lb"
+  },
+  {
+   "abstract_no": "2828-LB",
+   "program": "BACH01 (oral nanoengineered semaglutide platform)",
+   "drugs": [
+    {
+     "name": "BACH01"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP/funding stated",
+   "indication": "Obesity / T2D",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral nanoparticle delivery platform for GLP-1RA peptides",
+   "model": "Cell uptake assays, PK animal models",
+   "key_finding": "2 lead candidates selected from ~250 for highest oral bioavailability",
+   "title": "BACH01, a Nanoengineered Platform Enabling Oral Semaglutide with Preclinical Evaluation",
+   "link": "https://doi.org/10.2337/db26-2828-lb"
+  },
+  {
+   "abstract_no": "1106-OR",
+   "program": "BC-006 (GalNAc-siRNA)",
+   "drugs": [
+    {
+     "name": "BC-006"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP or FUND stated",
+   "indication": "Weight maintenance after GLP-1 withdrawal",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "INHBE siRNA",
+   "model": "Obese NHPs",
+   "key_finding": "Prevented weight rebound and restored muscle mass after semaglutide withdrawal",
+   "title": "Prevention of Weight Rebound and Restoration of Muscle Mass after Semaglutide Withdrawal Using Bc-006, an INHBE siRNA, in a Nonhuman Primate Obesity Model",
+   "link": "https://doi.org/10.2337/db26-1106-or"
+  },
+  {
+   "abstract_no": "3075-LB",
+   "program": "BG-104",
+   "drugs": [
+    {
+     "name": "BG-104"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP/funding stated",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1/GIP/hGH receptor trispecific agonist + ActRII targeting",
+   "model": "Aged DIO mice",
+   "key_finding": "Selective fat mass reduction",
+   "title": "A Trispecific GLP-1/GIP/hGH Receptor Agonist Targeting Activin Type II Receptor Drives Selective Fat Mass Reduction",
+   "link": "https://doi.org/10.2337/db26-3075-lb"
+  },
+  {
+   "abstract_no": "1818-P",
+   "program": "BGM2618 (+ GLP-1/GIP agonist)",
+   "drugs": [
+    {
+     "name": "BGM2618"
+    }
+   ],
+   "sponsor": "BrightGene Bio-Medical",
+   "sponsor_basis": "authors employed by BrightGene",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Macrocyclic peptide myostatin inhibitor",
+   "model": "Obese mice",
+   "key_finding": "Preserves lean mass during GLP-1/GIP-induced weight loss",
+   "title": "BGM2618, a Selective Myostatin Inhibitor, Preserves Lean Mass during GLP-1/GIP–Induced Weight Loss in Obese Mice",
+   "link": "https://doi.org/10.2337/db26-1818-p"
+  },
+  {
+   "abstract_no": "1791-P",
+   "program": "Cagrilintide + semaglutide microarray patch (Vaxess MAP)",
+   "drugs": [
+    {
+     "name": "Cagrilintide"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Vaxess Technologies",
+   "sponsor_basis": "authors employed by Vaxess",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro",
+   "mechanism": "Microarray patch delivery (amylin analogue + GLP-1RA codelivery)",
+   "model": "Microarray patch formulation (shelf stability; in vivo not stated in excerpt)",
+   "key_finding": "Codelivery without coformulation via shelf-stable self-applied patch",
+   "title": "Codelivery without Coformulation of Amylin Analog and GLP-1RA via a Shelf-Stable, Self-Applied Microarray Patch",
+   "link": "https://doi.org/10.2337/db26-1791-p"
+  },
+  {
+   "abstract_no": "1821-P",
+   "program": "CBL-514 + Tirzepatide",
+   "drugs": [
+    {
+     "name": "CBL-514"
+    },
+    {
+     "name": "Tirzepatide"
+    }
+   ],
+   "sponsor": "Caliway Biopharmaceuticals",
+   "sponsor_basis": "authors employed by Caliway",
+   "indication": "Obesity (weight-loss durability after GLP-1 discontinuation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Adipocyte-apoptosis agent (combination with GLP-1/GIP RA)",
+   "model": "DIO rats",
+   "key_finding": "Improved weight-loss durability and adipose remodeling after tirzepatide discontinuation",
+   "title": "Combination of Tirzepatide with CBL-514 an Adipocyte-Apoptosis Agent Improves Weight Loss Durability and Adipose Tissue Remodeling in Diet-Induced Obese Rats",
+   "link": "https://doi.org/10.2337/db26-1821-p"
+  },
+  {
+   "abstract_no": "1105-OR",
+   "program": "CC-18",
+   "drugs": [
+    {
+     "name": "CC-18"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP or FUND stated",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "GLP-1R agonist/ActRIIA/ActRIIB dual-pathway fusion protein",
+   "model": "Cell-based assays, DIO mice, monkeys",
+   "key_finding": "Reduced weight while increasing muscle",
+   "title": "In Vitro and In Vivo Characterization of CC-18, a Novel GLP-1R/ActRIIA/ActRIIB Dual Pathway-Targeting Fusion Protein That Reduces Weight while Increasing Muscle in Preclinical Models",
+   "link": "https://doi.org/10.2337/db26-1105-or"
+  },
+  {
+   "abstract_no": "1842-P",
+   "program": "Celecoxib + valsartan + metformin",
+   "drugs": [
+    {
+     "name": "Celecoxib + Valsartan + Metformin"
+    }
+   ],
+   "sponsor": "Myopharm",
+   "sponsor_basis": "authors employed by Myopharm",
+   "indication": "T2D / obesity (adiposity)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "COX-2 inhibitor + ARB + biguanide combination",
+   "model": "Obese mice",
+   "key_finding": "Reduced HbA1c and adiposity vs metformin monotherapy",
+   "title": "Reduction in HbA1c and Adiposity in Obese Mice Treated with Celecoxib, Valsartan, and Metformin Compared with Metformin Monotherapy",
+   "link": "https://doi.org/10.2337/db26-1842-p"
+  },
+  {
+   "abstract_no": "1794-P",
+   "program": "CIS-0602K + tirzepatide",
+   "drugs": [
+    {
+     "name": "CIS-0602K"
+    },
+    {
+     "name": "Tirzepatide"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "No employee disclosures; author advisory/research ties only; no funder stated",
+   "indication": "T2D / insulin resistance + obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Insulin sensitizer + GLP-1/GIP dual agonist",
+   "model": "DIO mice (plus clinical T2D data)",
+   "key_finding": "Combination with tirzepatide synergistically remodeled skeletal muscle and adipose tissue",
+   "title": "New Insulin Sensitizer CIS-0602K Potential to Expand Treatment Options to Manage Diabetes",
+   "link": "https://doi.org/10.2337/10.2337/db26-1794-p"
+  },
+  {
+   "abstract_no": "3079-LB",
+   "program": "CMS-D008",
+   "drugs": [
+    {
+     "name": "CMS-D008"
+    }
+   ],
+   "sponsor": "Shenzhen Kangzhe Biotechnology (China Medical System)",
+   "sponsor_basis": "authors employed by Shenzhen Kangzhe",
+   "indication": "Obesity (fat-selective weight loss / maintenance)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "INHBE siRNA",
+   "model": "Not stated in excerpt",
+   "key_finding": "Specific INHBE silencing with fat-selective weight loss",
+   "title": "CMS-D008 Specifically Silences INHBE mRNA, Delivering Fat-Selective Weight Loss in Preclinical Study",
+   "link": "https://doi.org/10.2337/db26-3079-lb"
+  },
+  {
+   "abstract_no": "1322-OR",
+   "program": "Dorzagliatin + orforglipron",
+   "drugs": [
+    {
+     "name": "Dorzagliatin"
+    },
+    {
+     "name": "Orforglipron"
+    }
+   ],
+   "sponsor": "Hua Medicine",
+   "sponsor_basis": "Disclosure: Employee; Current; Hua Medicine",
+   "indication": "Obesity + T2D",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Glucokinase activator + oral small-molecule GLP-1RA",
+   "model": "hGLP-1R transgenic DIO mice",
+   "key_finding": "Combination improved glycemic control and adiposity, potentially allowing lower GLP-1RA dosing",
+   "title": "Synergistic Effects of Dorzagliatin and Orforglipron on Glycemic Control and Adiposity in DIO Mice",
+   "link": "https://doi.org/10.2337/10.2337/db26-1322-or"
+  },
+  {
+   "abstract_no": "3082-LB",
+   "program": "Eloralintide (LY3841136) + tirzepatide",
+   "drugs": [
+    {
+     "name": "Eloralintide",
+     "aliases": [
+      "LY3841136"
+     ]
+    },
+    {
+     "name": "Tirzepatide"
+    }
+   ],
+   "sponsor": "Eli Lilly",
+   "sponsor_basis": "authors employed by Lilly",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Selective amylin analogue (+ GIP/GLP-1 agonist)",
+   "model": "DIO rats",
+   "key_finding": "Enhanced weight loss when combined with tirzepatide",
+   "title": "The Selective Amylin Analog Eloralintide Enhanced Weight-Loss Efficacy when Combined with Tirzepatide in DIO Rats",
+   "link": "https://doi.org/10.2337/db26-3082-lb"
+  },
+  {
+   "abstract_no": "1817-P",
+   "program": "ENT-21 (oral form of ENT-03)",
+   "drugs": [
+    {
+     "name": "ENT-21",
+     "aliases": [
+      "ENT-03"
+     ]
+    }
+   ],
+   "sponsor": "Enterin (inferred)",
+   "sponsor_basis": "drug owner (inferred)",
+   "indication": "Obesity / T2D",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "PTP1B inhibitor (centrally acting, oral)",
+   "model": "SD rats (PK); in silico binding modeling",
+   "key_finding": "Oral ENT-03 derivative identified by rat bioavailability; ENT-03 sc safe in Phase 1a",
+   "title": "ENT-21: Identification of Oral ENT-03 Form for Obesity and Type 2 Diabetes Management and Modeling of Allosteric Binding to PTP1b",
+   "link": "https://doi.org/10.2337/db26-1817-p"
+  },
+  {
+   "abstract_no": "2560-P",
+   "program": "FBL-140",
+   "drugs": [
+    {
+     "name": "FBL-140"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP/funding stated",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vitro",
+   "mechanism": "ActR2A/B antagonist antibody (once-monthly s.c.)",
+   "model": "Not stated in excerpt",
+   "key_finding": null,
+   "title": "Development of FBL-140, a Best-in-Class, Once-Monthly Subcutaneous ActR2A/B Antagonist Antibody for Obesity and Related Comorbidities",
+   "link": "https://doi.org/10.2337/db26-2560-p"
+  },
+  {
+   "abstract_no": "3094-LB",
+   "program": "FBL-140",
+   "drugs": [
+    {
+     "name": "FBL-140"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "company not named in abstract excerpt",
+   "indication": "Obesity (fat loss with lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "ActR2A/B antagonist antibody",
+   "model": "NHPs (PK/PD) + human PK simulation",
+   "key_finding": "Modelling supports quarterly s.c. dosing in humans",
+   "title": "FBL-140, a Best-in-Class ActR2A/B mAb Designed for Infrequent SC Dosing for Treatment of Obesity",
+   "link": "https://doi.org/10.2337/db26-3094-lb"
+  },
+  {
+   "abstract_no": "1103-OR",
+   "program": "GUB-UCN2 (± semaglutide)",
+   "drugs": [
+    {
+     "name": "GUB-UCN2"
+    }
+   ],
+   "sponsor": "Gubra",
+   "sponsor_basis": "authors employed by Gubra",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Long-acting CRHR2-selective UCN2 analogue",
+   "model": "Aged DIO rats",
+   "key_finding": "Increased muscle mass, reduced fat mass as monotherapy and with semaglutide",
+   "title": "GUB-UCN2 as Monotherapy and in Combination with Semaglutide Increases Muscle Mass, Reduces Fat Mass, and Improves Metabolic Outcomes in Aged Diet-Induced Obese Rats",
+   "link": "https://doi.org/10.2337/db26-1103-or"
+  },
+  {
+   "abstract_no": "2546-P",
+   "program": "HDM1014 (GalNAc-siRNA)",
+   "drugs": [
+    {
+     "name": "HDM1014"
+    }
+   ],
+   "sponsor": "Hangzhou Zhongmei Huadong Pharmaceutical (with GenScript)",
+   "sponsor_basis": "authors employed by Huadong Pharmaceutical and GenScript",
+   "indication": "Obesity (fat-selective, muscle preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "INHBE siRNA",
+   "model": "Not stated in excerpt",
+   "key_finding": null,
+   "title": "Preclinical Efficacy and Safety of HDM1014, a Novel GalNAc-siRNA Targeting INHBE, for Weight Management with Muscle Preservation",
+   "link": "https://doi.org/10.2337/db26-2546-p"
+  },
+  {
+   "abstract_no": "1803-P",
+   "program": "HM17321",
+   "drugs": [
+    {
+     "name": "HM17321"
+    }
+   ],
+   "sponsor": "Hanmi Pharmaceutical",
+   "sponsor_basis": "authors employed by Hanmi",
+   "indication": "Obesity (lean-mass preservation; obesity-associated musculoskeletal disease)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "UCN2 analogue (CRFR2-selective)",
+   "model": "Obese mouse models of osteoarthritis/osteoporosis",
+   "key_finding": "Protective effects on obesity-associated musculoskeletal disease",
+   "title": "Protective Effects of HM17321, a Novel UCN2 Analog, on Obesity-Associated Musculoskeletal Diseases in Mouse Models",
+   "link": "https://doi.org/10.2337/db26-1803-p"
+  },
+  {
+   "abstract_no": "2537-P",
+   "program": "HM17321 (± bimagrumab)",
+   "drugs": [
+    {
+     "name": "HM17321"
+    },
+    {
+     "name": "Bimagrumab"
+    }
+   ],
+   "sponsor": "Hanmi Pharm",
+   "sponsor_basis": "authors employed by Hanmi",
+   "indication": "Obesity (weight-loss quality / lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "CRFR2-selective UCN2 analogue",
+   "model": "Male and female DIO mice",
+   "key_finding": "Fat-selective body weight loss alone and with myostatin/activin inhibition",
+   "title": "Body Composition and Functional Outcomes of HM17321, a CRFR2-Selective UCN2 Analog, Alone and in Combination with Myostatin/Activin Inhibition in DIO Mice",
+   "link": "https://doi.org/10.2337/db26-2537-p"
+  },
+  {
+   "abstract_no": "3078-LB",
+   "program": "HM17321 + amylin analogues (cagrilintide, petrelintide, eloralintide)",
+   "drugs": [
+    {
+     "name": "HM17321"
+    },
+    {
+     "name": "Cagrilintide"
+    },
+    {
+     "name": "Petrelintide"
+    },
+    {
+     "name": "Eloralintide",
+     "aliases": [
+      "LY3841136"
+     ]
+    }
+   ],
+   "sponsor": "Hanmi Pharm",
+   "sponsor_basis": "authors employed by Hanmi",
+   "indication": "Obesity (weight-loss quality)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "CRFR2-selective UCN2 analogue + amylin analogue",
+   "model": "DIO rats",
+   "key_finding": "Improved weight-loss quality in combination with amylin analogues",
+   "title": "HM17321, a Novel UCN2 Analog, Improves Weight Loss Quality in Combination with Amylin Analogs in DIO Rats",
+   "link": "https://doi.org/10.2337/db26-3078-lb"
+  },
+  {
+   "abstract_no": "3073-LB",
+   "program": "HM500197",
+   "drugs": [
+    {
+     "name": "HM500197"
+    }
+   ],
+   "sponsor": "Hanmi Pharm",
+   "sponsor_basis": "authors employed by Hanmi",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Long-acting de novo peptide myostatin inhibitor",
+   "model": "DIO mice",
+   "key_finding": "Improved skeletal muscle mass and body composition",
+   "title": "HM500197, a De Novo–Designed Long-Acting Peptide Myostatin Inhibitor, Improves Skeletal Muscle Mass and Body Composition in Diet-Induced Obese Mice",
+   "link": "https://doi.org/10.2337/db26-3073-lb"
+  },
+  {
+   "abstract_no": "2550-P",
+   "program": "HTD1801 + semaglutide / tirzepatide",
+   "drugs": [
+    {
+     "name": "HTD1801"
+    },
+    {
+     "name": "Semaglutide"
+    },
+    {
+     "name": "Tirzepatide"
+    }
+   ],
+   "sponsor": "HighTide Therapeutics",
+   "sponsor_basis": "authors employed by HighTide",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "AMPK activator / NLRP3 inhibitor (metabolic modulator) + GLP-1RA",
+   "model": "DIO mice",
+   "key_finding": "Enhanced weight loss in combination with GLP-1RAs",
+   "title": "Enhanced Weight Loss when HTD1801 Is Combined with GLP-1RAs in DIO Mice",
+   "link": "https://doi.org/10.2337/db26-2550-p"
+  },
+  {
+   "abstract_no": "1678-P",
+   "program": "IBI3032",
+   "drugs": [
+    {
+     "name": "IBI3032"
+    }
+   ],
+   "sponsor": "Innovent Biologics (inferred)",
+   "sponsor_basis": "Disclosures \"None\"; IBI-coded compound of Innovent Biologics",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral small-molecule (non-peptide) GLP-1RA",
+   "model": "Mice, rats, dogs, cynomolgus monkeys (PK); preclinical obesity models",
+   "key_finding": "Potent oral non-peptide GLP-1RA with cross-species PK and anti-obesity efficacy supporting Phase 1",
+   "title": "IBI3032: An Orally Bioavailable Nonpeptidic GLP-1 Receptor Agonist Advancing through Phase 1 Clinical Trials",
+   "link": "https://doi.org/10.2337/10.2337/db26-1678-p"
+  },
+  {
+   "abstract_no": "3077-LB",
+   "program": "IBI3040",
+   "drugs": [
+    {
+     "name": "IBI3040"
+    }
+   ],
+   "sponsor": "Innovent Biologics",
+   "sponsor_basis": "authors employed by Innovent",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Amylin analogue",
+   "model": "Preclinical obesity models",
+   "key_finding": "Superior weight loss in preclinical models",
+   "title": "IBI3040, a Novel Amylin Analog, Induces Superior Weight Loss in Preclinical Models",
+   "link": "https://doi.org/10.2337/db26-3077-lb"
+  },
+  {
+   "abstract_no": "2543-P",
+   "program": "IBI3042",
+   "drugs": [
+    {
+     "name": "IBI3042"
+    }
+   ],
+   "sponsor": "Innovent Biologics (inferred)",
+   "sponsor_basis": "Disclosures \"None\"; IBI-coded compound of Innovent Biologics",
+   "indication": "Obesity + T2D",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral once-weekly small-molecule GLP-1RA",
+   "model": "DIO humanized GLP-1R knock-in mice",
+   "key_finding": "Twice-weekly oral dosing compared with daily orforglipron in DIO hGLP-1R mice",
+   "title": "IBI3042: A Novel Oral Once-Weekly Small-Molecule GLP-1 Receptor Agonist for Type 2 Diabetes and Obesity",
+   "link": "https://doi.org/10.2337/10.2337/db26-2543-p"
+  },
+  {
+   "abstract_no": "2662-P",
+   "program": "IBI3046 (GalNAc-siRNA)",
+   "drugs": [
+    {
+     "name": "IBI3046"
+    }
+   ],
+   "sponsor": "Innovent Biologics (inferred)",
+   "sponsor_basis": "drug owner (inferred, IBI code)",
+   "indication": "Obesity (high-quality, long-lasting weight control)",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "INHBE siRNA",
+   "model": "Hep3B cells, primary human hepatocytes; in vivo models not stated in excerpt",
+   "key_finding": "High-quality, long-lasting weight control",
+   "title": "IBI3046, an INHBE siRNA, Enables High Quality and Long-Lasting Weight Control in Preclinical Study",
+   "link": "https://doi.org/10.2337/db26-2662-p"
+  },
+  {
+   "abstract_no": "2566-P",
+   "program": "INHBE GalNAc-siRNA (INHBE-3; WVE-007 program) ± semaglutide",
+   "drugs": [
+    {
+     "name": "WVE-007"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Wave Life Sciences",
+   "sponsor_basis": "Disclosure: Employee; Current; Wave Life Sciences",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "INHBE (activin E) GalNAc-siRNA",
+   "model": "Mice (obesity models)",
+   "key_finding": "Single dose of INHBE-3 plus daily semaglutide doubled weight reduction vs either agent alone",
+   "title": "Silencing Hepatokine Activin E Promotes a Healthy Body Composition and Metabolic Profile in Mice",
+   "link": "https://doi.org/10.2337/10.2337/db26-2566-p"
+  },
+  {
+   "abstract_no": "2584-P",
+   "program": "IVL3021 (once-monthly long-acting semaglutide)",
+   "drugs": [
+    {
+     "name": "IVL3021"
+    }
+   ],
+   "sponsor": "Inventage Lab (inferred)",
+   "sponsor_basis": "IVL-DrugFluidic platform owner (inferred)",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Long-acting injectable GLP-1RA formulation",
+   "model": "DIO rats",
+   "key_finding": "Durable, exposure-dependent anti-obesity efficacy",
+   "title": "Durable and Exposure-Dependent Antiobesity Efficacy of IVL3021, a Once-Monthly Long-Acting Semaglutide in a Rat Diet-Induced Obesity Model",
+   "link": "https://doi.org/10.2337/db26-2584-p"
+  },
+  {
+   "abstract_no": "2721-LB",
+   "program": "JD5037",
+   "drugs": [
+    {
+     "name": "JD5037"
+    }
+   ],
+   "sponsor": "Academic (funded by NIAAA intramural)",
+   "sponsor_basis": "funding: NIAAA intramural",
+   "indication": "Obesity + steatotic liver disease",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Peripheral CB1R antagonist",
+   "model": "DIO mice (hepatocyte CB1R KO and floxed controls)",
+   "key_finding": "Reduced body weight and hyperleptinemia in both genotypes; reversed steatosis only in controls",
+   "title": "Obesity Switches Hepatic CB1 Signaling from Gi/oa-Mediated Lipolysis to Gsa-Driven Lipogenesis via the CREB-PPAR?-CD36-AMPK Axis",
+   "link": "https://doi.org/10.2337/db26-2721-lb"
+  },
+  {
+   "abstract_no": "3066-LB",
+   "program": "LiCO-saUcp1",
+   "drugs": [
+    {
+     "name": "LiCO-saUcp1"
+    }
+   ],
+   "sponsor": "Ractigen Therapeutics",
+   "sponsor_basis": "authors employed by Ractigen",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Ucp1 saRNA (lipid-conjugated oligonucleotide)",
+   "model": "Wild-type mice, DIO mice",
+   "key_finding": "Durable, high-quality weight loss",
+   "title": "Activating the Adipose Thermogenic Switch: A First-in-Class Ucp1 saRNA Drives Durable, High-Quality Weight Loss in Diet-Induced Obese Mice",
+   "link": "https://doi.org/10.2337/db26-3066-lb"
+  },
+  {
+   "abstract_no": "2589-P",
+   "program": "LUM-201 (ibutamoren) + semaglutide",
+   "drugs": [
+    {
+     "name": "Ibutamoren",
+     "aliases": [
+      "LUM-201",
+      "MK-677"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Lumos Pharma",
+   "sponsor_basis": "Disclosure: Employee; Current; Lumos Pharma",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral GH secretagogue + GLP-1RA",
+   "model": "DIO mice",
+   "key_finding": "Combination enhanced weight loss while preserving lean mass; supports Phase 2",
+   "title": "Combination LUM-201 and Semaglutide Enhances Weight Loss and Preserves Lean Mass in Diet-Induced Obesity: Translational Rationale for a Phase 2 Study in Adults with Obesity",
+   "link": "https://doi.org/10.2337/10.2337/db26-2589-p"
+  },
+  {
+   "abstract_no": "1686-P",
+   "program": "Mazdutide",
+   "drugs": [
+    {
+     "name": "Mazdutide",
+     "aliases": [
+      "IBI362",
+      "LY3305677"
+     ]
+    }
+   ],
+   "sponsor": "Academic (funded by Capital's Funds for Health Improvement and Research / Beijing S&T)",
+   "sponsor_basis": "funding: Capital's Funds / Beijing Municipal S&T",
+   "indication": "Obesity + MAFLD",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1R/GCGR dual agonist",
+   "model": "DIO mice (MAFLD model)",
+   "key_finding": "Reprogrammed systemic and hepatic metabolism, ameliorating MAFLD",
+   "title": "Dual GLP-1R/GCGR Activation Reprograms Systemic and Hepatic Metabolism to Ameliorate MAFLD",
+   "link": "https://doi.org/10.2337/db26-1686-p"
+  },
+  {
+   "abstract_no": "2814-LB",
+   "program": "Monthly cagrilintide + semaglutide microsphere injectable",
+   "drugs": [
+    {
+     "name": "Cagrilintide"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP/funding stated",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro",
+   "mechanism": "Long-acting amylin + GLP-1RA combination formulation (biodegradable microspheres)",
+   "model": "Not stated in excerpt",
+   "key_finding": null,
+   "title": "A Monthly Amylin and GLP-1 Agonists Combination Injectable Enabled by Novel Single-Process Biodegradable Microsphere Manufacturing",
+   "link": "https://doi.org/10.2337/db26-2814-lb"
+  },
+  {
+   "abstract_no": "1802-P",
+   "program": "Myo-004",
+   "drugs": [
+    {
+     "name": "Myo-004"
+    }
+   ],
+   "sponsor": "MitoRx Therapeutics",
+   "sponsor_basis": "authors employed by MitoRx",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Small-molecule metabolic modulator (fat-to-carbohydrate oxidation switch)",
+   "model": "DIO mice (thermoneutrality)",
+   "key_finding": "Body-weight loss in DIO mice at thermoneutrality; comparator tirzepatide",
+   "title": "Myo-004 Induces Body-Weight Loss in DIO at Thermoneutrality by Switching Metabolism from Fat to Carbohydrate Oxidation",
+   "link": "https://doi.org/10.2337/db26-1802-p"
+  },
+  {
+   "abstract_no": "2548-P",
+   "program": "Petrelintide",
+   "drugs": [
+    {
+     "name": "Petrelintide",
+     "aliases": [
+      "ZP8396",
+      "RG6849"
+     ]
+    }
+   ],
+   "sponsor": "Zealand Pharma",
+   "sponsor_basis": "Disclosure: Employee; Current; Zealand Pharma A/S; Funding: Zealand Pharma A/S",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Long-acting amylin analogue",
+   "model": "DIO rats",
+   "key_finding": "Distinct eating-pattern effects and maintained locomotor activity vs semaglutide",
+   "title": "Petrelintide Elicits Distinct Effects on Eating Pattern and Maintains Locomotor Activity Compared with Semaglutide in Rats with Diet-Induced Obesity",
+   "link": "https://doi.org/10.2337/10.2337/db26-2548-p"
+  },
+  {
+   "abstract_no": "1765-P",
+   "program": "PSTC1411",
+   "drugs": [
+    {
+     "name": "PSTC1411"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP or FUND stated",
+   "indication": "Obesity (weight loss + muscle preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral G-protein-biased apelin (APJ) agonist",
+   "model": "Not stated in excerpt",
+   "key_finding": "Monotherapy weight loss with muscle preservation (first disclosure)",
+   "title": "First Disclosure of PSTC1411, a Novel Oral G-Protein-Biased Apelin Agonist Demonstrating Monotherapy Efficacy for Weight Loss and Muscle Preservation",
+   "link": "https://doi.org/10.2337/db26-1765-p"
+  },
+  {
+   "abstract_no": "1772-P",
+   "program": "PSTC2501",
+   "drugs": [
+    {
+     "name": "PSTC2501"
+    }
+   ],
+   "sponsor": "Not stated",
+   "sponsor_basis": "no employer listed in disclosures",
+   "indication": "Obesity + cardiovascular disease",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral brain-penetrant NLRP3 inhibitor",
+   "model": "THP-1 cells, mouse BMDMs, DIO mice",
+   "key_finding": "Efficacy in DIO mouse model",
+   "title": "Novel Oral Brain Penetrant NLRP3 Inhibitor PSTC2501 for Treatment of Obesity and Cardiovascular Diseases",
+   "link": "https://doi.org/10.2337/db26-1772-p"
+  },
+  {
+   "abstract_no": "1321-OR",
+   "program": "PTT-A",
+   "drugs": [
+    {
+     "name": "PTT-A"
+    }
+   ],
+   "sponsor": "Pep2Tango Therapeutics",
+   "sponsor_basis": "authors employed by Pep2Tango",
+   "indication": "Obesity (weight-loss quality)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1/GIP/amylin/calcitonin unimolecular tetra-agonist",
+   "model": "DIO rats",
+   "key_finding": "Superior quality of weight loss vs tirzepatide and CagriSema",
+   "title": "Superior Quality of Weight Loss with a Novel Unimolecular Tetra-Agonist Peptide Targeting GLP-1, GIP, Amylin, and Calcitonin Receptors vs. Tirzepatide and Cagrisema in Diet-Induced Obese Rats",
+   "link": "https://doi.org/10.2337/db26-1321-or"
+  },
+  {
+   "abstract_no": "2578-P",
+   "program": "Retatrutide",
+   "drugs": [
+    {
+     "name": "Retatrutide",
+     "aliases": [
+      "LY3437943"
+     ]
+    }
+   ],
+   "sponsor": "Eli Lilly (inferred)",
+   "sponsor_basis": "drug owner (inferred); no EMP stated",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GIP/GLP-1/glucagon triple agonist",
+   "model": "Obese male and female mice",
+   "key_finding": "Enhanced weight loss in females with preserved muscle mass, strength and mitochondrial efficiency",
+   "title": "Retatrutide Enhances Weight Loss in Female Mice and Preserves Muscle Mass, Strength, and Mitochondrial Efficiency",
+   "link": "https://doi.org/10.2337/db26-2578-p"
+  },
+  {
+   "abstract_no": "2561-P",
+   "program": "RV-202",
+   "drugs": [
+    {
+     "name": "RV-202"
+    }
+   ],
+   "sponsor": "Rivus Pharmaceuticals",
+   "sponsor_basis": "authors employed by Rivus",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral mitochondrial uncoupler",
+   "model": "In vitro uncoupling assays, DIO mice",
+   "key_finding": "Durable, fat-selective weight loss with increased EE and fat oxidation",
+   "title": "RV-202, a Novel Oral Mitochondrial Uncoupler, Drives Durable, Fat-Selective Weight Loss in Mouse Model of Obesity",
+   "link": "https://doi.org/10.2337/db26-2561-p"
+  },
+  {
+   "abstract_no": "2553-P",
+   "program": "RV-202 + semaglutide",
+   "drugs": [
+    {
+     "name": "RV-202"
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Rivus Pharmaceuticals",
+   "sponsor_basis": "authors employed by Rivus",
+   "indication": "Obesity (weight maintenance after semaglutide discontinuation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral mitochondrial uncoupler",
+   "model": "DIO mice",
+   "key_finding": "Low-dose RV-202 converted subefficacious semaglutide into durable, fat-selective weight loss",
+   "title": "Low Dose of Oral Mitochondrial Uncoupler Converts a Subefficacious Semaglutide Dose into a Durable, Fat-Selective Weight Loss Treatment in Obesity Model",
+   "link": "https://doi.org/10.2337/db26-2553-p"
+  },
+  {
+   "abstract_no": "1104-OR",
+   "program": "RV-8451",
+   "drugs": [
+    {
+     "name": "RV-8451"
+    }
+   ],
+   "sponsor": "Rivus Pharmaceuticals",
+   "sponsor_basis": "Disclosure: Employee; Current; Rivus Pharmaceuticals",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral small-molecule (non-peptide) GLP-1RA",
+   "model": "DIO NHPs (also rodent obesity models)",
+   "key_finding": "~65% reduction in daily food intake with fat loss and lean-mass preservation; advancing to IND-enabling studies",
+   "title": "Muscle-Preserving Weight Loss with RV-8451, a Novel, Oral Nonpeptide GLP-1 Receptor Agonist, in Diet-Induced Obese Nonhuman Primates",
+   "link": "https://doi.org/10.2337/10.2337/db26-1104-or"
+  },
+  {
+   "abstract_no": "2574-P",
+   "program": "RV-8451",
+   "drugs": [
+    {
+     "name": "RV-8451"
+    }
+   ],
+   "sponsor": "Rivus Pharmaceuticals",
+   "sponsor_basis": "authors employed by Rivus",
+   "indication": "Obesity (lean-mass preservation)",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral small-molecule GLP-1RA (muscle-preserving)",
+   "model": "Not stated in excerpt",
+   "key_finding": null,
+   "title": "Discovery of RV-8451, a Novel, Oral, Muscle-Preserving Small Molecule GLP-1 Receptor Agonist",
+   "link": "https://doi.org/10.2337/db26-2574-p"
+  },
+  {
+   "abstract_no": "3059-LB",
+   "program": "Semaglutide + MS 001 (ulodesine hemiglutarate)",
+   "drugs": [
+    {
+     "name": "MS 001",
+     "aliases": [
+      "ulodesine hemiglutarate"
+     ]
+    },
+    {
+     "name": "Semaglutide"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP/funding stated",
+   "indication": "Obesity (muscle preservation)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Purine nucleoside phosphorylase inhibitor + GLP-1RA",
+   "model": "Mice (obese)",
+   "key_finding": "Further weight loss vs sema with increased muscle weight and reduced iWAT",
+   "title": "Combination of MS 001 with GLP-1R Agonist Semaglutide Induces Further Weight Loss while Supporting Muscle Health in Mice",
+   "link": "https://doi.org/10.2337/db26-3059-lb"
+  },
+  {
+   "abstract_no": "2577-P",
+   "program": "Semaglutide vs tirzepatide vs survodutide",
+   "drugs": [
+    {
+     "name": "Semaglutide"
+    },
+    {
+     "name": "Tirzepatide"
+    },
+    {
+     "name": "Survodutide",
+     "aliases": [
+      "BI 456906"
+     ]
+    }
+   ],
+   "sponsor": "Gubra",
+   "sponsor_basis": "Disclosure: Employee; Current; Gubra",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1RA vs GLP-1/GIP dual agonist vs GLP-1/glucagon dual agonist",
+   "model": "DIO mice at thermoneutrality",
+   "key_finding": "Only semaglutide and tirzepatide reduced food intake; all lowered RER early, indicating increased lipid oxidation",
+   "title": "Differential Effects of Semaglutide, Tirzepatide, and Survodutide on Energy Expenditure in Obese Mice under Thermoneutrality",
+   "link": "https://doi.org/10.2337/10.2337/db26-2577-p"
+  },
+  {
+   "abstract_no": "1220-OR",
+   "program": "Survodutide",
+   "drugs": [
+    {
+     "name": "Survodutide",
+     "aliases": [
+      "BI 456906"
+     ]
+    }
+   ],
+   "sponsor": "Boehringer Ingelheim",
+   "sponsor_basis": "Disclosure: Employee; Current; Boehringer Ingelheim International GmbH",
+   "indication": "Obesity + MASH",
+   "stage": "Preclinical – in vitro",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "Time-resolved cell-based GLP-1R/GCGR signaling assays",
+   "key_finding": "Differentiated GLP-1R/GCGR pharmacology vs endogenous ligands linked to C18-diacid half-life extension",
+   "title": "Survodutide: Differentiated GLP-1R and Glucagon Receptor (GCGR) Pharmacology Compared with Endogenous Ligands via Time-Resolved Assays",
+   "link": "https://doi.org/10.2337/10.2337/db26-1220-or"
+  },
+  {
+   "abstract_no": "2565-P",
+   "program": "Survodutide",
+   "drugs": [
+    {
+     "name": "Survodutide",
+     "aliases": [
+      "BI 456906"
+     ]
+    }
+   ],
+   "sponsor": "Boehringer Ingelheim",
+   "sponsor_basis": "authors employed by / funded by BI",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1/glucagon dual agonist",
+   "model": "DIO mice (thermoneutral housing)",
+   "key_finding": "Superior weight loss and EE vs semaglutide at thermoneutrality",
+   "title": "Survodutide Induces Superior Weight Loss and Energy Expenditure Compared with Semaglutide in DIO Mice Housed at Thermoneutrality",
+   "link": "https://doi.org/10.2337/db26-2565-p"
+  },
+  {
+   "abstract_no": "1266-OR",
+   "program": "Tirzepatide + pioglitazone",
+   "drugs": [
+    {
+     "name": "Tirzepatide"
+    },
+    {
+     "name": "Pioglitazone"
+    }
+   ],
+   "sponsor": "Academic (funded by Kuwait Foundation for the Advancement of Sciences)",
+   "sponsor_basis": "Funding: Kuwait Foundation for the Advancement of Sciences (KFAS)",
+   "indication": "Obesity (insulin resistance)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1/GIP dual agonist + TZD (PPAR-γ agonist)",
+   "model": "HFD-fed Sprague Dawley rats",
+   "key_finding": "Combination synergistically improved insulin sensitivity and adipose tissue remodeling",
+   "title": "Tirzepatide and Pioglitazone Combination Therapy Synergistically Improves Insulin Sensitivity and Adipose Tissue Remodeling",
+   "link": "https://doi.org/10.2337/10.2337/db26-1266-or"
+  },
+  {
+   "abstract_no": "2540-P",
+   "program": "Tirzepatide; Retatrutide",
+   "drugs": [
+    {
+     "name": "Tirzepatide"
+    },
+    {
+     "name": "Retatrutide"
+    }
+   ],
+   "sponsor": "Physiogenex",
+   "sponsor_basis": "authors employed by Physiogenex (CRO)",
+   "indication": "Obesity / dyslipidemia",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GIP/GLP-1 dual agonist; GIP/GLP-1/glucagon triple agonist",
+   "model": "Free-choice-diet obese dyslipidemic hamsters",
+   "key_finding": "Weight loss associated with altered food preference and metabolic benefits",
+   "title": "Weight Loss with Tirzepatide and Retatrutide Is Associated with Changes in Food Preference and Multiple Metabolic Benefits in the Free Choice Diet–Induced Obese Hamster Model",
+   "link": "https://doi.org/10.2337/db26-2540-p"
+  },
+  {
+   "abstract_no": "1319-OR",
+   "program": "TIX100",
+   "drugs": [
+    {
+     "name": "TIX100"
+    }
+   ],
+   "sponsor": "TIXiMED",
+   "sponsor_basis": "Author disclosure: Other - Co-founder, CSO/CMO; Current; TIXiMED, Inc. (no employee disclosure)",
+   "indication": "Obesity (weight-regain prevention)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Oral TXNIP inhibitor",
+   "model": "DIO mice after semaglutide discontinuation",
+   "key_finding": "Oral TIX100 protected against weight rebound after semaglutide withdrawal",
+   "title": "Oral TIX100 Protects against Weight Rebound after Semaglutide Discontinuation",
+   "link": "https://doi.org/10.2337/10.2337/db26-1319-or"
+  },
+  {
+   "abstract_no": "1790-P",
+   "program": "TLC-1180",
+   "drugs": [
+    {
+     "name": "TLC-1180"
+    }
+   ],
+   "sponsor": "OrsoBio",
+   "sponsor_basis": "Disclosure: Employee; Current; OrsoBio, Inc.",
+   "indication": "Obesity (insulin resistance)",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Liver-targeted mitochondrial protonophore",
+   "model": "DIO mice",
+   "key_finding": "Improved liver, muscle, WAT and myocardial insulin sensitivity and increased exercise capacity",
+   "title": "TLC-1180 Enhances Liver, Muscle, WAT, and Myocardial Insulin Sensitivity and Increases Exercise Capacity in DIO Mice",
+   "link": "https://doi.org/10.2337/10.2337/db26-1790-p"
+  },
+  {
+   "abstract_no": "3064-LB",
+   "program": "TLC-1180",
+   "drugs": [
+    {
+     "name": "TLC-1180"
+    }
+   ],
+   "sponsor": "OrsoBio",
+   "sponsor_basis": "authors employed by OrsoBio",
+   "indication": "Obesity-associated cognitive decline",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Mitochondrial protonophore (uncoupler)",
+   "model": "HFD + sucrose DIO mice",
+   "key_finding": "Mitigated cognitive decline and metabolic deficits",
+   "title": "Mitochondrial Protonophore TLC-1180 Mitigates Cognitive Decline in Diet-Induced Obese Mice",
+   "link": "https://doi.org/10.2337/db26-3064-lb"
+  },
+  {
+   "abstract_no": "2856-LB",
+   "program": "Vanoglipel (DA-1241) + metformin",
+   "drugs": [
+    {
+     "name": "Vanoglipel",
+     "aliases": [
+      "DA-1241"
+     ]
+    },
+    {
+     "name": "Metformin"
+    }
+   ],
+   "sponsor": "Dong-A ST (inferred)",
+   "sponsor_basis": "Disclosures \"None\"; vanoglipel (DA-1241) is a Dong-A ST compound",
+   "indication": "Obesity + T2D",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GPR119 agonist + biguanide",
+   "model": "DIO mice (60% HFD)",
+   "key_finding": "Combination synergistically improved glycemic control and reduced body weight",
+   "title": "Synergistic Effects of Vanoglipel and Metformin on Glycemic Control and Body Weight Reduction in a Diet-Induced Obese Mouse Model",
+   "link": "https://doi.org/10.2337/10.2337/db26-2856-lb"
+  },
+  {
+   "abstract_no": "3043-LB",
+   "program": "Vanoglipel (DA-1241) + resmetirom",
+   "drugs": [
+    {
+     "name": "Vanoglipel",
+     "aliases": [
+      "DA-1241"
+     ]
+    },
+    {
+     "name": "Resmetirom",
+     "create": false
+    }
+   ],
+   "sponsor": "Dong-A ST (inferred)",
+   "sponsor_basis": "Vanoglipel (DA-1241) is a Dong-A ST compound (not stated); one author Employee; Current; Gubra (CRO)",
+   "indication": "Obesity + MASH",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GPR119 agonist + THR-β agonist",
+   "model": "GAN diet-induced obese, biopsy-confirmed MASH mice",
+   "key_finding": "Combination gave synergistic hepatoprotective and weight-loss effects",
+   "title": "Synergistic Hepatoprotective and Weight-Loss Effects of Vanoglipel and Resmetirom Combination Therapy in a Diet-Induced Obese, Biopsy-Confirmed Mouse Model of MASH",
+   "link": "https://doi.org/10.2337/10.2337/db26-3043-lb"
+  },
+  {
+   "abstract_no": "1766-P",
+   "program": "VRB-103",
+   "drugs": [
+    {
+     "name": "VRB-103"
+    }
+   ],
+   "sponsor": "Verdiva Bio",
+   "sponsor_basis": "authors employed by Verdiva Bio / Sciwind",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Oral amylin analogue",
+   "model": "Receptor assays (amylin vs calcitonin receptors); oral PK (species not stated)",
+   "key_finding": "Potent, orally bioavailable, selective for human amylin receptors over calcitonin receptor",
+   "title": "VRB-103 Is a Potent, Orally Bioavailable Amylin Analog with a Strong Selectivity towards Human Amylin Receptors vs. Calcitonin Receptor",
+   "link": "https://doi.org/10.2337/db26-1766-p"
+  },
+  {
+   "abstract_no": "1658-P",
+   "program": "VRB-104",
+   "drugs": [
+    {
+     "name": "VRB-104"
+    }
+   ],
+   "sponsor": "Verdiva Bio",
+   "sponsor_basis": "authors employed by Verdiva Bio / Sciwind",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Unimolecular amylin/GLP-1 receptor dual agonist",
+   "model": "Cell-based potency assays; in vivo efficacy + PK (species not stated)",
+   "key_finding": null,
+   "title": "Characterization and Preclinical Efficacy of a Novel Unimolecular Amylin and GLP-1 Receptor Dual Agonist, VRB-104",
+   "link": "https://doi.org/10.2337/db26-1658-p"
+  },
+  {
+   "abstract_no": "2839-LB",
+   "program": "VRX-0075",
+   "drugs": [
+    {
+     "name": "VRX-0075"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "No employee disclosures (authors report Eli Lilly research support); no funder stated",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "GLP-1/GIP/glucagon/amylin/calcitonin receptor quintuple agonist",
+   "model": "Obese rats",
+   "key_finding": "Greater weight loss than retatrutide in obese rats",
+   "title": "A Long-Acting Quintuple Agonist for the GLP-1, GIP, Glucagon, Amylin, and Calcitonin Receptors Induces Greater Weight Loss than Retatrutide in Obese Rats",
+   "link": "https://doi.org/10.2337/10.2337/db26-2839-lb"
+  },
+  {
+   "abstract_no": "1324-OR",
+   "program": "XWDAPC-1",
+   "drugs": [
+    {
+     "name": "XWDAPC-1"
+    }
+   ],
+   "sponsor": "Sciwind Biosciences",
+   "sponsor_basis": "authors employed by Sciwind",
+   "indication": "Obesity + MASLD/MASH",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "β-klotho antibody–GLP-1/GCG/GIP triple agonist conjugate",
+   "model": "Cell assays, obese rodents, NHPs",
+   "key_finding": "Robust body weight reduction and metabolic improvement",
+   "title": "A β-klotho Antibody Conjugated to GLP-1/GCG/GIP Triple Agonist Demonstrates Robust Body Weight Reduction and Metabolic Improvement in Obese Rodents and Nonhuman Primates",
+   "link": "https://doi.org/10.2337/db26-1324-or"
+  },
+  {
+   "abstract_no": "1323-OR",
+   "program": "Zenagamtide (amycretin)",
+   "drugs": [
+    {
+     "name": "Amycretin",
+     "aliases": [
+      "Zenagamtide"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "sponsor_basis": "authors employed by Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vivo",
+   "mechanism": "Unimolecular GLP-1/amylin/calcitonin receptor agonist",
+   "model": "Sprague Dawley rats (free-choice diet)",
+   "key_finding": "Weight loss with preferential reduction of unhealthy diet intake",
+   "title": "Zenagamtide Targets Key Feeding-Related Brain Regions and Induces Weight Loss by Preferentially Reducing Consumption of Unhealthy Solid and Liquid Diets in Rats",
+   "link": "https://doi.org/10.2337/db26-1323-or"
+  },
+  {
+   "abstract_no": "2552-P",
+   "program": "ZT009",
+   "drugs": [
+    {
+     "name": "ZT009"
+    }
+   ],
+   "sponsor": "Academic / not stated",
+   "sponsor_basis": "no EMP or FUND stated",
+   "indication": "Obesity",
+   "stage": "Preclinical – in vitro + in vivo",
+   "mechanism": "Unimolecular long-acting GLP-1/amylin receptor agonist",
+   "model": "BHK cells (hGLP-1R/amylin receptor); in vivo models not stated in excerpt",
+   "key_finding": null,
+   "title": "Preclinical Proof of Concept of ZT009, a Novel Unimolecular Long-Acting GLP-1 and Amylin Receptor Agonist",
+   "link": "https://doi.org/10.2337/db26-2552-p"
+  }
+ ]
+}

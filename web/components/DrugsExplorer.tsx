@@ -10,12 +10,18 @@ import { icons } from "@/components/shell/icons";
 
 const level = (p: string) => (p.includes("PHASE4") ? 4 : p.includes("PHASE3") ? 3 : p.includes("PHASE2") ? 2 : p.includes("PHASE1") ? 1 : 0);
 const topLevel = (phases: string[]) => phases.reduce((m, p) => Math.max(m, level(p)), 0);
+// A drug with no trial yet, known from conference abstracts (e.g. ADA 2026).
+const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.all_trials === 0;
+// Most advanced phase: from its trials, else from its profile ("Phase 1/2" -> 2).
+const topOf = (p: ProductSummary) => p.trial_phases.length ? topLevel(p.trial_phases)
+  : Math.max(0, ...[...(p.phase ?? "").matchAll(/\d/g)].map((m) => Number(m[0])).filter((n) => n <= 4));
 const STAGES = [
   { key: 0, label: "All stages" },
   { key: 1, label: "Phase 1" },
   { key: 2, label: "Phase 2" },
   { key: 3, label: "Phase 3" },
   { key: 4, label: "Phase 4" },
+  { key: 5, label: "No trial yet (abstracts)" },
 ] as const;
 const LADDER = ["P1", "P2", "P3", "P4"];
 const STEP = 24;
@@ -27,23 +33,24 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
   const [sort, setSort] = useState<"trials" | "phase" | "name">("trials");
   const [limit, setLimit] = useState(STEP);
 
-  const base = useMemo(() => products.filter((p) => p.trials > 0), [products]);
+  const base = useMemo(() => products.filter((p) => p.trials > 0 || p.abstracts > 0), [products]);
+  const inStage = (p: ProductSummary, k: number) => (k === 5 ? abstractOnly(p) : !abstractOnly(p) && topOf(p) === k);
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = base.filter((p) => {
-      if (stage && topLevel(p.trial_phases) !== stage) return false; // most advanced phase is exactly this one
+      if (stage && !inStage(p, stage)) return false; // most advanced phase is exactly this one
       if (!needle) return true;
       return [p.name, p.aliases, p.brand_names, p.sponsor, p.drug_class, p.therapy_subclass, p.moa]
         .some((v) => v?.toLowerCase().includes(needle));
     });
     return out.sort((a, b) =>
       sort === "name" ? a.name.localeCompare(b.name)
-        : sort === "phase" ? topLevel(b.trial_phases) - topLevel(a.trial_phases) || b.trials - a.trials
+        : sort === "phase" ? topOf(b) - topOf(a) || b.trials - a.trials
           : b.trials - a.trials || a.name.localeCompare(b.name));
   }, [base, q, stage, sort]);
 
   const counts = useMemo(() => STAGES.map((s) => (s.key === 0 ? base.length
-    : base.filter((p) => topLevel(p.trial_phases) === s.key).length)), [base]);
+    : base.filter((p) => inStage(p, s.key)).length)), [base]);
 
   return (
     <div className="space-y-4">
@@ -96,7 +103,8 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {rows.slice(0, limit).map((p) => {
-                const top = topLevel(p.trial_phases);
+                const top = topOf(p);
+                const onlyAbs = abstractOnly(p);
                 const undisclosed = /^undisclosed/i.test(p.name);
                 return (
                   <Link key={p.slug} href={`/drugs/${encodeURIComponent(p.slug)}`}
@@ -110,15 +118,15 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600">{p.trials}</div>
-                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">trials</div>
+                        <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600">{onlyAbs ? p.abstracts : p.trials}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">{onlyAbs ? (p.abstracts === 1 ? "abstract" : "abstracts") : "trials"}</div>
                       </div>
                     </div>
 
                     <div className="mt-4">
                       <div className="mb-1.5 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                         <span>Development</span>
-                        <span className="text-slate-400">{top ? `up to Phase ${top}` : "phase n/a"}</span>
+                        <span className="text-slate-400">{top ? `up to Phase ${top}` : p.phase && onlyAbs ? p.phase : "phase n/a"}</span>
                       </div>
                       <div className="grid grid-cols-4 gap-1">
                         {LADDER.map((l, i) => (
@@ -131,8 +139,9 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                       </div>
                     </div>
 
-                    {(p.drug_class || p.candidate || p.approved === "Yes") && (
+                    {(p.drug_class || p.candidate || p.approved === "Yes" || p.abstracts > 0) && (
                       <div className="mt-3 flex flex-wrap gap-1">
+                        {p.abstracts > 0 && <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 ring-1 ring-amber-200" title={`${p.abstracts} conference abstract${p.abstracts === 1 ? "" : "s"}`}>{p.abstract_sources ?? "Abstracts"}</span>}
                         {p.approved === "Yes" && <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-emerald-700 ring-1 ring-emerald-200">approved</span>}
                         {p.candidate && <span className="rounded-md bg-accent-50 px-1.5 py-0.5 text-[10px] font-medium text-accent-700 ring-1 ring-accent-200">{p.candidate}</span>}
                         {p.drug_class && <span className="truncate rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 ring-1 ring-slate-200">{p.drug_class}</span>}

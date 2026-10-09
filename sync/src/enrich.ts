@@ -20,6 +20,7 @@ import { readFileSync } from "node:fs";
 import { pool } from "./db.js";
 import { config } from "./config.js";
 import { loadAliases } from "./sync.js";
+import { importAbstracts, type ImportResult } from "./abstracts.js";
 import {
   BUILTIN_ALIASES, buildKnownSet, isUndisclosedProduct, productsFromName, slugify, type AliasMap,
 } from "./products.js";
@@ -146,9 +147,11 @@ export function subclassFrom(text: string, smallMolecule = false): string | null
   const gip = /gastric inhibitory polypeptide|glucose-dependent insulinotropic|\bgipr?\b/.test(t);
   const gipAntagonist = /(gastric inhibitory polypeptide|\bgipr?\b)[^;]*(antagonist|inhibitor|blocker)/.test(t);
   const oxm = /oxyntomodulin/.test(t); // GLP-1 + glucagon receptor co-agonist
-  const gcg = oxm || /(^|[^-])\bglucagon receptor\b|\bgcgr?\b|glucagon agonist/.test(t);
+  const gcg = oxm || /(^|[^-])\bglucagon receptor\b|\bgcgr?\b|glucagon agonist|\bglucagon\b(?!-like)(?=\s*[/,]|\s+(dual|triple|co-?agonist))|[/,]\s*glucagon\b(?!-like)/.test(t);
   const amylin = /amylin|amlintide|pramlintide|calcitonin receptor/.test(t);
-  if (glp1 && gip && gcg) return "GIP/GLP-1/glucagon triple agonist";
+  const hits = [gip && !gipAntagonist && "GIP", glp1 && "GLP-1", gcg && "glucagon", amylin && "amylin"].filter((x): x is string => !!x);
+  const multi = hits.length >= 4 || /tetra|quadruple|quintuple|penta/.test(t);
+  if (glp1 && hits.length >= 3) return multi ? `${hits.join("/")} multi-agonist` : `${hits.join("/")} triple agonist`;
   if (glp1 && gipAntagonist) return "GLP-1 agonist / GIPR antagonist";
   if (glp1 && gip) return "GIP/GLP-1 dual agonist";
   if (glp1 && gcg) return "GLP-1/glucagon dual agonist";
@@ -235,12 +238,47 @@ export interface TrialFact {
 
 export interface PipelineAlias { alias: string; company: string }
 
+/** A conference abstract (e.g. ADA 2026) that names this drug. */
+export interface AbstractFact {
+  source: string;                // "ADA 2026"
+  sponsor: string | null;
+  indication: string | null;
+  stage: string | null;          // "Clinical – Phase 2b" | "Preclinical – in vivo" | ...
+  mechanism: string | null;
+  program?: string | null;
+  aliases: string[];
+  solo: boolean;                 // the abstract is about this drug alone (not a combination / comparison)
+}
+
+/** "Clinical – Phase 1b/2a" -> Phase 1/2, "Preclinical – in vivo" -> Preclinical; null when not stated. */
+export function phaseFromStage(stage: string | null | undefined): { level: number; label: string } | null {
+  const s = (stage ?? "").toLowerCase();
+  if (!s) return null;
+  if (s.startsWith("preclinical")) return { level: 0, label: "Preclinical" };
+  const m = /phase\s*(\d)\s*[ab]?(?:\s*\/\s*(?:phase\s*)?(\d))?/.exec(s);
+  if (m) {
+    const a = Number(m[1]), b = m[2] ? Number(m[2]) : null;
+    return b && b > a ? { level: b, label: `Phase ${a}/${b}` } : { level: a, label: `Phase ${a}` };
+  }
+  if (/first[- ]in[- ]human|\bfih\b/.test(s)) return { level: 1, label: "Phase 1" };
+  return null;
+}
+
+/** The developing company named by an abstract; null for academic / unstated sponsors. */
+export function industrySponsor(s: string | null | undefined): string | null {
+  const x = (s ?? "").replace(/\s*\(inferred\)\s*$/i, "").replace(/\s*\(with [^)]*\)\s*$/i, "").trim();
+  if (!x) return null;
+  if (/^(academic|not stated|unknown)/i.test(x) || /\b(funded|university|institute|national|foundation|association|grant|nih|niddk|rwjf)\b/i.test(x)) return null;
+  return x;
+}
+
 export interface DeriveInput {
   slug: string;
   name: string;
   trials: TrialFact[];
   aliasKeys: string[];           // alias slugs that fold into this product (built-in + product_aliases)
   pipelineAliases?: PipelineAlias[]; // code names from company pipeline pages
+  abstracts?: AbstractFact[];    // conference abstracts naming this drug
   lookup: Lookup | null;
   now?: Date;
 }
@@ -361,6 +399,11 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   const inx = (lookup?.inxight ?? []).filter((c): c is InxightInfo => !!c);
   const singleInx = !combo ? inx[0] ?? null : null;
   const inxStatus = singleInx?.status ?? "";
+  const abstracts = input.abstracts ?? [];
+  const soloAbs = abstracts.filter((a) => a.solo);
+  // A drug known only from abstracts: what the abstracts say about its program is all we have.
+  const ownAbs = trials.length ? soloAbs : abstracts;
+  const absSrc = (a: AbstractFact) => `${a.source} abstract`;
   const now = input.now ?? new Date();
 
   // Approval -------------------------------------------------------------------
@@ -392,8 +435,14 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
     const cp = single?.maxPhase != null ? Math.floor(single.maxPhase) : 0;
     const ip = inxightPhaseLevel(singleInx?.highestPhase);
     const best = Math.max(cp, ip);
-    if (best >= 1 && best < 4 && (!tp || best > tp.level)) set("phase", `Phase ${best}`, cp >= ip ? "ChEMBL" : "Inxight Drugs");
+    // The most advanced stage a conference abstract reports for this drug alone.
+    const ab = ownAbs.map((a) => ({ p: phaseFromStage(a.stage), a }))
+      .filter((x): x is { p: { level: number; label: string }; a: AbstractFact } => !!x.p)
+      .sort((x, y) => y.p.level - x.p.level)[0];
+    if (best >= 1 && best < 4 && (!tp || best > tp.level) && (!ab || best >= ab.p.level)) set("phase", `Phase ${best}`, cp >= ip ? "ChEMBL" : "Inxight Drugs");
+    else if (ab && ab.p.level >= 1 && ab.p.level < 4 && (!tp || ab.p.level > tp.level)) set("phase", ab.p.label, absSrc(ab.a));
     else if (tp && tp.level < 4) set("phase", tp.label, "Trials");
+    else if (ab && !tp) set("phase", ab.p.label, absSrc(ab.a)); // "Preclinical"
   }
 
   // Company -------------------------------------------------------------------
@@ -404,6 +453,16 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
     if (s) set("sponsor", s, trials.some((t) => t.sponsor === s) ? "Trials" : "openFDA");
   }
 
+  if (!out.sponsor) {
+    const counts = new Map<string, { n: number; src: string }>();
+    for (const a of ownAbs) {
+      const s = industrySponsor(a.sponsor);
+      if (s) counts.set(s, { n: (counts.get(s)?.n ?? 0) + 1, src: absSrc(a) });
+    }
+    const top = [...counts].sort((x, y) => y[1].n - x[1].n)[0];
+    if (top) set("sponsor", top[0], top[1].src);
+  }
+
   // Pipeline / non-pipeline ----------------------------------------------------
   // Pipeline = a drug a company is developing (industry); Non-pipeline = an academic
   // drug (only universities / hospitals / public funders run its trials, or a generic
@@ -411,6 +470,7 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   const industryTrials = trials.filter((t) => (t.sponsorClass ?? "").toUpperCase() === "INDUSTRY").length;
   const company = out.sponsor && out.sponsor.value !== "Generic (several companies)" ? out.sponsor.value : null;
   if (company) set("candidate", "Pipeline", `Industry (${company})`);
+  else if (!trials.length && abstracts.length) set("candidate", "Non-pipeline", "Academic (conference abstract only)");
   else if (trials.length) {
     set("candidate", "Non-pipeline",
       out.sponsor ? "Generic, no developing company"
@@ -419,6 +479,10 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
 
   // Indication -----------------------------------------------------------------
   set("indication", topIndications(trials), "Trials");
+  if (!out.indication && ownAbs.some((a) => a.indication)) {
+    const a = ownAbs.find((x) => x.indication)!;
+    set("indication", uniqText(normalizeCondition(a.indication!)).join(", "), absSrc(a));
+  }
   if (!out.indication && singleInx?.conditions.length) {
     set("indication", uniqText(singleInx.conditions.flatMap(normalizeCondition)).slice(0, 3).join(", "), "Inxight Drugs");
   }
@@ -440,6 +504,7 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   }
   // 2) Trial titles: "Enicepatide (CT-388)" or "CT-388 (Enicepatide)".
   for (const a of titleAliases(input.name, trials.map((t) => t.title ?? ""))) codes.push({ v: a, src: "Trial titles" });
+  for (const a of abstracts) for (const x of a.aliases) codes.push({ v: isCode(x) ? x.toUpperCase() : x, src: absSrc(a) });
   // 3) A code written next to this drug alone in intervention names ("Tirzepatide (LY3298176)") in 2+ trials.
   const codeTrials = new Map<string, { v: string; n: number }>();
   for (const t of trials) {
@@ -483,6 +548,8 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   if (mechs.length) set("moa", mechs.join("; "), "ChEMBL");
   else if (inxMoa.length) set("moa", inxMoa.join("; "), "Inxight Drugs");
   else if (fdaMoa.length) set("moa", fdaMoa.join("; "), "openFDA");
+  const absMech = soloAbs.find((a) => a.mechanism);
+  if (!out.moa && absMech) set("moa", absMech.mechanism, absSrc(absMech));
 
   // Therapy subclass / class -----------------------------------------------------
   const isSmall = !combo && (single ? (single.type ?? "").toLowerCase() === "small molecule" : singleInx?.substanceClass === "chemical");
@@ -503,6 +570,10 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   if (!sub && fdaEpc) {
     const s = subclassFrom(fdaEpc, isSmall);
     sub = { value: s ?? fdaEpc.split("; ")[0], source: "openFDA" };
+  }
+  if (!sub && absMech && !combo) {
+    const s = subclassFrom(absMech.mechanism!, /small[- ]molecule|non-?peptide/i.test(absMech.mechanism!));
+    if (s) sub = { value: s, source: absSrc(absMech) };
   }
   if (!sub) {
     const s = subclassFrom(input.name);
@@ -538,6 +609,17 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
       : null;
     if (m) set("modality", m, "Inxight Drugs");
   }
+  if (!out.modality && absMech) {
+    const t = absMech.mechanism!;
+    const m =
+      /\b(si|sa)rna\b|oligonucleotide|antisense/i.test(t) ? "Oligonucleotide (siRNA / ASO)"
+      : /antibod|\bmab\b/i.test(t) ? "Monoclonal antibody"
+      : /gene therapy|\baav\b/i.test(t) ? "Gene therapy"
+      : /small[- ]molecule|non-?peptide/i.test(t) ? "Small molecule"
+      : /peptide|analogue|analog\b/i.test(t) ? "Peptide"
+      : null;
+    if (m) set("modality", m, absSrc(absMech));
+  }
   if (!out.modality && !undisclosed) {
     const n = input.name.toLowerCase();
     if (/mab$/.test(n)) set("modality", "Monoclonal antibody", "Drug name (INN stem)");
@@ -553,6 +635,8 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   else if (nameRoutes.length) set("roa", nameRoutes.slice(0, 2).join(", "), "Trials (intervention names)");
   else if (single?.oral && !single.parenteral) set("roa", "Oral", "ChEMBL");
   else if (single?.parenteral && !single.oral) set("roa", "Injection", "ChEMBL");
+  const oralAbs = soloAbs.find((a) => /\boral\b/i.test(`${a.mechanism ?? ""} ${a.program ?? ""}`));
+  if (!out.roa && oralAbs) set("roa", "Oral", absSrc(oralAbs));
 
   return out;
 }
@@ -1139,6 +1223,7 @@ export interface EnrichResult {
   stoppedEarly: boolean;
   otherNames?: { trials: number; names: number } | null;
   pipelines?: PipelineReport[] | null;
+  abstracts?: ImportResult | null;
 }
 
 export async function enrichProducts(
@@ -1151,16 +1236,27 @@ export async function enrichProducts(
     products: 0, lookedUp: 0, fdaChecked: 0, inxightChecked: 0, inxightFound: 0, chemblFound: 0, fdaFound: 0, updated: 0, filledFields: 0, sourcesDown: [], stoppedEarly: false,
   };
 
+  // Conference abstracts (sync/data/conference/*.json): new drug pages for programs with no trial yet.
+  if (!opts.only?.length) {
+    try {
+      res.abstracts = await importAbstracts(undefined, log);
+    } catch (e) {
+      res.abstracts = null;
+      log("Conference abstracts not imported", String(e));
+    }
+  }
+
+  // Drugs with an active trial, or named by a conference abstract.
   const prods = await pool.query<{
     id: number; slug: string; name: string; auto_lookup: Lookup | null; auto_checked_at: Date | null; primary_trials: number;
   }>(
     `SELECT p.id, p.slug, p.name, p.auto_lookup, p.auto_checked_at,
-            count(*) FILTER (WHERE t.obesity_class = 'primary')::int AS primary_trials
+            (SELECT count(*) FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+              WHERE tp.product_id = p.id AND t.obesity_class = 'primary')::int AS primary_trials
        FROM products p
-       JOIN trial_products tp ON tp.product_id = p.id
-       JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
-      ${opts.only?.length ? "WHERE p.slug = ANY($1)" : ""}
-      GROUP BY p.id`,
+      WHERE (EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active WHERE tp.product_id = p.id)
+             OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug))
+      ${opts.only?.length ? "AND p.slug = ANY($1)" : ""}`,
     opts.only?.length ? [opts.only] : [],
   );
   res.products = prods.rowCount ?? 0;
@@ -1215,6 +1311,27 @@ export async function enrichProducts(
     );
     for (const r of pl.rows) pipelineBySlug.set(r.product_slug, [...(pipelineBySlug.get(r.product_slug) ?? []), { alias: r.alias, company: r.company }]);
   } catch { /* table not created yet */ }
+  const abstractsBySlug = new Map<string, AbstractFact[]>();
+  try {
+    const ab = await pool.query<{
+      product_slug: string; aliases: string[]; source: string; sponsor: string | null; indication: string | null;
+      stage: string | null; mechanism: string | null; program: string | null; drugs: number; drug_name: string;
+    }>(
+      `SELECT pa.product_slug, pa.aliases, pa.drug_name, a.source, a.sponsor, a.indication, a.stage, a.mechanism, a.program,
+              (SELECT count(*) FROM product_abstracts o WHERE o.source = a.source AND o.abstract_no = a.abstract_no)::int AS drugs
+         FROM product_abstracts pa JOIN conference_abstracts a USING (source, abstract_no)
+        ORDER BY a.source, a.abstract_no`,
+    );
+    for (const r of ab.rows) {
+      abstractsBySlug.set(r.product_slug, [...(abstractsBySlug.get(r.product_slug) ?? []), {
+        source: r.source, sponsor: r.sponsor, indication: r.indication, stage: r.stage, mechanism: r.mechanism,
+        program: r.program, aliases: r.aliases ?? [],
+        // About this drug alone: the only drug linked, and the program names no other drug
+        // ("Vanoglipel + resmetirom" is not about vanoglipel alone, even if resmetirom isn't tracked).
+        solo: r.drugs === 1 && (r.drug_name.includes(" + ") || !/\s\+\s|\svs\.?\s|;/i.test(r.program ?? "")),
+      }]);
+    }
+  } catch { /* table not created yet */ }
   const allNames = await pool.query<{ interventions: string[] }>("SELECT interventions FROM trials WHERE is_active");
   const known = buildKnownSet(allNames.rows.map((r) => r.interventions ?? []), aliases);
   const aliasRows = await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases");
@@ -1255,6 +1372,7 @@ export async function enrichProducts(
       const auto = deriveAuto({
         slug: p.slug, name: p.name, trials: facts.get(p.id) ?? [],
         aliasKeys: bySlugAliases.get(p.slug) ?? [], lookup: p.auto_lookup, pipelineAliases: pipelineBySlug.get(p.slug),
+        abstracts: abstractsBySlug.get(p.slug),
       });
       filled += Object.keys(auto).length;
       if (auto.aliases) altNames.set(p.id, auto.aliases.value.split(", ").filter((a) => a && !/\s/.test(a)).slice(0, 3));

@@ -1061,6 +1061,7 @@ export async function rebuildProducts(): Promise<RebuildResult> {
     const del = await c.query(
       `DELETE FROM products p
         WHERE NOT EXISTS (SELECT 1 FROM trial_products tp WHERE tp.product_id = p.id)
+          AND NOT EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug) -- conference-only drugs stay
           AND ${MANUAL_INFO_EMPTY}`,
     );
     result.orphansRemoved = del.rowCount ?? 0;

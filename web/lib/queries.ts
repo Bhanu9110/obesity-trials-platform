@@ -219,13 +219,16 @@ export async function listProducts(): Promise<ProductSummary[]> {
             count(t.nct_id) FILTER (WHERE t.obesity_class = 'primary')::int AS trials,
             count(t.nct_id)::int AS all_trials,
             coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
-            ${HAS_INFO} AS has_info
+            ${HAS_INFO} AS has_info,
+            (SELECT count(*)::int FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstracts,
+            (SELECT string_agg(DISTINCT pa.source, ', ') FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstract_sources
        FROM products p
        ${AUTO_JOIN}
-       JOIN trial_products tp ON tp.product_id = p.id
-       JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+       LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active) ON tp.product_id = p.id
       GROUP BY p.id, x.ai
-      ORDER BY trials DESC, all_trials DESC, p.name`,
+     -- drugs with trials, and drugs known only from conference abstracts (e.g. preclinical programs)
+     HAVING count(t.nct_id) > 0 OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug)
+      ORDER BY trials DESC, all_trials DESC, abstracts DESC, p.name`,
   );
 }
 
@@ -317,11 +320,30 @@ export async function dashboardCounts(): Promise<{
   };
 }
 
+export interface ConferenceAbstractRow {
+  source: string; abstract_no: string; title: string | null; link: string | null; program: string | null;
+  sponsor: string | null; indication: string | null; stage: string | null; mechanism: string | null;
+  model: string | null; key_finding: string | null;
+}
+
+/** Conference abstracts (e.g. ADA 2026) that name this drug. */
+export async function getProductAbstracts(slug: string): Promise<ConferenceAbstractRow[]> {
+  return query<ConferenceAbstractRow>(
+    `SELECT a.source, a.abstract_no, a.title, a.link, a.program, a.sponsor, a.indication, a.stage, a.mechanism,
+            a.model, a.key_finding
+       FROM product_abstracts pa JOIN conference_abstracts a USING (source, abstract_no)
+      WHERE pa.product_slug = $1
+      ORDER BY a.source DESC, a.stage NULLS LAST, a.abstract_no`,
+    [slug],
+  ).catch(() => []); // before migration 0019
+}
+
 /** All product names (for the merge picker). */
 export async function productNames(): Promise<{ slug: string; name: string }[]> {
   return query<{ slug: string; name: string }>(
     `SELECT p.slug, p.name FROM products p
       WHERE EXISTS (SELECT 1 FROM trial_products tp WHERE tp.product_id = p.id)
+         OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug)
       ORDER BY p.name`,
   );
 }
@@ -374,6 +396,14 @@ export async function mergeProduct(fromSlug: string, intoSlug: string): Promise<
          FROM products f WHERE t.id = $2 AND f.id = $1`,
       [from.id, into.id],
     );
+    // Conference abstracts follow the drug.
+    await client.query(
+      `INSERT INTO product_abstracts (product_slug, source, abstract_no, drug_name, aliases)
+       SELECT $2, source, abstract_no, drug_name, aliases FROM product_abstracts WHERE product_slug = $1
+       ON CONFLICT DO NOTHING`,
+      [from.slug, into.slug],
+    );
+    await client.query("DELETE FROM product_abstracts WHERE product_slug = $1", [from.slug]);
     await client.query("DELETE FROM products WHERE id = $1", [from.id]); // cascades its old links
     await client.query("COMMIT");
     return into.slug;
@@ -855,12 +885,14 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
     opts.drugs
       ? query<SearchResults["drugs"][number]>(
           `SELECT p.slug, p.name, count(t.nct_id)::int AS trials
-             FROM products p JOIN trial_products tp ON tp.product_id = p.id
-             JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}
+             FROM products p
+             LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}) ON tp.product_id = p.id
             WHERE p.name ILIKE $1
                OR coalesce(p.aliases, to_jsonb(p) #>> '{auto_info,aliases,value}', '') ILIKE $1
                OR coalesce(p.brand_names, to_jsonb(p) #>> '{auto_info,brand_names,value}', '') ILIKE $1
-            GROUP BY p.id ORDER BY (p.name ILIKE $2) DESC, trials DESC LIMIT 6`,
+            GROUP BY p.id
+           HAVING count(t.nct_id) > 0 OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug)
+            ORDER BY (p.name ILIKE $2) DESC, trials DESC LIMIT 6`,
           [like, `${q}%`],
         )
       : Promise.resolve([]),

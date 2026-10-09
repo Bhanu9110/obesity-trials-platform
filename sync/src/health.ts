@@ -11,7 +11,7 @@ import { pool } from "./db.js";
 import { MAX_ATTEMPTS } from "./failures.js";
 
 /** Latest migration this code needs. Update when adding a migration. */
-export const REQUIRED_SCHEMA_VERSION = "0018";
+export const REQUIRED_SCHEMA_VERSION = "0019";
 
 export type HealthStatus = "ok" | "warn" | "fail";
 export interface HealthCheck {

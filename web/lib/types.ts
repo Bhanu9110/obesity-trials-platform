@@ -114,4 +114,6 @@ export interface ProductSummary extends ProductInfo {
   all_trials: number;  // all stored trials (incl. comorbidity / weight-related / not obesity)
   trial_phases: string[];
   has_info: boolean;   // at least one field entered by hand
+  abstracts: number;   // conference abstracts naming the drug (e.g. ADA 2026)
+  abstract_sources: string | null; // "ADA 2026"
 }
