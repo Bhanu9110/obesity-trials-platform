@@ -363,7 +363,7 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   assert.equal(calls, before);
 
   // A source that is down: noted, skipped, and the drug is retried next run.
-  await pool.query("UPDATE products SET auto_checked_at = NULL WHERE slug = 'obscurazine'");
+  await pool.query("UPDATE products SET auto_checked_at = NULL, auto_lookup = NULL WHERE slug = 'obscurazine'");
   fdaDown = true;
   const r3 = await enrichProducts({ only: ["obscurazine"] });
   assert.equal(r3.sourcesDown.length, 1);

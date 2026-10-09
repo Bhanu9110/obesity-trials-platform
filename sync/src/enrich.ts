@@ -78,6 +78,8 @@ export interface Lookup {
   chembl: (ChemblInfo | null)[]; // one per component (a combination has several)
   fda: FdaInfo | null;
   at: string;
+  fdaAt?: string;    // when openFDA was last asked (falls back to `at`)
+  chemblAt?: string; // when ChEMBL was last asked (falls back to `at`)
 }
 
 // --------------------------------------------------------------------------- #
@@ -653,14 +655,33 @@ export function parseFda(results: any[], parts: string[]): FdaInfo | null {
   };
 }
 
+/** Products sold under this brand name (any ingredients), e.g. "Micardis" -> telmisartan. */
+export function parseFdaBrand(results: any[], brand: string): FdaInfo | null {
+  const want = brand.toUpperCase();
+  const keep = (results ?? []).map((app: any) => ({
+    ...app,
+    products: (Array.isArray(app?.products) ? app.products : []).filter((p: any) => String(p?.brand_name ?? "").toUpperCase() === want),
+  })).filter((app: any) => app.products.length);
+  if (!keep.length) return null;
+  const ings = [...new Set(keep.flatMap((a: any) => a.products.flatMap((p: any) =>
+    (p.active_ingredients ?? []).map((i: any) => String(i?.name ?? "").replace(/\s+(HYDROCHLORIDE|SODIUM|POTASSIUM|ACETATE|MESYLATE|MALEATE|TARTRATE|SUCCINATE|CITRATE|SULFATE|PHOSPHATE)$/i, "")))))] as string[];
+  return parseFda(keep, ings.length ? ings : [want]);
+}
+
 export async function fdaByParts(parts: string[]): Promise<FdaInfo | null> {
   const q = parts
     .map((p) => encodeURIComponent(`products.active_ingredients.name:"${p.toUpperCase().replace(/"/g, "")}"`))
     .join("+AND+");
   const key = enrichConfig.fdaKey ? `&api_key=${encodeURIComponent(enrichConfig.fdaKey)}` : "";
   const r = await getJson(`${enrichConfig.fdaBase}/drug/drugsfda.json?search=${q}&limit=1000${key}`);
-  await sleep(enrichConfig.delayMs);
-  return parseFda(Array.isArray(r?.results) ? r.results : [], parts);
+  await sleep(Math.max(enrichConfig.delayMs, 300)); // openFDA: max 240 requests/minute
+  const byIngredient = parseFda(Array.isArray(r?.results) ? r.results : [], parts);
+  if (byIngredient || parts.length !== 1) return byIngredient;
+  // Not an ingredient name: maybe a US brand name ("Micardis", "Qsymia").
+  const bq = encodeURIComponent(`products.brand_name:"${parts[0].toUpperCase().replace(/"/g, "")}"`);
+  const b = await getJson(`${enrichConfig.fdaBase}/drug/drugsfda.json?search=${bq}&limit=100${key}`);
+  await sleep(Math.max(enrichConfig.delayMs, 300));
+  return parseFdaBrand(Array.isArray(b?.results) ? b.results : [], parts[0]);
 }
 
 // --------------------------------------------------------------------------- #
@@ -951,7 +972,8 @@ export function lookupable(slug: string, name: string): boolean {
 
 export interface EnrichResult {
   products: number;
-  lookedUp: number;
+  lookedUp: number;      // ChEMBL look-ups this run
+  fdaChecked?: number;   // openFDA look-ups this run
   chemblFound: number;
   fdaFound: number;
   updated: number;
@@ -969,7 +991,7 @@ export async function enrichProducts(
   const external = opts.external ?? enrichConfig.external;
   const started = Date.now();
   const res: EnrichResult = {
-    products: 0, lookedUp: 0, chemblFound: 0, fdaFound: 0, updated: 0, filledFields: 0, sourcesDown: [], stoppedEarly: false,
+    products: 0, lookedUp: 0, fdaChecked: 0, chemblFound: 0, fdaFound: 0, updated: 0, filledFields: 0, sourcesDown: [], stoppedEarly: false,
   };
 
   const prods = await pool.query<{
@@ -1094,65 +1116,83 @@ export async function enrichProducts(
 
   await writeAll();
 
-  // External lookups for the products that are due, most-studied first. ----
+  // External lookups, most-studied drugs first. Two passes:
+  //  1) openFDA for every drug that is due (fast; with an OPENFDA_API_KEY there is no
+  //     practical daily limit, without one openFDA allows 1,000 requests a day);
+  //  2) ChEMBL, slower, a limited number per run (ENRICH_MAX_LOOKUPS) within the time budget.
   if (external) {
     const maxAge = enrichConfig.refreshDays * 86_400_000;
-    const due = prods.rows
+    const stale = (t?: string | null) => !t || Date.now() - Date.parse(t) > maxAge;
+    const current = (p: (typeof prods.rows)[number]) => (p.auto_lookup?.v === LOOKUP_VERSION ? p.auto_lookup : null);
+    const candidates = prods.rows
       .filter((p) => lookupable(p.slug, p.name))
-      .filter((p) => !p.auto_lookup || p.auto_lookup.v !== LOOKUP_VERSION || !p.auto_checked_at
-        || Date.now() - new Date(p.auto_checked_at).getTime() > maxAge)
-      .sort((a, b) => Number(!!a.auto_checked_at) - Number(!!b.auto_checked_at) || b.primary_trials - a.primary_trials)
-      .slice(0, opts.maxLookups ?? enrichConfig.maxLookups);
-    let chemblUp = true, fdaUp = true;
-    for (const p of due) {
-      if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
-      if (!chemblUp && !fdaUp) break;
-      const parts = p.name.split(" + ").map((s) => s.trim());
-      const prev = p.auto_lookup?.v === LOOKUP_VERSION ? p.auto_lookup : null;
-      const next: Lookup = { v: LOOKUP_VERSION, chembl: prev?.chembl ?? [], fda: prev?.fda ?? null, at: new Date().toISOString() };
-      let complete = true;
-      if (chemblUp) {
-        try {
-          const found: (ChemblInfo | null)[] = [];
-          for (const part of parts) {
-            let hit = await chemblByName(part);
-            // A new INN may not be in ChEMBL yet: try the drug's code names (e.g. CT-388).
-            if (!hit && parts.length === 1) for (const alt of altNames.get(p.id) ?? []) { hit = await chemblByName(alt); if (hit) break; }
-            found.push(hit);
-          }
-          next.chembl = found;
-        } catch (e) {
-          chemblUp = false; complete = false;
-          res.sourcesDown.push(`ChEMBL: ${e instanceof Error ? e.message : e}`);
-          log("ChEMBL unavailable — skipping it for the rest of this run", String(e));
-        }
-      } else complete = false;
-      if (fdaUp) {
-        try {
-          next.fda = await fdaByParts(parts);
-        } catch (e) {
-          fdaUp = false; complete = false;
-          res.sourcesDown.push(`openFDA: ${e instanceof Error ? e.message : e}`);
-          log("openFDA unavailable — skipping it for the rest of this run", String(e));
-        }
-      } else complete = false;
-      res.lookedUp++;
-      if (next.chembl.some(Boolean)) res.chemblFound++;
-      if (next.fda) res.fdaFound++;
+      .sort((a, b) => b.primary_trials - a.primary_trials || a.name.localeCompare(b.name));
+    const save = async (p: (typeof prods.rows)[number], next: Lookup) => {
       p.auto_lookup = next;
-      // Only a complete lookup counts as "checked"; a partial one is retried next run.
+      const fresh = !stale(next.fdaAt) && !stale(next.chemblAt);
       await pool.query(
         `UPDATE products SET auto_lookup = $2, auto_checked_at = CASE WHEN $3 THEN now() ELSE auto_checked_at END WHERE id = $1`,
-        [p.id, JSON.stringify(next), complete],
+        [p.id, JSON.stringify(next), fresh],
       );
-      if (res.lookedUp % 25 === 0) {
-        await writeAll();
-        log(`looked up ${res.lookedUp}/${due.length}`);
+    };
+    const blank = (): Lookup => ({ v: LOOKUP_VERSION, chembl: [], fda: null, at: new Date().toISOString() });
+
+    // 1) openFDA
+    const fdaDue = candidates.filter((p) => { const c = current(p); return !c || stale(c.fdaAt ?? c.at); })
+      .slice(0, enrichConfig.fdaKey ? 100_000 : 900);
+    let done = 0;
+    for (const p of fdaDue) {
+      if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
+      const parts = p.name.split(" + ").map((x) => x.trim());
+      const next: Lookup = { ...(current(p) ?? blank()) };
+      try {
+        next.fda = await fdaByParts(parts);
+      } catch (e) {
+        res.sourcesDown.push(`openFDA: ${e instanceof Error ? e.message : e}`);
+        log("openFDA unavailable — skipping it for the rest of this run", String(e));
+        break;
       }
+      next.fdaAt = new Date().toISOString();
+      next.chemblAt = next.chemblAt ?? (current(p) ? current(p)!.at : undefined);
+      await save(p, next);
+      done++;
+      if (next.fda) res.fdaFound++;
+      if (done % 100 === 0) { await writeAll(); log(`openFDA: ${done}/${fdaDue.length} drugs checked`); }
+    }
+    res.fdaChecked = done;
+    if (done) await writeAll();
+
+    // 2) ChEMBL
+    const chemblDue = candidates.filter((p) => { const c = current(p); // never checked in ChEMBL (only openFDA so far) → due; an older look-up → its own date
+        return !c || (c.chemblAt ? stale(c.chemblAt) : c.fdaAt ? true : stale(c.at)); })
+      .slice(0, opts.maxLookups ?? enrichConfig.maxLookups);
+    for (const p of chemblDue) {
+      if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
+      const parts = p.name.split(" + ").map((x) => x.trim());
+      const next: Lookup = { ...(current(p) ?? blank()) };
+      try {
+        const found: (ChemblInfo | null)[] = [];
+        for (const part of parts) {
+          let hit = await chemblByName(part);
+          // A new INN may not be in ChEMBL yet: try the drug's code names (e.g. CT-388).
+          if (!hit && parts.length === 1) for (const alt of altNames.get(p.id) ?? []) { hit = await chemblByName(alt); if (hit) break; }
+          found.push(hit);
+        }
+        next.chembl = found;
+      } catch (e) {
+        res.sourcesDown.push(`ChEMBL: ${e instanceof Error ? e.message : e}`);
+        log("ChEMBL unavailable — skipping it for the rest of this run", String(e));
+        break;
+      }
+      next.chemblAt = new Date().toISOString();
+      await save(p, next);
+      res.lookedUp++;
+      if (next.chembl.some(Boolean)) res.chemblFound++;
+      if (res.lookedUp % 25 === 0) { await writeAll(); log(`ChEMBL: ${res.lookedUp}/${chemblDue.length} drugs checked`); }
     }
   }
 
-  if (res.lookedUp) await writeAll();
+  if (res.lookedUp || res.fdaChecked) await writeAll();
   await pool.query(
     `INSERT INTO app_meta (key, value) VALUES ('product_autofill_at', $1)
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,

@@ -167,9 +167,12 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   (modality, mechanism, codes, trade names) and [openFDA](https://open.fda.gov/apis/drug/drugsfda/)
   (US brands, route, first US approval). Values go to `products.auto_info` and show on the
   drug page with an "auto" tag; a value typed in on the website always wins and is never
-  overwritten. Up to `ENRICH_MAX_LOOKUPS` (200) drugs are looked up per run and each is
-  re-checked every `ENRICH_REFRESH_DAYS` (30). Optional secret `OPENFDA_API_KEY` raises
-  openFDA's daily limit.
+  overwritten. openFDA is checked for every drug that is due in each run (by ingredient
+  name, then by brand name); ChEMBL for up to `ENRICH_MAX_LOOKUPS` (200) drugs per run.
+  Each drug is re-checked every `ENRICH_REFRESH_DAYS` (30). Add the repository secret
+  `OPENFDA_API_KEY` (free key from https://open.fda.gov/apis/authentication/) so all drugs
+  fit in one run; without it openFDA allows about 900 drugs a day. openFDA only knows
+  FDA-approved / US-marketed drugs, so investigational drugs get no openFDA values.
 - **Drug code names (Alias field)** — collected automatically from the drug's company
   pipeline page (`sync/data/pipeline-sources.json`, re-checked monthly; add confirmed
   pairs under `known`), ChEMBL, ClinicalTrials.gov "other names", trial titles such as
