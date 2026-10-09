@@ -7,6 +7,8 @@
 //     research codes, trade names, max phase, withdrawn flag
 //   - openFDA drugsfda (US FDA, public domain): US brand names, route,
 //     first US approval date, FDA pharmacologic class
+//   - NCATS Inxight Drugs (NIH, public API): development status, highest phase,
+//     approval year, targets + action (mechanism), substance type, code names, brands
 //
 // Results go to products.auto_info as {field: {value, source}}. The hand-entered
 // columns are never written: the website shows an automatic value only while the
@@ -33,6 +35,10 @@ export const enrichConfig = {
   chemblBase: (process.env.CHEMBL_API_BASE ?? "https://www.ebi.ac.uk/chembl/api/data").replace(/\/$/, ""),
   fdaBase: (process.env.OPENFDA_API_BASE ?? "https://api.fda.gov").replace(/\/$/, ""),
   fdaKey: process.env.OPENFDA_API_KEY ?? "",
+  inxightBase: (process.env.INXIGHT_API_BASE ?? "https://drugs.ncats.io/api/v1").replace(/\/$/, ""),
+  maxInxight: Number(process.env.ENRICH_MAX_INXIGHT ?? 100),
+  inxightDelayMs: Number(process.env.INXIGHT_REQUEST_DELAY_MS ?? 2500), // it answers 503 to quick bursts
+  inxightRetryMs: Number(process.env.INXIGHT_RETRY_MS ?? 20_000),
   delayMs: Number(process.env.ENRICH_REQUEST_DELAY_MS ?? 150),
   timeoutMs: Number(process.env.ENRICH_TIMEOUT_MS ?? 25_000),
 };
@@ -73,6 +79,19 @@ export interface FdaInfo {
   moa: string[];                 // FDA mechanism of action class
 }
 
+export interface InxightInfo {
+  unii: string;                  // FDA UNII, e.g. "OYN3CCI6QE" (drugs.ncats.io/drug/<unii>)
+  name: string;
+  status: string | null;         // Development Status: "US Approved Rx" | "Clinical" | "Discontinued" | ...
+  highestPhase: string | null;   // "Approved" | "Phase III" | ...
+  approvalYear: number | null;
+  conditions: string[];
+  targets: { target: string; action: string | null }[]; // e.g. GLP-1 receptor / "partial agonist"
+  substanceClass: string | null; // "chemical" | "protein" | "nucleicAcid" | "mixture" | ...
+  codes: string[];               // code names (VX-548, LY3298176)
+  brands: string[];
+}
+
 export interface Lookup {
   v: number;
   chembl: (ChemblInfo | null)[]; // one per component (a combination has several)
@@ -80,6 +99,8 @@ export interface Lookup {
   at: string;
   fdaAt?: string;    // when openFDA was last asked (falls back to `at`)
   chemblAt?: string; // when ChEMBL was last asked (falls back to `at`)
+  inxight?: (InxightInfo | null)[]; // one per component
+  inxightAt?: string;
 }
 
 // --------------------------------------------------------------------------- #
@@ -121,11 +142,12 @@ function phaseLevel(p: string | null | undefined): number {
 // --------------------------------------------------------------------------- #
 export function subclassFrom(text: string, smallMolecule = false): string | null {
   const t = text.toLowerCase();
-  const glp1 = /glucagon-like peptide[- ]1|glp-?1/.test(t);
+  const glp1 = /glucagon-like peptide[- ]1|glp-?1|oxyntomodulin/.test(t);
   const gip = /gastric inhibitory polypeptide|glucose-dependent insulinotropic|\bgipr?\b/.test(t);
   const gipAntagonist = /(gastric inhibitory polypeptide|\bgipr?\b)[^;]*(antagonist|inhibitor|blocker)/.test(t);
-  const gcg = /(^|[^-])\bglucagon receptor\b|\bgcgr?\b|glucagon agonist/.test(t);
-  const amylin = /amylin|calcitonin receptor/.test(t);
+  const oxm = /oxyntomodulin/.test(t); // GLP-1 + glucagon receptor co-agonist
+  const gcg = oxm || /(^|[^-])\bglucagon receptor\b|\bgcgr?\b|glucagon agonist/.test(t);
+  const amylin = /amylin|amlintide|pramlintide|calcitonin receptor/.test(t);
   if (glp1 && gip && gcg) return "GIP/GLP-1/glucagon triple agonist";
   if (glp1 && gipAntagonist) return "GLP-1 agonist / GIPR antagonist";
   if (glp1 && gip) return "GIP/GLP-1 dual agonist";
@@ -336,31 +358,41 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   const chembl = (lookup?.chembl ?? []).filter((c): c is ChemblInfo => !!c);
   const single = !combo ? chembl[0] ?? null : null;
   const fda = lookup?.fda ?? null;
+  const inx = (lookup?.inxight ?? []).filter((c): c is InxightInfo => !!c);
+  const singleInx = !combo ? inx[0] ?? null : null;
+  const inxStatus = singleInx?.status ?? "";
   const now = input.now ?? new Date();
 
   // Approval -------------------------------------------------------------------
   const phase4Trial = trials.some((t) => phaseLevel(t.phase) === 4);
   let approved: AutoValue | null = null;
   if (fda) approved = { value: "Yes", source: "openFDA" };
+  else if (/^US (Approved (Rx|OTC)|Previously Marketed)$/i.test(inxStatus)) approved = { value: "Yes", source: "Inxight Drugs" };
   else if (!combo && single && single.maxPhase !== null && single.maxPhase >= 4) approved = { value: "Yes", source: "ChEMBL" };
   else if (combo && chembl.length === parts.length && chembl.every((c) => (c.maxPhase ?? 0) >= 4) && phase4Trial)
     approved = { value: "Yes", source: "ChEMBL + trials" };
   else if (!combo && single) approved = { value: "No", source: "ChEMBL" };
+  else if (/^(Clinical|Discontinued|Designated)$/i.test(inxStatus)) approved = { value: "No", source: "Inxight Drugs" };
   else if (!undisclosed && phase4Trial) approved = { value: "Yes", source: "Trials (Phase 4)" };
   if (approved) set("approved", approved.value, approved.source);
   const isApproved = approved?.value === "Yes";
-  const withdrawn = !!single?.withdrawn;
+  const withdrawn = !!single?.withdrawn || /^withdrawn$/i.test(inxStatus);
 
   if (fda?.firstApproval) set("approval_date", fda.firstApproval, "openFDA (first US approval)");
+  else if (isApproved && singleInx?.approvalYear) set("approval_date", String(singleInx.approvalYear), "Inxight Drugs (approval year)");
   else if (isApproved && single?.firstApproval) set("approval_date", String(single.firstApproval), "ChEMBL (first approval year)");
 
   // Phase ------------------------------------------------------------------------
   const tp = phaseLabelFromTrials(trials);
-  if (withdrawn) set("phase", "Withdrawn", "ChEMBL");
+  const activeTrial = trials.some((t) => /RECRUITING|ACTIVE|ENROLLING/i.test(t.status ?? ""));
+  if (withdrawn) set("phase", "Withdrawn", single?.withdrawn ? "ChEMBL" : "Inxight Drugs");
   else if (isApproved) set("phase", "Approved", approved!.source);
+  else if (/^discontinued$/i.test(inxStatus) && !activeTrial) set("phase", "Discontinued", "Inxight Drugs");
   else {
-    const cp = single?.maxPhase ?? null;
-    if (cp !== null && cp >= 1 && (!tp || Math.floor(cp) > tp.level)) set("phase", `Phase ${Math.floor(cp)}`, "ChEMBL");
+    const cp = single?.maxPhase != null ? Math.floor(single.maxPhase) : 0;
+    const ip = inxightPhaseLevel(singleInx?.highestPhase);
+    const best = Math.max(cp, ip);
+    if (best >= 1 && best < 4 && (!tp || best > tp.level)) set("phase", `Phase ${best}`, cp >= ip ? "ChEMBL" : "Inxight Drugs");
     else if (tp && tp.level < 4) set("phase", tp.label, "Trials");
   }
 
@@ -387,6 +419,9 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
 
   // Indication -----------------------------------------------------------------
   set("indication", topIndications(trials), "Trials");
+  if (!out.indication && singleInx?.conditions.length) {
+    set("indication", uniqText(singleInx.conditions.flatMap(normalizeCondition)).slice(0, 3).join(", "), "Inxight Drugs");
+  }
 
   // Combination parts ----------------------------------------------------------
   if (combo) set("parent_drug", parts.join(", "), "Drug name");
@@ -398,6 +433,7 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   // 0) The developer's own pipeline page, then ChEMBL.
   for (const pa of input.pipelineAliases ?? []) codes.push({ v: pa.alias, src: `Company pipeline (${pa.company})` });
   for (const c of chembl) for (const x of c.codes) codes.push({ v: x, src: "ChEMBL" });
+  for (const c of inx) for (const x of c.codes) codes.push({ v: x, src: "Inxight Drugs" });
   // 1) ClinicalTrials.gov "other names" registered for this drug's interventions.
   for (const t of trials) for (const o of t.otherNames ?? []) {
     for (const a of aliasCandidates(o)) codes.push({ v: a, src: "ClinicalTrials.gov" });
@@ -429,6 +465,7 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   // Brand names ----------------------------------------------------------------
   const brands: { v: string; src: string }[] = [];
   for (const b of fda?.brands ?? []) brands.push({ v: titleCase(b), src: "openFDA" });
+  for (const b of singleInx?.brands ?? []) brands.push({ v: titleCase(b), src: "Inxight Drugs" });
   for (const [k, ref] of Object.entries(BUILTIN_ALIASES))
     if (ref.slug === input.slug && !/\d/.test(k)) brands.push({ v: k.charAt(0).toUpperCase() + k.slice(1), src: "Alias list" });
   if (!combo) for (const b of single?.tradeNames ?? []) brands.push({ v: titleCase(b), src: "ChEMBL" });
@@ -441,11 +478,14 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   // Mechanism ------------------------------------------------------------------
   const mechs = uniqText(chembl.flatMap((c) => c.mechanisms.map((m) => sentence(m.moa))));
   const fdaMoa = uniqText((fda?.moa ?? []).map((m) => m.replace(/\s*\[MoA\]\s*$/i, "")));
+  const inxMoaOf = (c: InxightInfo) => c.targets.map((t) => sentence(t.target.toLowerCase()) + (t.action ? ` ${t.action}` : ""));
+  const inxMoa = uniqText(inx.flatMap(inxMoaOf));
   if (mechs.length) set("moa", mechs.join("; "), "ChEMBL");
+  else if (inxMoa.length) set("moa", inxMoa.join("; "), "Inxight Drugs");
   else if (fdaMoa.length) set("moa", fdaMoa.join("; "), "openFDA");
 
   // Therapy subclass / class -----------------------------------------------------
-  const isSmall = !combo && (single?.type ?? "").toLowerCase() === "small molecule";
+  const isSmall = !combo && (single ? (single.type ?? "").toLowerCase() === "small molecule" : singleInx?.substanceClass === "chemical");
   const fdaEpc = (fda?.epc ?? []).map((e) => e.replace(/\s*\[EPC\]\s*$/i, "")).join("; ");
   let sub: AutoValue | null = null;
   const fromMech = subclassFrom(mechs.join("; "), isSmall);
@@ -454,7 +494,12 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
     const perPart = chembl.map((c) => subclassFrom(c.mechanisms.map((m) => m.moa).join("; "), (c.type ?? "").toLowerCase() === "small molecule"));
     const joined = uniqText(perPart.filter((x): x is string => !!x));
     if (joined.length) sub = { value: joined.join(" + "), source: "ChEMBL" };
+    else {
+      const ip = uniqText(inx.map((c) => subclassFrom(inxMoaOf(c).join("; "), c.substanceClass === "chemical") ?? "").filter(Boolean));
+      if (ip.length) sub = { value: ip.join(" + "), source: "Inxight Drugs" };
+    }
   } else if (fromMech) sub = { value: fromMech, source: "ChEMBL" };
+  else if (inxMoa.length && subclassFrom(inxMoa.join("; "), isSmall)) sub = { value: subclassFrom(inxMoa.join("; "), isSmall)!, source: "Inxight Drugs" };
   if (!sub && fdaEpc) {
     const s = subclassFrom(fdaEpc, isSmall);
     sub = { value: s ?? fdaEpc.split("; ")[0], source: "openFDA" };
@@ -470,10 +515,10 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   }
 
   // Modality -------------------------------------------------------------------
+  const peptideLike = /tide$/i.test(input.name) || /GLP-1|GIP|glucagon|amylin|MC4R/.test(sub?.value ?? "");
   if (combo) set("modality", "Combination", "Drug name");
   else if (single?.type) {
     const t = single.type.toLowerCase();
-    const peptideLike = /tide$/i.test(input.name) || /GLP-1|GIP|glucagon|amylin|MC4R/.test(sub?.value ?? "");
     const m =
       t === "small molecule" ? "Small molecule"
       : t === "antibody" ? "Monoclonal antibody"
@@ -483,6 +528,15 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
       : t === "protein" || t === "enzyme" ? (peptideLike ? "Peptide" : "Protein / biologic")
       : null;
     if (m) set("modality", m, "ChEMBL");
+  }
+  if (!out.modality && singleInx?.substanceClass) {
+    const c = singleInx.substanceClass.toLowerCase();
+    const m =
+      c === "chemical" ? (/tide$/i.test(input.name) ? "Peptide" : "Small molecule") // cyclic peptides are filed as chemicals
+      : c === "protein" ? (/mab$/i.test(input.name) ? "Monoclonal antibody" : peptideLike ? "Peptide" : "Protein / biologic")
+      : c === "nucleicacid" ? "Oligonucleotide (siRNA / ASO)"
+      : null;
+    if (m) set("modality", m, "Inxight Drugs");
   }
   if (!out.modality && !undisclosed) {
     const n = input.name.toLowerCase();
@@ -682,6 +736,107 @@ export async function fdaByParts(parts: string[]): Promise<FdaInfo | null> {
   const b = await getJson(`${enrichConfig.fdaBase}/drug/drugsfda.json?search=${bq}&limit=100${key}`);
   await sleep(Math.max(enrichConfig.delayMs, 300));
   return parseFdaBrand(Array.isArray(b?.results) ? b.results : [], parts[0]);
+}
+
+// --------------------------------------------------------------------------- #
+// NCATS Inxight Drugs (drugs.ncats.io): public JSON API of the NIH substance registry
+// --------------------------------------------------------------------------- #
+/** "Phase II" -> 2, "Approved" / "Phase IV" -> 4. */
+export function inxightPhaseLevel(p: string | null | undefined): number {
+  const s = (p ?? "").trim().toUpperCase();
+  if (s === "APPROVED") return 4;
+  const m = /^PHASE\s+(IV|III|II|I|[1-4])\b/.exec(s);
+  if (!m) return 0;
+  return ({ I: 1, II: 2, III: 3, IV: 4 } as Record<string, number>)[m[1]] ?? Number(m[1]);
+}
+
+const bareName = (n: string) => n.replace(/\s*\[[^\]]*\]\s*$/, "").trim();
+const nameKey = (n: string) => slugify(bareName(n));
+
+/**
+ * The substance record that IS this drug among search results (a name search also returns
+ * salts, fragments and intermediates): its display name, else the one active moiety that
+ * carries the name. null when nothing (or more than one thing) fits.
+ */
+export function pickInxight(content: any[], name: string): any | null {
+  const want = nameKey(name);
+  if (!want) return null;
+  const isMoiety = (c: any) => (c?.relationships ?? []).some((r: any) =>
+    r?.type === "ACTIVE MOIETY" && r?.relatedSubstance?.approvalID && r.relatedSubstance.approvalID === c?.approvalID);
+  const exact = (content ?? []).filter((c) => nameKey(String(c?._name ?? "")) === want);
+  if (exact.length) return exact.find(isMoiety) ?? exact[0];
+  const named = (content ?? []).filter((c) => (c?.names ?? []).some((n: any) => nameKey(String(n?.name ?? "")) === want));
+  const moieties = named.filter(isMoiety);
+  const pool = moieties.length ? moieties : named;
+  return pool.length === 1 ? pool[0] : null;
+}
+
+/** One substance record (view=full) + the facet values of that record alone. */
+export function parseInxight(rec: any, facets: any[]): InxightInfo {
+  const names: any[] = Array.isArray(rec?.names) ? rec.names : [];
+  const ofType = (t: string) => uniqText(names.filter((n) => n?.type === t).map((n) => bareName(String(n?.name ?? ""))));
+  const facet = (k: string): string[] =>
+    ((facets ?? []).find((f: any) => f?.name === k)?.values ?? []).map((v: any) => String(v?.label ?? "")).filter((x: string) => x && x !== "Unknown" && x !== "Not Provided");
+  const targets = uniqBy(
+    (Array.isArray(rec?.relationships) ? rec.relationships : [])
+      .filter((r: any) => /^TARGET->/i.test(String(r?.type ?? "")) && r?.relatedSubstance?.name)
+      .map((r: any) => ({ target: String(r.relatedSubstance.name), action: String(r.type).split("->")[1]?.trim().toLowerCase() || null })),
+    (t: { target: string; action: string | null }) => `${t.target.toLowerCase()}|${t.action}`,
+  );
+  // No target relationships: the curated "Primary Target" + "Pharmacology" facets.
+  const pharm = facet("Pharmacology");
+  if (!targets.length) for (const t of facet("Primary Target")) targets.push({ target: t, action: pharm.length === 1 ? pharm[0].toLowerCase() : null });
+  const year = num(facet("Approval Year")[0]);
+  return {
+    unii: String(rec?.approvalID ?? ""),
+    name: bareName(String(rec?._name ?? "")),
+    status: facet("Development Status")[0] ?? null,
+    highestPhase: facet("Highest Phase").sort((a, b) => inxightPhaseLevel(b) - inxightPhaseLevel(a))[0] ?? null,
+    approvalYear: year && year > 1900 ? year : null,
+    conditions: facet("Condition").slice(0, 6),
+    targets: targets.slice(0, 6),
+    substanceClass: rec?.substanceClass ? String(rec.substanceClass) : null,
+    codes: ofType("cd").filter(isCode).slice(0, 12),                       // not "XW004 component XW003"
+    brands: ofType("bn").filter((b) => !/component|\bkit\b/i.test(b)).slice(0, 10), // not "QSYMIA COMPONENT PHENTERMINE"
+  };
+}
+
+/** GET JSON from Inxight; a page instead of JSON (its browser check) counts as the service being down. */
+async function inxightJson(path: string): Promise<any | null> {
+  const url = `${enrichConfig.inxightBase}${path}`;
+  let last = "";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt) await sleep(enrichConfig.inxightRetryMs * attempt); // 503 = too quick: back off
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json", "User-Agent": "obesity-trials-platform/1.0 (drug-profile autofill; +https://obesity-trials.vercel.app)" },
+        signal: AbortSignal.timeout(enrichConfig.timeoutMs),
+      });
+      if (res.status === 404 || res.status === 400) return null;
+      if (res.ok && /json/i.test(res.headers.get("content-type") ?? "")) return await res.json();
+      last = res.ok ? "a web page instead of data (browser check?)" : `HTTP ${res.status}`;
+      if (res.ok || (res.status !== 429 && res.status < 500)) throw new SourceDown(`${last} for ${url}`);
+    } catch (e) {
+      if (e instanceof SourceDown) throw e;
+      last = e instanceof Error ? e.message : String(e);
+    }
+  }
+  throw new SourceDown(`${last} for ${url}`);
+}
+
+export async function inxightByName(name: string): Promise<InxightInfo | null> {
+  const enc = encodeURIComponent;
+  for (const v of nameVariants(name)) {
+    const q = `root_names_name:"${v.replace(/"/g, "")}"`;
+    const r = await inxightJson(`/substances/search?q=${enc(q)}&top=10&view=full`);
+    await sleep(enrichConfig.inxightDelayMs);
+    const rec = pickInxight(Array.isArray(r?.content) ? r.content : [], name);
+    if (!rec?.approvalID) continue;
+    const f = await inxightJson(`/substances/search?q=${enc(`root_approvalID:"${rec.approvalID}"`)}&top=1&fdim=40`);
+    await sleep(enrichConfig.inxightDelayMs);
+    return parseInxight(rec, Number(f?.total) === 1 && Array.isArray(f?.facets) ? f.facets : []);
+  }
+  return null;
 }
 
 // --------------------------------------------------------------------------- #
@@ -974,6 +1129,8 @@ export interface EnrichResult {
   products: number;
   lookedUp: number;      // ChEMBL look-ups this run
   fdaChecked?: number;   // openFDA look-ups this run
+  inxightChecked?: number; // Inxight Drugs look-ups this run
+  inxightFound?: number;
   chemblFound: number;
   fdaFound: number;
   updated: number;
@@ -985,13 +1142,13 @@ export interface EnrichResult {
 }
 
 export async function enrichProducts(
-  opts: { log?: (m: string, o?: unknown) => void; external?: boolean; maxLookups?: number; only?: string[] } = {},
+  opts: { log?: (m: string, o?: unknown) => void; external?: boolean; maxLookups?: number; maxInxight?: number; only?: string[] } = {},
 ): Promise<EnrichResult> {
   const log = opts.log ?? (() => {});
   const external = opts.external ?? enrichConfig.external;
   const started = Date.now();
   const res: EnrichResult = {
-    products: 0, lookedUp: 0, fdaChecked: 0, chemblFound: 0, fdaFound: 0, updated: 0, filledFields: 0, sourcesDown: [], stoppedEarly: false,
+    products: 0, lookedUp: 0, fdaChecked: 0, inxightChecked: 0, inxightFound: 0, chemblFound: 0, fdaFound: 0, updated: 0, filledFields: 0, sourcesDown: [], stoppedEarly: false,
   };
 
   const prods = await pool.query<{
@@ -1119,7 +1276,9 @@ export async function enrichProducts(
   // External lookups, most-studied drugs first. Two passes:
   //  1) openFDA for every drug that is due (fast; with an OPENFDA_API_KEY there is no
   //     practical daily limit, without one openFDA allows 1,000 requests a day);
-  //  2) ChEMBL, slower, a limited number per run (ENRICH_MAX_LOOKUPS) within the time budget.
+  //  2) ChEMBL, slower, a limited number per run (ENRICH_MAX_LOOKUPS) within the time budget;
+  //  3) NCATS Inxight Drugs, ENRICH_MAX_INXIGHT per run, unhurried (a public NIH service that
+  //     asks not to be bulk-downloaded: two requests per drug, ~0.6 s apart, once a month).
   if (external) {
     const maxAge = enrichConfig.refreshDays * 86_400_000;
     const stale = (t?: string | null) => !t || Date.now() - Date.parse(t) > maxAge;
@@ -1129,22 +1288,26 @@ export async function enrichProducts(
       .sort((a, b) => b.primary_trials - a.primary_trials || a.name.localeCompare(b.name));
     const save = async (p: (typeof prods.rows)[number], next: Lookup) => {
       p.auto_lookup = next;
-      const fresh = !stale(next.fdaAt) && !stale(next.chemblAt);
+      const fresh = !stale(next.fdaAt) && !stale(next.chemblAt) && !stale(next.inxightAt);
       await pool.query(
         `UPDATE products SET auto_lookup = $2, auto_checked_at = CASE WHEN $3 THEN now() ELSE auto_checked_at END WHERE id = $1`,
         [p.id, JSON.stringify(next), fresh],
       );
     };
     const blank = (): Lookup => ({ v: LOOKUP_VERSION, chembl: [], fda: null, at: new Date().toISOString() });
+    // A look-up saved before each source kept its own date has only `at` (it covered openFDA and ChEMBL).
+    const legacy = (c: Lookup) => !c.fdaAt && !c.chemblAt && !c.inxightAt;
+    const due = (c: Lookup | null, t: string | undefined) => !c || (t ? stale(t) : legacy(c) ? stale(c.at) : true);
 
     // 1) openFDA
-    const fdaDue = candidates.filter((p) => { const c = current(p); return !c || stale(c.fdaAt ?? c.at); })
+    const fdaDue = candidates.filter((p) => { const c = current(p); return due(c, c?.fdaAt); })
       .slice(0, enrichConfig.fdaKey ? 100_000 : 900);
     let done = 0;
     for (const p of fdaDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
       const parts = p.name.split(" + ").map((x) => x.trim());
-      const next: Lookup = { ...(current(p) ?? blank()) };
+      const cur = current(p);
+      const next: Lookup = { ...(cur ?? blank()) };
       try {
         next.fda = await fdaByParts(parts);
       } catch (e) {
@@ -1153,7 +1316,7 @@ export async function enrichProducts(
         break;
       }
       next.fdaAt = new Date().toISOString();
-      next.chemblAt = next.chemblAt ?? (current(p) ? current(p)!.at : undefined);
+      if (cur && legacy(cur)) next.chemblAt = cur.at; // keep the old ChEMBL date
       await save(p, next);
       done++;
       if (next.fda) res.fdaFound++;
@@ -1163,8 +1326,7 @@ export async function enrichProducts(
     if (done) await writeAll();
 
     // 2) ChEMBL
-    const chemblDue = candidates.filter((p) => { const c = current(p); // never checked in ChEMBL (only openFDA so far) → due; an older look-up → its own date
-        return !c || (c.chemblAt ? stale(c.chemblAt) : c.fdaAt ? true : stale(c.at)); })
+    const chemblDue = candidates.filter((p) => { const c = current(p); return due(c, c?.chemblAt); })
       .slice(0, opts.maxLookups ?? enrichConfig.maxLookups);
     for (const p of chemblDue) {
       if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
@@ -1190,9 +1352,39 @@ export async function enrichProducts(
       if (next.chembl.some(Boolean)) res.chemblFound++;
       if (res.lookedUp % 25 === 0) { await writeAll(); log(`ChEMBL: ${res.lookedUp}/${chemblDue.length} drugs checked`); }
     }
+    if (res.lookedUp) await writeAll();
+
+    // 3) Inxight Drugs
+    const inxightDue = candidates.filter((p) => { const c = current(p); return !c || !c.inxightAt || stale(c.inxightAt); })
+      .slice(0, opts.maxInxight ?? enrichConfig.maxInxight);
+    let checked = 0;
+    for (const p of inxightDue) {
+      if (Date.now() - started > enrichConfig.budgetMs) { res.stoppedEarly = true; break; }
+      const parts = p.name.split(" + ").map((x) => x.trim());
+      const next: Lookup = { ...(current(p) ?? blank()) };
+      try {
+        const found: (InxightInfo | null)[] = [];
+        for (const part of parts) {
+          let hit = await inxightByName(part);
+          if (!hit && parts.length === 1) for (const alt of altNames.get(p.id) ?? []) { hit = await inxightByName(alt); if (hit) break; }
+          found.push(hit);
+        }
+        next.inxight = found;
+      } catch (e) {
+        res.sourcesDown.push(`Inxight Drugs: ${e instanceof Error ? e.message : e}`);
+        log("Inxight Drugs unavailable — skipping it for the rest of this run", String(e));
+        break;
+      }
+      next.inxightAt = new Date().toISOString();
+      await save(p, next);
+      checked++;
+      if (next.inxight!.some(Boolean)) res.inxightFound = (res.inxightFound ?? 0) + 1;
+      if (checked % 25 === 0) { await writeAll(); log(`Inxight Drugs: ${checked}/${inxightDue.length} drugs checked`); }
+    }
+    res.inxightChecked = checked;
   }
 
-  if (res.lookedUp || res.fdaChecked) await writeAll();
+  if (res.lookedUp || res.fdaChecked || res.inxightChecked) await writeAll();
   await pool.query(
     `INSERT INTO app_meta (key, value) VALUES ('product_autofill_at', $1)
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,

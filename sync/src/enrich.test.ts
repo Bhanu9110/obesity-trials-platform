@@ -7,7 +7,8 @@ import type { AddressInfo } from "node:net";
 import {
   deriveAuto, parseFda, parseChemblMolecule, normalizeCondition, subclassFrom, enrichConfig, enrichProducts,
   aliasCandidates, titleAliases, otherNamesOf, refreshOtherNames, pageText, extractPipelinePairs, refreshPipelineAliases,
-  type ChemblInfo, type Lookup, type TrialFact,
+  pickInxight, parseInxight, inxightPhaseLevel,
+  type ChemblInfo, type InxightInfo, type Lookup, type TrialFact,
 } from "./enrich.js";
 import { runSyncForStudies } from "./sync.js";
 import { pool } from "./db.js";
@@ -246,6 +247,105 @@ test("parsers: ChEMBL molecule and openFDA applications", () => {
 });
 
 // --------------------------------------------------------------------------- #
+// NCATS Inxight Drugs
+// --------------------------------------------------------------------------- #
+const inxRecord = (unii: string, name: string, over: any = {}) => ({
+  approvalID: unii, _name: name, substanceClass: "protein",
+  names: [{ name, type: "of" }], relationships: [{ type: "ACTIVE MOIETY", relatedSubstance: { name, approvalID: unii } }], ...over,
+});
+const INX_TIRZ = [
+  inxRecord("NVV1P9GCY2", "N6-(N-(HYDROGEN ICOSANEDIOYL)-.GAMMA.-GLU-BIS(IMINOBIS(ETHYLENOXY)ACETYL))-LYSINE", {
+    substanceClass: "chemical", names: [{ name: "TIRZEPATIDE SIDE CHAIN", type: "cn" }], relationships: [] }),
+  inxRecord("OYN3CCI6QE", "Tirzepatide", {
+    names: [
+      { name: "Tirzepatide", type: "of" }, { name: "tirzepatide [INN]", type: "cn" }, { name: "LY3298176", type: "cd" },
+      { name: "LY-3298176", type: "cd" }, { name: "MOUNJARO", type: "bn" }, { name: "ZEPBOUND", type: "bn" }, { name: "BG-121", type: "cd" },
+      { name: "XW004 component XW003", type: "cd" }, { name: "QSYMIA COMPONENT TIRZEPATIDE", type: "bn" },
+    ],
+    relationships: [
+      { type: "TARGET->PARTIAL AGONIST", relatedSubstance: { name: "GLUCAGON-LIKE PEPTIDE 1 RECEPTOR", approvalID: "EF38T7N5MI" } },
+      { type: "TARGET->AGONIST", relatedSubstance: { name: "GASTRIC INHIBITORY POLYPEPTIDE RECEPTOR", approvalID: "D6H00MV7K8" } },
+      { type: "ACTIVE MOIETY", relatedSubstance: { name: "Tirzepatide", approvalID: "OYN3CCI6QE" } },
+    ],
+  }),
+];
+const INX_FACETS_TIRZ = [
+  { name: "Development Status", values: [{ label: "US Approved Rx", count: 1 }] },
+  { name: "Highest Phase", values: [{ label: "Approved", count: 1 }] },
+  { name: "Approval Year", values: [{ label: "2022", count: 1 }] },
+  { name: "Condition", values: [{ label: "Type 2 diabetes mellitus", count: 1 }] },
+];
+
+test("Inxight Drugs: the right record, its codes, brands, targets and status", () => {
+  assert.equal(inxightPhaseLevel("Phase III"), 3);
+  assert.equal(inxightPhaseLevel("Phase II"), 2);
+  assert.equal(inxightPhaseLevel("Approved"), 4);
+  assert.equal(inxightPhaseLevel("Not Provided"), 0);
+  // Inxight's target wording.
+  assert.equal(subclassFrom("Oxyntomodulin human mimetic"), "GLP-1/glucagon dual agonist");
+  assert.equal(subclassFrom("Amlintide mimetic"), "Amylin analogue");
+  // By display name; by code name (one active moiety carries it); nothing for an unrelated or ambiguous name.
+  assert.equal(pickInxight(INX_TIRZ, "Tirzepatide")?.approvalID, "OYN3CCI6QE");
+  assert.equal(pickInxight(INX_TIRZ, "LY-3298176")?.approvalID, "OYN3CCI6QE");
+  assert.equal(pickInxight(INX_TIRZ, "Retatrutide"), null);
+  assert.equal(pickInxight([inxRecord("A1", "Semaglutide", { names: [{ name: "CagriSema", type: "cn" }] }),
+    inxRecord("B2", "Cagrilintide", { names: [{ name: "CagriSema", type: "cn" }] })], "CagriSema"), null);
+
+  const info = parseInxight(INX_TIRZ[1], INX_FACETS_TIRZ);
+  assert.equal(info.unii, "OYN3CCI6QE");
+  assert.equal(info.status, "US Approved Rx");
+  assert.equal(info.highestPhase, "Approved");
+  assert.equal(info.approvalYear, 2022);
+  assert.deepEqual(info.codes, ["LY3298176", "BG-121"]); // "LY-3298176" is the same code
+  assert.deepEqual(info.brands, ["MOUNJARO", "ZEPBOUND"]);
+  assert.deepEqual(info.targets, [
+    { target: "GLUCAGON-LIKE PEPTIDE 1 RECEPTOR", action: "partial agonist" },
+    { target: "GASTRIC INHIBITORY POLYPEPTIDE RECEPTOR", action: "agonist" },
+  ]);
+  // No target relationships: the curated Primary Target + Pharmacology facets.
+  const viaFacets = parseInxight(inxRecord("X1", "Testmab", { relationships: [] }), [
+    { name: "Primary Target", values: [{ label: "Activin receptor type-2B" }] }, { name: "Pharmacology", values: [{ label: "Antagonist" }] },
+    { name: "Approval Year", values: [{ label: "Unknown" }] },
+  ]);
+  assert.deepEqual(viaFacets.targets, [{ target: "Activin receptor type-2B", action: "antagonist" }]);
+  assert.equal(viaFacets.approvalYear, null);
+});
+
+test("autofill: Inxight Drugs fills a pipeline drug ChEMBL and openFDA don't know", () => {
+  const inx: InxightInfo = {
+    unii: "D78KBY7BRU", name: "Petrelintide", status: "Clinical", highestPhase: "Phase II", approvalYear: null, conditions: [],
+    targets: [{ target: "CALCITONIN RECEPTOR", action: "mimetic" }, { target: "RECEPTOR ACTIVITY-MODIFYING PROTEIN 3", action: "mimetic" }],
+    substanceClass: "protein", codes: ["ZP8396"], brands: [],
+  };
+  const a = deriveAuto({
+    slug: "petrelintide", name: "Petrelintide", aliasKeys: [],
+    trials: [trial({ phase: "PHASE1", sponsor: "Zealand Pharma", names: ["Petrelintide"], soleNames: ["Petrelintide"], status: "RECRUITING" })],
+    lookup: { v: 1, chembl: [null], fda: null, at: "2026-10-01", inxight: [inx], inxightAt: "2026-10-01" },
+  });
+  assert.deepEqual(a.approved, { value: "No", source: "Inxight Drugs" });
+  assert.deepEqual(a.phase, { value: "Phase 2", source: "Inxight Drugs" });   // ahead of the Phase 1 trials here
+  assert.equal(a.moa?.value, "Calcitonin receptor mimetic; Receptor activity-modifying protein 3 mimetic");
+  assert.deepEqual(a.therapy_subclass, { value: "Amylin analogue", source: "Inxight Drugs" });
+  assert.deepEqual(a.modality, { value: "Peptide", source: "Inxight Drugs" });
+  assert.deepEqual(a.aliases, { value: "ZP8396", source: "Inxight Drugs" });
+
+  // An approved drug known only to Inxight: approval, year, brands; "Discontinued" when no trial is running.
+  const b = deriveAuto({
+    slug: "tirzepatide", name: "Tirzepatide", aliasKeys: [], trials: [trial({ names: ["Tirzepatide"] })],
+    lookup: { v: 1, chembl: [], fda: null, at: "2026-10-01", inxight: [parseInxight(INX_TIRZ[1], INX_FACETS_TIRZ)] },
+  });
+  assert.deepEqual(b.approved, { value: "Yes", source: "Inxight Drugs" });
+  assert.equal(b.approval_date?.value, "2022");
+  assert.equal(b.brand_names?.value, "Mounjaro, Zepbound");
+  assert.equal(b.therapy_subclass?.value, "GIP/GLP-1 dual agonist");
+  const c = deriveAuto({
+    slug: "oldtide", name: "Oldtide", aliasKeys: [], trials: [trial({ phase: "PHASE2", names: ["Oldtide"], status: "COMPLETED" })],
+    lookup: { v: 1, chembl: [], fda: null, at: "2026-10-01", inxight: [{ ...inx, name: "Oldtide", status: "Discontinued" }] },
+  });
+  assert.deepEqual(c.phase, { value: "Discontinued", source: "Inxight Drugs" });
+});
+
+// --------------------------------------------------------------------------- #
 // Full run against a fake ChEMBL + openFDA
 // --------------------------------------------------------------------------- #
 const MOLS: Record<string, any> = {
@@ -280,6 +380,17 @@ const server = http.createServer((req, res) => {
     return send(200, { studies: ids.filter((id) => id === "NCT09999901").map((id) => ({ protocolSection: {
       identificationModule: { nctId: id },
       armsInterventionsModule: { interventions: [{ name: "Testaglutide (TG-101) subcutaneous injection", otherNames: ["TG-101", "Testavy"] }] } } })) });
+  }
+  if (u.pathname === "/inxight/substances/search") {
+    const q = u.searchParams.get("q") ?? "";
+    const rec = { approvalID: "OBZ0000001", _name: "Obscurazine", substanceClass: "chemical",
+      names: [{ name: "Obscurazine", type: "of" }, { name: "OBZ-123", type: "cd" }],
+      relationships: [{ type: "TARGET->AGONIST", relatedSubstance: { name: "MELANOCORTIN RECEPTOR 4", approvalID: "MC4R000001" } },
+        { type: "ACTIVE MOIETY", relatedSubstance: { name: "Obscurazine", approvalID: "OBZ0000001" } }] };
+    if (q.includes("OBSCURAZINE")) return send(200, { total: 1, content: [rec] });
+    if (q.includes("OBZ0000001")) return send(200, { total: 1, content: [], facets: [
+      { name: "Development Status", values: [{ label: "Clinical", count: 1 }] }, { name: "Highest Phase", values: [{ label: "Phase II", count: 1 }] }] });
+    return send(200, { total: 0, content: [], facets: [] });
   }
   if (u.pathname === "/fda/drug/drugsfda.json") {
     if (fdaDown) return send(503, { error: "down" });
@@ -318,7 +429,7 @@ function study(nct: string, drug: string, sponsor = "Acme Pharma") {
 test("enrich run: fills blanks from trials + references, never touches hand-entered fields", async () => {
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-  Object.assign(enrichConfig, { chemblBase: `${base}/chembl`, fdaBase: `${base}/fda`, delayMs: 0, timeoutMs: 5000 });
+  Object.assign(enrichConfig, { chemblBase: `${base}/chembl`, fdaBase: `${base}/fda`, inxightBase: `${base}/inxight`, delayMs: 0, inxightDelayMs: 0, inxightRetryMs: 0, timeoutMs: 5000 });
 
   await pool.query("DELETE FROM products WHERE slug IN ('testaglutide', 'obscurazine')");
   await runSyncForStudies([
@@ -334,6 +445,8 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   assert.equal(r.lookedUp, 2);
   assert.equal(r.chemblFound, 1);
   assert.equal(r.fdaFound, 1);
+  assert.equal(r.inxightChecked, 2);
+  assert.equal(r.inxightFound, 1);
   assert.deepEqual(r.sourcesDown, []);
 
   const row = async (slug: string) =>
@@ -354,7 +467,11 @@ test("enrich run: fills blanks from trials + references, never touches hand-ente
   assert.equal(o.auto_info.roa.value, "Oral");
   assert.equal(o.auto_info.phase.value, "Phase 3");
   assert.equal(o.auto_info.candidate.value, "Pipeline");
-  assert.equal(o.auto_info.approved, undefined);
+  assert.deepEqual(o.auto_info.approved, { value: "No", source: "Inxight Drugs" });
+  assert.equal(o.auto_info.moa.value, "Melanocortin receptor 4 agonist");
+  assert.equal(o.auto_info.therapy_subclass.value, "MC4R agonist");
+  assert.deepEqual(o.auto_info.modality, { value: "Small molecule", source: "Inxight Drugs" });
+  assert.equal(o.auto_info.aliases.value, "OBZ-123");
 
   // Nothing due: a second run makes no calls.
   const before = calls;

@@ -173,6 +173,12 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   `OPENFDA_API_KEY` (free key from https://open.fda.gov/apis/authentication/) so all drugs
   fit in one run; without it openFDA allows about 900 drugs a day. openFDA only knows
   FDA-approved / US-marketed drugs, so investigational drugs get no openFDA values.
+  [NCATS Inxight Drugs](https://drugs.ncats.io/) (NIH, public JSON API, no key) adds
+  development status, highest phase, approval year, targets with their action
+  (mechanism), substance type (modality), code names and brand names — it knows many
+  investigational drugs too. It asks not to be bulk-downloaded, so the job is slow on
+  purpose: two requests per drug, 2.5 s apart, `ENRICH_MAX_INXIGHT` (100) drugs per run,
+  each re-checked every 30 days; a 503 ("too quick") makes it back off and try next run.
 - **Drug code names (Alias field)** — collected automatically from the drug's company
   pipeline page (`sync/data/pipeline-sources.json`, re-checked monthly; add confirmed
   pairs under `known`), ChEMBL, ClinicalTrials.gov "other names", trial titles such as
