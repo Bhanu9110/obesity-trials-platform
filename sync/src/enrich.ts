@@ -520,7 +520,11 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   }
   for (const { v, n } of codeTrials.values()) if (n >= 2) codes.push({ v, src: "Trials" });
   // 4) The built-in alias list and merges made on the website.
-  for (const k of input.aliasKeys) if (isCode(k) || INN_STEM_RE.test(k)) codes.push({ v: isCode(k) ? k.toUpperCase() : titleCase(k), src: "Alias list" });
+  // (not merged spellings of the name itself, e.g. "lsgsemaglutide" = "LSG-Semaglutide" merged into Semaglutide)
+  for (const k of input.aliasKeys) {
+    if (k !== ownSlug && k.includes(ownSlug)) continue;
+    if (isCode(k) || INN_STEM_RE.test(k)) codes.push({ v: isCode(k) ? k.toUpperCase() : titleCase(k), src: "Alias list" });
+  }
   const codeList = uniqBy(codes, (c) => slugify(c.v)).filter((c) => slugify(c.v) !== ownSlug && slugify(c.v) !== input.slug).slice(0, 8);
   if (codeList.length) {
     // "Company pipeline (Roche) + Company pipeline (Zealand)" -> "Company pipeline (Roche, Zealand)"

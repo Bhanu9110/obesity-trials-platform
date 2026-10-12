@@ -397,6 +397,9 @@ test("autofill: Inxight Drugs fills a pipeline drug ChEMBL and openFDA don't kno
   assert.deepEqual(a.therapy_subclass, { value: "Amylin analogue", source: "Inxight Drugs" });
   assert.deepEqual(a.modality, { value: "Peptide", source: "Inxight Drugs" });
   assert.deepEqual(a.aliases, { value: "ZP8396", source: "Inxight Drugs" });
+  // A merged spelling of the name itself is not a code name.
+  const m = deriveAuto({ slug: "semaglutide", name: "Semaglutide", aliasKeys: ["lsgsemaglutide", "nn9535"], trials: [trial()], lookup: null });
+  assert.equal(m.aliases?.value, "NN9535");
 
   // An approved drug known only to Inxight: approval, year, brands; "Discontinued" when no trial is running.
   const b = deriveAuto({
