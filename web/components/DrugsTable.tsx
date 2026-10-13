@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ProductSummary } from "@/lib/types";
 import { highestPhase } from "@/lib/format";
+import { matchDrug } from "@/lib/drugSearch";
 
 const PAGE = 50;
 
-export default function DrugsTable({ products }: { products: ProductSummary[] }) {
-  const [q, setQ] = useState("");
+// `search`: the Drugs page's own search box drives the table (it then shows no box of its own).
+export default function DrugsTable({ products, search }: { products: ProductSummary[]; search?: string }) {
+  const [ownQ, setQ] = useState("");
+  const q = search ?? ownQ;
   const [info, setInfo] = useState<"" | "filled" | "blank" | "abstracts">("");
   const [page, setPage] = useState(1);
   // Drugs that only appear in non-primary trials (comorbidity, weight-related, not obesity)
@@ -20,17 +23,21 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
     [products, includeOther],
   );
 
-  const rows = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return visible.filter((p) => {
+  // Search: name, brand names, every alias / code name the database knows, company, class, modality.
+  const { rows, via } = useMemo(() => {
+    const via = new Map<string, string>(); // slug -> the alias that matched
+    const out = visible.filter((p) => {
       if (info === "filled" && !p.has_info) return false;
       if (info === "blank" && p.has_info) return false;
       if (info === "abstracts" && !(p.abstracts > 0 && p.nct_trials === 0)) return false;
-      if (!needle) return true;
-      return [p.name, p.sponsor, p.drug_class, p.modality].some((v) => v?.toLowerCase().includes(needle));
+      const m = matchDrug(p, q, [p.modality]);
+      if (m.via) via.set(p.slug, m.via);
+      return m.hit;
     });
+    return { rows: out, via };
   }, [visible, q, info]);
 
+  useEffect(() => { setPage(1); }, [search]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
   const filled = visible.filter((p) => p.has_info).length;
@@ -39,15 +46,15 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row">
-        <input
+        {search === undefined && <input
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
             setPage(1);
           }}
-          placeholder="Find a drug…"
+          placeholder="Find a drug, brand or code name…"
           className="w-full flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500"
-        />
+        />}
         <select
           value={info}
           onChange={(e) => {
@@ -114,6 +121,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
                         {p.abstracts} abstract{p.abstracts === 1 ? "" : "s"}
                       </span>
                     )}
+                    {via.has(p.slug) && <div className="mt-0.5 text-xs text-slate-500">Also known as <b className="font-medium text-slate-700">{via.get(p.slug)}</b></div>}
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">
                     {p.trials}

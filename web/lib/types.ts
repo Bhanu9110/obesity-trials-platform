@@ -124,4 +124,5 @@ export interface ProductSummary extends ProductInfo {
   abstracts: number;   // conference abstracts naming the drug (e.g. ADA 2026)
   abstract_sources: string | null; // "ADA 2026"
   reports_only: boolean; // linked only to company pipeline reports (no conference abstract)
+  other_names: string | null; // every other name the database knows (merged spellings, codes, abstract names), for search
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { ProductSummary } from "@/lib/types";
 import DrugsTable from "@/components/DrugsTable";
+import { matchDrug } from "@/lib/drugSearch";
 import { icons } from "@/components/shell/icons";
 
 // Drugs: a card grid (default) or the detailed table. Search, stage filter and sort.
@@ -36,18 +37,22 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
 
   const base = useMemo(() => products.filter((p) => p.trials > 0 || p.abstracts > 0), [products]);
   const inStage = (p: ProductSummary, k: number) => (k === 5 ? abstractOnly(p) : !abstractOnly(p) && topOf(p) === k);
-  const rows = useMemo(() => {
-    const needle = q.trim().toLowerCase();
+  // Search: name, brand names, every alias / code name the database knows, company, class.
+  const { rows, via } = useMemo(() => {
+    const via = new Map<string, string>(); // slug -> the alias that matched
     const out = base.filter((p) => {
       if (stage && !inStage(p, stage)) return false; // most advanced phase is exactly this one
-      if (!needle) return true;
-      return [p.name, p.aliases, p.brand_names, p.sponsor, p.drug_class, p.therapy_subclass, p.moa]
-        .some((v) => v?.toLowerCase().includes(needle));
+      const m = matchDrug(p, q);
+      if (m.via) via.set(p.slug, m.via);
+      return m.hit;
     });
-    return out.sort((a, b) =>
+    // A drug whose name or code matches the search exactly comes first.
+    const exact = (p: ProductSummary) => (q.trim() && [p.name, via.get(p.slug)].some((n) => n?.toLowerCase() === q.trim().toLowerCase()) ? 1 : 0);
+    out.sort((a, b) => exact(b) - exact(a) || (
       sort === "name" ? a.name.localeCompare(b.name)
         : sort === "phase" ? topOf(b) - topOf(a) || b.trials - a.trials
-          : b.trials - a.trials || a.name.localeCompare(b.name));
+          : b.trials - a.trials || a.name.localeCompare(b.name)));
+    return { rows: out, via };
   }, [base, q, stage, sort]);
 
   const counts = useMemo(() => STAGES.map((s) => (s.key === 0 ? base.length
@@ -74,7 +79,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
         </div>
       </div>
 
-      {view === "table" ? <DrugsTable products={products} /> : (
+      {view === "table" ? <DrugsTable products={products} search={q} /> : (
         <>
           <div className="flex flex-wrap items-center gap-2">
             {STAGES.map((s, i) => (
@@ -120,6 +125,11 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         <div className="mt-0.5 truncate text-xs text-slate-500">
                           {[p.brand_names, p.aliases].filter(Boolean).join(" · ") || p.sponsor || (undisclosed ? "Drug class only — name not disclosed" : "Profile not filled in yet")}
                         </div>
+                        {via.has(p.slug) && (
+                          <div className="mt-1 inline-flex max-w-full items-center gap-1 truncate rounded-md bg-brand-500/10 px-1.5 py-0.5 text-[11px] font-medium text-brand-700">
+                            Also known as {via.get(p.slug)}
+                          </div>
+                        )}
                       </div>
                       <div className="text-right">
                         {onlyAbs && p.trials === 0 ? (

@@ -9,6 +9,9 @@ import type { HomeStats, ProductLink,
 } from "./types";
 import { CONTINENT_ORDER, phaseRank } from "./format";
 
+/** Letters and digits only, lower case — "NN-9440" and "nn 9440" both become "nn9440". */
+const squashTerm = (q: string) => q.normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
+
 export interface TrialFilters {
   q?: string;
   phase?: string[];
@@ -75,7 +78,12 @@ function buildWhere(f: TrialFilters, params: unknown[]): string {
       OR array_to_string(t.countries, ' ') ILIKE $${i}
       OR EXISTS (SELECT 1 FROM trial_products tp JOIN products p ON p.id = tp.product_id
                   WHERE tp.nct_id = t.nct_id AND p.name ILIKE $${i})
+      -- a drug's code / alias / brand name ("NN9440", "LY-3437943"): that drug's trials
+      OR ($${i + 1} <> '' AND EXISTS (SELECT 1 FROM trial_products tp WHERE tp.nct_id = t.nct_id AND tp.product_id IN (
+            SELECT p.id FROM products p
+             WHERE regexp_replace(lower(coalesce(${OTHER_NAMES("p")}, '')), '[^a-z0-9]', '', 'g') LIKE '%' || $${i + 1} || '%')))
     )`);
+    params.push(squashTerm(f.q).length >= 3 ? squashTerm(f.q) : "");
   }
   if (f.phase?.length) {
     params.push(f.phase);
@@ -227,6 +235,24 @@ const CONF_TRIALS = `(SELECT count(DISTINCT coalesce(upper(tr.id), '#unnamed')):
            -- a company's own report of a clinical-stage drug (e.g. "Phase 1") counts as its trial
            OR (to_jsonb(ca) ->> 'kind' = 'company_report' AND ca.stage ~* 'phase'))) `;
 
+/**
+ * Every name a drug page is known by besides its own name, for search: hand-entered and automatic
+ * aliases and brand names, spellings merged into it (product_aliases), code names from company
+ * pipeline pages, names used in conference abstracts / company reports, and the "other names"
+ * ClinicalTrials.gov lists for its interventions. Comma-separated.
+ */
+export const OTHER_NAMES = (p = "p") => `(SELECT string_agg(DISTINCT n, ', ') FROM (
+       SELECT trim(unnest(regexp_split_to_array(concat_ws(',', ${p}.aliases, to_jsonb(${p}) #>> '{auto_info,aliases,value}',
+                ${p}.brand_names, to_jsonb(${p}) #>> '{auto_info,brand_names,value}'), '\\s*[,;]\\s*'))) AS n
+       UNION SELECT CASE WHEN pa.alias_slug ~ '[0-9]' THEN upper(pa.alias_slug) ELSE pa.alias_slug END
+         FROM product_aliases pa WHERE pa.product_slug = ${p}.slug
+       UNION SELECT pc.alias FROM pipeline_code_names pc WHERE pc.product_slug = ${p}.slug
+       UNION SELECT ab.drug_name FROM product_abstracts ab WHERE ab.product_slug = ${p}.slug
+       UNION SELECT unnest(ab.aliases) FROM product_abstracts ab WHERE ab.product_slug = ${p}.slug
+       UNION SELECT io.other_name FROM trial_products tp JOIN intervention_other_names io ON io.nct_id = tp.nct_id
+         WHERE tp.product_id = ${p}.id AND regexp_replace(lower(io.intervention), '[^a-z0-9]', '', 'g') = ${p}.slug
+     ) s WHERE n <> '' AND lower(n) <> lower(${p}.name))`;
+
 export async function listProducts(): Promise<ProductSummary[]> {
   return query<ProductSummary>(
     `SELECT p.slug, p.name, ${INFO_COLS},
@@ -241,7 +267,8 @@ export async function listProducts(): Promise<ProductSummary[]> {
             (SELECT count(*)::int FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstracts,
             (SELECT string_agg(DISTINCT pa.source, ', ') FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstract_sources,
             NOT EXISTS (SELECT 1 FROM product_abstracts pa JOIN conference_abstracts ca USING (source, abstract_no)
-                         WHERE pa.product_slug = p.slug AND to_jsonb(ca) ->> 'kind' IS DISTINCT FROM 'company_report') AS reports_only
+                         WHERE pa.product_slug = p.slug AND to_jsonb(ca) ->> 'kind' IS DISTINCT FROM 'company_report') AS reports_only,
+            ${OTHER_NAMES("p")} AS other_names
        FROM products p
        ${AUTO_JOIN}
        LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active) ON tp.product_id = p.id
@@ -928,13 +955,13 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
              FROM products p
              LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}) ON tp.product_id = p.id
             WHERE p.kind IS NULL
-              AND (p.name ILIKE $1
-               OR coalesce(p.aliases, to_jsonb(p) #>> '{auto_info,aliases,value}', '') ILIKE $1
-               OR coalesce(p.brand_names, to_jsonb(p) #>> '{auto_info,brand_names,value}', '') ILIKE $1)
+              AND (p.name ILIKE $1 OR coalesce(${OTHER_NAMES("p")}, '') ILIKE $1
+               -- "nn 9440" / "NN-9440" find NN9440: compare letters and digits only
+               OR ($3 <> '' AND regexp_replace(lower(p.name || ',' || coalesce(${OTHER_NAMES("p")}, '')), '[^a-z0-9]', '', 'g') LIKE '%' || $3 || '%'))
             GROUP BY p.id
            HAVING count(t.nct_id) > 0 OR EXISTS (SELECT 1 FROM product_abstracts pa WHERE pa.product_slug = p.slug)
             ORDER BY (p.name ILIKE $2) DESC, trials DESC LIMIT 6`,
-          [like, `${q}%`],
+          [like, `${q}%`, squashTerm(q)],
         )
       : Promise.resolve([]),
     opts.trials
