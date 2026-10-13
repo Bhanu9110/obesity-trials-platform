@@ -95,7 +95,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
           <p className="px-1 text-sm text-slate-500">
             <b className="font-display text-base font-semibold text-slate-950">{rows.length.toLocaleString()}</b> drugs
             {rows.some((p) => p.conference_trials > 0) && (
-              <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported at a conference (e.g. ADA 2026), no ClinicalTrials.gov record yet</span>
+              <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported in a conference abstract or company report, no ClinicalTrials.gov record yet</span>
             )}
           </p>
 
@@ -125,7 +125,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         {onlyAbs && p.trials === 0 ? (
                           <>
                             <div className="font-display text-2xl font-semibold leading-none tabular-nums text-brand-600">{p.abstracts}</div>
-                            <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">{p.abstracts === 1 ? "abstract" : "abstracts"}</div>
+                            <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-slate-500">{p.reports_only ? (p.abstracts === 1 ? "report" : "reports") : p.abstracts === 1 ? "abstract" : "abstracts"}</div>
                           </>
                         ) : (
                           <>

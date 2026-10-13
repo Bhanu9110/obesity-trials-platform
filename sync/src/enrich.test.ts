@@ -300,6 +300,13 @@ test("abstracts: stage, sponsor and a drug known only from a meeting", () => {
   const d = deriveAuto({ slug: "zz", name: "Zz", aliasKeys: [], trials: [trial({ phase: "PHASE1", names: ["Zz"] })], lookup: null,
     abstracts: [abs({ stage: "Clinical – Phase 2b", aliases: ["ZZ-101"] })] });
   assert.deepEqual(d.phase, { value: "Phase 2", source: "ADA 2026 abstract" });
+  // The developer's own pipeline report wins over trials and databases ("Terminated (Phase 2)").
+  const r = deriveAuto({ slug: "monlunabant", name: "Monlunabant", aliasKeys: [], lookup: null,
+    trials: [trial({ phase: "PHASE2", sponsor: "Novo Nordisk A/S", names: ["Monlunabant"], status: "COMPLETED" })],
+    abstracts: [abs({ source: "Novo Nordisk 2026 Q2", kind: "company_report", stage: "Terminated (Phase 2)", sponsor: "Novo Nordisk",
+      mechanism: null, aliases: ["NN9440", "INV-202"] })] });
+  assert.deepEqual(r.phase, { value: "Terminated (Phase 2)", source: "Novo Nordisk 2026 Q2 pipeline" });
+  assert.equal(r.aliases?.value, "NN9440, INV-202");
   assert.match(d.aliases?.value ?? "", /ZZ-101/);
 });
 

@@ -123,4 +123,5 @@ export interface ProductSummary extends ProductInfo {
   conference_trials: number; // no NCT trial yet: clinical trials its conference abstracts report (counted in trials)
   abstracts: number;   // conference abstracts naming the drug (e.g. ADA 2026)
   abstract_sources: string | null; // "ADA 2026"
+  reports_only: boolean; // linked only to company pipeline reports (no conference abstract)
 }

@@ -222,7 +222,10 @@ const HAS_INFO = `(p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT
 const CONF_TRIALS = `(SELECT count(DISTINCT coalesce(upper(tr.id), '#unnamed'))::int
      FROM product_abstracts pa JOIN conference_abstracts ca USING (source, abstract_no)
      LEFT JOIN LATERAL unnest(nullif(ca.trial_ids, '{}')) AS tr(id) ON true
-    WHERE pa.product_slug = p.slug AND ca.stage ILIKE 'clinical%')`;
+    WHERE pa.product_slug = p.slug
+      AND (ca.stage ILIKE 'clinical%'
+           -- a company's own report of a clinical-stage drug (e.g. "Phase 1") counts as its trial
+           OR (to_jsonb(ca) ->> 'kind' = 'company_report' AND ca.stage ~* 'phase'))) `;
 
 export async function listProducts(): Promise<ProductSummary[]> {
   return query<ProductSummary>(
@@ -236,7 +239,9 @@ export async function listProducts(): Promise<ProductSummary[]> {
             coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
             ${HAS_INFO} AS has_info,
             (SELECT count(*)::int FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstracts,
-            (SELECT string_agg(DISTINCT pa.source, ', ') FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstract_sources
+            (SELECT string_agg(DISTINCT pa.source, ', ') FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstract_sources,
+            NOT EXISTS (SELECT 1 FROM product_abstracts pa JOIN conference_abstracts ca USING (source, abstract_no)
+                         WHERE pa.product_slug = p.slug AND to_jsonb(ca) ->> 'kind' IS DISTINCT FROM 'company_report') AS reports_only
        FROM products p
        ${AUTO_JOIN}
        LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active) ON tp.product_id = p.id
@@ -356,7 +361,7 @@ export async function dashboardCounts(): Promise<{
 
 export interface ConferenceAbstractRow {
   source: string; abstract_no: string; title: string | null; link: string | null; program: string | null;
-  trial_ids: string[]; study_type: string | null;
+  trial_ids: string[]; study_type: string | null; kind: string | null;
   sponsor: string | null; indication: string | null; stage: string | null; mechanism: string | null;
   model: string | null; key_finding: string | null;
 }
@@ -365,7 +370,7 @@ export interface ConferenceAbstractRow {
 export async function getProductAbstracts(slug: string): Promise<ConferenceAbstractRow[]> {
   return query<ConferenceAbstractRow>(
     `SELECT a.source, a.abstract_no, a.title, a.link, a.program, a.sponsor, a.indication, a.stage, a.mechanism,
-            a.model, a.key_finding, a.trial_ids, a.study_type
+            a.model, a.key_finding, a.trial_ids, a.study_type, to_jsonb(a) ->> 'kind' AS kind
        FROM product_abstracts pa JOIN conference_abstracts a USING (source, abstract_no)
       WHERE pa.product_slug = $1
       ORDER BY a.source DESC, a.stage NULLS LAST, a.abstract_no`,

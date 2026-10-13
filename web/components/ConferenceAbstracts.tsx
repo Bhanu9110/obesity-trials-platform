@@ -7,9 +7,12 @@ export default function ConferenceAbstracts({ abstracts }: { abstracts: Conferen
   return (
     <section id="abstracts" className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
       <div className="mb-4">
-        <h2 className="font-display text-[15px] font-semibold text-slate-950">Conference abstracts</h2>
+        <h2 className="font-display text-[15px] font-semibold text-slate-950">
+          {abstracts.every((a) => a.kind === "company_report") ? "Company pipeline reports"
+            : abstracts.some((a) => a.kind === "company_report") ? "Conference abstracts and company reports" : "Conference abstracts"}
+        </h2>
         <p className="mt-0.5 text-xs text-slate-500">
-          {abstracts.length} abstract{abstracts.length === 1 ? "" : "s"} from {sources} naming this drug — clinical and preclinical work presented at the meeting.
+          {abstracts.length} {abstracts.length === 1 ? "entry" : "entries"} from {sources} naming this drug — conference abstracts (clinical and preclinical work presented at a meeting) and the developer&apos;s own pipeline reports.
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -32,7 +35,7 @@ export default function ConferenceAbstracts({ abstracts }: { abstracts: Conferen
                       {a.title ?? a.abstract_no}
                     </a>
                   ) : <span className="font-medium text-slate-800">{a.title ?? a.abstract_no}</span>}
-                  <div className="mt-0.5 text-xs text-slate-400">{a.source} · {a.abstract_no}</div>
+                  <div className="mt-0.5 text-xs text-slate-400">{a.source}{a.kind === "company_report" ? " · company pipeline report" : ` · ${a.abstract_no}`}</div>
                 </td>
                 <td className="py-2.5 pr-3 text-slate-700">
                   <div className="whitespace-nowrap">{a.stage ?? "—"}</div>

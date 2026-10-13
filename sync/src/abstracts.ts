@@ -26,7 +26,13 @@ export interface ConferenceAbstract {
   trials?: string[];         // clinical trial(s) reported: NCT IDs or trial names ("ACCESS II")
   study_type?: string | null; // "Clinical trial" | "Post hoc analysis of SELECT" | ...
 }
-export interface ConferenceFile { source: string; description?: string; url?: string; abstracts: ConferenceAbstract[] }
+export interface ConferenceFile {
+  source: string;
+  kind?: "abstract" | "company_report"; // a meeting's abstracts (default) or a company's pipeline report
+  description?: string;
+  url?: string;
+  abstracts: ConferenceAbstract[];
+}
 
 const DATA_DIR = new URL("../data/conference/", import.meta.url);
 
@@ -113,11 +119,11 @@ export async function importAbstracts(
         if (!a.abstract_no || !a.drugs?.length) continue;
         await c.query(
           `INSERT INTO conference_abstracts (source, abstract_no, title, link, program, sponsor, sponsor_basis, indication,
-                                             stage, mechanism, model, key_finding, trial_ids, study_type)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+                                             stage, mechanism, model, key_finding, trial_ids, study_type, kind)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
           [f.source, a.abstract_no, a.title ?? null, a.link ?? null, a.program ?? null, a.sponsor ?? null, a.sponsor_basis ?? null,
            a.indication ?? null, a.stage ?? null, a.mechanism ?? null, a.model ?? null, a.key_finding ?? null,
-           trialsOf.get(a.abstract_no) ?? [], a.study_type ?? null],
+           trialsOf.get(a.abstract_no) ?? [], a.study_type ?? null, f.kind ?? "abstract"],
         );
         res.abstracts++;
         for (const d of a.drugs) {

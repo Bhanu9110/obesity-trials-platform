@@ -1,0 +1,120 @@
+{
+ "source": "Novo Nordisk 2026 Q2",
+ "kind": "company_report",
+ "description": "Novo Nordisk's own obesity pipeline as reported in its Q2 2026 investor presentation (obesity pipeline slide). Only the projects added to the database on request; the phase given here is shown on the drug page ahead of phases worked out from trials and databases.",
+ "url": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf",
+ "abstracts": [
+  {
+   "abstract_no": "NN9440",
+   "program": "Monlunabant",
+   "drugs": [
+    {
+     "name": "Monlunabant",
+     "aliases": [
+      "NN9440",
+      "INV-202"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Terminated (Phase 2)",
+   "title": "Novo Nordisk Q2 2026 investor presentation — obesity pipeline",
+   "link": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf"
+  },
+  {
+   "abstract_no": "NN9662",
+   "program": "Triple (tri-agonist)",
+   "drugs": [
+    {
+     "name": "NNC0662-0419",
+     "aliases": [
+      "NN9662",
+      "Triple agonist"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Phase 1b/2",
+   "title": "Novo Nordisk Q2 2026 investor presentation — obesity pipeline",
+   "link": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf",
+   "mechanism": "Tri-agonist"
+  },
+  {
+   "abstract_no": "NN9638",
+   "program": "Amylin 355",
+   "drugs": [
+    {
+     "name": "NNC0638-0355",
+     "aliases": [
+      "NN9638",
+      "Amylin 355"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Phase 1",
+   "title": "Novo Nordisk Q2 2026 investor presentation — obesity pipeline",
+   "link": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf",
+   "mechanism": "Amylin analogue"
+  },
+  {
+   "abstract_no": "NN9839",
+   "program": "Amylin 1213",
+   "drugs": [
+    {
+     "name": "NNC0174-1213",
+     "aliases": [
+      "NN9839",
+      "Amylin 1213"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Phase 1",
+   "title": "Novo Nordisk Q2 2026 investor presentation — obesity pipeline",
+   "link": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf",
+   "mechanism": "Amylin analogue"
+  },
+  {
+   "abstract_no": "NN6989",
+   "program": "Oral ACSL5i",
+   "drugs": [
+    {
+     "name": "NNC6989-0001",
+     "aliases": [
+      "NN6989",
+      "Oral ACSL5i"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Phase 1",
+   "title": "Novo Nordisk Q2 2026 investor presentation — obesity pipeline",
+   "link": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf",
+   "mechanism": "Oral ACSL5 inhibitor"
+  },
+  {
+   "abstract_no": "NN9695",
+   "program": "GLP-1 analogue",
+   "drugs": [
+    {
+     "name": "GLP-1 analogue (NN9695)",
+     "aliases": [
+      "NN9695"
+     ]
+    }
+   ],
+   "sponsor": "Novo Nordisk",
+   "indication": "Obesity",
+   "stage": "Phase 1",
+   "title": "Novo Nordisk Q2 2026 investor presentation — obesity pipeline",
+   "link": "https://www.novonordisk.com/content/dam/nncorp/global/en/investors/pdfs/financial-results/2026/Q2-2026-Full%20presentation.pdf",
+   "mechanism": "GLP-1 analogue"
+  }
+ ]
+}

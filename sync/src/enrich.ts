@@ -251,6 +251,7 @@ export interface AbstractFact {
   program?: string | null;
   aliases: string[];
   solo: boolean;                 // the abstract is about this drug alone (not a combination / comparison)
+  kind?: "abstract" | "company_report"; // a company's own pipeline report: its phase comes first
 }
 
 /** "Clinical – Phase 1b/2a" -> Phase 1/2, "Preclinical – in vivo" -> Preclinical; null when not stated. */
@@ -406,7 +407,9 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   const soloAbs = abstracts.filter((a) => a.solo);
   // A drug known only from abstracts: what the abstracts say about its program is all we have.
   const ownAbs = trials.length ? soloAbs : abstracts;
-  const absSrc = (a: AbstractFact) => `${a.source} abstract`;
+  const absSrc = (a: AbstractFact) => (a.kind === "company_report" ? `${a.source} pipeline` : `${a.source} abstract`);
+  // The developer's own latest pipeline report for this drug alone ("Phase 1b/2", "Terminated (Phase 2)").
+  const report = soloAbs.filter((a) => a.kind === "company_report" && a.stage).slice(-1)[0] ?? null;
   const now = input.now ?? new Date();
 
   // Approval -------------------------------------------------------------------
@@ -433,13 +436,14 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   const activeTrial = trials.some((t) => /RECRUITING|ACTIVE|ENROLLING/i.test(t.status ?? ""));
   if (withdrawn) set("phase", "Withdrawn", single?.withdrawn ? "ChEMBL" : "Inxight Drugs");
   else if (isApproved) set("phase", "Approved", approved!.source);
+  else if (report) set("phase", report.stage, absSrc(report));
   else if (/^discontinued$/i.test(inxStatus) && !activeTrial) set("phase", "Discontinued", "Inxight Drugs");
   else {
     const cp = single?.maxPhase != null ? Math.floor(single.maxPhase) : 0;
     const ip = inxightPhaseLevel(singleInx?.highestPhase);
     const best = Math.max(cp, ip);
     // The most advanced stage a conference abstract reports for this drug alone.
-    const ab = ownAbs.map((a) => ({ p: phaseFromStage(a.stage), a }))
+    const ab = ownAbs.filter((a) => a.kind !== "company_report").map((a) => ({ p: phaseFromStage(a.stage), a }))
       .filter((x): x is { p: { level: number; label: string }; a: AbstractFact } => !!x.p)
       .sort((x, y) => y.p.level - x.p.level)[0];
     if (best >= 1 && best < 4 && (!tp || best > tp.level) && (!ab || best >= ab.p.level)) set("phase", `Phase ${best}`, cp >= ip ? "ChEMBL" : "Inxight Drugs");
@@ -507,7 +511,7 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   }
   // 2) Trial titles: "Enicepatide (CT-388)" or "CT-388 (Enicepatide)".
   for (const a of titleAliases(input.name, trials.map((t) => t.title ?? ""))) codes.push({ v: a, src: "Trial titles" });
-  for (const a of abstracts) for (const x of a.aliases) codes.push({ v: isCode(x) ? x.toUpperCase() : x, src: absSrc(a) });
+  for (const a of abstracts) for (const x of a.aliases) codes.push({ v: x.trim(), src: absSrc(a) }); // as written in the data file
   // 3) A code written next to this drug alone in intervention names ("Tirzepatide (LY3298176)") in 2+ trials.
   const codeTrials = new Map<string, { v: string; n: number }>();
   for (const t of trials) {
@@ -1418,9 +1422,10 @@ export async function enrichProducts(
   try {
     const ab = await pool.query<{
       product_slug: string; aliases: string[]; source: string; sponsor: string | null; indication: string | null;
-      stage: string | null; mechanism: string | null; program: string | null; drugs: number; drug_name: string;
+      stage: string | null; mechanism: string | null; program: string | null; drugs: number; drug_name: string; kind: string | null;
     }>(
       `SELECT pa.product_slug, pa.aliases, pa.drug_name, a.source, a.sponsor, a.indication, a.stage, a.mechanism, a.program,
+              to_jsonb(a) ->> 'kind' AS kind,
               (SELECT count(*) FROM product_abstracts o WHERE o.source = a.source AND o.abstract_no = a.abstract_no)::int AS drugs
          FROM product_abstracts pa JOIN conference_abstracts a USING (source, abstract_no)
         ORDER BY a.source, a.abstract_no`,
@@ -1428,7 +1433,7 @@ export async function enrichProducts(
     for (const r of ab.rows) {
       abstractsBySlug.set(r.product_slug, [...(abstractsBySlug.get(r.product_slug) ?? []), {
         source: r.source, sponsor: r.sponsor, indication: r.indication, stage: r.stage, mechanism: r.mechanism,
-        program: r.program, aliases: r.aliases ?? [],
+        program: r.program, aliases: r.aliases ?? [], kind: r.kind === "company_report" ? "company_report" : "abstract",
         // About this drug alone: the only drug linked, and the program names no other drug
         // ("Vanoglipel + resmetirom" is not about vanoglipel alone, even if resmetirom isn't tracked).
         solo: r.drugs === 1 && (r.drug_name.includes(" + ") || !/\s\+\s|\svs\.?\s|;/i.test(r.program ?? "")),

@@ -678,6 +678,10 @@
    "into": "morphine_nalbuphine",
    "name": "Morphine + Nalbuphine"
   },
+  "inv202": {
+   "into": "monlunabant",
+   "name": "Monlunabant"
+  },
   "itsmetabolitesscheme1_paracetamol": {
    "into": "paracetamol",
    "name": "Paracetamol"

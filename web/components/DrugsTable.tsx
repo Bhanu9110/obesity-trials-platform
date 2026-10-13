@@ -80,7 +80,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
       <div className="text-sm text-slate-500">
         {rows.length.toLocaleString()} drugs
         {rows.some((p) => p.conference_trials > 0) && (
-          <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported at a conference (e.g. ADA 2026), no ClinicalTrials.gov record yet</span>
+          <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported in a conference abstract or company report, no ClinicalTrials.gov record yet</span>
         )}
       </div>
 
@@ -118,7 +118,7 @@ export default function DrugsTable({ products }: { products: ProductSummary[] })
                   <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">
                     {p.trials}
                     {p.conference_trials > 0 && (
-                      <span className="text-[10px] text-amber-600" title={`Reported at ${p.abstract_sources ?? "a conference"} — no ClinicalTrials.gov record yet`}>*</span>
+                      <span className="text-[10px] text-amber-600" title={`Reported in ${p.abstract_sources ?? "a conference abstract"} — no ClinicalTrials.gov record yet`}>*</span>
                     )}
                     {p.all_trials > p.trials && (
                       <span className="ml-1 text-xs text-slate-400" title="Other stored trials (comorbidity / weight-related / not obesity)">
