@@ -35,7 +35,7 @@ export function requiredPage(pathname: string): GuestPage | "always" | "never" {
   if (["/profile", "/help", "/api/profile"].some(under)) return "always";
   // The Trials explorer and overview need "trials"; a single trial record opens from any page.
   if (pathname === "/" || pathname === "/trials" || under("/api/trials") || under("/api/filters")) return "trials";
-  if (["/login", "/api/auth", "/api/activity", "/api/health", "/api/search", "/trials"].some(under)) return "always";
+  if (["/login", "/api/auth", "/api/activity", "/api/health", "/api/search", "/api/version", "/trials"].some(under)) return "always";
   if (under("/drugs") || under("/api/products")) return "drugs";
   if (under("/changes")) return "changes";
   if (under("/api/quality/export")) return "quality_export";

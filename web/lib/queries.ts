@@ -370,12 +370,14 @@ export async function dashboardCounts(): Promise<{
     `SELECT (SELECT count(*)::int FROM trials t WHERE t.is_active AND t.obesity_class = 'primary' AND ${hasDrug("t")}) AS trials,
             (SELECT count(*)::int FROM trials t WHERE t.is_active AND ${hasDrug("t")}) AS stored,
             (SELECT count(*)::int FROM trials t WHERE t.is_active AND NOT ${hasDrug("t")}) AS no_drug,
+            -- the same drug count as the Overview's "Drugs" tile (homeStats)
             (SELECT count(DISTINCT tp.product_id)::int FROM trial_products tp
-               JOIN trials t ON t.nct_id = tp.nct_id AND t.obesity_class = 'primary'
+               JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active AND t.obesity_class = 'primary'
                JOIN products p ON p.id = tp.product_id AND p.kind IS NULL) AS products,
             (SELECT count(*)::int FROM products p
-              WHERE EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id
-                             WHERE tp.product_id = p.id AND t.obesity_class = 'primary')
+              WHERE p.kind IS NULL
+                AND EXISTS (SELECT 1 FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id
+                             WHERE tp.product_id = p.id AND t.is_active AND t.obesity_class = 'primary')
                 AND (p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
                      OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL
                      OR p.drug_class IS NOT NULL)) AS with_info`,

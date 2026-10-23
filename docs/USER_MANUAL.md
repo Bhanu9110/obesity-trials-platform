@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.1 |
+| **Manual version** | 1.2 |
 | **Last updated** | 23 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -16,7 +16,7 @@
 | 1 | [About the website](#1-about-the-website) | What the site does and where the data comes from |
 | 2 | [Signing in and out](#2-signing-in-and-out) | Sign-in page, session length, signing out |
 | 3 | [Roles and permissions](#3-roles-and-permissions) | Super admin, admin, member, guest — who can do what |
-| 4 | [Finding your way around](#4-finding-your-way-around) | Sidebar, search, dark mode |
+| 4 | [Finding your way around](#4-finding-your-way-around) | Sidebar, search, dark mode, automatic updates |
 | 5 | [Overview](#5-overview) | The dashboard |
 | 6 | [Trials explorer](#6-trials-explorer) | Filtering, previewing and sharing trial lists |
 | 7 | [Drugs](#7-drugs) | Drug list, search by code names, drug pages, editing |
@@ -89,6 +89,8 @@ Everyone can open **Profile** and **Help & manual**.
 | **Round initials (top right)** | Opens your profile |
 
 On a phone, the sidebar opens from the **menu** button at the top left.
+
+**Numbers update by themselves.** Every open page checks for new data once a minute and whenever you come back to its tab. When something changed — the daily sync finished, someone edited, merged or re-classified a drug, or data quality was re-checked — the counts, charts and tables reload in place and a small **Updated with the latest data** note appears at the bottom right. Your filters, search text and scroll position stay as they were. You never need to press refresh.
 
 ## 5. Overview
 
@@ -228,6 +230,8 @@ Changing your password needs your current one. Afterwards admins can no longer s
 
 If a source is down for 3 drugs in a row it is skipped for that run; the health check fails after 47 hours down, and an e-mail alert is sent after 3 days.
 
+When a sync finishes, pages that are open show the new numbers within about a minute (see [4](#4-finding-your-way-around)). The "Synced" time on the Overview is shown in India time (the `APP_TIMEZONE` setting).
+
 ## 15. Conference abstracts and company reports
 
 | Item | Detail |
@@ -262,6 +266,7 @@ Never paste passwords, tokens or connection strings into chats, issues or this m
 | You were signed out after your type changed | Expected — sign in again |
 | A guest can't change their password | Guests ask an admin for a new password |
 | The Sync buttons don't work | Set `GITHUB_DISPATCH_TOKEN` in Vercel (see DEPLOY.md) |
+| A count looks out of date | Wait a minute or switch back to the tab — pages refresh their numbers by themselves. If it still looks wrong, check **Admin → Recent sync runs** for a failed run |
 | Search doesn't find a code name | The alias may not be known yet; add it to the drug's profile (Code names) |
 
 ## 18. Change log
@@ -270,6 +275,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 23 Oct 2026 | 1.2 | Counts update by themselves: open pages reload their numbers within a minute of any data change (sync, drug edits, merges, quality checks). Trials filter counts are never held out of date. Admin's drug counts now match the Overview. Overview "Synced" time shown in India time | 4, 14, 17 |
 | 23 Oct 2026 | 1.1 | Exactly one super admin: `SUPER_ADMIN` names it; if empty or not an owner, the first owner in `AUTH_USERS` is the super admin. Other owners are admins | 3, 16, 17 |
 | 23 Oct 2026 | 1.0 | Super admin (`SUPER_ADMIN`) and admin logins; only the super admin creates admins. Sign out moved to the bottom of the sidebar. Audit logs moved to their own page, now including admin actions. New Profile page with password change. New Help & manual page | 2, 3, 4, 10, 11, 12, 13, 16 |
 | 16 Oct 2026 | — | Drug search finds drugs by any alias, code or brand name; the page search box also filters the table | 6, 7 |

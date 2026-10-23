@@ -10,6 +10,7 @@ import { ContinentChips, Dash, PhaseText, ProductChips, StatusPill } from "@/com
 import PageHeader from "@/components/PageHeader";
 import TrialPreview from "@/components/TrialPreview";
 import { icons } from "@/components/shell/icons";
+import { DATA_UPDATED } from "@/components/LiveRefresh";
 
 // Trials explorer: filters on the left, results on the right, a quick-preview
 // panel on row click. Every filter lives in the URL, so a view can be shared.
@@ -63,6 +64,13 @@ function Explorer() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  // Bumped when the data changes while this page is open (components/LiveRefresh.tsx).
+  const [dataTick, setDataTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setDataTick((n) => n + 1);
+    window.addEventListener(DATA_UPDATED, bump);
+    return () => window.removeEventListener(DATA_UPDATED, bump);
+  }, []);
 
   useEffect(() => { setQueryInput(q); }, [q]);
 
@@ -71,7 +79,7 @@ function Explorer() {
     (async () => {
       for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
         try {
-          const res = await fetch("/api/filters");
+          const res = await fetch("/api/filters", { cache: "no-store" });
           if (res.status === 401) { window.location.assign("/login?next=/trials"); return; }
           const body = await res.json();
           if (res.ok && Array.isArray(body?.phases)) { if (!cancelled) setOptions(body); return; }
@@ -80,7 +88,7 @@ function Explorer() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [dataTick]);
 
   const apiQuery = useMemo(() => {
     const p = new URLSearchParams();
@@ -95,12 +103,13 @@ function Explorer() {
     return p.toString();
   }, [q, phases, statuses, country, continent, sponsor, sort, page, size]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  // quiet: a background reload after the data changed keeps the current rows on screen until the new ones arrive.
+  const load = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
     setError(null);
     try {
-      let r = await fetch(`/api/trials?${apiQuery}`);
-      if (r.status >= 500) { await new Promise((ok) => setTimeout(ok, 800)); r = await fetch(`/api/trials?${apiQuery}`); }
+      let r = await fetch(`/api/trials?${apiQuery}`, { cache: "no-store" });
+      if (r.status >= 500) { await new Promise((ok) => setTimeout(ok, 800)); r = await fetch(`/api/trials?${apiQuery}`, { cache: "no-store" }); }
       if (r.status === 401) { window.location.assign(`/login?next=${encodeURIComponent("/trials")}`); return; }
       const res = await r.json().catch(() => ({ error: `Server answered ${r.status}` }));
       if (!r.ok || !Array.isArray(res.items)) throw new Error(res.error ?? `HTTP ${r.status}`);
@@ -115,6 +124,7 @@ function Explorer() {
     }
   }, [apiQuery]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (dataTick) load(true); }, [dataTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // "/" focuses the search box on this page (the global palette uses Ctrl/⌘ K).
   useEffect(() => {

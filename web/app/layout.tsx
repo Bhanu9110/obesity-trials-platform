@@ -8,6 +8,7 @@ import { adminLevel, shownRole } from "@/lib/admin";
 import { firstPagePath, type GuestPage } from "@/lib/guest-pages";
 import { displayTimeZone } from "@/lib/queries";
 import ActivityTracker from "@/components/ActivityTracker";
+import LiveRefresh from "@/components/LiveRefresh";
 import AppShell, { type ShellNavItem } from "@/components/shell/AppShell";
 import { LogoMark } from "@/components/Logo";
 
@@ -79,6 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <head>{fonts}</head>
         <body>
           {user && <ActivityTracker endsAt={site?.active && site.expiresAt ? site.expiresAt : undefined} />}
+          {user && <LiveRefresh />}
           <AppShell nav={nav} user={shellUser} homeHref={guest ? firstPagePath(guest.pages) : "/"} canTrials={can("trials")}>
             {children}
           </AppShell>

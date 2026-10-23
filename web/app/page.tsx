@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, authDisabled, readSession } from "@/lib/auth";
-import { homeStats, overview } from "@/lib/queries";
+import { displayTimeZone, homeStats, overview } from "@/lib/queries";
 import { formatPhase, phaseRank } from "@/lib/format";
 import PageHeader, { StatTile } from "@/components/PageHeader";
 import { BarList, SplitBar, YearColumns, type Segment } from "@/components/charts";
@@ -74,7 +74,7 @@ export default async function OverviewPage() {
     href: `/trials?status=${encodeURIComponent(g.codes.join("|"))}`,
   }));
   const synced = stats.lastSync
-    ? new Date(stats.lastSync).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+    ? new Date(stats.lastSync).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: displayTimeZone() })
     : null;
   const pct = (v: number) => (stats.trials ? `${Math.round((v / stats.trials) * 100)}% of trials` : "");
 
