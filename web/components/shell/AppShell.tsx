@@ -32,10 +32,10 @@ function ThemeToggle() {
   );
 }
 
-export interface ShellNavItem { href: string; label: string; icon: IconName; section: "Intelligence" | "Workspace" }
-export interface ShellUser { name: string; username: string; badge?: string | null; role: "owner" | "member" | "guest" }
+export interface ShellNavItem { href: string; label: string; icon: IconName; section: "Intelligence" | "Workspace" | "Account" }
+export interface ShellUser { name: string; username: string; badge?: string | null; role: "super_admin" | "owner" | "admin" | "member" | "guest" }
 
-const ROLE_LABEL = { owner: "Owner", member: "Member", guest: "Guest" } as const;
+const ROLE_LABEL = { super_admin: "Super admin", owner: "Owner", admin: "Admin", member: "Member", guest: "Guest" } as const;
 /** "Priya – our analyst" -> "PR"; "obeybhanu" -> "OB". */
 const initials = (name: string) => {
   const words = name.replace(/[^\p{L}\p{N} ]/gu, " ").trim().split(/\s+/).filter(Boolean);
@@ -84,7 +84,7 @@ export default function AppShell({
     });
   }
 
-  const sections = (["Intelligence", "Workspace"] as const).map((s) => ({ s, items: nav.filter((n) => n.section === s) })).filter((x) => x.items.length);
+  const sections = (["Intelligence", "Workspace", "Account"] as const).map((s) => ({ s, items: nav.filter((n) => n.section === s) })).filter((x) => x.items.length);
 
   const sidebar = (mobile: boolean) => {
     const mini = collapsed && !mobile;
@@ -133,14 +133,26 @@ export default function AppShell({
         </nav>
 
         <div className="space-y-3 p-3">
-          {!mini && (
-            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-              <span className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full bg-emerald-400/20 blur-xl" />
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-800">
-                <span className="h-2 w-2 animate-pulse-dot rounded-full bg-emerald-400 shadow-[0_0_10px_rgb(52_211_153)]" />
-                Live data feed
-              </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-500">ClinicalTrials.gov registry, synced every day.</p>
+          {user && (
+            <div className={`rounded-xl border border-slate-200 bg-slate-50/60 ${mini ? "p-1.5" : "p-2"}`}>
+              {!mini && (
+                <Link href="/profile" className="flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 hover:bg-slate-100/70" title="Your profile">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500/40 to-accent-500/40 font-display text-[11px] font-semibold uppercase text-slate-950 ring-1 ring-slate-300">
+                    {initials(user.name)}
+                  </span>
+                  <span className="min-w-0 leading-tight">
+                    <span className="block truncate text-[13px] font-medium text-slate-900">{user.name}</span>
+                    <span className="block truncate text-[11px] text-slate-500">{ROLE_LABEL[user.role]}{user.badge ? ` · until ${user.badge}` : ""}</span>
+                  </span>
+                </Link>
+              )}
+              <form action="/api/auth/logout" method="post" className={mini ? "" : "mt-1"}>
+                <button type="submit" title="Sign out" aria-label="Sign out"
+                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] font-medium text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 ${mini ? "justify-center px-0" : ""}`}>
+                  {icons.logout}
+                  {!mini && <span>Sign out</span>}
+                </button>
+              </form>
             </div>
           )}
           {!mobile && (
@@ -198,16 +210,10 @@ export default function AppShell({
                       {user.name !== user.username ? `${user.username} · ` : ""}{ROLE_LABEL[user.role]}{user.badge ? ` · until ${user.badge}` : ""}
                     </div>
                   </div>
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-brand-500/40 to-accent-500/40 font-display text-xs font-semibold uppercase text-slate-950 ring-1 ring-slate-300"
-                        title={`Signed in as ${user.username}`}>
+                  <Link href="/profile" className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-brand-500/40 to-accent-500/40 font-display text-xs font-semibold uppercase text-slate-950 ring-1 ring-slate-300 transition hover:ring-brand-500"
+                        title={`Signed in as ${user.username} — open your profile`}>
                     {initials(user.name)}
-                  </span>
-                  <form action="/api/auth/logout" method="post">
-                    <button type="submit" title="Sign out" aria-label="Sign out"
-                            className="grid h-9 w-9 place-items-center rounded-xl text-slate-400 ring-1 ring-slate-200 transition hover:text-rose-600 hover:ring-rose-200">
-                      {icons.logout}
-                    </button>
-                  </form>
+                  </Link>
                 </div>
               )}
             </div>

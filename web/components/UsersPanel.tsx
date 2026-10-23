@@ -6,9 +6,11 @@ import type { OwnerRow } from "@/app/api/users/route";
 import { DEFAULT_GUEST_PAGES, GUEST_PAGES, cleanPages, type GuestPage } from "@/lib/guest-pages";
 
 // Admin page: every login in one place. Owners come from Vercel (AUTH_USERS) and
-// are shown read-only; members and guests are created and managed here.
+// are shown read-only; admins, members and guests are created and managed here.
+// Only the super admin (SUPER_ADMIN in Vercel) can create, change or remove admins.
 
-type Role = "member" | "guest";
+type Role = "admin" | "member" | "guest";
+const ROLE_LABEL: Record<Role, string> = { admin: "Admin", member: "Member", guest: "Guest" };
 
 const DURATIONS: [number, string][] = [
   [10, "10 minutes"], [15, "15 minutes"], [30, "30 minutes"],
@@ -32,7 +34,9 @@ function timeLeft(iso: string): string {
 }
 
 const TYPE_TAG = {
+  super: "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200",
   owner: "bg-violet-50 text-violet-700 ring-violet-200",
+  admin: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   member: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   guest: "bg-sky-50 text-sky-700 ring-sky-200",
 } as const;
@@ -86,7 +90,7 @@ function loginText(username: string, password: string, u: Pick<SiteUser, "role" 
     `Sign in at: ${window.location.origin}/login`,
     `Username: ${username}`,
     `Password: ${password}`,
-    `Access: ${u.role === "member" ? "all pages" : u.pages.map((k) => PAGE_LABEL[k]).join(", ")}`,
+    `Access: ${u.role === "admin" ? "all pages, including Admin and Audit logs" : u.role === "member" ? "all pages" : u.pages.map((k) => PAGE_LABEL[k]).join(", ")}`,
     `Valid until: ${u.expires_at ? fmt(u.expires_at) : "no end date"}`,
   ].join("\n");
 }
@@ -112,12 +116,18 @@ export default function UsersPanel() {
   const [open, setOpen] = useState<number | null>(null);
   const [details, setDetails] = useState<{ title: string; text: string } | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  const [me, setMe] = useState<{
+    level: "super" | "admin"; superAdmin: string | null;
+    superAdminSource: "setting" | "first_owner" | "invalid_setting" | "none"; superAdminSetting: string | null;
+  } | null>(null);
+  const isSuper = me?.level === "super";
 
   const load = useCallback(async () => {
     try {
       const d = await api("GET", "/api/users");
       setOwners(d.owners);
       setUsers(d.users);
+      setMe(d.me ?? null);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -163,8 +173,9 @@ export default function UsersPanel() {
         <div className="max-w-3xl">
           <h2 className="text-sm font-semibold text-slate-900">Users &amp; access</h2>
           <p className="text-xs text-slate-500">
+            <b>Admins</b> open the Admin and Audit logs pages and manage members and guests — only the super admin can create, change or remove admins.{" "}
             <b>Members</b> can open every page except Admin and edit drug profiles. <b>Guests</b> can only open the pages you choose, view-only, until their time runs out.
-            Only owners (set in Vercel) can open this Admin page. Deleting or ending a login signs that person out on their next click.
+            Deleting or ending a login signs that person out on their next click.
           </p>
         </div>
         <button type="button" onClick={() => { setAdding((a) => !a); setDetails(null); }} className={btnBrand + " px-3 py-2 text-sm"}>
@@ -172,8 +183,18 @@ export default function UsersPanel() {
         </button>
       </div>
 
+      {isSuper && me && me.superAdminSource !== "setting" && (
+        <p className="mx-5 mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          {me.superAdminSource === "invalid_setting"
+            ? <><code className="rounded bg-white px-1">SUPER_ADMIN</code> names “{me.superAdminSetting}”, which is not an owner account, so </>
+            : <><code className="rounded bg-white px-1">SUPER_ADMIN</code> is not set, so </>}
+          the first owner in <code className="rounded bg-white px-1">AUTH_USERS</code> — <b>{me.superAdmin}</b> — is the only super admin.
+          Set <code className="rounded bg-white px-1">SUPER_ADMIN</code> in Vercel to the owner username you want, then redeploy.
+        </p>
+      )}
+
       {adding && (
-        <AddUser
+        <AddUser isSuper={isSuper}
           onCancel={() => setAdding(false)}
           onCreated={(u, password) => {
             setAdding(false);
@@ -214,8 +235,14 @@ export default function UsersPanel() {
                   <div className="font-mono text-[13px] font-medium text-slate-800">{o.display}</div>
                   <div className="text-xs text-slate-500">Owner account</div>
                 </td>
-                <td className="px-3 py-2.5"><span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${TYPE_TAG.owner}`}>Owner</span></td>
-                <td className="px-3 py-2.5 text-slate-600">{o.admin ? "Everything, including Admin" : "Every page except Admin"}</td>
+                <td className="px-3 py-2.5">
+                  <span className={`whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${o.superAdmin ? TYPE_TAG.super : o.admin ? TYPE_TAG.admin : TYPE_TAG.owner}`}>
+                    {o.superAdmin ? "Super admin" : o.admin ? "Admin" : "Owner"}
+                  </span>
+                </td>
+                <td className="px-3 py-2.5 text-slate-600">
+                  {o.superAdmin ? "Everything, including creating admins" : o.admin ? "Everything, including Admin and Audit logs" : "Every page except Admin"}
+                </td>
                 <td className="px-3 py-2.5 text-slate-600">No end date</td>
                 <td className="px-3 py-2.5 text-slate-400">—</td>
                 <td className="whitespace-nowrap px-5 py-2.5 text-right text-xs text-slate-400">Set in Vercel</td>
@@ -228,7 +255,7 @@ export default function UsersPanel() {
                 {q ? "No user matches." : view === "ended" ? "No ended logins." : "No users yet — click “+ Add user”."}
               </td></tr>
             ) : shown.map((u) => (
-              <UserRows key={u.id} u={u} open={open === u.id}
+              <UserRows key={u.id} u={u} open={open === u.id} isSuper={isSuper}
                         onToggle={() => setOpen(open === u.id ? null : u.id)}
                         onCopy={() => copyLogin(u)}
                         onChanged={(msg) => { if (msg) say(msg); load(); }}
@@ -263,7 +290,7 @@ function DetailsCard({ title, text, onDone }: { title: string; text: string; onD
   );
 }
 
-function AddUser({ onCancel, onCreated }: { onCancel: () => void; onCreated: (u: SiteUser, password: string) => void }) {
+function AddUser({ isSuper, onCancel, onCreated }: { isSuper: boolean; onCancel: () => void; onCreated: (u: SiteUser, password: string) => void }) {
   const [role, setRole] = useState<Role>("guest");
   const [label, setLabel] = useState("");
   const [username, setUsername] = useState("");
@@ -276,7 +303,7 @@ function AddUser({ onCancel, onCreated }: { onCancel: () => void; onCreated: (u:
   function pickRole(r: Role) {
     setRole(r);
     if (r === "guest" && minutes === null) setMinutes(10080);
-    if (r === "member") setMinutes(null);
+    if (r !== "guest") setMinutes(null);
   }
 
   async function submit(e: React.FormEvent) {
@@ -298,9 +325,12 @@ function AddUser({ onCancel, onCreated }: { onCancel: () => void; onCreated: (u:
   return (
     <form onSubmit={submit} className="space-y-4 border-b border-slate-100 bg-slate-50/60 px-5 py-4">
       <div className="flex flex-wrap items-center gap-3">
-        <Segmented value={role} onChange={pickRole} options={[["guest", "Guest"], ["member", "Member"]]} />
+        <Segmented value={role} onChange={pickRole}
+                   options={isSuper ? [["guest", "Guest"], ["member", "Member"], ["admin", "Admin"]] : [["guest", "Guest"], ["member", "Member"]]} />
         <span className="text-xs text-slate-500">
-          {role === "guest" ? "Only the pages you tick, view-only, for a limited time." : "Every page except Admin; can edit drug profiles."}
+          {role === "guest" ? "Only the pages you tick, view-only, for a limited time."
+            : role === "admin" ? "Every page, including Admin and Audit logs; manages members and guests."
+            : "Every page except Admin; can edit drug profiles."}
         </span>
       </div>
       <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr_1fr]">
@@ -322,7 +352,7 @@ function AddUser({ onCancel, onCreated }: { onCancel: () => void; onCreated: (u:
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Access for
           <select value={minutes ?? ""} onChange={(e) => setMinutes(e.target.value === "" ? null : Number(e.target.value))} className={input}>
-            {role === "member" && <option value="">No end date</option>}
+            {role !== "guest" && <option value="">No end date</option>}
             {DURATIONS.map(([m, l]) => <option key={m} value={m}>{l}</option>)}
           </select>
         </label>
@@ -345,9 +375,9 @@ function AddUser({ onCancel, onCreated }: { onCancel: () => void; onCreated: (u:
 }
 
 function UserRows({
-  u, open, onToggle, onCopy, onChanged, onDeleted, onDetails, onError,
+  u, open, isSuper, onToggle, onCopy, onChanged, onDeleted, onDetails, onError,
 }: {
-  u: SiteUser; open: boolean; onToggle: () => void; onCopy: () => void;
+  u: SiteUser; open: boolean; isSuper: boolean; onToggle: () => void; onCopy: () => void;
   onChanged: (msg?: string) => void; onDeleted: () => void;
   onDetails: (title: string, text: string) => void; onError: (m: string | null) => void;
 }) {
@@ -365,10 +395,11 @@ function UserRows({
           <div className="max-w-[260px] truncate text-xs text-slate-500" title={u.label}>{u.label}</div>
         </td>
         <td className="px-3 py-2.5">
-          <span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${TYPE_TAG[u.role]}`}>{u.role === "member" ? "Member" : "Guest"}</span>
+          <span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${TYPE_TAG[u.role]}`}>{ROLE_LABEL[u.role]}</span>
         </td>
         <td className="px-3 py-2.5">
-          {u.role === "member" ? <span className="text-slate-600">Every page except Admin</span> : (
+          {u.role === "admin" ? <span className="text-slate-600">Every page, incl. Admin &amp; Audit logs</span>
+            : u.role === "member" ? <span className="text-slate-600">Every page except Admin</span> : (
             <div className="flex flex-wrap gap-1">
               {u.pages.map((k) => (
                 <span key={k} className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-700">{k === "quality_export" ? "CSV" : PAGE_LABEL[k]}</span>
@@ -384,16 +415,22 @@ function UserRows({
           {u.last_login_at ? <>{fmt(u.last_login_at)} <span className="text-xs text-slate-400">({u.login_count}×)</span></> : <span className="text-slate-400">never</span>}
         </td>
         <td className="whitespace-nowrap px-5 py-2.5 text-right">
-          {!ended && <button type="button" onClick={onCopy} className={btnPlain}>Copy login</button>}
-          <button type="button" onClick={onToggle} className={`${open ? btnBrand : btnPlain} ml-2`}>
-            {open ? "Close" : "Manage"}
-          </button>
+          {u.role === "admin" && !isSuper ? (
+            <span className="text-xs text-slate-400" title="Only the super admin can change or remove an admin">Super admin only</span>
+          ) : (
+            <>
+              {!ended && <button type="button" onClick={onCopy} className={btnPlain}>Copy login</button>}
+              <button type="button" onClick={onToggle} className={`${open ? btnBrand : btnPlain} ml-2`}>
+                {open ? "Close" : "Manage"}
+              </button>
+            </>
+          )}
         </td>
       </tr>
       {open && (
         <tr className="bg-slate-50">
           <td colSpan={6} className="px-5 pb-5 pt-1">
-            <Manage u={u} onChanged={onChanged} onDeleted={onDeleted} onDetails={onDetails} onError={onError} />
+            <Manage u={u} isSuper={isSuper} onChanged={onChanged} onDeleted={onDeleted} onDetails={onDetails} onError={onError} />
           </td>
         </tr>
       )}
@@ -441,7 +478,7 @@ function AccessTime({
             </button>
           );
         })}
-        {u.role === "member" && (u.expires_at || !active) && (
+        {u.role !== "guest" && (u.expires_at || !active) && (
           <button type="button" disabled={busy} onClick={() => patch({ action: "no_end" }, "No end date")} className={btnPlain}>No end date</button>
         )}
       </div>
@@ -477,9 +514,9 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 function Manage({
-  u, onChanged, onDeleted, onDetails, onError,
+  u, isSuper, onChanged, onDeleted, onDetails, onError,
 }: {
-  u: SiteUser; onChanged: (msg?: string) => void; onDeleted: () => void;
+  u: SiteUser; isSuper: boolean; onChanged: (msg?: string) => void; onDeleted: () => void;
   onDetails: (title: string, text: string) => void; onError: (m: string | null) => void;
 }) {
   const [password, setPassword] = useState<string | null | undefined>(undefined); // undefined = hidden
@@ -560,8 +597,8 @@ function Manage({
 
       <Card title="Type and pages">
         <div className="mb-3 flex flex-wrap items-center gap-3">
-          <Segmented value={u.role} onChange={(r) => r !== u.role && patch({ action: "role", role: r }, `Now a ${r}`)}
-                     options={[["guest", "Guest"], ["member", "Member"]]} />
+          <Segmented value={u.role} onChange={(r) => r !== u.role && patch({ action: "role", role: r }, `Now ${r === "admin" ? "an" : "a"} ${r}`)}
+                     options={isSuper ? [["guest", "Guest"], ["member", "Member"], ["admin", "Admin"]] : [["guest", "Guest"], ["member", "Member"]]} />
           <span className="text-xs text-slate-500">Changing the type signs them out once.</span>
         </div>
         {u.role === "guest" ? (
@@ -573,13 +610,15 @@ function Manage({
             )}
           </>
         ) : (
-          <p className="text-sm text-slate-600">Members can open every page except Admin.</p>
+          <p className="text-sm text-slate-600">
+            {u.role === "admin" ? "Admins can open every page, including Admin and Audit logs, and manage members and guests." : "Members can open every page except Admin."}
+          </p>
         )}
       </Card>
 
       <Card title="Delete">
         <p className="mb-3 text-sm text-slate-600">
-          Removes this login for good — they can&apos;t sign in again. Their past activity stays in “Who is using the website”.
+          Removes this login for good — they can&apos;t sign in again. Their past activity stays in the Audit logs.
         </p>
         {!confirmDelete ? (
           <button type="button" onClick={() => setConfirmDelete(true)} className={btnDanger}>Delete {u.username}</button>

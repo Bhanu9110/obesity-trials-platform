@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { NctLink } from "@/components/ui";
-import AccessPanel from "@/components/AccessPanel";
+import Link from "next/link";
 import UsersPanel from "@/components/UsersPanel";
 
 interface SyncRun {
@@ -117,7 +117,7 @@ export default function AdminPage() {
       <div className="space-y-6">
         <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
         <UsersPanel />
-        <AccessPanel />
+        <AuditLogsLink />
       </div>
     );
   }
@@ -284,7 +284,7 @@ export default function AdminPage() {
       </section>
 
       <UsersPanel />
-      <AccessPanel />
+      <AuditLogsLink />
     </div>
   );
 }
@@ -343,5 +343,19 @@ function Tile({ label, value, color }: { label: string; value: number; color: st
       <div className={`text-2xl font-bold tabular-nums ${color}`}>{value.toLocaleString()}</div>
       <div className="text-xs text-slate-500">{label}</div>
     </div>
+  );
+}
+
+/** The audit log moved to its own page. */
+function AuditLogsLink() {
+  return (
+    <Link href="/audit-logs"
+          className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm transition hover:border-brand-500/40">
+      <span>
+        <span className="font-semibold text-slate-900">Audit logs</span>
+        <span className="ml-2 text-slate-500">Who signed in, failed sign-ins, page views and admin actions — now on their own page.</span>
+      </span>
+      <span className="text-brand-600">Open →</span>
+    </Link>
   );
 }

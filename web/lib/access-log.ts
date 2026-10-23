@@ -4,6 +4,8 @@ import type { NextRequest } from "next/server";
 import { query } from "./db";
 
 export type AccessEvent = "login" | "login_failed" | "logout" | "page" | "blocked";
+/** What admins do to logins, and password changes (migration 0023). */
+export type AdminEvent = "user_added" | "user_changed" | "user_removed" | "password_changed";
 
 /** Failed sign-ins from one IP address within the window before it is blocked. */
 export const MAX_FAILURES = 8;
@@ -51,6 +53,20 @@ export async function logAccess(event: AccessEvent, username: string | null, req
     }
   } catch (err) {
     console.error("[access-log] not recorded:", (err as Error)?.message);
+  }
+}
+
+/** Audit log entry for an admin action, e.g. ("user_added", "obeybhanu", req, "admin priya"). Never throws. */
+export async function logAdminAction(event: AdminEvent, actor: string | null, req: NextRequest, detail: string): Promise<void> {
+  const i = requestInfo(req);
+  try {
+    await query(
+      `INSERT INTO access_log (event, username, detail, ip, country, region, city, user_agent)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [event, clip(actor?.trim().toLowerCase(), 60), clip(detail, 300), i.ip, i.country, i.region, i.city, i.userAgent],
+    );
+  } catch (err) {
+    console.error("[access-log] admin action not recorded:", (err as Error)?.message);
   }
 }
 

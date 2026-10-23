@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser, mayAdminister } from "@/lib/admin";
-import { configuredUsers, displayUsername, isGuest, isSiteUser, plainName } from "@/lib/auth";
+import { currentUser, isSuperAdmin, mayAdminister, ownerLevel } from "@/lib/admin";
+import { configuredUsers, displayUsername, isGuest, isSiteAdmin, isSiteUser, plainName } from "@/lib/auth";
 import { listUsers } from "@/lib/site-users";
 import { query } from "@/lib/db";
 import { displayTimeZone } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
+const ownerRole = (u: string) => (ownerLevel(u) === "super" ? "super_admin" as const : ownerLevel(u) === "admin" ? "admin" as const : "owner" as const);
+
 export interface AccessMember {
   username: string;
   display: string;           // how the name is shown (owners keep their capitals)
   allowed: boolean;          // can still sign in (owner in AUTH_USERS, or an active site login)
-  role: "owner" | "member" | "guest";
+  role: "super_admin" | "owner" | "admin" | "member" | "guest";
   last_seen: string | null;
   last_login: string | null;
   logins_30d: number;
@@ -27,20 +29,22 @@ export interface AccessEventRow {
   event: string;
   username: string | null;
   path: string | null;
+  detail: string | null;      // admin actions: what was done, to whom
   ip: string | null;
   place: string | null;
   user_agent: string | null;
 }
 
-/** The Admin page's access log (admins only). */
+/** The Audit logs page (admins and the super admin). */
 export async function GET(req: NextRequest) {
   const user = await currentUser(req);
-  if (!mayAdminister(user)) return NextResponse.json({ error: "Only admins can see the access log." }, { status: 403 });
+  if (!await mayAdminister(user)) return NextResponse.json({ error: "Only admins can see the access log." }, { status: 403 });
   const tz = displayTimeZone();
   const kind = req.nextUrl.searchParams.get("kind");
   const filter =
     kind === "failed" ? "WHERE event IN ('login_failed', 'blocked')" :
-    kind === "logins" ? "WHERE event IN ('login', 'logout', 'login_failed', 'blocked')" : "";
+    kind === "logins" ? "WHERE event IN ('login', 'logout', 'login_failed', 'blocked')" :
+    kind === "admin" ? "WHERE event IN ('user_added', 'user_changed', 'user_removed', 'password_changed')" : "";
   try {
     const [members, events, failed] = await Promise.all([
       query<Omit<AccessMember, "allowed" | "role" | "display">>(
@@ -60,7 +64,8 @@ export async function GET(req: NextRequest) {
         [tz],
       ),
       query<AccessEventRow>(
-        `SELECT id, to_char(at AT TIME ZONE $1, 'YYYY-MM-DD HH24:MI:SS') AS at, event, username, path, ip,
+        `SELECT id, to_char(at AT TIME ZONE $1, 'YYYY-MM-DD HH24:MI:SS') AS at, event, username, path,
+                to_jsonb(access_log) ->> 'detail' AS detail, ip,
                 nullif(concat_ws(', ', nullif(city, ''), nullif(region, ''), country), '') AS place, user_agent
            FROM access_log ${filter}
           ORDER BY access_log.at DESC LIMIT 200`,
@@ -79,20 +84,20 @@ export async function GET(req: NextRequest) {
     const all: AccessMember[] = [
       ...members.map((m) => {
         const display = displayUsername(m.username);
-        if (!isSiteUser(m.username)) return { ...m, display, role: "owner" as const, allowed: owners.includes(m.username) };
-        const role = isGuest(m.username) ? ("guest" as const) : ("member" as const);
+        if (!isSiteUser(m.username)) return { ...m, display, role: ownerRole(m.username), allowed: owners.includes(m.username) };
+        const role = isGuest(m.username) ? ("guest" as const) : isSiteAdmin(m.username) ? ("admin" as const) : ("member" as const);
         return { ...m, display, role, allowed: active.get(plainName(m.username)) === role };
       }),
       ...owners.filter((u) => !seen.has(u)).map((u) => ({
-        username: u, display: displayUsername(u), role: "owner" as const, allowed: true, last_seen: null, last_login: null, logins_30d: 0, pages_30d: 0,
+        username: u, display: displayUsername(u), role: ownerRole(u), allowed: true, last_seen: null, last_login: null, logins_30d: 0, pages_30d: 0,
         countries: [], last_place: null, last_ip: null, last_agent: null,
       })),
     ];
-    return NextResponse.json({ members: all, events, failed7d: failed[0] ?? { attempts: 0, ips: 0 }, timeZone: tz });
+    return NextResponse.json({ members: all, events, failed7d: failed[0] ?? { attempts: 0, ips: 0 }, timeZone: tz, canErase: await isSuperAdmin(user) });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "query failed";
     return NextResponse.json(
-      { error: /access_log/.test(msg) ? "The access log starts after the next sync adds its table (migration 0012)." : msg },
+      { error: /access_log/.test(msg) ? "The audit log starts after the next sync adds its table (migration 0012)." : msg },
       { status: 500 },
     );
   }
@@ -100,10 +105,13 @@ export async function GET(req: NextRequest) {
 
 /**
  * Remove someone who can no longer sign in from this list: deletes their rows
- * from the access log. ?username=… (as stored, e.g. "guest:rahul"). Owners only.
+ * from the audit log. ?username=… (as stored, e.g. "guest:rahul"). Super admin only,
+ * so admins can't erase what they did.
  */
 export async function DELETE(req: NextRequest) {
-  if (!mayAdminister(await currentUser(req))) return NextResponse.json({ error: "Only admins can do this." }, { status: 403 });
+  if (!(await isSuperAdmin(await currentUser(req)))) {
+    return NextResponse.json({ error: "Only the super admin can remove audit log history." }, { status: 403 });
+  }
   const name = (req.nextUrl.searchParams.get("username") ?? "").trim();
   if (!name) return NextResponse.json({ error: "invalid request" }, { status: 400 });
   if (configuredUsers().includes(name)) {

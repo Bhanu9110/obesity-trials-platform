@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, authConfigured, authDisabled, isGuest, isSiteMember, readSession } from "@/lib/auth";
+// Site admins ("admin:" logins) pass through like owners; the Admin and Audit logs pages and their
+// APIs check the admin level against the database (lib/admin.ts).
 import { DEFAULT_GUEST_PAGES, firstPagePath, guestMayOpen, requiredPage } from "@/lib/guest-pages";
 
 // Every page and API requires login, except the login page itself.
@@ -44,7 +46,7 @@ export async function middleware(req: NextRequest) {
   if (user && isSiteMember(user) && requiredPage(pathname) === "never") {
     // Members made on the Admin page: every page except Admin.
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Only owners can open the Admin page." }, { status: 403 });
+      return NextResponse.json({ error: "Only admins can open the Admin and Audit logs pages." }, { status: 403 });
     }
     return NextResponse.redirect(new URL("/", req.url));
   }

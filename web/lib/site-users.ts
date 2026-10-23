@@ -1,15 +1,20 @@
 // Users & access: logins managed on the Admin page (server-only, uses the database).
+//   admin : made by the super admin only; Admin + Audit logs pages, manages members and guests;
+//           optional end date
 //   member: every page except Admin, may edit drug profiles; optional end date
 //   guest : only the chosen pages, view-only; always ends
 // Owners (AUTH_USERS in Vercel) are not stored here.
 import { query } from "./db";
 import {
-  GUEST_PREFIX, GUEST_SESSION_MIN, MEMBER_PREFIX, MEMBER_SESSION_MIN, configuredUsers, decryptText, encryptText,
+  ADMIN_PREFIX, GUEST_PREFIX, GUEST_SESSION_MIN, MEMBER_PREFIX, MEMBER_SESSION_MIN, configuredUsers, isSiteAdmin, decryptText, encryptText,
   generatePassword, hashPassword, isGuest, plainName, verifyPassword,
 } from "./auth";
 import { DEFAULT_GUEST_PAGES, GUEST_PAGES, cleanPages, type GuestPage } from "./guest-pages";
 
-export type Role = "member" | "guest";
+export type Role = "admin" | "member" | "guest";
+const ROLES: Role[] = ["admin", "member", "guest"];
+const isRole = (r: unknown): r is Role => ROLES.includes(r as Role);
+const PREFIX: Record<Role, string> = { admin: ADMIN_PREFIX, member: MEMBER_PREFIX, guest: GUEST_PREFIX };
 export type UserStatus = "active" | "expired" | "revoked";
 
 export interface SiteUser {
@@ -17,14 +22,15 @@ export interface SiteUser {
   username: string;
   label: string;
   role: Role;
-  pages: GuestPage[];            // guests; members can open everything except Admin
+  pages: GuestPage[];            // guests; members and admins can open every page (members: not Admin)
   created_by: string | null;
   created_at: string;
-  expires_at: string | null;     // null = no end date (members only)
+  expires_at: string | null;     // null = no end date (admins and members)
   revoked_at: string | null;
   last_login_at: string | null;
   login_count: number;
   has_password_copy: boolean;
+  password_changed_at: string | null;
   status: UserStatus;
 }
 
@@ -35,7 +41,7 @@ const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/;
 const ALL_PAGES = GUEST_PAGES.map((p) => p.key) as GuestPage[];
 
 const COLS = `id::int AS id, username, label, role, pages, created_by, created_at, expires_at, revoked_at,
-  last_login_at, login_count, (password_enc IS NOT NULL) AS has_password_copy,
+  last_login_at, login_count, (password_enc IS NOT NULL) AS has_password_copy, password_changed_at,
   CASE WHEN revoked_at IS NOT NULL THEN 'revoked'
        WHEN expires_at IS NOT NULL AND expires_at <= now() THEN 'expired' ELSE 'active' END AS status`;
 
@@ -45,7 +51,7 @@ export async function listUsers(): Promise<SiteUser[]> {
   return query<SiteUser>(
     `SELECT ${COLS} FROM site_users
       ORDER BY (revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) DESC,
-               role DESC, created_at DESC
+               CASE role WHEN 'admin' THEN 0 WHEN 'member' THEN 1 ELSE 2 END, created_at DESC
       LIMIT 500`,
   );
 }
@@ -63,11 +69,11 @@ export async function createUser(opts: {
 }) {
   const label = opts.label.trim().slice(0, 120);
   if (!label) throw new UserError("Add a name or who the login is for.");
-  if (opts.role !== "member" && opts.role !== "guest") throw new UserError("Choose Member or Guest.");
+  if (!isRole(opts.role)) throw new UserError("Choose Admin, Member or Guest.");
   if (opts.minutes === null ? opts.role === "guest" : !validMinutes(opts.minutes)) {
     throw new UserError(opts.role === "guest" ? "Choose how long the guest's access lasts." : "Choose how long the access lasts.");
   }
-  const pages = opts.role === "member" ? ALL_PAGES : opts.pages === undefined ? DEFAULT_GUEST_PAGES : cleanPages(opts.pages);
+  const pages = opts.role !== "guest" ? ALL_PAGES : opts.pages === undefined ? DEFAULT_GUEST_PAGES : cleanPages(opts.pages);
   if (!pages.length) throw new UserError("Choose at least one page they can open.");
 
   let username = (opts.username ?? "").trim().toLowerCase();
@@ -75,7 +81,7 @@ export async function createUser(opts: {
     if (!USERNAME_RE.test(username)) throw new UserError("Username: 3–30 characters — lowercase letters, numbers, dot, dash or underscore.");
     if (configuredUsers().includes(username)) throw new UserError("That username is an owner account (set in Vercel).");
   } else {
-    username = `${opts.role === "guest" ? "guest" : "user"}-${generatePassword(5).toLowerCase()}`;
+    username = `${opts.role === "guest" ? "guest" : opts.role === "admin" ? "admin" : "user"}-${generatePassword(5).toLowerCase()}`;
   }
   const password = opts.password ? checkPassword(opts.password) : generatePassword(12);
   try {
@@ -139,9 +145,9 @@ export async function updateUser(id: number, a: UserAction): Promise<{ user: Sit
     }
     case "no_end":
       rows = await query<SiteUser>(
-        `UPDATE site_users SET expires_at = NULL, revoked_at = NULL WHERE id = $1 AND role = 'member' RETURNING ${COLS}`, [id],
+        `UPDATE site_users SET expires_at = NULL, revoked_at = NULL WHERE id = $1 AND role <> 'guest' RETURNING ${COLS}`, [id],
       );
-      if (!rows[0]) throw new UserError("Only members can have no end date — guests always end.");
+      if (!rows[0]) throw new UserError("Only admins and members can have no end date — guests always end.");
       break;
     case "pages": {
       const pages = cleanPages(a.pages);
@@ -150,11 +156,11 @@ export async function updateUser(id: number, a: UserAction): Promise<{ user: Sit
       break;
     }
     case "role":
-      if (a.role !== "member" && a.role !== "guest") throw new UserError("Choose Member or Guest.");
+      if (!isRole(a.role)) throw new UserError("Choose Admin, Member or Guest.");
       // A guest must always end: one becoming a guest with no end date gets 7 days.
       rows = await query<SiteUser>(
         `UPDATE site_users SET role = $2,
-                pages = CASE WHEN $2 = 'member' THEN $3::text[] ELSE pages END,
+                pages = CASE WHEN $2 <> 'guest' THEN $3::text[] ELSE pages END,
                 expires_at = CASE WHEN $2 = 'guest' AND expires_at IS NULL THEN now() + interval '7 days' ELSE expires_at END
           WHERE id = $1 RETURNING ${COLS}`,
         [id, a.role, ALL_PAGES],
@@ -169,7 +175,7 @@ export async function updateUser(id: number, a: UserAction): Promise<{ user: Sit
     case "password":
       password = a.password ? checkPassword(a.password) : generatePassword(12);
       rows = await query<SiteUser>(
-        `UPDATE site_users SET password_hash = $2, password_enc = $3 WHERE id = $1 RETURNING ${COLS}`,
+        `UPDATE site_users SET password_hash = $2, password_enc = $3, password_changed_at = now() WHERE id = $1 RETURNING ${COLS}`,
         [id, await hashPassword(password), await encryptText(password)],
       );
       break;
@@ -215,11 +221,39 @@ export async function siteLogin(username: string, password: string): Promise<
   forget(name);
   const r = rows[0];
   return {
-    user: (r.role === "guest" ? GUEST_PREFIX : MEMBER_PREFIX) + name,
+    user: PREFIX[r.role] + name,
     role: r.role,
     expiresAt: r.expires_at ? new Date(r.expires_at).getTime() : null,
     pages: r.role === "guest" ? cleanPages(r.pages) : ALL_PAGES,
   };
+}
+
+/** Role and username of one login (to check what an admin may change). */
+export async function getUserRole(id: number): Promise<{ username: string; role: Role } | null> {
+  const rows = await query<{ username: string; role: Role }>(`SELECT username, role FROM site_users WHERE id = $1`, [id]);
+  return rows[0] ?? null;
+}
+
+/** Details of one login for its profile page. */
+export async function getProfile(user: string): Promise<SiteUser | null> {
+  const rows = await query<SiteUser>(`SELECT ${COLS} FROM site_users WHERE username = $1`, [plainName(user)]);
+  return rows[0] ?? null;
+}
+
+/** A login changes its own password (the current one must match). The admin's kept copy is dropped. */
+export async function changeOwnPassword(user: string, current: string, next: string): Promise<void> {
+  const name = plainName(user);
+  const rows = await query<{ password_hash: string }>(`SELECT password_hash FROM site_users WHERE username = $1`, [name]);
+  if (!rows[0] || !(await verifyPassword((current ?? "").trim(), rows[0].password_hash))) {
+    throw new UserError("Your current password is not right.");
+  }
+  const pw = checkPassword(next ?? "");
+  if (pw === (current ?? "").trim()) throw new UserError("Choose a password different from the current one.");
+  await query(
+    `UPDATE site_users SET password_hash = $2, password_enc = NULL, password_changed_at = now() WHERE username = $1`,
+    [name, await hashPassword(pw)],
+  );
+  forget(name);
 }
 
 // Small per-instance cache so pages don't query the table on every request.
@@ -234,7 +268,7 @@ function forget(name: string) { cache.delete(name); }
  */
 export async function siteUserStatus(user: string): Promise<UserState> {
   const name = plainName(user);
-  const wantRole: Role = isGuest(user) ? "guest" : "member";
+  const wantRole: Role = isGuest(user) ? "guest" : isSiteAdmin(user) ? "admin" : "member";
   let state: UserState;
   const hit = cache.get(name);
   if (hit && Date.now() - hit.at < CACHE_MS) {
@@ -264,6 +298,6 @@ export async function siteUserStatus(user: string): Promise<UserState> {
 
 /** End of the next session: renewed while they use the site, never past their end date. */
 export function sessionUntil(role: Role, expiresAt: number | null): number {
-  const len = (role === "guest" ? GUEST_SESSION_MIN : MEMBER_SESSION_MIN) * 60_000;
+  const len = (role === "guest" ? GUEST_SESSION_MIN : MEMBER_SESSION_MIN) * 60_000; // admins: like members
   return Math.min(expiresAt ?? Infinity, Date.now() + len);
 }

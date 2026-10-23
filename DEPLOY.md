@@ -131,6 +131,7 @@ Optional extra settings (Vercel environment variables):
 | Name | What it does |
 |---|---|
 | `ADMIN_USERS` | only these logins (comma-separated, e.g. `poli`) may press Sync / re-queue failed records. Empty = everyone who can sign in. |
+| `SUPER_ADMIN` | the one owner login (from `AUTH_USERS`, e.g. `ObeyBhanu`) that is **super admin**: the only account that can create, change or remove admins, and remove audit-log history. There is only ever **one** super admin: empty (or not an owner) = the first owner written in `AUTH_USERS`. Every other owner is an admin. |
 | `APP_TIMEZONE` | time zone for dates on the Changes page (default `Asia/Kolkata`). |
 
 ### Optional: get an email if the site or the data goes stale

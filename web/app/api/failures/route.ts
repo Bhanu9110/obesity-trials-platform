@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 /** POST {nct_id, action: "requeue" | "dismiss"} — manage the retry / dead-letter queue. */
 export async function POST(req: NextRequest) {
-  if (!mayAdminister(await currentUser(req))) {
+  if (!await mayAdminister(await currentUser(req))) {
     return NextResponse.json({ error: "Only admins can change the queue." }, { status: 403 });
   }
   let body: any = {};

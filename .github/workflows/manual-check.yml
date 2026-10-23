@@ -1,0 +1,52 @@
+name: User manual check
+
+# Every change to the website must update the user manual (docs/USER_MANUAL.md):
+# the sections it affects and a row in "18. Change log". This check warns on a push
+# that changes the website without touching the manual, and fails a pull request.
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "sync/src/**", "db/migrations/**", "docs/USER_MANUAL.md"]
+  pull_request:
+    paths: ["web/**", "sync/src/**", "db/migrations/**", "docs/USER_MANUAL.md"]
+
+permissions:
+  contents: read
+
+jobs:
+  manual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Website changed without a manual update?
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.sha }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            echo "No earlier commit to compare with."; exit 0
+          fi
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          echo "$changed"
+          site=$(echo "$changed" | grep -E '^(web/(app|components|lib|middleware\.ts)|sync/src|db/migrations)/?' | grep -v 'manual.generated.ts' || true)
+          manual=$(echo "$changed" | grep -x 'docs/USER_MANUAL.md' || true)
+          if [ -n "$site" ] && [ -z "$manual" ]; then
+            msg="The website changed but docs/USER_MANUAL.md was not updated. Update the affected sections and add a row to '18. Change log'."
+            if [ "$EVENT" = "pull_request" ]; then echo "::error::$msg"; exit 1; fi
+            echo "::warning::$msg"
+          else
+            echo "Manual is up to date with this change."
+          fi
+
+      - name: Help page copy of the manual is current
+        run: |
+          node web/scripts/embed-manual.mjs
+          if ! git diff --quiet -- web/lib/manual.generated.ts; then
+            echo "::warning::web/lib/manual.generated.ts is out of date — run 'npm run embed-manual' in web/ (Vercel rebuilds it anyway)."
+          fi

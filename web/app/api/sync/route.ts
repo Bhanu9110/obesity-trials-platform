@@ -39,7 +39,7 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
   const user = await currentUser(req);
-  if (!mayAdminister(user)) {
+  if (!await mayAdminister(user)) {
     return NextResponse.json({ error: "Only admins can start a sync." }, { status: 403 });
   }
   const full = req.nextUrl.searchParams.get("full") === "true";

@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import "./globals.css";
 import { SESSION_COOKIE, authDisabled, displayUsername, isGuest, isSiteUser, verifySession } from "@/lib/auth";
 import { siteUserStatus } from "@/lib/site-users";
+import { adminLevel, shownRole } from "@/lib/admin";
 import { firstPagePath, type GuestPage } from "@/lib/guest-pages";
 import { displayTimeZone } from "@/lib/queries";
 import ActivityTracker from "@/components/ActivityTracker";
@@ -23,9 +24,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const site = user && isSiteUser(user) ? await siteUserStatus(user) : null;
   const guest = user && isGuest(user) && site?.active ? site : null;
   const ended = Boolean(site && !site.active);
-  // Owners see everything; site members every page but Admin; guests only their pages.
+  // Owners and admins see everything; site members every page but Admin; guests only their pages.
   const can = (page: GuestPage) => !guest || guest.pages.includes(page);
-  const showAdmin = !site;
+  const level = disabled ? "super" : ended ? null : await adminLevel(user);
+  const showAdmin = level !== null;
   const showNav = (disabled || Boolean(user)) && !ended;
   const until = site?.active && site.expiresAt
     ? new Date(site.expiresAt).toLocaleString("en-GB", {
@@ -39,14 +41,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     ...(can("drugs") ? [{ href: "/drugs", label: "Drugs", icon: "drugs", section: "Intelligence" } as const] : []),
     ...(can("changes") ? [{ href: "/changes", label: "Registry changes", icon: "changes", section: "Intelligence" } as const] : []),
     ...(can("quality") ? [{ href: "/quality", label: "Data quality", icon: "quality", section: "Workspace" } as const] : []),
-    ...(showAdmin ? [{ href: "/admin", label: "Admin", icon: "admin", section: "Workspace" } as const] : []),
+    ...(showAdmin ? [{ href: "/admin", label: "Admin", icon: "admin", section: "Workspace" } as const,
+                     { href: "/audit-logs", label: "Audit logs", icon: "audit", section: "Workspace" } as const] : []),
+    { href: "/profile", label: "Profile", icon: "profile", section: "Account" } as const,
+    { href: "/help", label: "Help & manual", icon: "help", section: "Account" } as const,
   ];
   const shellUser = user
     ? {
         name: site?.label?.trim() || displayUsername(user),
         username: displayUsername(user),
         badge: until,
-        role: guest ? "guest" as const : site ? "member" as const : "owner" as const,
+        role: await shownRole(user),
       }
     : null;
   // Apply the saved theme before the first paint (light unless the viewer chose dark).

@@ -12,22 +12,26 @@
 export const SESSION_COOKIE = "otd_session";
 export const SESSION_DAYS = 30;
 
-// Logins managed on the Admin page (Users & access) sign in as "user:<name>"
-// (members) or "guest:<name>" (guests). A colon can never appear in an
-// AUTH_USERS name, so the prefix alone tells every part of the site which kind
-// of login this is. AUTH_USERS accounts are the owners.
+// Logins managed on the Admin page (Users & access) sign in as "admin:<name>"
+// (admins), "user:<name>" (members) or "guest:<name>" (guests). A colon can never
+// appear in an AUTH_USERS name, so the prefix alone tells every part of the site
+// (including the middleware) which kind of login this is. AUTH_USERS accounts are
+// the owners; the one named in SUPER_ADMIN is the super admin (lib/admin.ts).
 export const GUEST_PREFIX = "guest:";
 export const MEMBER_PREFIX = "user:";
+export const ADMIN_PREFIX = "admin:";
 /** Session length for site users; renewed while they use the site (never past their end date). */
 export const GUEST_SESSION_MIN = 60;
 export const MEMBER_SESSION_MIN = 12 * 60;
 
 export const isGuest = (user: string | null | undefined): boolean => Boolean(user?.startsWith(GUEST_PREFIX));
 export const isSiteMember = (user: string | null | undefined): boolean => Boolean(user?.startsWith(MEMBER_PREFIX));
-/** Managed on the Admin page (member or guest), as opposed to an owner in AUTH_USERS. */
-export const isSiteUser = (user: string | null | undefined): boolean => isGuest(user) || isSiteMember(user);
-/** The name without its "guest:" / "user:" prefix. */
-export const plainName = (user: string): string => user.replace(/^(guest|user):/, "");
+/** An admin login made on the website by the super admin. */
+export const isSiteAdmin = (user: string | null | undefined): boolean => Boolean(user?.startsWith(ADMIN_PREFIX));
+/** Managed on the Admin page (admin, member or guest), as opposed to an owner in AUTH_USERS. */
+export const isSiteUser = (user: string | null | undefined): boolean => isGuest(user) || isSiteMember(user) || isSiteAdmin(user);
+/** The name without its "guest:" / "user:" / "admin:" prefix. */
+export const plainName = (user: string): string => user.replace(/^(guest|user|admin):/, "");
 export const guestName = plainName;
 
 export function authDisabled(): boolean {
@@ -62,6 +66,11 @@ export function displayUsername(user: string): string {
     if (name && name.toLowerCase() === user.toLowerCase()) return name;
   }
   return user;
+}
+
+/** Owner usernames in the order they are written in AUTH_USERS (lower case). */
+export function ownersInOrder(): string[] {
+  return [...parseUsers().keys()];
 }
 
 /** Usernames allowed to sign in (from AUTH_USERS), never the passwords. */
@@ -148,7 +157,7 @@ export async function readSession(token: string | undefined | null): Promise<Ses
       // Still active? checked against the database (lib/site-users.ts).
       return { user: data.u, pages: Array.isArray(data.p) ? data.p.map(String) : [] };
     }
-    if (isSiteMember(data.u)) return { user: data.u };
+    if (isSiteMember(data.u) || isSiteAdmin(data.u)) return { user: data.u };
     return parseUsers().has(data.u) ? { user: data.u } : null; // removing a user from AUTH_USERS logs them out
   } catch {
     return null;

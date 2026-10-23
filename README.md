@@ -7,6 +7,13 @@ A lean drug database of obesity clinical trials, auto-updated daily from the
 > **Host it online for free (with login):** see [DEPLOY.md](DEPLOY.md) — Supabase database +
 > Vercel website + daily GitHub Actions update (all free plans).
 
+## User manual
+
+The user manual is [`docs/USER_MANUAL.md`](docs/USER_MANUAL.md) — also shown in the website on the **Help & manual** page.
+**Every change to the website must update it**: the affected sections and a new row in *18. Change log*.
+The `User manual check` workflow warns on pushes (and fails pull requests) that change `web/`, `sync/src/` or
+`db/migrations/` without touching the manual.
+
 ## What is stored
 
 Only what the drug database needs — per trial:

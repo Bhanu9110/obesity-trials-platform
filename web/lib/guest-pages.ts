@@ -1,5 +1,6 @@
 // Which parts of the site a guest login may open. Chosen per guest on the Admin
-// page. The Admin page itself is never available to guests, whatever is chosen.
+// page. The Admin and Audit logs pages are never available to guests, whatever is chosen;
+// Profile and Help always are.
 // No server-only imports: this runs in the middleware too.
 
 export const GUEST_PAGES = [
@@ -29,7 +30,9 @@ export function cleanPages(input: unknown): GuestPage[] {
  */
 export function requiredPage(pathname: string): GuestPage | "always" | "never" {
   const under = (p: string) => pathname === p || pathname.startsWith(p + "/");
-  if (["/admin", "/api/sync", "/api/failures", "/api/access", "/api/users", "/api/guests"].some(under)) return "never";
+  if (["/admin", "/audit-logs", "/api/sync", "/api/failures", "/api/access", "/api/users", "/api/guests"].some(under)) return "never";
+  // Everyone signed in: their own profile and the user manual (guests: view only).
+  if (["/profile", "/help", "/api/profile"].some(under)) return "always";
   // The Trials explorer and overview need "trials"; a single trial record opens from any page.
   if (pathname === "/" || pathname === "/trials" || under("/api/trials") || under("/api/filters")) return "trials";
   if (["/login", "/api/auth", "/api/activity", "/api/health", "/api/search", "/trials"].some(under)) return "always";
