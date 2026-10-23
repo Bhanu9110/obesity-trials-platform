@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.2 |
+| **Manual version** | 1.3 |
 | **Last updated** | 23 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -184,24 +184,30 @@ Every add, change, removal and new password is recorded in the [Audit logs](#12-
 
 ## 12. Audit logs
 
-Admins and the super admin only. Sidebar → **Audit logs**.
+Admins and the super admin only. Sidebar → **Audit logs**. The page updates itself every 30 seconds.
 
 | Part | What it shows |
 |---|---|
-| Who is using the website | Every login with role, last active, last sign-in, sign-ins and pages in 30 days, last location and device |
-| Recent activity | The latest 200 events. Filters: **Everything**, **Sign-ins only**, **Failed attempts**, **Admin actions** |
-| Failed attempts button | Appears when there were failed sign-ins in the last 7 days |
-| Remove | Super admin only: removes the history of someone who can no longer sign in |
+| **Headline numbers** | People active, sign-ins (and how many today), page views, and failed attempts — all for the last 7 days. Click **Failed attempts** to see them in the log |
+| **Activity, last 14 days** | Page views and sign-ins per day; a red badge shows failed attempts on that day. Hover a day for its numbers |
+| **Most opened pages** | The 8 most opened pages in the last 30 days, with how many people opened each |
+| **People** | Everyone who can sign in, and anyone with activity in the last 180 days: role, *Online now* (active in the last 5 minutes), last active, last sign-in, sign-ins and pages in 30 days, location and device. **Click a person** to see only their activity |
+| **Activity log** | Every entry as a sentence ("Asha opened Drug · Semaglutide"), newest first and grouped by day, with location, device and IP address |
+| Log filters | Tabs: **Everything**, **Sign-ins**, **Page views**, **Failed attempts**, **Admin actions** (each shows its count); a **person** list; a **search** box (page, name, IP address or city). **Clear filters** resets them |
+| **Load older entries** | The log shows 50 entries at a time; this adds the next 50 |
+| **Export CSV** | Downloads the entries shown as a spreadsheet file |
+| Remove history | Super admin only, on a person who can no longer sign in: deletes their activity history |
 
 | Event | Meaning |
 |---|---|
 | Signed in / Signed out | A successful sign-in or sign-out |
-| Failed sign-in / Blocked | A wrong password, or too many attempts from one network |
-| Viewed | A page opened |
-| Login added / changed / removed | An admin action on a login (the detail column says what and whom) |
-| Password changed | An admin made a new password, or someone changed their own |
+| Failed sign-in | A wrong username or password |
+| Blocked | Too many failed attempts from one network; sign-in is paused for a while |
+| Viewed | A page was opened |
+| Login added / changed / removed | An admin action on a login — the sentence says what was done and to whom |
+| Password changed | An admin set a new password, or someone changed their own |
 
-Records are kept for 180 days. Locations come from the IP address and are approximate.
+Records are kept for 180 days. Times are in India time. Locations come from the IP address and are approximate.
 
 ## 13. Profile
 
@@ -275,6 +281,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 23 Oct 2026 | 1.3 | Audit logs page redesigned: headline numbers, 14-day activity chart, most opened pages, People list (click a person to filter), activity log as sentences grouped by day with type tabs, person and text filters, older entries on demand and CSV export | 12 |
 | 23 Oct 2026 | 1.2 | Counts update by themselves: open pages reload their numbers within a minute of any data change (sync, drug edits, merges, quality checks). Trials filter counts are never held out of date. Admin's drug counts now match the Overview. Overview "Synced" time shown in India time | 4, 14, 17 |
 | 23 Oct 2026 | 1.1 | Exactly one super admin: `SUPER_ADMIN` names it; if empty or not an owner, the first owner in `AUTH_USERS` is the super admin. Other owners are admins | 3, 16, 17 |
 | 23 Oct 2026 | 1.0 | Super admin (`SUPER_ADMIN`) and admin logins; only the super admin creates admins. Sign out moved to the bottom of the sidebar. Audit logs moved to their own page, now including admin actions. New Profile page with password change. New Help & manual page | 2, 3, 4, 10, 11, 12, 13, 16 |

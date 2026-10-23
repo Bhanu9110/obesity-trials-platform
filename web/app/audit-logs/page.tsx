@@ -20,11 +20,17 @@ export default async function AuditLogsPage() {
         highlight="logs"
         description={
           <>
-            Who signed in and when, failed sign-in attempts, which pages were opened, and what admins changed on logins (added,
-            changed, removed, new passwords). {level === "super"
+            Who signs in and when, failed sign-in attempts, which pages people open, and every change admins make to logins.{" "}
+            {level === "super"
               ? "As super admin you can also remove the history of someone who can no longer sign in."
               : "Only the super admin can remove history."}
           </>
+        }
+        actions={
+          <span className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/60 px-3 py-1.5 text-xs text-slate-600">
+            <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-emerald-400 shadow-[0_0_8px_rgb(52_211_153)]" />
+            Live · updates every 30 s
+          </span>
         }
       />
       <AccessPanel />
