@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.3 |
+| **Manual version** | 1.4 |
 | **Last updated** | 23 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -19,7 +19,7 @@
 | 4 | [Finding your way around](#4-finding-your-way-around) | Sidebar, search, dark mode, automatic updates |
 | 5 | [Overview](#5-overview) | The dashboard |
 | 6 | [Trials explorer](#6-trials-explorer) | Filtering, previewing and sharing trial lists |
-| 7 | [Drugs](#7-drugs) | Drug list, search by code names, drug pages, editing |
+| 7 | [Drugs](#7-drugs) | Drug list, upcoming milestones, drug pages, development & regulatory profile, results, timeline, editing |
 | 8 | [Registry changes](#8-registry-changes) | What changed on ClinicalTrials.gov |
 | 9 | [Data quality](#9-data-quality) | Quality scores, issues and the drug-profile auto-fill |
 | 10 | [Admin page](#10-admin-page) | Pipeline health, syncs, users and access |
@@ -27,7 +27,7 @@
 | 12 | [Audit logs](#12-audit-logs) | Sign-ins, page views and admin actions |
 | 13 | [Profile](#13-profile) | Your account, recent sign-ins, changing your password |
 | 14 | [Data sources and the daily sync](#14-data-sources-and-the-daily-sync) | Where each piece of data comes from and how often |
-| 15 | [Conference abstracts and company reports](#15-conference-abstracts-and-company-reports) | ADA abstracts, company pipeline reports |
+| 15 | [Conference abstracts, company reports and research files](#15-conference-abstracts-company-reports-and-research-files) | ADA abstracts, company pipeline reports, the researched profiles of the leading drugs |
 | 16 | [Settings for the super admin](#16-settings-for-the-super-admin) | Vercel variables and GitHub settings |
 | 17 | [Troubleshooting](#17-troubleshooting) | Common problems and fixes |
 | 18 | [Change log](#18-change-log) | Every change to the website, newest first |
@@ -112,7 +112,10 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 
 | Feature | How to use it |
 |---|---|
-| Search | Finds a drug by **name, brand, code name or any alias** the database knows, plus company and class. Spaces, hyphens and capitals don't matter (`nn 9440`, `NN-9440` and `nn9440` all work). A match on an alias shows "Also known as …" |
+| **Upcoming milestones** | The next 8 expected regulatory decisions, readouts and launches across all drugs, soonest first. "date passed" means the expected date has gone by — check whether it happened. Click a drug to open its timeline |
+| Search | Finds a drug by **name, INN, brand, code name or any alias** the database knows, plus company and class. Spaces, hyphens and capitals don't matter (`nn 9440`, `NN-9440` and `nn9440` all work). A match on an alias shows "Also known as …" |
+| **Regulatory status filter** | Approved, Filed / under review, Investigational, Discontinued, or **With an upcoming milestone**. Works in both the cards and the table |
+| Card and table extras | Each drug shows its regulatory status (a coloured tag plus the detail) and its **next milestone** with its date |
 | Stage chips | All stages, Phase 1–4, and **No NCT yet (conference)** for drugs known only from conference abstracts or company reports |
 | Sort | Most trials, most advanced, name A–Z |
 | Cards / Table | Switch between the card grid and a detailed table; the main search box filters both |
@@ -122,12 +125,37 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 
 | Section | What it shows |
 |---|---|
-| Header tiles | Trials, phase, sponsors, approval |
+| Header | Trials, phase, sponsors, recruiting; under the name, the **regulatory status** and the **next milestone** (click either to jump to it) |
 | Profile | Company, class, sub-class, mechanism, modality, route, phase, code names, brand names, approval — each value shows its source; hand-entered values win |
+| **Development & regulatory** | INN, API (active ingredient), regulatory status, designations (Breakthrough, Fast Track, PRIME, priority vouchers …), patents / exclusivity, anticipated launch, efficacy signal and safety signal. Part of the profile: change them with its **Edit** button |
+| **Milestones & timeline** | Dated events in two columns — **Upcoming** (soonest first) and **Past** (newest first): regulatory steps, readouts, launches, patent expiries and inflection points, each with its source. Tabs: All, Upcoming, Past |
+| **Efficacy & safety results** | Key trial results — trial, population and duration, dose, endpoint, result, comparator and source. Tabs: Efficacy, Safety |
 | Trials | Every linked ClinicalTrials.gov trial |
 | Conference abstracts / company reports | Abstracts (e.g. ADA 2026) and company pipeline reports that name the drug |
 | Kind | Mark a product as drug, supplement or not a drug (members and above) |
 | Merge | Merge a duplicate spelling into this drug (members and above) |
+
+### 7.3 Where the values come from
+
+| Tag | Meaning |
+|---|---|
+| *(no tag)* | Typed on the drug page — always shown first and never changed by the sync |
+| **research** | From the research files (see [15](#15-conference-abstracts-company-reports-and-research-files)); click the tag to open the source |
+| **auto** | Worked out automatically from trial data, ChEMBL, openFDA or Inxight Drugs — INN, API and regulatory status are also filled this way for drugs without research |
+| **added** | A milestone or result row someone added on the page |
+
+Dates like *Q4 2026*, *H2 2026* or *2027* are company guidance or registry estimates. When an expected date has passed, the row shows **Date passed — check**.
+
+### 7.4 Editing results and milestones
+
+Members, admins and the super admin (not guests).
+
+| Task | How |
+|---|---|
+| Add | **+ Add milestone** or **+ Add result**, fill in the form, then save. Dates: `2026-03-19`, `2026-03`, `2026-Q4`, `2026-H2` or `2027` — or leave blank if not known |
+| Change or delete | **Edit** / **Delete** on a row you added (click Delete twice) |
+| Hide a research row | **Hide** — it stays hidden after every sync. "Show them" at the bottom lists hidden rows so you can bring one back |
+| Change a research row | Hide it and add your own row — research rows are rewritten by the sync |
 
 ## 8. Registry changes
 
@@ -233,18 +261,22 @@ Changing your password needs your current one. Afterwards admins can no longer s
 | Company pipeline pages | Code names (e.g. Roche RG6640) | Monthly re-check |
 | Conference abstract files | ADA 2026 abstracts | On every run, from `sync/data/conference/` |
 | Company reports | e.g. Novo Nordisk Q2 2026 pipeline | On every run, from `sync/data/conference/` |
+| Research files | INN, regulatory status, designations, patents, results, milestones, launch timing of the leading drugs | On every run, from `sync/data/profiles/` |
 
 If a source is down for 3 drugs in a row it is skipped for that run; the health check fails after 47 hours down, and an e-mail alert is sent after 3 days.
 
 When a sync finishes, pages that are open show the new numbers within about a minute (see [4](#4-finding-your-way-around)). The "Synced" time on the Overview is shown in India time (the `APP_TIMEZONE` setting).
 
-## 15. Conference abstracts and company reports
+## 15. Conference abstracts, company reports and research files
 
 | Item | Detail |
 |---|---|
 | ADA 2026 | Obesity abstracts linked to drug pages; drugs with no ClinicalTrials.gov trial get a page and count the trials the abstracts report (`*`) |
 | Company reports | A company's own pipeline report sets the drug's phase (e.g. Monlunabant "Terminated (Phase 2)") and adds its code names |
 | Adding a new file | Put a JSON file in `sync/data/conference/`; it is imported on the next sync |
+| **Research files** | `sync/data/profiles/*.json` — the researched development, regulatory and commercial profile of the leading obesity drugs: INN, API, regulatory status, designations, patents, launch timing, efficacy and safety signals, results and milestones, each with its source. Loaded on every daily sync |
+| Current file | `obesity-leaders-2026-10.json` (researched 25 Oct 2026): semaglutide, tirzepatide, orforglipron, retatrutide, CagriSema, survodutide, maridebart cafraglutide, amycretin, mazdutide, VK2735, petrelintide, eloralintide, ecnoglutide — 42 results and 65 milestones |
+| Updating | Edit the file (or add a newer one) and push; rows that are no longer in a file are removed on the next sync, hidden rows stay hidden, and rows added on the website are never touched. A drug named in a file must already have a drug page (found by its name or any alias) |
 
 ## 16. Settings for the super admin
 
@@ -281,6 +313,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 25 Oct 2026 | 1.4 | Development & regulatory profile on drug pages: INN, API, regulatory status, designations, patents, anticipated launch, efficacy and safety signals; **Milestones & timeline** and **Efficacy & safety results** sections with editing; regulatory status and next milestone in the Drugs list with a filter; **Upcoming milestones** panel; research file for 13 leading drugs; INN, API and regulatory status also filled automatically | 7, 14, 15 |
 | 23 Oct 2026 | 1.3 | Audit logs page redesigned: headline numbers, 14-day activity chart, most opened pages, People list (click a person to filter), activity log as sentences grouped by day with type tabs, person and text filters, older entries on demand and CSV export | 12 |
 | 23 Oct 2026 | 1.2 | Counts update by themselves: open pages reload their numbers within a minute of any data change (sync, drug edits, merges, quality checks). Trials filter counts are never held out of date. Admin's drug counts now match the Overview. Overview "Synced" time shown in India time | 4, 14, 17 |
 | 23 Oct 2026 | 1.1 | Exactly one super admin: `SUPER_ADMIN` names it; if empty or not an owner, the first owner in `AUTH_USERS` is the super admin. Other owners are admins | 3, 16, 17 |

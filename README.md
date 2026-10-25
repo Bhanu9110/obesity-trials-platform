@@ -220,6 +220,15 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
   (company, stage, mechanism, modality, indication) is filled from the abstracts; an
   abstract about a combination (e.g. "X + semaglutide") never changes the profile of the
   background drug. To add a meeting, add another JSON file in the same format.
+- **Research files (development & regulatory profile)** — `sync/data/profiles/*.json`: for the
+  leading drugs, INN, API, regulatory status, designations, patents / exclusivity, anticipated
+  launch, efficacy and safety signals (→ `products.curated_info`), efficacy / safety results
+  (→ `product_results`) and dated milestones — regulatory steps, readouts, launches, patent
+  expiries, inflection points (→ `product_milestones`), each with its source. Loaded by every
+  auto-fill run (or `npm run import-profiles`); a typed value on the drug page always wins, then
+  the research value, then the automatic one. Rows editors add on the website are kept; research
+  rows they hide stay hidden. INN, API and regulatory status are also worked out automatically
+  (drug name / ChEMBL / openFDA) for every other drug.
 - **Drug code names (Alias field)** — collected automatically from the drug's company
   pipeline page (`sync/data/pipeline-sources.json`, re-checked monthly; add confirmed
   pairs under `known`), ChEMBL, ClinicalTrials.gov "other names", trial titles such as

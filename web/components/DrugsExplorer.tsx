@@ -6,6 +6,8 @@ import type { ProductSummary } from "@/lib/types";
 import DrugsTable from "@/components/DrugsTable";
 import { matchDrug } from "@/lib/drugSearch";
 import { icons } from "@/components/shell/icons";
+import { REG_GROUPS, regGroup, shortStatus, type RegGroup } from "@/lib/regulatory";
+import { KIND_META, dateText } from "@/lib/milestones";
 
 // Drugs: a card grid (default) or the detailed table. Search, stage filter and sort.
 
@@ -34,8 +36,19 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
   const [stage, setStage] = useState(0);
   const [sort, setSort] = useState<"trials" | "phase" | "name">("trials");
   const [limit, setLimit] = useState(STEP);
+  const [reg, setReg] = useState<"" | RegGroup | "milestone">("");
 
-  const base = useMemo(() => products.filter((p) => p.trials > 0 || p.abstracts > 0), [products]);
+  const listed = useMemo(() => products.filter((p) => p.trials > 0 || p.abstracts > 0), [products]);
+  const regCounts = useMemo(() => {
+    const c: Record<string, number> = { milestone: listed.filter((p) => p.next_milestone).length };
+    for (const p of listed) { const g = regGroup(p.regulatory_status, p.approved); c[g] = (c[g] ?? 0) + 1; }
+    return c;
+  }, [listed]);
+  // Regulatory filter applies to both views (the table gets the filtered list).
+  const base = useMemo(() => !reg ? listed
+    : reg === "milestone" ? listed.filter((p) => p.next_milestone)
+      : listed.filter((p) => regGroup(p.regulatory_status, p.approved) === reg), [listed, reg]);
+  const forTable = useMemo(() => !reg ? products : products.filter((p) => base.includes(p)), [products, base, reg]);
   const inStage = (p: ProductSummary, k: number) => (k === 5 ? abstractOnly(p) : !abstractOnly(p) && topOf(p) === k);
   // Search: name, brand names, every alias / code name the database knows, company, class.
   const { rows, via } = useMemo(() => {
@@ -67,6 +80,12 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                  placeholder="Find a drug, brand, code name, company or class…"
                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none" />
         </div>
+        <select value={reg} onChange={(e) => { setReg(e.target.value as typeof reg); setLimit(STEP); }} aria-label="Regulatory status"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700">
+          <option value="">Any regulatory status</option>
+          {REG_GROUPS.filter((g) => regCounts[g.key]).map((g) => <option key={g.key} value={g.key}>{g.label} ({regCounts[g.key].toLocaleString()})</option>)}
+          {regCounts.milestone > 0 && <option value="milestone">With an upcoming milestone ({regCounts.milestone.toLocaleString()})</option>}
+        </select>
         <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1">
           <button type="button" onClick={() => setView("grid")} title="Cards"
                   className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${view === "grid" ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>
@@ -79,7 +98,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
         </div>
       </div>
 
-      {view === "table" ? <DrugsTable products={products} search={q} /> : (
+      {view === "table" ? <DrugsTable products={forTable} search={q} /> : (
         <>
           <div className="flex flex-wrap items-center gap-2">
             {STAGES.map((s, i) => (
@@ -164,6 +183,26 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         ))}
                       </div>
                     </div>
+
+                    {(p.regulatory_status || p.next_milestone) && (
+                      <div className="mt-3 space-y-1 border-t border-slate-100 pt-2.5 text-xs">
+                        {p.regulatory_status && (() => {
+                          const g = REG_GROUPS.find((x) => x.key === regGroup(p.regulatory_status, p.approved))!;
+                          return (
+                            <div className="flex items-start gap-1.5" title={p.regulatory_status}>
+                              <span className={`mt-px shrink-0 rounded px-1.5 py-px text-[10px] font-semibold uppercase ring-1 ${g.chip}`}>{g.key === "review" ? "Filed" : g.label.split(" ")[0]}</span>
+                              <span className="line-clamp-1 text-slate-600">{shortStatus(p.regulatory_status.replace(/^(approved|investigational)\s*[—-]\s*/i, ""), 70)}</span>
+                            </div>
+                          );
+                        })()}
+                        {p.next_milestone && (
+                          <div className="flex items-start gap-1.5" title={p.next_milestone.title}>
+                            <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${KIND_META[p.next_milestone.kind].dot}`} />
+                            <span className="line-clamp-1 text-slate-600"><b className="font-semibold text-slate-800">{dateText(p.next_milestone.date_label)}</b> · {p.next_milestone.title}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {(p.drug_class || p.candidate || p.approved === "Yes" || p.abstracts > 0) && (
                       <div className="mt-3 flex flex-wrap gap-1">

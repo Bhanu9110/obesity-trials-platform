@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { activeUser, mayEdit } from "@/lib/admin";
 import { getProduct, updateProductInfo } from "@/lib/queries";
-import { PRODUCT_INFO_FIELDS, type ProductInfo } from "@/lib/types";
+import { LONG_INFO_FIELDS, PRODUCT_INFO_FIELDS, type ProductInfo } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug
   const info = {} as ProductInfo;
   for (const k of PRODUCT_INFO_FIELDS) {
     const v = body[k];
-    const s = typeof v === "string" ? v.trim().slice(0, 500) : "";
+    const s = typeof v === "string" ? v.trim().slice(0, LONG_INFO_FIELDS.has(k) ? 1000 : 500) : "";
     info[k] = s === "" ? null : s;
   }
   if (info.candidate !== null && info.candidate !== "Pipeline" && info.candidate !== "Non-pipeline") {

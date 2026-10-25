@@ -68,16 +68,57 @@ export interface ProductInfo {
   roa: string | null;
   approved: string | null; // "Yes" | "No" | null
   approval_date: string | null; // YYYY-MM-DD
+  // Development & regulatory (migration 0024)
+  inn: string | null;                 // International Nonproprietary Name
+  api: string | null;                 // active pharmaceutical ingredient (salt / form)
+  regulatory_status: string | null;   // "Approved — US (2023)", "Under FDA review", "Investigational — Phase 3"
+  designations: string | null;        // Breakthrough Therapy, Fast Track, PRIME, priority voucher …
+  patents: string | null;             // key patent / exclusivity expiries
+  anticipated_launch: string | null;  // launch timeline
+  efficacy_signal: string | null;     // headline efficacy
+  safety_signal: string | null;       // headline safety / tolerability
 }
 
 export const PRODUCT_INFO_FIELDS: (keyof ProductInfo)[] = [
   "aliases", "brand_names", "candidate", "parent_drug", "sponsor", "drug_class", "therapy_subclass", "indication",
   "modality", "phase", "moa", "roa", "approved", "approval_date",
+  "inn", "api", "regulatory_status", "designations", "patents", "anticipated_launch", "efficacy_signal", "safety_signal",
 ];
+/** The development & regulatory fields: longer text allowed. */
+export const LONG_INFO_FIELDS = new Set<keyof ProductInfo>(["api", "regulatory_status", "designations", "patents", "anticipated_launch", "efficacy_signal", "safety_signal"]);
+
+/** An efficacy or safety result of one trial (research files or typed on the drug page). */
+export interface ProductResult {
+  id: number;
+  kind: "efficacy" | "safety";
+  trial: string | null; phase: string | null; population: string | null; duration: string | null; dose: string | null;
+  endpoint: string | null; result: string; comparator: string | null; reported: string | null;
+  source_label: string | null; source_url: string | null;
+  origin: "curated" | "manual"; hidden: boolean;
+}
+export const MILESTONE_KINDS = ["regulatory", "readout", "launch", "patent", "inflection", "milestone"] as const;
+export type MilestoneKind = (typeof MILESTONE_KINDS)[number];
+export const MILESTONE_STATUSES = ["done", "expected", "delayed", "cancelled"] as const;
+export type MilestoneStatus = (typeof MILESTONE_STATUSES)[number];
+/** A dated event: regulatory step, readout, launch, patent expiry, inflection point or upcoming milestone. */
+export interface ProductMilestone {
+  id: number;
+  kind: MilestoneKind;
+  title: string; detail: string | null;
+  date_label: string | null; date_sort: string | null;
+  status: MilestoneStatus; region: string | null;
+  source_label: string | null; source_url: string | null;
+  origin: "curated" | "manual"; hidden: boolean;
+}
+/** The next expected milestone of a drug, for the Drugs list and the upcoming panel. */
+export interface UpcomingMilestone {
+  slug: string; name: string; kind: MilestoneKind; title: string; date_label: string | null; date_sort: string | null;
+  region: string | null; source_url: string | null;
+}
 
 
-/** An automatic drug-profile value and where it came from (ChEMBL, openFDA, Trials, ...). */
-export interface AutoValue { value: string; source: string }
+/** An automatic or researched drug-profile value and where it came from (ChEMBL, openFDA, Trials, a research file …). */
+export interface AutoValue { value: string; source: string; url?: string; curated?: boolean } // curated: from a research file
 
 export interface Product extends ProductInfo {
   id: number;
@@ -125,4 +166,5 @@ export interface ProductSummary extends ProductInfo {
   abstract_sources: string | null; // "ADA 2026"
   reports_only: boolean; // linked only to company pipeline reports (no conference abstract)
   other_names: string | null; // every other name the database knows (merged spellings, codes, abstract names), for search
+  next_milestone: { title: string; date_label: string | null; kind: MilestoneKind } | null; // the next expected milestone
 }

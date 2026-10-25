@@ -22,6 +22,7 @@ import { config } from "./config.js";
 import { loadAliases } from "./sync.js";
 import { importAbstracts, type ImportResult } from "./abstracts.js";
 import { applyCuration, type CurationResult } from "./curation.js";
+import { importProfiles, type ProfileImportResult } from "./profiles.js";
 import {
   BUILTIN_ALIASES, buildKnownSet, isUndisclosedProduct, productsFromName, slugify, type AliasMap,
 } from "./products.js";
@@ -49,7 +50,10 @@ export const enrichConfig = {
 
 export type InfoField =
   | "aliases" | "brand_names" | "candidate" | "parent_drug" | "sponsor" | "drug_class" | "therapy_subclass"
-  | "indication" | "modality" | "phase" | "moa" | "roa" | "approved" | "approval_date";
+  | "indication" | "modality" | "phase" | "moa" | "roa" | "approved" | "approval_date"
+  // development & regulatory profile (0024): only these three are worked out automatically;
+  // the rest come from the research files (sync/data/profiles, see profiles.ts) or are typed in
+  | "inn" | "api" | "regulatory_status";
 
 export interface AutoValue { value: string; source: string }
 export type AutoInfo = Partial<Record<InfoField, AutoValue>>;
@@ -81,6 +85,7 @@ export interface FdaInfo {
   marketed: boolean;             // at least one product not discontinued
   epc: string[];                 // FDA established pharmacologic class
   moa: string[];                 // FDA mechanism of action class
+  ingredients?: string[];        // active ingredients as FDA lists them, salt form included ("PHENTERMINE HYDROCHLORIDE")
 }
 
 export interface InxightInfo {
@@ -649,8 +654,37 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
   const oralAbs = soloAbs.find((a) => /\boral\b/i.test(`${a.mechanism ?? ""} ${a.program ?? ""}`));
   if (!out.roa && oralAbs) set("roa", "Oral", absSrc(oralAbs));
 
+  // INN, API, regulatory status (0024) ------------------------------------------
+  if (!undisclosed) {
+    const words = (n: string) => /^[a-z]+(\s[a-z]+)?$/i.test(n.trim());
+    const innName = (n: string) => words(n) && INN_STEM.test(n.trim().toLowerCase());
+    const innOf = (n: string) => n.split(" + ").map((x) => titleCase(x.trim())).join(" / ");
+    if (combo && parts.every(innName)) set("inn", innOf(input.name), "Drug name (INN stems)");
+    // ChEMBL's preferred name of a drug is its INN when it is plain words (no code).
+    else if (!combo && single?.name && words(single.name) && single.name.length > 4) set("inn", titleCase(single.name), "ChEMBL");
+    else if (!combo && innName(input.name)) set("inn", titleCase(input.name), "Drug name (INN stem)");
+    else if (!combo) {
+      // A drug tracked under its code ("LY3437943"): an INN among its other names.
+      const alias = (out.aliases?.value ?? "").split(/,\s*/).find(innName);
+      if (alias) set("inn", titleCase(alias), out.aliases!.source);
+    }
+  }
+  const ingredients = uniqText((fda?.ingredients ?? []).map(titleCase));
+  if (ingredients.length) set("api", ingredients.join(" + "), "openFDA");
+  const year = (fda?.firstApproval ?? "").slice(0, 4) || (singleInx?.approvalYear ? String(singleInx.approvalYear) : "");
+  if (withdrawn) set("regulatory_status", "Withdrawn", single?.withdrawn ? "ChEMBL" : "Inxight Drugs");
+  else if (fda) set("regulatory_status", `Approved — US FDA${year ? ` (${year})` : ""}${fda.marketed ? "" : ", no longer marketed in the US"}`, "openFDA");
+  else if (/^US Approved/i.test(inxStatus)) set("regulatory_status", `Approved — US${year ? ` (${year})` : ""}`, "Inxight Drugs");
+  else if (isApproved) set("regulatory_status", approved!.source.startsWith("Trials") ? "Approved (has Phase 4 trials)" : "Approved", approved!.source);
+  else if (out.phase && /discontinued|terminated/i.test(out.phase.value)) set("regulatory_status", out.phase.value, out.phase.source);
+  else if (out.phase) set("regulatory_status", `Investigational — ${out.phase.value}`, out.phase.source);
+
   return out;
 }
+
+// INN stems of the drug classes seen in obesity trials (WHO INN stem book), for telling an
+// INN ("survodutide") from a code or brand name.
+const INN_STEM = /(tide|gliptin|gliflozin|glipron|mab|cept|siran|rsen|sartan|pril|formin|glitazone|tinib|lukast|setron|oxetine|ermin|orlistat|lorcaserin|bant|rimonabant|adenant|naltrexone|bupropion|topiramate|phentermine|setmelanotide|metreleptin)$/;
 
 // --------------------------------------------------------------------------- #
 // HTTP
@@ -780,7 +814,7 @@ const fdaDate = (d: unknown) => {
 export function parseFda(results: any[], parts: string[]): FdaInfo | null {
   const want = parts.map((p) => p.toUpperCase());
   const brandsNda: string[] = [], brandsOther: string[] = [], discontinued: string[] = [];
-  const routes: string[] = [], sponsors: string[] = [], epc: string[] = [], moa: string[] = [];
+  const routes: string[] = [], sponsors: string[] = [], epc: string[] = [], moa: string[] = [], ingredients: string[] = [];
   let first: string | null = null, generics = 0, marketed = false, any = false;
   for (const app of results ?? []) {
     const prods = (Array.isArray(app?.products) ? app.products : []).filter((p: any) => {
@@ -799,6 +833,7 @@ export function parseFda(results: any[], parts: string[]): FdaInfo | null {
       if (!stopped) marketed = true;
       if (b && !want.some((w) => b.toUpperCase().includes(w))) (stopped ? discontinued : isGeneric ? brandsOther : brandsNda).push(b);
       if (p?.route) routes.push(...String(p.route).split(/,\s*/));
+      if (!isGeneric) for (const i of Array.isArray(p?.active_ingredients) ? p.active_ingredients : []) if (i?.name) ingredients.push(String(i.name));
     }
     for (const s of Array.isArray(app?.submissions) ? app.submissions : []) {
       if (String(s?.submission_type).toUpperCase() !== "ORIG" || String(s?.submission_status).toUpperCase() !== "AP") continue;
@@ -818,6 +853,7 @@ export function parseFda(results: any[], parts: string[]): FdaInfo | null {
     marketed,
     epc: uniqText(epc),
     moa: uniqText(moa),
+    ingredients: uniqText(ingredients).slice(0, 6),
   };
 }
 
@@ -1323,6 +1359,7 @@ export interface EnrichResult {
   pipelines?: PipelineReport[] | null;
   abstracts?: ImportResult | null;
   curation?: CurationResult | null;
+  profiles?: ProfileImportResult | null;
 }
 
 export async function enrichProducts(
@@ -1349,6 +1386,14 @@ export async function enrichProducts(
     } catch (e) {
       res.abstracts = null;
       log("Conference abstracts not imported", String(e));
+    }
+    // Research files (sync/data/profiles/*.json): INN, API, regulatory status, designations,
+    // patents, results, milestones and launch timelines of the leading drugs.
+    try {
+      res.profiles = await importProfiles(undefined, log);
+    } catch (e) {
+      res.profiles = null;
+      log("Research files not imported", String(e));
     }
   }
 

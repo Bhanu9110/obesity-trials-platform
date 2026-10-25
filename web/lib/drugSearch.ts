@@ -26,7 +26,8 @@ export function matchDrug(p: ProductSummary, q: string, extra: (string | null | 
   };
   if (has(p.name)) return { hit: true, via: null };
   // Alias / code / brand names, one by one, so the page can say which one matched.
-  for (const n of [...splitNames(p.brand_names), ...splitNames(p.aliases), ...splitNames(p.other_names)]) {
+  const inn = p.inn && /^[A-Za-z][A-Za-z /-]*$/.test(p.inn) && p.inn.toLowerCase() !== p.name.toLowerCase() ? [p.inn] : [];
+  for (const n of [...inn, ...splitNames(p.brand_names), ...splitNames(p.aliases), ...splitNames(p.other_names)]) {
     if (has(n)) return { hit: true, via: n };
   }
   if ([p.sponsor, p.drug_class, p.therapy_subclass, p.moa, ...extra].some(has)) return { hit: true, via: null };

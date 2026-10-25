@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { ProductSummary } from "@/lib/types";
 import { highestPhase } from "@/lib/format";
 import { matchDrug } from "@/lib/drugSearch";
+import { REG_GROUPS, regGroup, shortStatus } from "@/lib/regulatory";
+import { dateText } from "@/lib/milestones";
 
 const PAGE = 50;
 
@@ -92,7 +94,7 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        <table className="w-full min-w-[760px] text-left text-sm">
+        <table className="w-full min-w-[1080px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3 font-semibold">Drug</th>
@@ -100,13 +102,14 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
               <th className="px-4 py-3 font-semibold">Most advanced trial</th>
               <th className="px-4 py-3 font-semibold">Modality</th>
               <th className="px-4 py-3 font-semibold">Class</th>
-              <th className="px-4 py-3 font-semibold">Approved</th>
+              <th className="px-4 py-3 font-semibold">Regulatory status</th>
+              <th className="px-4 py-3 font-semibold">Next milestone</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {shown.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-slate-400">No drugs match.</td>
+                <td colSpan={7} className="px-4 py-10 text-center text-slate-400">No drugs match.</td>
               </tr>
             ) : (
               shown.map((p) => (
@@ -139,7 +142,17 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
                   </td>
                   <td className="px-4 py-2.5 text-slate-700">{p.modality || <span className="text-slate-300">—</span>}</td>
                   <td className="px-4 py-2.5 text-slate-700">{p.drug_class || <span className="text-slate-300">—</span>}</td>
-                  <td className="px-4 py-2.5 text-slate-700">{p.approved || <span className="text-slate-300">—</span>}</td>
+                  <td className="max-w-[260px] px-4 py-2.5 text-slate-700" title={p.regulatory_status ?? undefined}>
+                    {p.regulatory_status ? (() => {
+                      const g = REG_GROUPS.find((x) => x.key === regGroup(p.regulatory_status, p.approved))!;
+                      return <><span className={`mr-1.5 rounded px-1.5 py-px text-[10px] font-semibold uppercase ring-1 ${g.chip}`}>{g.key === "review" ? "Filed" : g.label.split(" ")[0]}</span><span className="text-xs">{shortStatus(p.regulatory_status.replace(/^(approved|investigational)\s*[—-]\s*/i, ""), 55)}</span></>;
+                    })() : p.approved === "Yes" ? "Approved" : <span className="text-slate-300">—</span>}
+                  </td>
+                  <td className="max-w-[240px] px-4 py-2.5 text-xs text-slate-700" title={p.next_milestone?.title}>
+                    {p.next_milestone
+                      ? <><b className="font-semibold text-slate-900">{dateText(p.next_milestone.date_label)}</b><div className="line-clamp-2 text-slate-600">{p.next_milestone.title}</div></>
+                      : <span className="text-slate-300">—</span>}
+                  </td>
                 </tr>
               ))
             )}

@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Product, ProductInfo } from "@/lib/types";
 
-// Drug profile. Blank fields are filled automatically every day (trial data, ChEMBL,
-// openFDA) and marked "auto"; a value typed in with the Edit button always wins and is
-// never overwritten. "No. of trials" is counted from the database.
+// Drug profile. Blank fields are filled every day from the research files (marked "research",
+// with a link to the source) or automatically from trial data, ChEMBL and openFDA (marked
+// "auto"); a value typed in with the Edit button always wins and is never overwritten.
+// "No. of trials" is counted from the database.
 
 // Typing aids only (a dropdown while typing) — every field accepts free text.
 const SUGGEST: Partial<Record<keyof ProductInfo, string[]>> = {
@@ -29,9 +30,14 @@ const SUGGEST: Partial<Record<keyof ProductInfo, string[]>> = {
     "Oral small-molecule GLP-1 RA", "MC4R agonist", "Lipase inhibitor", "Sympathomimetic amine",
     "Activin type II receptor antibody", "CB1 receptor antagonist", "SGLT2 inhibitor", "Biguanide",
   ],
+  regulatory_status: [
+    "Approved — US", "Approved — US and EU", "Approved — China", "Under FDA review", "Submitted", "Investigational — Phase 3",
+    "Investigational — Phase 2", "Investigational — Phase 1", "Discontinued",
+  ],
+  designations: ["Breakthrough Therapy", "Fast Track", "Priority Review", "Orphan Drug", "EMA PRIME", "National Priority Voucher"],
 };
 
-type Field = { key: keyof ProductInfo; label: string; wide?: boolean };
+type Field = { key: keyof ProductInfo; label: string; wide?: boolean; long?: boolean; hint?: string };
 
 // Drug profile, in the order of the Drugs-list columns. "No. of trials" sits after Candidate.
 const PROFILE: Field[] = [
@@ -52,7 +58,18 @@ const DETAILS: Field[] = [
   { key: "approved", label: "Approved" },
   { key: "approval_date", label: "Approval date" },
 ];
-const ALL = [...PROFILE, ...DETAILS];
+// Development & regulatory (migration 0024)
+const DEVELOPMENT: Field[] = [
+  { key: "inn", label: "INN (international nonproprietary name)" },
+  { key: "api", label: "API (active ingredient)", long: true },
+  { key: "regulatory_status", label: "Regulatory status", wide: true, long: true, hint: "e.g. Approved — US (Nov 2023); Under FDA review, decision Q4 2026" },
+  { key: "designations", label: "Designations", wide: true, long: true, hint: "Breakthrough Therapy, Fast Track, Priority Review, Orphan, PRIME …" },
+  { key: "patents", label: "Patents / exclusivity", wide: true, long: true, hint: "Key patent expiries by region" },
+  { key: "anticipated_launch", label: "Anticipated launch", wide: true, long: true, hint: "e.g. US launch expected 2027" },
+  { key: "efficacy_signal", label: "Efficacy signal", wide: true, long: true, hint: "Headline result, e.g. −20.9% body weight at 72 weeks (SURMOUNT-1)" },
+  { key: "safety_signal", label: "Safety signal", wide: true, long: true, hint: "Main tolerability / safety findings" },
+];
+const ALL = [...PROFILE, ...DETAILS, ...DEVELOPMENT];
 
 const autoOf = (p: Product, key: keyof ProductInfo) => p.auto?.[key] ?? null;
 
@@ -88,7 +105,8 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
       if (k === "approved" && v === "No") next.approval_date = ""; // no approval date for a drug that is not approved
       return next;
     });
-  const autoCount = ALL.filter(({ key }) => autoOf(product, key)).length;
+  const autoCount = ALL.filter(({ key }) => autoOf(product, key) && !autoOf(product, key)!.curated).length;
+  const researchCount = ALL.filter(({ key }) => autoOf(product, key)?.curated).length;
   const approvedNow = form.approved || autoOf(product, "approved")?.value || "";
 
   async function save() {
@@ -116,7 +134,7 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
   // In the editor, a blank field shows the automatic value it will keep ("auto: …").
   const autoHint = (key: keyof ProductInfo) => {
     const a = autoOf(product, key);
-    return a ? `auto: ${formatValue(key, a.value)}` : null;
+    return a ? `${a.curated ? "research" : "auto"}: ${formatValue(key, a.value)}` : null;
   };
 
   const editor = (key: keyof ProductInfo) => {
@@ -155,6 +173,13 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
         </>
       );
     }
+    const field = ALL.find((f) => f.key === key);
+    if (field?.long) {
+      return (
+        <textarea value={form[key]} onChange={(e) => set(key, e.target.value)} rows={2} maxLength={1000}
+                  placeholder={autoHint(key) ?? field.hint} className={`${input} resize-y placeholder:text-slate-400`} />
+      );
+    }
     return (
       <>
         <input value={form[key]} onChange={(e) => set(key, e.target.value)} list={SUGGEST[key] ? `suggest-${key}` : undefined}
@@ -179,7 +204,18 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
           return (
             <>
               {v}
-              {a && (
+              {a && a.curated && (
+                a.url
+                  ? <a href={a.url} target="_blank" rel="noopener noreferrer" title={`From ${a.source}. Click Edit to type your own value.`}
+                       className="ml-1.5 inline-flex items-center rounded bg-accent-500/10 px-1.5 py-px align-[1px] text-[10px] font-semibold uppercase tracking-wide text-accent-700 ring-1 ring-accent-500/20 hover:bg-accent-500/20">
+                      research ↗
+                    </a>
+                  : <span title={`From ${a.source}. Click Edit to type your own value.`}
+                          className="ml-1.5 inline-flex cursor-help items-center rounded bg-accent-500/10 px-1.5 py-px align-[1px] text-[10px] font-semibold uppercase tracking-wide text-accent-700 ring-1 ring-accent-500/20">
+                      research
+                    </span>
+              )}
+              {a && !a.curated && (
                 <span title={`Filled automatically from ${a.source}. Click Edit to type your own value.`}
                       className="ml-1.5 inline-flex cursor-help items-center rounded bg-brand-500/10 px-1.5 py-px align-[1px] text-[10px] font-semibold uppercase tracking-wide text-brand-700 ring-1 ring-brand-500/20">
                   auto
@@ -198,9 +234,10 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Drug profile</h2>
           <p className="text-xs text-slate-500">
-            {autoCount > 0
-              ? `${autoCount} field${autoCount === 1 ? "" : "s"} filled automatically from trial data, ChEMBL and openFDA`
-              : readOnly ? "Curated" : "Entered manually"}
+            {researchCount > 0 && `${researchCount} field${researchCount === 1 ? "" : "s"} from research files`}
+            {researchCount > 0 && autoCount > 0 && " · "}
+            {autoCount > 0 && `${autoCount} filled automatically from trial data, ChEMBL and openFDA`}
+            {researchCount + autoCount === 0 && (readOnly ? "Curated" : "Entered manually")}
             {product.info_updated_at ? ` · last edited by hand ${new Date(product.info_updated_at).toLocaleString()}` : ""}
           </p>
         </div>
@@ -240,6 +277,12 @@ export default function ProductInfoCard({ product, readOnly = false }: { product
         </div>
         {PROFILE.slice(3).map(cell)}
         {DETAILS.map(cell)}
+      </dl>
+
+      <h3 id="development" className="mb-1 mt-5 scroll-mt-24 border-t border-slate-200 pt-4 text-sm font-semibold text-slate-900">Development &amp; regulatory</h3>
+      <p className="mb-2 text-xs text-slate-500">INN, active ingredient, where it stands with regulators, designations, patents, launch timing and the headline efficacy and safety findings. Detailed results and dated milestones are in the sections below.</p>
+      <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+        {DEVELOPMENT.map(cell)}
       </dl>
     </section>
   );

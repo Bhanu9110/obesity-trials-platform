@@ -14,6 +14,7 @@ import { dismissFailure, failureCounts, requeueFailure } from "./failures.js";
 import { checkHealth, formatHealth } from "./health.js";
 import { enrichProducts } from "./enrich.js";
 import { importAbstracts } from "./abstracts.js";
+import { importProfiles } from "./profiles.js";
 import { applyCuration } from "./curation.js";
 import { closePool, pool } from "./db.js";
 
@@ -38,6 +39,8 @@ const USAGE = `Commands:
                        [--no-external] trial data only; [slug…] only these drugs
   curate-products      hide non-drugs and merge duplicate drug pages (sync/data/product-curation.json)
   import-abstracts     load conference abstracts (sync/data/conference/*.json) into drug pages
+  import-profiles      load research files (sync/data/profiles/*.json): INN, regulatory status,
+                       designations, patents, results, milestones, launch timelines
   health               pipeline health checks (exit code 1 when a check fails)`;
 
 async function main() {
@@ -115,6 +118,12 @@ async function main() {
     case "curate-products": {
       const r = await applyCuration(undefined, log);
       log("Drug list clean-up", r);
+      break;
+    }
+    case "import-profiles": {
+      const r = await importProfiles(undefined, log);
+      log("Research files imported", r);
+      if (r.unresolved.length) console.warn(`::warning::Research files name drugs with no drug page: ${r.unresolved.join(", ")}`);
       break;
     }
     case "import-abstracts": {

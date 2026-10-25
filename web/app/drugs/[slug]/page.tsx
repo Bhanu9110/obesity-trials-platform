@@ -2,7 +2,9 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, authDisabled, isGuest, verifySession } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { getProduct, getProductAbstracts, getProductTrials, productNames } from "@/lib/queries";
+import { getProduct, getProductAbstracts, getProductMilestones, getProductResults, getProductTrials, productNames } from "@/lib/queries";
+import { MilestonesCard, ResultsCard } from "@/components/DrugDevelopment";
+import { KIND_META, dateText } from "@/lib/milestones";
 import ConferenceAbstracts from "@/components/ConferenceAbstracts";
 import ProductKind from "@/components/ProductKind";
 import { highestPhase } from "@/lib/format";
@@ -44,12 +46,17 @@ export default async function DrugPage({ params, searchParams }: {
   const pickedSponsor = (sp.sponsor ?? "").slice(0, 200) || undefined;
   const product = await getProduct(decodeURIComponent(slug));
   if (!product) notFound();
-  const [trials, names, abstracts] = await Promise.all([getProductTrials(product.id), productNames(), getProductAbstracts(product.slug)]);
+  const viewOnly = !authDisabled() && isGuest(await verifySession((await cookies()).get(SESSION_COOKIE)?.value));
+  const [trials, names, abstracts, results, milestones] = await Promise.all([
+    getProductTrials(product.id), productNames(), getProductAbstracts(product.slug),
+    // editors also get hidden research rows (they can show them again)
+    getProductResults(product.slug, !viewOnly), getProductMilestones(product.slug, !viewOnly),
+  ]);
+  const next = milestones.find((m) => !m.hidden && (m.status === "expected" || m.status === "delayed"));
   const primary = trials.filter((t) => t.obesity_class === "primary");
   // No ClinicalTrials.gov trial yet: the clinical trials its conference abstracts report.
   const confTrials = trials.length === 0 ? product.conference_trials : 0;
   const confSources = [...new Set(abstracts.map((a) => a.source))].join(", ");
-  const viewOnly = !authDisabled() && isGuest(await verifySession((await cookies()).get(SESSION_COOKIE)?.value));
 
   return (
     <div className="space-y-5">
@@ -73,6 +80,21 @@ export default async function DrugPage({ params, searchParams }: {
               {trials.length > primary.length && <> · +{trials.length - primary.length} other stored</>}
               {abstracts.length > 0 && <> · <a href="#abstracts" className="hover:text-brand-600">{abstracts.length} conference abstract{abstracts.length === 1 ? "" : "s"} / report{abstracts.length === 1 ? "" : "s"}</a></>}
             </p>
+            {(product.regulatory_status || next) && (
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                {product.regulatory_status && (
+                  <a href="#development" className="max-w-full truncate rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-slate-700 hover:border-brand-500/50" title={product.regulatory_status}>
+                    <span className="font-semibold text-slate-900">Status:</span> {product.regulatory_status.length > 90 ? `${product.regulatory_status.slice(0, 88)}…` : product.regulatory_status}
+                  </a>
+                )}
+                {next && (
+                  <a href="#milestones" className="max-w-full truncate rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-slate-700 hover:border-brand-500/50" title={next.title}>
+                    <span className={`mr-1.5 inline-block h-2 w-2 rounded-full ${KIND_META[next.kind].dot}`} />
+                    <span className="font-semibold text-slate-900">Next:</span> {dateText(next.date_label)} — {next.title.length > 70 ? `${next.title.slice(0, 68)}…` : next.title}
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="relative mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -93,6 +115,9 @@ export default async function DrugPage({ params, searchParams }: {
       <ProductSummaryCard product={product} readOnly={viewOnly} />
 
       <ProductInfoCard product={product} readOnly={viewOnly} />
+
+      {(milestones.length > 0 || !viewOnly) && <MilestonesCard slug={product.slug} milestones={milestones} readOnly={viewOnly} />}
+      {(results.length > 0 || !viewOnly) && <ResultsCard slug={product.slug} results={results} readOnly={viewOnly} />}
 
       {trials.length === 0 && abstracts.length > 0 && (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">

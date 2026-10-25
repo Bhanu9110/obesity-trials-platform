@@ -79,21 +79,25 @@ export function canonicalTrials(abstracts: ConferenceAbstract[]): Map<string, st
   return out;
 }
 
-export interface ImportResult { sources: number; abstracts: number; links: number; created: string[] }
+export interface NameIndex {
+  pages: Set<string>;                 // every product slug (combination pages have "_" in the slug)
+  owner: Map<string, string>;         // name key -> product slug
+  put: (name: string, slug: string) => void;
+  resolve: (d: AbstractDrug) => string | null;
+}
 
-export async function importAbstracts(
-  files: ConferenceFile[] = loadConferenceFiles(), log: (m: string, o?: unknown) => void = () => {},
-): Promise<ImportResult> {
-  const res: ImportResult = { sources: 0, abstracts: 0, links: 0, created: [] };
-  if (!files.length) return res;
-
-  // Every name a drug page is known by. Most trusted first: the page's own name wins.
+/**
+ * Every name a drug page is known by — its slug and name, built-in aliases, merged spellings,
+ * company code names, and hand-entered and automatic aliases — to find the page for a drug
+ * named in a data file. Most trusted first: the page's own name wins.
+ */
+export async function productNameIndex(): Promise<NameIndex> {
   const owner = new Map<string, string>();
   const put = (k: string, slug: string) => { const s = slugify(k); if (s && !owner.has(s)) owner.set(s, slug); };
   const prods = await pool.query<{ slug: string; name: string; aliases: string | null; auto: string | null }>(
     "SELECT slug, name, aliases, auto_info #>> '{aliases,value}' AS auto FROM products",
   );
-  const pages = new Set(prods.rows.map((p) => p.slug)); // combination pages have "_" in the slug
+  const pages = new Set(prods.rows.map((p) => p.slug));
   for (const p of prods.rows) { put(p.slug, p.slug); put(p.name, p.slug); }
   for (const [k, ref] of Object.entries(BUILTIN_ALIASES)) put(k, ref.slug);
   for (const r of (await pool.query<{ alias_slug: string; product_slug: string }>("SELECT alias_slug, product_slug FROM product_aliases")).rows) put(r.alias_slug, r.product_slug);
@@ -109,6 +113,18 @@ export async function importAbstracts(
     for (const k of [own, ...(d.aliases ?? []).map(slugify)]) if (owner.has(k)) return owner.get(k)!;
     return null;
   };
+  return { pages, owner, put, resolve };
+}
+
+export interface ImportResult { sources: number; abstracts: number; links: number; created: string[] }
+
+export async function importAbstracts(
+  files: ConferenceFile[] = loadConferenceFiles(), log: (m: string, o?: unknown) => void = () => {},
+): Promise<ImportResult> {
+  const res: ImportResult = { sources: 0, abstracts: 0, links: 0, created: [] };
+  if (!files.length) return res;
+
+  const { pages, owner, put, resolve } = await productNameIndex();
 
   await withTransaction(async (c) => {
     for (const f of files) {

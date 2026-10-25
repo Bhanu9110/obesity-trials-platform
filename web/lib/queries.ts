@@ -3,6 +3,9 @@ import type { HomeStats, ProductLink,
   FilterOptions,
   Product,
   ProductInfo,
+  ProductMilestone,
+  ProductResult,
+  UpcomingMilestone,
   ProductSummary,
   ProductTrial,
   TrialListItem,
@@ -201,17 +204,23 @@ export async function homeStats(): Promise<HomeStats> {
 // --------------------------------------------------------------------------- #
 // Products (drug pages)
 // --------------------------------------------------------------------------- #
-// Drug profile: the hand-entered value, or while that is blank the automatic one
-// (products.auto_info, filled daily by `npm run enrich-products`). auto_info is read
-// through to_jsonb so pages keep working in the minute before migration 0017 runs.
-const AUTO_JOIN = `CROSS JOIN LATERAL (SELECT to_jsonb(p) -> 'auto_info' AS ai) x`;
+// Drug profile: the hand-entered value, or while that is blank the researched one
+// (products.curated_info, from sync/data/profiles) or else the automatic one (products.auto_info,
+// filled daily by `npm run enrich-products`). Both are read through to_jsonb so pages keep
+// working in the minute before migrations 0017 / 0024 run.
+const objOrEmpty = (col: string) => `CASE WHEN jsonb_typeof(to_jsonb(p) -> '${col}') = 'object' THEN to_jsonb(p) -> '${col}' ELSE '{}'::jsonb END`;
+const AUTO_JOIN = `CROSS JOIN LATERAL (SELECT ${objOrEmpty("auto_info")} || ${objOrEmpty("curated_info")} AS ai) x`;
 const autoVal = (f: string) => `(x.ai -> '${f}' ->> 'value')`;
+/** Development & regulatory fields (0024), read through to_jsonb (see above). */
+export const DEV_FIELDS = ["inn", "api", "regulatory_status", "designations", "patents", "anticipated_launch", "efficacy_signal", "safety_signal"] as const;
 const INFO_COLS = [
   "modality", "phase", "moa", "roa", "approved", "approval_date", "sponsor", "drug_class",
   "aliases", "brand_names", "candidate", "parent_drug", "therapy_subclass", "indication",
 ].map((f) => f === "approval_date"
   ? `coalesce(to_char(p.approval_date, 'YYYY-MM-DD'), ${autoVal(f)}) AS approval_date`
-  : `coalesce(p.${f}, ${autoVal(f)}) AS ${f}`).join(",\n  ");
+  : `coalesce(p.${f}, ${autoVal(f)}) AS ${f}`)
+  .concat(DEV_FIELDS.map((f) => `coalesce(to_jsonb(p) ->> '${f}', ${autoVal(f)}) AS ${f}`))
+  .join(",\n  ");
 // Which shown values are automatic: {field: {value, source}} for every blank hand-entered field.
 const AUTO_SHOWN = `(SELECT coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
      FROM jsonb_each(CASE WHEN jsonb_typeof(x.ai) = 'object' THEN x.ai ELSE '{}'::jsonb END) e
@@ -220,7 +229,8 @@ const AUTO_SHOWN = `(SELECT coalesce(jsonb_object_agg(e.key, e.value), '{}'::jso
 const HAS_INFO = `(p.modality IS NOT NULL OR p.phase IS NOT NULL OR p.moa IS NOT NULL OR p.roa IS NOT NULL
    OR p.approved IS NOT NULL OR p.approval_date IS NOT NULL OR p.sponsor IS NOT NULL OR p.drug_class IS NOT NULL
    OR p.aliases IS NOT NULL OR p.brand_names IS NOT NULL OR p.candidate IS NOT NULL OR p.parent_drug IS NOT NULL
-   OR p.therapy_subclass IS NOT NULL OR p.indication IS NOT NULL)`;
+   OR p.therapy_subclass IS NOT NULL OR p.indication IS NOT NULL
+   ${DEV_FIELDS.map((f) => `OR to_jsonb(p) ->> '${f}' IS NOT NULL`).join(" ")})`;
 
 /**
  * Clinical trials a drug's conference abstracts report (e.g. ADA 2026): distinct trial IDs / names,
@@ -243,7 +253,8 @@ const CONF_TRIALS = `(SELECT count(DISTINCT coalesce(upper(tr.id), '#unnamed')):
  */
 export const OTHER_NAMES = (p = "p") => `(SELECT string_agg(DISTINCT n, ', ') FROM (
        SELECT trim(unnest(regexp_split_to_array(concat_ws(',', ${p}.aliases, to_jsonb(${p}) #>> '{auto_info,aliases,value}',
-                ${p}.brand_names, to_jsonb(${p}) #>> '{auto_info,brand_names,value}'), '\\s*[,;]\\s*'))) AS n
+                ${p}.brand_names, to_jsonb(${p}) #>> '{auto_info,brand_names,value}', to_jsonb(${p}) #>> '{curated_info,brand_names,value}',
+                to_jsonb(${p}) ->> 'inn', to_jsonb(${p}) #>> '{auto_info,inn,value}'), '\\s*[,;]\\s*'))) AS n
        UNION SELECT CASE WHEN pa.alias_slug ~ '[0-9]' THEN upper(pa.alias_slug) ELSE pa.alias_slug END
          FROM product_aliases pa WHERE pa.product_slug = ${p}.slug
        UNION SELECT pc.alias FROM pipeline_code_names pc WHERE pc.product_slug = ${p}.slug
@@ -254,6 +265,15 @@ export const OTHER_NAMES = (p = "p") => `(SELECT string_agg(DISTINCT n, ', ') FR
      ) s WHERE n <> '' AND lower(n) <> lower(${p}.name))`;
 
 export async function listProducts(): Promise<ProductSummary[]> {
+  const [rows, next] = await Promise.all([listProductRows(), nextMilestones()]);
+  for (const r of rows) {
+    const m = next.get(r.slug);
+    r.next_milestone = m ? { title: m.title, date_label: m.date_label, kind: m.kind } : null;
+  }
+  return rows;
+}
+
+async function listProductRows(): Promise<ProductSummary[]> {
   return query<ProductSummary>(
     `SELECT p.slug, p.name, ${INFO_COLS},
             -- no ClinicalTrials.gov trial yet: the clinical trials its conference abstracts report
@@ -333,13 +353,17 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
         modality = $2, phase = $3, moa = $4, roa = $5, approved = $6,
         approval_date = $7::date, sponsor = $8, drug_class = $9,
         aliases = $10, brand_names = $11, candidate = $12, parent_drug = $13,
-        therapy_subclass = $14, indication = $15, info_updated_at = now()
+        therapy_subclass = $14, indication = $15,
+        inn = $16, api = $17, regulatory_status = $18, designations = $19, patents = $20,
+        anticipated_launch = $21, efficacy_signal = $22, safety_signal = $23, info_updated_at = now()
       WHERE slug = $1
       RETURNING slug`,
     [
       slug, info.modality, info.phase, info.moa, info.roa, info.approved,
       info.approval_date, info.sponsor, info.drug_class,
       info.aliases, info.brand_names, info.candidate, info.parent_drug, info.therapy_subclass, info.indication,
+      info.inn, info.api, info.regulatory_status, info.designations, info.patents,
+      info.anticipated_launch, info.efficacy_signal, info.safety_signal,
     ],
   );
   return rows.length ? getProduct(slug) : null;
@@ -352,6 +376,160 @@ export async function updateProductKind(slug: string, kind: "drug" | "supplement
     [slug, kind === "drug" ? null : kind, kind === "drug" ? null : "set on the drug page"],
   );
   return rows.length ? getProduct(slug) : null;
+}
+
+// --------------------------------------------------------------------------- #
+// Development & regulatory: results and milestones (0024)
+// --------------------------------------------------------------------------- #
+const RESULT_COLS = `id::int, kind, trial, phase, population, duration, dose, endpoint, result, comparator, reported,
+  source_label, source_url, origin, hidden`;
+const MILESTONE_COLS = `id::int, kind, title, detail, date_label, to_char(date_sort, 'YYYY-MM-DD') AS date_sort, status, region,
+  source_label, source_url, origin, hidden`;
+// Until migration 0024 has run, the tables are missing: show nothing rather than fail the page.
+const noTable = <T,>(e: unknown): T[] => {
+  if (/product_(results|milestones)/.test(String(e))) return [];
+  throw e;
+};
+
+/** Efficacy and safety results of a drug: research-file rows first (in file order), then rows typed on the page. */
+export async function getProductResults(slug: string, withHidden = false): Promise<ProductResult[]> {
+  return query<ProductResult>(
+    `SELECT ${RESULT_COLS} FROM product_results
+      WHERE product_slug = $1 ${withHidden ? "" : "AND NOT hidden"}
+      ORDER BY kind, (origin = 'manual'), sort, id`,
+    [slug],
+  ).catch(noTable<ProductResult>);
+}
+
+/** A drug's milestones by date (undated ones last). */
+export async function getProductMilestones(slug: string, withHidden = false): Promise<ProductMilestone[]> {
+  return query<ProductMilestone>(
+    `SELECT ${MILESTONE_COLS} FROM product_milestones
+      WHERE product_slug = $1 ${withHidden ? "" : "AND NOT hidden"}
+      ORDER BY date_sort NULLS LAST, id`,
+    [slug],
+  ).catch(noTable<ProductMilestone>);
+}
+
+/** Each drug's next expected milestone (the earliest dated one; an undated one only if nothing is dated). */
+export async function nextMilestones(): Promise<Map<string, UpcomingMilestone>> {
+  const rows = await query<UpcomingMilestone>(
+    `SELECT DISTINCT ON (m.product_slug) m.product_slug AS slug, p.name, m.kind, m.title, m.date_label,
+            to_char(m.date_sort, 'YYYY-MM-DD') AS date_sort, m.region, m.source_url
+       FROM product_milestones m JOIN products p ON p.slug = m.product_slug
+      WHERE m.status IN ('expected', 'delayed') AND NOT m.hidden
+      ORDER BY m.product_slug, m.date_sort NULLS LAST, m.id`,
+  ).catch(noTable<UpcomingMilestone>);
+  return new Map(rows.map((r) => [r.slug, r]));
+}
+
+/** Expected milestones across all listed drugs, soonest first (dated ones only). */
+export async function upcomingMilestones(limit = 12): Promise<UpcomingMilestone[]> {
+  return query<UpcomingMilestone>(
+    `SELECT m.product_slug AS slug, p.name, m.kind, m.title, m.date_label, to_char(m.date_sort, 'YYYY-MM-DD') AS date_sort,
+            m.region, m.source_url
+       FROM product_milestones m JOIN products p ON p.slug = m.product_slug AND p.kind IS NULL
+      WHERE m.status IN ('expected', 'delayed') AND NOT m.hidden AND m.date_sort IS NOT NULL
+      ORDER BY m.date_sort, p.name, m.id
+      LIMIT $1`,
+    [limit],
+  ).catch(noTable<UpcomingMilestone>);
+}
+
+export type ResultInput = Omit<ProductResult, "id" | "origin" | "hidden">;
+export type MilestoneInput = Omit<ProductMilestone, "id" | "origin" | "hidden" | "date_sort">;
+
+/** First day of the period a date label names: "2026-03-19", "2026-03", "2026-Q4", "2026-H2", "2027". */
+export function milestoneDateSort(label: string | null): string | null {
+  const s = (label ?? "").trim().toUpperCase();
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (m) return isNaN(Date.parse(s)) ? null : s;
+  m = /^(\d{4})-(\d{2})$/.exec(s);
+  if (m && +m[2] >= 1 && +m[2] <= 12) return `${m[1]}-${m[2]}-01`;
+  m = /^(\d{4})-?Q([1-4])$/.exec(s);
+  if (m) return `${m[1]}-${String((+m[2] - 1) * 3 + 1).padStart(2, "0")}-01`;
+  m = /^(\d{4})-?H([12])$/.exec(s);
+  if (m) return `${m[1]}-${m[2] === "1" ? "01" : "07"}-01`;
+  m = /^(\d{4})$/.exec(s);
+  return m ? `${m[1]}-01-01` : null;
+}
+
+export async function addResult(slug: string, r: ResultInput, by: string | null): Promise<ProductResult | null> {
+  const rows = await query<ProductResult>(
+    `INSERT INTO product_results (product_slug, kind, trial, phase, population, duration, dose, endpoint, result, comparator,
+                                  reported, source_label, source_url, origin, created_by, sort)
+     SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'manual', $14,
+            coalesce((SELECT max(sort) + 1 FROM product_results WHERE product_slug = $1), 0)
+      WHERE EXISTS (SELECT 1 FROM products WHERE slug = $1)
+     RETURNING ${RESULT_COLS}`,
+    [slug, r.kind, r.trial, r.phase, r.population, r.duration, r.dose, r.endpoint, r.result, r.comparator, r.reported,
+     r.source_label, r.source_url, by],
+  );
+  return rows[0] ?? null;
+}
+
+/** Change a row typed on the page. Research-file rows can only be hidden or shown (the sync would put them back). */
+export async function updateResult(slug: string, id: number, r: ResultInput): Promise<ProductResult | null> {
+  const rows = await query<ProductResult>(
+    `UPDATE product_results SET kind = $3, trial = $4, phase = $5, population = $6, duration = $7, dose = $8, endpoint = $9,
+            result = $10, comparator = $11, reported = $12, source_label = $13, source_url = $14, updated_at = now()
+      WHERE product_slug = $1 AND id = $2 AND origin = 'manual'
+      RETURNING ${RESULT_COLS}`,
+    [slug, id, r.kind, r.trial, r.phase, r.population, r.duration, r.dose, r.endpoint, r.result, r.comparator, r.reported,
+     r.source_label, r.source_url],
+  );
+  return rows[0] ?? null;
+}
+
+export async function setResultHidden(slug: string, id: number, hidden: boolean): Promise<boolean> {
+  const rows = await query<{ id: number }>(
+    "UPDATE product_results SET hidden = $3, updated_at = now() WHERE product_slug = $1 AND id = $2 RETURNING id", [slug, id, hidden],
+  );
+  return rows.length > 0;
+}
+
+export async function deleteResult(slug: string, id: number): Promise<boolean> {
+  const rows = await query<{ id: number }>(
+    "DELETE FROM product_results WHERE product_slug = $1 AND id = $2 AND origin = 'manual' RETURNING id", [slug, id],
+  );
+  return rows.length > 0;
+}
+
+export async function addMilestone(slug: string, m: MilestoneInput, by: string | null): Promise<ProductMilestone | null> {
+  const rows = await query<ProductMilestone>(
+    `INSERT INTO product_milestones (product_slug, kind, title, detail, date_label, date_sort, status, region,
+                                     source_label, source_url, origin, created_by)
+     SELECT $1, $2, $3, $4, $5, $6::date, $7, $8, $9, $10, 'manual', $11
+      WHERE EXISTS (SELECT 1 FROM products WHERE slug = $1)
+     RETURNING ${MILESTONE_COLS}`,
+    [slug, m.kind, m.title, m.detail, m.date_label, milestoneDateSort(m.date_label), m.status, m.region, m.source_label, m.source_url, by],
+  );
+  return rows[0] ?? null;
+}
+
+export async function updateMilestone(slug: string, id: number, m: MilestoneInput): Promise<ProductMilestone | null> {
+  const rows = await query<ProductMilestone>(
+    `UPDATE product_milestones SET kind = $3, title = $4, detail = $5, date_label = $6, date_sort = $7::date, status = $8,
+            region = $9, source_label = $10, source_url = $11, updated_at = now()
+      WHERE product_slug = $1 AND id = $2 AND origin = 'manual'
+      RETURNING ${MILESTONE_COLS}`,
+    [slug, id, m.kind, m.title, m.detail, m.date_label, milestoneDateSort(m.date_label), m.status, m.region, m.source_label, m.source_url],
+  );
+  return rows[0] ?? null;
+}
+
+export async function setMilestoneHidden(slug: string, id: number, hidden: boolean): Promise<boolean> {
+  const rows = await query<{ id: number }>(
+    "UPDATE product_milestones SET hidden = $3, updated_at = now() WHERE product_slug = $1 AND id = $2 RETURNING id", [slug, id, hidden],
+  );
+  return rows.length > 0;
+}
+
+export async function deleteMilestone(slug: string, id: number): Promise<boolean> {
+  const rows = await query<{ id: number }>(
+    "DELETE FROM product_milestones WHERE product_slug = $1 AND id = $2 AND origin = 'manual' RETURNING id", [slug, id],
+  );
+  return rows.length > 0;
 }
 
 /** Save the hand-written product summary (blank = remove). */
@@ -465,6 +643,17 @@ export async function mergeProduct(fromSlug: string, intoSlug: string): Promise<
          FROM products f WHERE t.id = $2 AND f.id = $1`,
       [from.id, into.id],
     );
+    // Development & regulatory fields and rows typed on the page (0024; skipped before that migration).
+    const dev = await client.query("SELECT 1 FROM information_schema.tables WHERE table_name = 'product_results'");
+    if (dev.rowCount) {
+      await client.query(
+        `UPDATE products t SET ${DEV_FIELDS.map((f) => `${f} = coalesce(t.${f}, f.${f})`).join(", ")}
+           FROM products f WHERE t.id = $2 AND f.id = $1`,
+        [from.id, into.id],
+      );
+      await client.query("UPDATE product_results SET product_slug = $2 WHERE product_slug = $1 AND origin = 'manual'", [from.slug, into.slug]);
+      await client.query("UPDATE product_milestones SET product_slug = $2 WHERE product_slug = $1 AND origin = 'manual'", [from.slug, into.slug]);
+    }
     // Conference abstracts follow the drug.
     await client.query(
       `INSERT INTO product_abstracts (product_slug, source, abstract_no, drug_name, aliases)

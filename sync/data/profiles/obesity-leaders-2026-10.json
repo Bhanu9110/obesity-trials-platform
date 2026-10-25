@@ -1,0 +1,388 @@
+{
+ "source": "Research Oct 2026",
+ "updated": "2026-10-25",
+ "description": "Development, regulatory and commercial profile of the leading obesity drugs, researched from company press releases, FDA announcements, journal publications and trial registries up to 25 Oct 2026. Loaded into the drug pages by the daily sync; values typed on the website take priority over these. Dates written as 2026-Q4, 2026-H2 or 2027 are company guidance or registry estimates, not confirmed dates.",
+ "drugs": [
+  {
+   "name": "Semaglutide",
+   "aliases": ["Wegovy", "Ozempic", "Rybelsus", "NN9536"],
+   "fields": {
+    "phase": "Approved",
+    "approved": "Yes",
+    "inn": "Semaglutide",
+    "api": "Semaglutide (acylated GLP-1 receptor agonist peptide); oral tablets co-formulated with the absorption enhancer SNAC",
+    "regulatory_status": "Approved — US: Wegovy injection 2.4 mg (Jun 2021), Wegovy pill 25 mg (Dec 2025), Wegovy HD 7.2 mg (Mar 2026); also approved in the EU, Japan, China and other markets",
+    "designations": "Wegovy HD 7.2 mg: FDA Commissioner's National Priority Voucher (approved 54 days after filing)",
+    "patents": "Core compound patent: US 5 Dec 2032 (US 10,525,129); EU/UK about Mar 2031 with SPC; Japan about 2031. Expired or lapsed Mar 2026 in China, India, Brazil and Canada",
+    "anticipated_launch": "On the market (US 2021). Wegovy pill launched in the US Jan 2026. Generic entry from 2026 in China, India, Brazil and Canada; US/EU about 2031–2033",
+    "efficacy_signal": "STEP 1: −14.9% vs −2.4% at 68 wk (2.4 mg). STEP UP 7.2 mg: −20.7% at 72 wk (efficacy estimand). SELECT: 20% lower risk of major cardiovascular events",
+    "safety_signal": "GI events (nausea 44% vs 17% in STEP 1); AE discontinuation 7.0% vs 3.1%; boxed warning for thyroid C-cell tumours; altered skin sensation more common at 7.2 mg (FDA reviewing)"
+   },
+   "sources": [
+    { "label": "FDA: Wegovy HD approval (19 Mar 2026)", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-fourth-product-under-national-priority-voucher-program-higher-dose-semaglutide" },
+    { "label": "DelveInsight: semaglutide patent cliff", "url": "https://www.delveinsight.com/blog/semaglutide-patent-cliff" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "STEP 1", "phase": "Phase 3", "population": "1,961 adults with obesity or overweight, no diabetes", "duration": "68 weeks", "dose": "2.4 mg weekly", "endpoint": "Body weight change", "result": "−14.9%", "comparator": "Placebo −2.4%", "reported": "2021-02", "source": { "label": "NEJM 2021", "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2032183" } },
+    { "kind": "efficacy", "trial": "SELECT", "phase": "Phase 3 (CV outcomes)", "population": "17,604 adults with cardiovascular disease and overweight/obesity, no diabetes", "duration": "Mean 40 months", "dose": "2.4 mg weekly", "endpoint": "Major adverse cardiovascular events", "result": "HR 0.80 (20% lower risk)", "comparator": "Placebo", "reported": "2023-11", "source": { "label": "NEJM 2023", "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2307563" } },
+    { "kind": "efficacy", "trial": "STEP UP", "phase": "Phase 3", "population": "Adults with obesity, no diabetes", "duration": "72 weeks", "dose": "7.2 mg weekly", "endpoint": "Body weight change", "result": "−20.7% (efficacy estimand); −18.7% (treatment policy)", "comparator": "Placebo", "reported": "2025-01", "source": { "label": "Novo Nordisk topline (Jan 2025)" } },
+    { "kind": "efficacy", "trial": "OASIS 4", "phase": "Phase 3", "population": "307 adults with obesity or overweight", "duration": "64 weeks", "dose": "Oral 25 mg daily", "endpoint": "Body weight change", "result": "−16.6% (if all stayed on treatment); −13.6% (regardless)", "comparator": "Placebo −2.7% / −2.4%", "reported": "2025-12", "source": { "label": "Novo Nordisk: Wegovy pill FDA approval", "url": "https://www.novonordisk-us.com/media/press-releases/wegovy-pill-fda-approval-obesity.html" } },
+    { "kind": "safety", "trial": "STEP 1", "phase": "Phase 3", "duration": "68 weeks", "dose": "2.4 mg weekly", "endpoint": "Tolerability", "result": "Nausea 44.2%; discontinuation for adverse events 7.0%", "comparator": "Placebo: nausea 17.4%; discontinuation 3.1%", "reported": "2021-02", "source": { "label": "NEJM 2021", "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2032183" } },
+    { "kind": "safety", "trial": "Wegovy HD review", "phase": "Approved", "dose": "7.2 mg weekly", "endpoint": "Safety signal", "result": "Altered skin sensation (dysaesthesia) more common than at 2.4 mg; generally resolved; FDA investigating further", "reported": "2026-03", "source": { "label": "FDA, 19 Mar 2026", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-fourth-product-under-national-priority-voucher-program-higher-dose-semaglutide" } }
+   ],
+   "milestones": [
+    { "kind": "regulatory", "date": "2021-06-04", "status": "done", "region": "US", "title": "FDA approves Wegovy 2.4 mg for chronic weight management", "source": { "label": "FDA", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-new-drug-treatment-chronic-weight-management-first-2014" } },
+    { "kind": "regulatory", "date": "2024-03-08", "status": "done", "region": "US", "title": "FDA adds cardiovascular risk-reduction indication (SELECT)", "source": { "label": "FDA", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-treatment-reduce-risk-serious-heart-problems-specifically-adults-obesity-or" } },
+    { "kind": "regulatory", "date": "2025-08", "status": "done", "region": "US", "title": "FDA accelerated approval for MASH with moderate-to-advanced fibrosis", "source": { "label": "Novo Nordisk (Aug 2025)" } },
+    { "kind": "inflection", "date": "2025-11", "status": "done", "title": "EVOKE / EVOKE+ Alzheimer's disease trials miss their primary endpoint", "source": { "label": "Novo Nordisk (Nov 2025)" } },
+    { "kind": "regulatory", "date": "2025-12-22", "status": "done", "region": "US", "title": "FDA approves Wegovy pill (oral semaglutide 25 mg) — first oral GLP-1 for obesity", "source": { "label": "Novo Nordisk", "url": "https://www.novonordisk-us.com/media/press-releases/wegovy-pill-fda-approval-obesity.html" } },
+    { "kind": "launch", "date": "2026-01", "status": "done", "region": "US", "title": "Wegovy pill launched (1.5 mg starting dose, $149/month self-pay)", "source": { "label": "Novo Nordisk", "url": "https://www.novonordisk-us.com/media/press-releases/wegovy-pill-fda-approval-obesity.html" } },
+    { "kind": "patent", "date": "2026-03", "status": "done", "region": "China, India, Brazil, Canada", "title": "Compound patent expires or lapses — generic entry opens", "detail": "China patent expired 20 Mar 2026 (extension refused); India patent never granted; Canada patent lapsed", "source": { "label": "DelveInsight", "url": "https://www.delveinsight.com/blog/semaglutide-patent-cliff" } },
+    { "kind": "regulatory", "date": "2026-03-19", "status": "done", "region": "US", "title": "FDA approves Wegovy HD 7.2 mg under the National Priority Voucher programme", "source": { "label": "FDA", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-fourth-product-under-national-priority-voucher-program-higher-dose-semaglutide" } },
+    { "kind": "patent", "date": "2031", "status": "expected", "region": "EU, UK, Japan", "title": "Compound patent and SPC expiry (about Mar 2031)", "source": { "label": "DelveInsight", "url": "https://www.delveinsight.com/blog/semaglutide-patent-cliff" } },
+    { "kind": "patent", "date": "2032-12-05", "status": "expected", "region": "US", "title": "US compound patent expiry (US 10,525,129); paediatric exclusivity could add 6 months", "source": { "label": "DelveInsight", "url": "https://www.delveinsight.com/blog/semaglutide-patent-cliff" } }
+   ]
+  },
+  {
+   "name": "Tirzepatide",
+   "aliases": ["Zepbound", "Mounjaro", "LY3298176"],
+   "fields": {
+    "phase": "Approved",
+    "approved": "Yes",
+    "inn": "Tirzepatide",
+    "api": "Tirzepatide (synthetic 39-amino-acid GIP/GLP-1 dual receptor agonist peptide with a C20 fatty diacid moiety), once weekly",
+    "regulatory_status": "Approved — US: Mounjaro (type 2 diabetes, May 2022), Zepbound (chronic weight management, Nov 2023; obstructive sleep apnoea, Dec 2024); approved in the EU and other markets",
+    "patents": "US compound patent US 9,474,780 expires 13 May 2036; autoinjector device patents expire 2031",
+    "anticipated_launch": "On the market (Zepbound US launch Dec 2023)",
+    "efficacy_signal": "SURMOUNT-1: −20.9% vs −3.1% at 72 wk (15 mg). SURMOUNT-5: −20.2% vs −13.7% for semaglutide 2.4 mg",
+    "safety_signal": "GI events (nausea up to 33%); AE discontinuation 4.3–7.1% vs 2.6% (SURMOUNT-1); boxed warning for thyroid C-cell tumours"
+   },
+   "sources": [
+    { "label": "GreyB: tirzepatide patents", "url": "https://pharsight.greyb.com/ingredient/tirzepatide-patent-expiration" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "SURMOUNT-1", "phase": "Phase 3", "population": "2,539 adults with obesity or overweight, no diabetes", "duration": "72 weeks", "dose": "5 / 10 / 15 mg weekly", "endpoint": "Body weight change", "result": "−15.0% / −19.5% / −20.9%", "comparator": "Placebo −3.1%", "reported": "2022-06", "source": { "label": "NEJM 2022", "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2206038" } },
+    { "kind": "efficacy", "trial": "SURMOUNT-5", "phase": "Phase 3 (head-to-head)", "population": "751 adults with obesity, no diabetes", "duration": "72 weeks", "dose": "Maximum tolerated dose (10 or 15 mg)", "endpoint": "Body weight change", "result": "−20.2%", "comparator": "Semaglutide 2.4 mg −13.7%", "reported": "2025-05", "source": { "label": "Lilly: SURMOUNT-5 in NEJM", "url": "https://investor.lilly.com/news-releases/news-release-details/zepbound-tirzepatide-showed-superior-weight-loss-over-wegovy" } },
+    { "kind": "safety", "trial": "SURMOUNT-1", "phase": "Phase 3", "duration": "72 weeks", "dose": "5 / 10 / 15 mg weekly", "endpoint": "Tolerability", "result": "Nausea 24.6% / 33.3% / 31.0%; discontinuation for adverse events 4.3% / 7.1% / 6.2%", "comparator": "Placebo: nausea 9.5%; discontinuation 2.6%", "reported": "2022-06", "source": { "label": "NEJM 2022", "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2206038" } },
+    { "kind": "efficacy", "trial": "EloraTZP Phase 2b (NCT06603571)", "phase": "Phase 2b", "population": "367 adults with obesity or overweight and type 2 diabetes", "duration": "48 weeks", "dose": "Eloralintide 9 mg + tirzepatide 15 mg", "endpoint": "Body weight change", "result": "−23.3% (A1C −2.9%)", "comparator": "Tirzepatide 15 mg alone −14.8%; placebo −3.0%", "reported": "2026-09", "source": { "label": "Lilly (30 Sep 2026)", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } }
+   ],
+   "milestones": [
+    { "kind": "regulatory", "date": "2022-05-13", "status": "done", "region": "US", "title": "FDA approves Mounjaro for type 2 diabetes" },
+    { "kind": "regulatory", "date": "2023-11-08", "status": "done", "region": "US", "title": "FDA approves Zepbound for chronic weight management", "source": { "label": "FDA", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-new-medication-chronic-weight-management" } },
+    { "kind": "regulatory", "date": "2024-12-20", "status": "done", "region": "US", "title": "FDA approves Zepbound for obstructive sleep apnoea in adults with obesity", "source": { "label": "FDA", "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-medication-obstructive-sleep-apnea" } },
+    { "kind": "inflection", "date": "2025-05", "status": "done", "title": "SURMOUNT-5: superior weight loss vs Wegovy published in NEJM", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/zepbound-tirzepatide-showed-superior-weight-loss-over-wegovy" } },
+    { "kind": "readout", "date": "2026-09-30", "status": "done", "title": "EloraTZP (eloralintide + tirzepatide) Phase 2b beats tirzepatide 15 mg alone", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } },
+    { "kind": "milestone", "date": "2026-Q4", "status": "expected", "title": "Phase 3 start for EloraTZP combination; co-formulation Phase 3 by end of 2026", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } },
+    { "kind": "patent", "date": "2036-05-13", "status": "expected", "region": "US", "title": "US compound patent expiry (US 9,474,780)", "source": { "label": "GreyB", "url": "https://pharsight.greyb.com/ingredient/tirzepatide-patent-expiration" } }
+   ]
+  },
+  {
+   "name": "Orforglipron",
+   "aliases": ["Foundayo", "LY3502970"],
+   "fields": {
+    "phase": "Approved",
+    "approved": "Yes",
+    "inn": "Orforglipron",
+    "api": "Orforglipron (non-peptide small-molecule GLP-1 receptor agonist), once-daily tablet taken with or without food",
+    "regulatory_status": "Approved — US: Foundayo for chronic weight management (1 Apr 2026). Type 2 diabetes: US submission planned",
+    "designations": "FDA Commissioner's National Priority Voucher — first new molecular entity approved under the programme",
+    "anticipated_launch": "Launched in the US Apr 2026 (LillyDirect, retail and telehealth; $149/month self-pay at the lowest dose; Medicare Part D from 1 Jul 2026)",
+    "efficacy_signal": "ATTAIN-1: −12.4% vs −0.9% at 72 wk (36 mg, completers); −11.1% vs −2.1% (all participants)",
+    "safety_signal": "GI events (nausea, constipation, diarrhoea, vomiting, dyspepsia); boxed warning for thyroid C-cell tumours; ACHIEVE-4 showed no excess cardiovascular risk"
+   },
+   "sources": [
+    { "label": "FDA: first NME under the National Priority Voucher programme", "url": "https://fda.gov/news-events/press-announcements/fda-approves-first-new-molecular-entity-under-national-priority-voucher-program" },
+    { "label": "Drugs.com: Foundayo approval history", "url": "https://www.drugs.com/history/foundayo.html" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "ATTAIN-1", "phase": "Phase 3", "population": "3,127 adults with obesity, no diabetes", "duration": "72 weeks", "dose": "36 mg daily (top trial dose)", "endpoint": "Body weight change", "result": "−12.4% (completers); −11.1% (all participants)", "comparator": "Placebo −0.9% / −2.1%", "reported": "2025-09", "source": { "label": "Drugs.com: Foundayo", "url": "https://www.drugs.com/history/foundayo.html" } },
+    { "kind": "efficacy", "trial": "ATTAIN-2", "phase": "Phase 3", "population": "Adults with obesity and type 2 diabetes", "duration": "72 weeks", "dose": "36 mg daily", "endpoint": "Body weight change", "result": "−10.5%; A1C −1.3 to −1.8 points", "comparator": "Placebo", "reported": "2025", "source": { "label": "Drugs.com: Foundayo", "url": "https://www.drugs.com/history/foundayo.html" } },
+    { "kind": "efficacy", "trial": "ACHIEVE-3", "phase": "Phase 3 (head-to-head)", "population": "Adults with type 2 diabetes", "dose": "36 mg daily", "endpoint": "A1C and weight", "result": "A1C −2.2 points; weight −9.2%", "comparator": "Oral semaglutide 14 mg: A1C −1.4; weight −5.3%", "reported": "2025-09", "source": { "label": "Drugs.com: Foundayo", "url": "https://www.drugs.com/history/foundayo.html" } },
+    { "kind": "safety", "trial": "ACHIEVE-4", "phase": "Phase 3 (CV safety)", "population": "Adults with type 2 diabetes at cardiovascular risk", "endpoint": "MACE", "result": "Non-inferior; 16% lower MACE-4 risk", "comparator": "Insulin glargine", "reported": "2026-04", "source": { "label": "Drugs.com: Foundayo", "url": "https://www.drugs.com/history/foundayo.html" } }
+   ],
+   "milestones": [
+    { "kind": "readout", "date": "2025-08-07", "status": "done", "title": "ATTAIN-1 topline: first pivotal obesity Phase 3 positive", "source": { "label": "Drugs.com", "url": "https://www.drugs.com/history/foundayo.html" } },
+    { "kind": "regulatory", "date": "2026-04-01", "status": "done", "region": "US", "title": "FDA approves Foundayo (orforglipron) for chronic weight management", "source": { "label": "FDA", "url": "https://fda.gov/news-events/press-announcements/fda-approves-first-new-molecular-entity-under-national-priority-voucher-program" } },
+    { "kind": "launch", "date": "2026-04", "status": "done", "region": "US", "title": "US launch via LillyDirect, pharmacies and telehealth", "source": { "label": "Patient Care Online", "url": "https://www.patientcareonline.com/view/fda-approves-orforglipron-first-oral-glp-1-receptor-agonist-for-weight-loss-with-no-food-or-water-restrictions" } },
+    { "kind": "milestone", "date": "2026-07-01", "status": "done", "region": "US", "title": "Medicare Part D access begins ($50/month for eligible beneficiaries)", "source": { "label": "Patient Care Online", "url": "https://www.patientcareonline.com/view/fda-approves-orforglipron-first-oral-glp-1-receptor-agonist-for-weight-loss-with-no-food-or-water-restrictions" } },
+    { "kind": "regulatory", "status": "expected", "region": "US", "title": "US submission for type 2 diabetes (timing not disclosed)", "source": { "label": "Patient Care Online", "url": "https://www.patientcareonline.com/view/fda-approves-orforglipron-first-oral-glp-1-receptor-agonist-for-weight-loss-with-no-food-or-water-restrictions" } }
+   ]
+  },
+  {
+   "name": "Retatrutide",
+   "aliases": ["LY3437943"],
+   "fields": {
+    "phase": "Phase 3",
+    "inn": "Retatrutide",
+    "api": "Retatrutide (LY3437943), synthetic GIP/GLP-1/glucagon triple receptor agonist peptide, once weekly",
+    "regulatory_status": "Investigational — Phase 3 obesity trials positive (TRIUMPH-1, -2, -3); US submission planned Q1 2027",
+    "anticipated_launch": "US submission Q1 2027 (company); approval unlikely before late 2027–2028 (estimate based on a standard review)",
+    "efficacy_signal": "TRIUMPH-1: −28.3% vs −2.2% at 80 wk (12 mg, efficacy estimand); −30.3% at 104 wk in the BMI ≥35 extension",
+    "safety_signal": "Dose-dependent GI events (nausea up to 42%); dysaesthesia 5–12.5% vs 0.9%; AE discontinuation up to 11.3% (12 mg) vs 4.9%"
+   },
+   "sources": [
+    { "label": "Lilly: TRIUMPH-1 (21 May 2026)", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-delivered-powerful-weight-loss" },
+    { "label": "Lilly: TRIUMPH-2 and -3 (23 Jul 2026)", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "TRIUMPH-1", "phase": "Phase 3", "population": "2,339 adults with obesity or overweight, no diabetes", "duration": "80 weeks", "dose": "4 / 9 / 12 mg weekly", "endpoint": "Body weight change (efficacy estimand)", "result": "−19.0% / −25.9% / −28.3%", "comparator": "Placebo −2.2%", "reported": "2026-05", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-delivered-powerful-weight-loss" } },
+    { "kind": "efficacy", "trial": "TRIUMPH-1 extension", "phase": "Phase 3", "population": "532 participants with BMI ≥35", "duration": "104 weeks", "dose": "Maximum tolerated dose (9 or 12 mg)", "endpoint": "Body weight change", "result": "−30.3% (12 mg)", "reported": "2026-05", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-delivered-powerful-weight-loss" } },
+    { "kind": "efficacy", "trial": "TRIUMPH-2", "phase": "Phase 3", "population": "1,152 adults with type 2 diabetes and obesity or overweight", "duration": "80 weeks", "dose": "4 / 9 / 12 mg weekly", "endpoint": "Body weight change; A1C", "result": "−12.7% / −19.1% / −20.8%; A1C −1.4 to −1.6 points", "comparator": "Placebo −4.0%; A1C −0.2", "reported": "2026-07", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" } },
+    { "kind": "efficacy", "trial": "TRIUMPH-3", "phase": "Phase 3", "population": "1,949 adults with BMI ≥35 and established cardiovascular disease", "duration": "80 weeks", "dose": "9 / 12 mg weekly", "endpoint": "Body weight change", "result": "−21.6% / −22.6%", "comparator": "Placebo −3.2%", "reported": "2026-07", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" } },
+    { "kind": "safety", "trial": "TRIUMPH-1", "phase": "Phase 3", "duration": "80 weeks", "dose": "4 / 9 / 12 mg weekly", "endpoint": "Tolerability", "result": "Nausea 28.6% / 38.4% / 42.4%; dysaesthesia 5.1% / 12.3% / 12.5%; AE discontinuation 4.1% / 6.9% / 11.3%", "comparator": "Placebo: nausea 14.8%; dysaesthesia 0.9%; discontinuation 4.9%", "reported": "2026-05", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-delivered-powerful-weight-loss" } },
+    { "kind": "safety", "trial": "TRIUMPH-3", "phase": "Phase 3", "duration": "80 weeks", "dose": "9 / 12 mg weekly", "endpoint": "Cardiovascular events (not powered)", "result": "MACE-5 HR 0.82 (95% CI 0.55–1.22); MACE-3 HR 1.12 (0.64–1.96); AE discontinuation 9.8% / 13.5%", "comparator": "Placebo; discontinuation 4.8%", "reported": "2026-07", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" } }
+   ],
+   "milestones": [
+    { "kind": "inflection", "date": "2026-05-21", "status": "done", "title": "TRIUMPH-1: up to 28.3% weight loss at 80 weeks (30.3% at 104 weeks in the BMI ≥35 extension) sets a new bar for obesity drugs", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-delivered-powerful-weight-loss" } },
+    { "kind": "readout", "date": "2026-07-23", "status": "done", "title": "TRIUMPH-2 (type 2 diabetes) and TRIUMPH-3 (severe obesity + CVD) positive", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" } },
+    { "kind": "regulatory", "date": "2027-Q1", "status": "expected", "region": "US", "title": "US submission (BLA) for obesity, after the manufacturing (CMC) package is complete", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" } },
+    { "kind": "readout", "status": "expected", "title": "Further Phase 3 readouts: knee osteoarthritis and sleep apnoea baskets, CV/renal outcomes, MASLD, chronic low back pain (dates not given)", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" } }
+   ]
+  },
+  {
+   "name": "Cagrilintide + semaglutide",
+   "aliases": ["CagriSema", "NN9838"],
+   "fields": {
+    "phase": "Registration / Filed",
+    "inn": "Cagrilintide / semaglutide (fixed-dose combination)",
+    "api": "Cagrilintide 2.4 mg (long-acting amylin analogue) + semaglutide 2.4 mg (GLP-1 receptor agonist), once-weekly single injection",
+    "regulatory_status": "Under FDA review — application submitted 18 Dec 2025; decision expected Q4 2026 (no public PDUFA date)",
+    "anticipated_launch": "US launch possible from late 2026 / early 2027 if approved (estimate)",
+    "efficacy_signal": "REDEFINE 1: −22.7% vs −2.3% at 68 wk (efficacy estimand). REDEFINE 4: −23.0% vs −25.5% for tirzepatide — non-inferiority missed",
+    "safety_signal": "GI events (REDEFINE 1: nausea 55%, constipation 31%, vomiting 26%); AE discontinuation 5.9% vs 3.5%"
+   },
+   "sources": [
+    { "label": "Life Science Daily: CagriSema FDA review", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "REDEFINE 1", "phase": "Phase 3", "population": "3,417 adults with obesity or overweight, no diabetes", "duration": "68 weeks", "dose": "2.4 mg / 2.4 mg weekly", "endpoint": "Body weight change", "result": "−22.7% (efficacy estimand); −20.4% (treatment policy)", "comparator": "Placebo −2.3% / −3.0%", "reported": "2024-12", "source": { "label": "Life Science Daily", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" } },
+    { "kind": "efficacy", "trial": "REDEFINE 2", "phase": "Phase 3", "population": "1,206 adults with obesity and type 2 diabetes", "duration": "68 weeks", "dose": "2.4 mg / 2.4 mg weekly", "endpoint": "Body weight change", "result": "−15.7% (efficacy estimand); −13.7% (treatment policy)", "comparator": "Placebo −3.1% / −3.4%", "reported": "2025-03", "source": { "label": "Life Science Daily", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" } },
+    { "kind": "efficacy", "trial": "REDEFINE 4", "phase": "Phase 3 (head-to-head, open label)", "population": "809 adults with obesity", "duration": "84 weeks", "dose": "2.4 mg / 2.4 mg weekly", "endpoint": "Body weight change", "result": "−23.0% (efficacy estimand); −20.2% (treatment regimen) — non-inferiority not met", "comparator": "Tirzepatide 15 mg −25.5% / −23.6%", "reported": "2026-02", "source": { "label": "Life Science Daily", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" } },
+    { "kind": "safety", "trial": "REDEFINE 1", "phase": "Phase 3", "duration": "68 weeks", "endpoint": "Tolerability", "result": "Nausea 55%; constipation 30.7%; vomiting 26.1%; AE discontinuation 5.9%", "comparator": "Placebo discontinuation 3.5%", "reported": "2025-06", "source": { "label": "Life Science Daily", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" } }
+   ],
+   "milestones": [
+    { "kind": "inflection", "date": "2024-12", "status": "done", "title": "REDEFINE 1 topline: 22.7% weight loss, below the 25% Novo had guided — shares fell sharply", "source": { "label": "Novo Nordisk (Dec 2024)" } },
+    { "kind": "readout", "date": "2025-03", "status": "done", "title": "REDEFINE 2 (type 2 diabetes) topline", "source": { "label": "Novo Nordisk (Mar 2025)" } },
+    { "kind": "regulatory", "date": "2025-12-18", "status": "done", "region": "US", "title": "Application submitted to the FDA for chronic weight management", "source": { "label": "Life Science Daily", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" } },
+    { "kind": "inflection", "date": "2026-02-23", "status": "done", "title": "REDEFINE 4: misses non-inferiority vs tirzepatide (23.0% vs 25.5%)", "source": { "label": "The Rx Index", "url": "https://therxindex.com/guides/cagrisema-fda-approval-status/" } },
+    { "kind": "regulatory", "date": "2026-Q4", "status": "expected", "region": "US", "title": "FDA decision expected", "source": { "label": "Life Science Daily", "url": "https://lifesciencedaily.news/cagrisema-fda-review-novo-nordisk-nda-timeline-explained/" } }
+   ]
+  },
+  {
+   "name": "Survodutide",
+   "aliases": ["BI 456906"],
+   "fields": {
+    "phase": "Phase 3",
+    "inn": "Survodutide",
+    "api": "Survodutide (BI 456906), glucagon/GLP-1 dual receptor agonist peptide, once weekly",
+    "regulatory_status": "Investigational — Phase 3: obesity (SYNCHRONIZE-1 and -2 positive) and MASH (LIVERAGE, LIVERAGE-Cirrhosis ongoing)",
+    "designations": "FDA Fast Track (May 2021) and Breakthrough Therapy (Sep 2024, MASH F2–F3); EMA PRIME (Nov 2023); China NMPA Breakthrough Therapy (Jun 2024); Taiwan Breakthrough (Sep 2024)",
+    "anticipated_launch": "Not announced — submission timing not disclosed; SYNCHRONIZE-CVOT results expected later in 2026",
+    "efficacy_signal": "SYNCHRONIZE-1: −16.6% vs −3.2% at 76 wk (6.0 mg). SYNCHRONIZE-2 (T2D): −13.1% vs −3.1%; A1C −1.21 points",
+    "safety_signal": "GI events, mostly during dose escalation; GI-related discontinuation 18% vs 1.2% (SYNCHRONIZE-2)"
+   },
+   "sources": [
+    { "label": "Boehringer Ingelheim: SYNCHRONIZE-1", "url": "https://www.boehringer-ingelheim.com/us/human-health/metabolic-diseases/results-phase-iii-synchronize-1-obesity-trial" },
+    { "label": "Drugs.com: SYNCHRONIZE-2", "url": "https://www.drugs.com/clinical_trials/boehringer-ingelheim-s-survodutide-achieves-up-13-1-weight-loss-new-phase-iii-trial-alongside-22618.html" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "SYNCHRONIZE-1", "phase": "Phase 3", "population": "725 adults with obesity or overweight, no diabetes", "duration": "76 weeks", "dose": "3.6 / 6.0 mg weekly", "endpoint": "Body weight change (efficacy estimand)", "result": "Up to −16.6%; 85.1% reached ≥5% loss", "comparator": "Placebo −3.2%", "reported": "2026-04", "source": { "label": "Boehringer Ingelheim", "url": "https://www.boehringer-ingelheim.com/us/human-health/metabolic-diseases/results-phase-iii-synchronize-1-obesity-trial" } },
+    { "kind": "efficacy", "trial": "SYNCHRONIZE-2", "phase": "Phase 3", "population": "755 adults with obesity or overweight and type 2 diabetes", "duration": "76 weeks", "dose": "3.6 / 6.0 mg weekly", "endpoint": "Body weight change; A1C", "result": "Up to −13.1%; A1C up to −1.21 points", "comparator": "Placebo −3.1%; A1C −0.03", "reported": "2026-10", "source": { "label": "Drugs.com", "url": "https://www.drugs.com/clinical_trials/boehringer-ingelheim-s-survodutide-achieves-up-13-1-weight-loss-new-phase-iii-trial-alongside-22618.html" } },
+    { "kind": "safety", "trial": "SYNCHRONIZE-2", "phase": "Phase 3", "duration": "76 weeks", "endpoint": "Tolerability", "result": "Mostly mild-to-moderate GI events; GI-related discontinuation 18%", "comparator": "Placebo 1.2%", "reported": "2026-10", "source": { "label": "Drugs.com", "url": "https://www.drugs.com/clinical_trials/boehringer-ingelheim-s-survodutide-achieves-up-13-1-weight-loss-new-phase-iii-trial-alongside-22618.html" } }
+   ],
+   "milestones": [
+    { "kind": "regulatory", "date": "2021-05", "status": "done", "region": "US", "title": "FDA Fast Track designation" },
+    { "kind": "regulatory", "date": "2023-11", "status": "done", "region": "EU", "title": "EMA PRIME designation (MASH)" },
+    { "kind": "regulatory", "date": "2024-09", "status": "done", "region": "US", "title": "FDA Breakthrough Therapy designation (MASH F2–F3)" },
+    { "kind": "readout", "date": "2026-04-28", "status": "done", "title": "SYNCHRONIZE-1 topline: up to 16.6% weight loss", "source": { "label": "Boehringer Ingelheim", "url": "https://www.boehringer-ingelheim.com/us/human-health/metabolic-diseases/results-phase-iii-synchronize-1-obesity-trial" } },
+    { "kind": "readout", "date": "2026-10-01", "status": "done", "title": "SYNCHRONIZE-2 (type 2 diabetes): up to 13.1% weight loss; NEJM and EASD", "source": { "label": "Drugs.com", "url": "https://www.drugs.com/clinical_trials/boehringer-ingelheim-s-survodutide-achieves-up-13-1-weight-loss-new-phase-iii-trial-alongside-22618.html" } },
+    { "kind": "readout", "date": "2026-H2", "status": "expected", "title": "SYNCHRONIZE-CVOT cardiovascular outcomes results", "source": { "label": "Drugs.com", "url": "https://www.drugs.com/clinical_trials/boehringer-ingelheim-s-survodutide-achieves-up-13-1-weight-loss-new-phase-iii-trial-alongside-22618.html" } },
+    { "kind": "readout", "status": "expected", "title": "LIVERAGE and LIVERAGE-Cirrhosis (MASH) Phase 3 results (dates not given)" }
+   ]
+  },
+  {
+   "name": "Maridebart cafraglutide",
+   "aliases": ["MariTide", "AMG 133"],
+   "fields": {
+    "phase": "Phase 3",
+    "inn": "Maridebart cafraglutide",
+    "api": "Maridebart cafraglutide (AMG 133): antibody–peptide conjugate — a GIP-receptor-antagonist monoclonal antibody linked to two GLP-1 agonist peptides; monthly or less frequent injection",
+    "regulatory_status": "Investigational — Phase 3 (MARITIME programme)",
+    "anticipated_launch": "MARITIME-1 and -2 readouts expected 2027 (registry estimates); launch not before 2028 (estimate)",
+    "efficacy_signal": "Phase 2 (52 wk): −16.2% (obesity) and −12.3% (obesity + T2D) in all patients; about −20% / −17% in those who completed treatment; no plateau",
+    "safety_signal": "GI events, mainly with the first doses; vomiting frequent without dose escalation; GI discontinuation 12–27% with fixed doses vs up to 7.8% with escalation"
+   },
+   "sources": [
+    { "label": "Fierce Biotech (24 Jun 2025)", "url": "https://www.fiercebiotech.com/biotech/amgen-adjusts-phase-3-dosing-plan-lead-obesity-candidate-maritide-after-high" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "Phase 2 (part 1)", "phase": "Phase 2", "population": "Adults with obesity, with or without type 2 diabetes", "duration": "52 weeks", "dose": "Monthly or every 2 months", "endpoint": "Body weight change", "result": "−16.2% (obesity); −12.3% (obesity + T2D) — all patients", "comparator": "Completers: −19.9% / −17.0%", "reported": "2025-06", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/amgen-adjusts-phase-3-dosing-plan-lead-obesity-candidate-maritide-after-high" } },
+    { "kind": "safety", "trial": "Phase 2 (part 1)", "phase": "Phase 2", "duration": "52 weeks", "endpoint": "Tolerability", "result": "GI discontinuation 12–27% with fixed doses, up to 7.8% with dose escalation; vomiting 43–92% depending on arm", "reported": "2025-06", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/amgen-adjusts-phase-3-dosing-plan-lead-obesity-candidate-maritide-after-high" } }
+   ],
+   "milestones": [
+    { "kind": "inflection", "date": "2024-11", "status": "done", "title": "Phase 2 topline: about 20% weight loss at 52 weeks; tolerability questions weigh on the shares", "source": { "label": "Amgen (Nov 2024)" } },
+    { "kind": "milestone", "date": "2025-03", "status": "done", "title": "MARITIME Phase 3 programme starts (MARITIME-1, MARITIME-2, 72 weeks, 8-week dose escalation)", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/amgen-enters-maritime-launching-2-late-stage-obesity-trials-maritide" } },
+    { "kind": "readout", "date": "2025-06-23", "status": "done", "title": "Full Phase 2 results at ADA and in NEJM", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/amgen-adjusts-phase-3-dosing-plan-lead-obesity-candidate-maritide-after-high" } },
+    { "kind": "readout", "date": "2027", "status": "expected", "title": "MARITIME-1 and MARITIME-2 Phase 3 results (ClinicalTrials.gov estimates)", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/amgen-adjusts-phase-3-dosing-plan-lead-obesity-candidate-maritide-after-high" } }
+   ]
+  },
+  {
+   "name": "Amycretin",
+   "aliases": ["Zenagamtide", "NNC0487-0111", "NN9487"],
+   "fields": {
+    "phase": "Phase 3",
+    "inn": "Amycretin (development name); zenagamtide reported as its INN",
+    "api": "Amycretin: single-molecule GLP-1 and amylin receptor co-agonist peptide; once-weekly injection and once-daily tablet",
+    "regulatory_status": "Investigational — Phase 3 (AMAZE obesity programme started 2026; AMBITION type 2 diabetes; AMBIENCE cardiovascular outcomes)",
+    "anticipated_launch": "Not announced — Phase 3 started 2026",
+    "efficacy_signal": "Phase 1b/2a (injection): −22% at 36 wk; Phase 1 (oral): −13.1% at 12 wk; type 2 diabetes Phase 2: up to −14.6% at 36 wk",
+    "safety_signal": "Mostly mild-to-moderate GI events, consistent with the GLP-1 class"
+   },
+   "sources": [
+    { "label": "Fierce Biotech (13 Jun 2025)", "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin" },
+    { "label": "Remy Research: zenagamtide (amycretin)", "url": "https://remyresearch.com/research/zenagamtide-amycretin-glp1-amylin" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "Phase 1b/2a (subcutaneous)", "phase": "Phase 1b/2a", "population": "Adults with overweight or obesity", "duration": "36 weeks", "dose": "Weekly injection", "endpoint": "Body weight change", "result": "−22%", "reported": "2025-01", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin" } },
+    { "kind": "efficacy", "trial": "Phase 1 (oral)", "phase": "Phase 1", "population": "Adults with overweight or obesity", "duration": "12 weeks", "dose": "Daily tablet", "endpoint": "Body weight change", "result": "−13.1%", "reported": "2024", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin" } },
+    { "kind": "efficacy", "trial": "Phase 2 (type 2 diabetes, subcutaneous)", "phase": "Phase 2", "population": "262 adults with type 2 diabetes", "duration": "36 weeks", "dose": "Up to 40 mg weekly", "endpoint": "Body weight change; A1C", "result": "Up to −14.6%; A1C up to −1.7 points", "comparator": "Placebo −2.1%", "reported": "2026-06", "source": { "label": "Remy Research", "url": "https://remyresearch.com/research/zenagamtide-amycretin-glp1-amylin" } }
+   ],
+   "milestones": [
+    { "kind": "readout", "date": "2025-01", "status": "done", "title": "Phase 1b/2a: 22% weight loss at 36 weeks with weekly injections", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin" } },
+    { "kind": "inflection", "date": "2025-06-12", "status": "done", "title": "Novo decides to take injectable and oral amycretin into Phase 3", "source": { "label": "Fierce Biotech", "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin" } },
+    { "kind": "milestone", "date": "2026-Q1", "status": "done", "title": "AMAZE Phase 3 obesity programme starts", "source": { "label": "Remy Research", "url": "https://remyresearch.com/research/zenagamtide-amycretin-glp1-amylin" } },
+    { "kind": "milestone", "date": "2026-10", "status": "done", "title": "AMBIENCE cardiovascular outcomes trial registered (about 8,500 people)", "source": { "label": "Remy Research", "url": "https://remyresearch.com/research/zenagamtide-amycretin-glp1-amylin" } },
+    { "kind": "readout", "date": "2030-09", "status": "expected", "title": "AMBIENCE primary completion (registry estimate)", "source": { "label": "Remy Research", "url": "https://remyresearch.com/research/zenagamtide-amycretin-glp1-amylin" } }
+   ]
+  },
+  {
+   "name": "Mazdutide",
+   "aliases": ["IBI362", "LY3305677"],
+   "fields": {
+    "phase": "Approved (China)",
+    "approved": "Yes",
+    "inn": "Mazdutide",
+    "api": "Mazdutide (IBI362 / LY3305677), glucagon/GLP-1 dual receptor agonist peptide, once weekly",
+    "regulatory_status": "Approved — China (NMPA, Jun 2025, chronic weight management) and Macao; type 2 diabetes application filed with the NMPA",
+    "anticipated_launch": "Launched in China 2025 (Innovent holds China rights under licence from Lilly)",
+    "efficacy_signal": "GLORY-1: −14.8% vs −0.5% at 48 wk (6 mg); DREAMS-3: better glucose control and weight loss than semaglutide in type 2 diabetes",
+    "safety_signal": "GI events typical of the class (rates not given in the sources reviewed)"
+   },
+   "sources": [
+    { "label": "Innovent: NMPA approval (27 Jun 2025)", "url": "https://www.prnewswire.com/news-releases/innovent-announces-mazdutide-first-dual-gcgglp-1-receptor-agonist-received-approval-from-chinas-nmpa-for-chronic-weight-management-302493152.html" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "GLORY-1", "phase": "Phase 3", "population": "Chinese adults with overweight or obesity", "duration": "48 weeks", "dose": "4 / 6 mg weekly", "endpoint": "Body weight change (efficacy estimand)", "result": "−12.0% / −14.8%; liver fat −66% / −80%", "comparator": "Placebo −0.5%", "reported": "2025-06", "source": { "label": "Innovent", "url": "https://www.prnewswire.com/news-releases/innovent-announces-mazdutide-first-dual-gcgglp-1-receptor-agonist-received-approval-from-chinas-nmpa-for-chronic-weight-management-302493152.html" } },
+    { "kind": "efficacy", "trial": "DREAMS-3", "phase": "Phase 3 (head-to-head)", "population": "Chinese adults with type 2 diabetes and obesity", "endpoint": "Glucose control with weight loss", "result": "Superior to semaglutide", "comparator": "Semaglutide", "reported": "2025", "source": { "label": "Innovent", "url": "https://www.prnewswire.com/news-releases/innovents-mazdutide-shows-superiority-in-glycemic-control-with-weight-loss-over-semaglutide-in-a-head-to-head-phase-3-clinical-trial-dreams-3-302594633.html" } }
+   ],
+   "milestones": [
+    { "kind": "regulatory", "date": "2025-06-27", "status": "done", "region": "China", "title": "NMPA approves mazdutide for chronic weight management — first glucagon/GLP-1 dual agonist", "source": { "label": "Innovent", "url": "https://www.prnewswire.com/news-releases/innovent-announces-mazdutide-first-dual-gcgglp-1-receptor-agonist-received-approval-from-chinas-nmpa-for-chronic-weight-management-302493152.html" } },
+    { "kind": "readout", "status": "expected", "title": "Remaining Phase 3 trials (GLORY-2, GLORY-3, GLORY-OSA) and adolescent, MASH and HFpEF studies (dates not given)" }
+   ]
+  },
+  {
+   "name": "VK2735",
+   "aliases": ["VK-2735"],
+   "fields": {
+    "phase": "Phase 3",
+    "inn": "None yet (code VK2735)",
+    "api": "VK2735: GLP-1/GIP dual receptor agonist; once-weekly injection and once-daily tablet",
+    "regulatory_status": "Investigational — Phase 3 (injection: VANQUISH-1 and -2 fully enrolled; oral: Phase 3 started Oct 2026)",
+    "anticipated_launch": "Not announced — 78-week VANQUISH trials fully enrolled by Q1 2026",
+    "efficacy_signal": "VENTURE (injection, Phase 2): up to −14.7% at 13 wk; VENTURE-Oral: up to −12.2% at 13 wk",
+    "safety_signal": "Mostly mild-to-moderate; oral: GI events similar to placebo in the planned dose range (company)"
+   },
+   "sources": [
+    { "label": "Viking Q2 2026 update", "url": "https://ir.vikingtherapeutics.com/2026-07-29-Viking-Therapeutics-Reports-Second-Quarter-2026-Financial-Results-and-Provides-Corporate-Update" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "VENTURE", "phase": "Phase 2", "population": "Adults with obesity", "duration": "13 weeks", "dose": "Weekly injection", "endpoint": "Body weight change", "result": "Up to −14.7%", "reported": "2024-02", "source": { "label": "Viking Therapeutics (Feb 2024)" } },
+    { "kind": "efficacy", "trial": "VENTURE-Oral", "phase": "Phase 2", "population": "Adults with obesity", "duration": "13 weeks", "dose": "Daily tablet", "endpoint": "Body weight change", "result": "Up to −12.2%; up to 80% reached ≥10% loss", "comparator": "Placebo: 5% reached ≥10%", "reported": "2025", "source": { "label": "Viking Q2 2026 update", "url": "https://ir.vikingtherapeutics.com/2026-07-29-Viking-Therapeutics-Reports-Second-Quarter-2026-Financial-Results-and-Provides-Corporate-Update" } }
+   ],
+   "milestones": [
+    { "kind": "milestone", "date": "2025-11", "status": "done", "title": "VANQUISH-1 fully enrolled (about 4,500 patients)", "source": { "label": "Viking", "url": "https://ir.vikingtherapeutics.com/2026-07-29-Viking-Therapeutics-Reports-Second-Quarter-2026-Financial-Results-and-Provides-Corporate-Update" } },
+    { "kind": "milestone", "date": "2026-Q1", "status": "done", "title": "VANQUISH-2 (type 2 diabetes) fully enrolled (about 1,000 patients)", "source": { "label": "Viking", "url": "https://ir.vikingtherapeutics.com/2026-07-29-Viking-Therapeutics-Reports-Second-Quarter-2026-Financial-Results-and-Provides-Corporate-Update" } },
+    { "kind": "readout", "date": "2026-Q3", "status": "expected", "title": "Maintenance-dosing study results (weekly, every other week, monthly)", "source": { "label": "Viking", "url": "https://ir.vikingtherapeutics.com/2026-07-29-Viking-Therapeutics-Reports-Second-Quarter-2026-Financial-Results-and-Provides-Corporate-Update" } },
+    { "kind": "milestone", "date": "2026-10-14", "status": "done", "title": "Oral VK2735 Phase 3 programme starts", "source": { "label": "Viking", "url": "https://ir.vikingtherapeutics.com/2026-10-14-Viking-Therapeutics-Announces-Initiation-of-VK2735-Oral-Phase-3-Clinical-Program-in-Patients-with-Obesity" } },
+    { "kind": "readout", "status": "expected", "title": "VANQUISH-1 and -2 (78 weeks) results — date not given" }
+   ]
+  },
+  {
+   "name": "Petrelintide",
+   "aliases": ["ZP8396"],
+   "fields": {
+    "phase": "Phase 2",
+    "inn": "Petrelintide",
+    "api": "Petrelintide (ZP8396), long-acting amylin analogue peptide, once weekly",
+    "regulatory_status": "Investigational — Phase 2 complete (ZUPREME-1); Phase 3 design in preparation",
+    "anticipated_launch": "Not announced",
+    "efficacy_signal": "ZUPREME-1: up to −10.7% vs −1.7% at 42 wk (efficacy estimand)",
+    "safety_signal": "Placebo-like tolerability: AE discontinuation 4.8% vs 4.9%; no vomiting in the most effective arm"
+   },
+   "sources": [
+    { "label": "Roche (5 Mar 2026)", "url": "https://www.roche.com/media/releases/med-cor-2026-03-05" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "ZUPREME-1", "phase": "Phase 2", "population": "493 adults with overweight or obesity", "duration": "42 weeks", "dose": "Five weekly doses", "endpoint": "Body weight change (efficacy estimand)", "result": "Up to −10.7%", "comparator": "Placebo −1.7%", "reported": "2026-03", "source": { "label": "Roche", "url": "https://www.roche.com/media/releases/med-cor-2026-03-05" } },
+    { "kind": "safety", "trial": "ZUPREME-1", "phase": "Phase 2", "duration": "42 weeks", "endpoint": "Tolerability", "result": "AE discontinuation 4.8% (most effective arm); no vomiting in that arm; total withdrawal 8.4%", "comparator": "Placebo: AE discontinuation 4.9%; total withdrawal 13.6%", "reported": "2026-03", "source": { "label": "Roche", "url": "https://www.roche.com/media/releases/med-cor-2026-03-05" } }
+   ],
+   "milestones": [
+    { "kind": "milestone", "date": "2025-03", "status": "done", "title": "Roche and Zealand agree to co-develop and co-commercialise petrelintide" },
+    { "kind": "inflection", "date": "2026-03-05", "status": "done", "title": "ZUPREME-1 topline: 10.7% weight loss with placebo-like tolerability — analysts divided", "source": { "label": "Clinical Trials Arena", "url": "https://www.clinicaltrialsarena.com/news/roche-zealand-pharma-petrelintide-phase-ii-obesity-results/" } },
+    { "kind": "readout", "date": "2026-09", "status": "done", "title": "Full ZUPREME-1 data at EASD and in The Lancet Diabetes & Endocrinology", "source": { "label": "Zealand Pharma", "url": "https://www.globenewswire.com/news-release/2026/09/29/3371443/0/en/zealand-pharma-to-present-additional-data-from-phase-2-zupreme-1-trial-for-petrelintide-at-easd-2026-and-announces-publication-of-trial-results-in-the-lancet-diabetes-endocrinology.html" } },
+    { "kind": "readout", "date": "2026-H2", "status": "expected", "title": "ZUPREME-2 (type 2 diabetes) topline results", "source": { "label": "Roche", "url": "https://www.roche.com/media/releases/med-cor-2026-03-05" } },
+    { "kind": "milestone", "date": "2026-H2", "status": "expected", "title": "Phase 2 of petrelintide + CT-388 combination starts", "source": { "label": "Roche", "url": "https://www.roche.com/media/releases/med-cor-2026-03-05" } }
+   ]
+  },
+  {
+   "name": "Eloralintide",
+   "aliases": ["LY3841136"],
+   "fields": {
+    "phase": "Phase 3",
+    "inn": "Eloralintide",
+    "api": "Eloralintide (LY3841136), selective amylin receptor agonist peptide, once weekly",
+    "regulatory_status": "Investigational — Phase 3 (obesity, with or without type 2 diabetes); combination with tirzepatide (EloraTZP) entering Phase 3 Q4 2026",
+    "anticipated_launch": "Not announced",
+    "efficacy_signal": "Phase 2: −20.1% vs −0.4% at 48 wk (9 mg)",
+    "safety_signal": "Mild-to-moderate GI events and fatigue, more at higher doses and fewer with slower escalation"
+   },
+   "sources": [
+    { "label": "Lilly (6 Nov 2025)", "url": "https://lilly.gcs-web.com/news-releases/news-release-details/lillys-selective-amylin-agonist-eloralintide-demonstrated" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "Phase 2 (NCT06230523)", "phase": "Phase 2", "population": "263 adults with obesity or overweight, no diabetes", "duration": "48 weeks", "dose": "1 / 3 / 6 / 9 mg weekly", "endpoint": "Body weight change (efficacy estimand)", "result": "−9.5% / −12.4% / −17.6% / −20.1%", "comparator": "Placebo −0.4%", "reported": "2025-11", "source": { "label": "Lilly", "url": "https://lilly.gcs-web.com/news-releases/news-release-details/lillys-selective-amylin-agonist-eloralintide-demonstrated" } },
+    { "kind": "efficacy", "trial": "EloraTZP Phase 2b (NCT06603571)", "phase": "Phase 2b", "population": "367 adults with obesity or overweight and type 2 diabetes", "duration": "48 weeks", "dose": "Eloralintide 6 mg alone / 9 mg + tirzepatide 15 mg", "endpoint": "Body weight change", "result": "−12.3% alone / −23.3% with tirzepatide", "comparator": "Tirzepatide 15 mg −14.8%; placebo −3.0%", "reported": "2026-09", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } },
+    { "kind": "safety", "trial": "EloraTZP Phase 2b (NCT06603571)", "phase": "Phase 2b", "duration": "48 weeks", "endpoint": "Tolerability", "result": "AE discontinuation 10.8–27.0% (combination); 0–10.8% (eloralintide alone)", "comparator": "Tirzepatide 2.9%; placebo 16.7%", "reported": "2026-09", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } }
+   ],
+   "milestones": [
+    { "kind": "readout", "date": "2025-11-06", "status": "done", "title": "Phase 2: up to 20.1% weight loss at 48 weeks", "source": { "label": "Lilly", "url": "https://lilly.gcs-web.com/news-releases/news-release-details/lillys-selective-amylin-agonist-eloralintide-demonstrated" } },
+    { "kind": "milestone", "date": "2025-12", "status": "done", "title": "Phase 3 obesity programme starts", "source": { "label": "Lilly", "url": "https://lilly.gcs-web.com/news-releases/news-release-details/lillys-selective-amylin-agonist-eloralintide-demonstrated" } },
+    { "kind": "readout", "date": "2026-09-30", "status": "done", "title": "EloraTZP Phase 2b: −23.3% with tirzepatide 15 mg vs −14.8% for tirzepatide alone", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } },
+    { "kind": "milestone", "date": "2026-Q4", "status": "expected", "title": "EloraTZP Phase 3 starts", "source": { "label": "Lilly", "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide" } }
+   ]
+  },
+  {
+   "name": "Ecnoglutide",
+   "aliases": ["XW003", "XW-003"],
+   "fields": {
+    "phase": "Approved (China)",
+    "approved": "Yes",
+    "inn": "Ecnoglutide",
+    "api": "Ecnoglutide (XW003), cAMP-biased GLP-1 receptor agonist peptide, once weekly",
+    "regulatory_status": "Approved — China (NMPA, Mar 2026, chronic weight management)",
+    "anticipated_launch": "China launch 2026 (Sciwind Biosciences)",
+    "efficacy_signal": "Phase 3 (China): −15.4% at 48 wk with 2.4 mg (15.1% placebo-adjusted)"
+   },
+   "sources": [
+    { "label": "Pharmaceutical Technology (9 Mar 2026)", "url": "https://www.pharmaceutical-technology.com/news/sciwind-chinas-nmpa-approval-ecnoglutide/" }
+   ],
+   "results": [
+    { "kind": "efficacy", "trial": "Phase 3 (China)", "phase": "Phase 3", "population": "Chinese adults with overweight or obesity", "duration": "48 weeks", "dose": "2.4 mg weekly", "endpoint": "Body weight change", "result": "−15.4% (15.1% placebo-adjusted); 92.8% reached ≥5% loss", "comparator": "Placebo", "reported": "2025-06", "source": { "label": "Pharmaceutical Technology", "url": "https://www.pharmaceutical-technology.com/news/sciwind-chinas-nmpa-approval-ecnoglutide/" } }
+   ],
+   "milestones": [
+    { "kind": "readout", "date": "2025-06", "status": "done", "title": "Phase 3 results published in The Lancet Diabetes & Endocrinology" },
+    { "kind": "regulatory", "date": "2026-03", "status": "done", "region": "China", "title": "NMPA approves ecnoglutide for chronic weight management", "source": { "label": "Pharmaceutical Technology", "url": "https://www.pharmaceutical-technology.com/news/sciwind-chinas-nmpa-approval-ecnoglutide/" } }
+   ]
+  }
+ ]
+}
