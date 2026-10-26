@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.4 |
+| **Manual version** | 1.5 |
 | **Last updated** | 23 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -276,6 +276,7 @@ When a sync finishes, pages that are open show the new numbers within about a mi
 | Adding a new file | Put a JSON file in `sync/data/conference/`; it is imported on the next sync |
 | **Research files** | `sync/data/profiles/*.json` — the researched development, regulatory and commercial profile of the leading obesity drugs: INN, API, regulatory status, designations, patents, launch timing, efficacy and safety signals, results and milestones, each with its source. Loaded on every daily sync |
 | Current file | `obesity-leaders-2026-10.json` (researched 25 Oct 2026): semaglutide, tirzepatide, orforglipron, retatrutide, CagriSema, survodutide, maridebart cafraglutide, amycretin, mazdutide, VK2735, petrelintide, eloralintide, ecnoglutide — 42 results and 65 milestones |
+| `drug-basics-2026-10.json` | Modality, route, therapy class, subclass and mechanism for 479 drugs whose automatic profile left them blank or wrong — standard pharmacology for established drugs, company sources for pipeline drugs (e.g. VK2735, HRS9531, petrelintide, AZD6234, MET-097). Codes with no public information are left blank |
 | Updating | Edit the file (or add a newer one) and push; rows that are no longer in a file are removed on the next sync, hidden rows stay hidden, and rows added on the website are never touched. A drug named in a file must already have a drug page (found by its name or any alias) |
 
 ## 16. Settings for the super admin
@@ -313,6 +314,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 26 Oct 2026 | 1.5 | Drug basics research file: modality, route, therapy class, subclass and mechanism filled for 479 drugs that had gaps (and wrong automatic values corrected, e.g. acarbose, metoprolol, pioglitazone) | 15 |
 | 25 Oct 2026 | 1.4 | Development & regulatory profile on drug pages: INN, API, regulatory status, designations, patents, anticipated launch, efficacy and safety signals; **Milestones & timeline** and **Efficacy & safety results** sections with editing; regulatory status and next milestone in the Drugs list with a filter; **Upcoming milestones** panel; research file for 13 leading drugs; INN, API and regulatory status also filled automatically | 7, 14, 15 |
 | 23 Oct 2026 | 1.3 | Audit logs page redesigned: headline numbers, 14-day activity chart, most opened pages, People list (click a person to filter), activity log as sentences grouped by day with type tabs, person and text filters, older entries on demand and CSV export | 12 |
 | 23 Oct 2026 | 1.2 | Counts update by themselves: open pages reload their numbers within a minute of any data change (sync, drug edits, merges, quality checks). Trials filter counts are never held out of date. Admin's drug counts now match the Overview. Overview "Synced" time shown in India time | 4, 14, 17 |

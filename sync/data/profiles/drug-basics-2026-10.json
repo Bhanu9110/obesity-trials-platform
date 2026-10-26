@@ -1,0 +1,7189 @@
+{
+ "source": "Drug basics Oct 2026",
+ "updated": "2026-10-26",
+ "description": "Modality, route, therapy class, subclass and mechanism for drugs whose automatic profile left these blank or wrong. Established drugs: standard pharmacology (prescribing information). Pipeline drugs: company releases and pipeline pages. Values typed on the website take priority.",
+ "drugs": [
+  {
+   "name": "VK2735",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Oral, Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/GIP dual agonist",
+    "moa": "Dual GLP-1 and GIP receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Viking Therapeutics",
+     "url": "https://ir.vikingtherapeutics.com/2026-07-29-Viking-Therapeutics-Reports-Second-Quarter-2026-Financial-Results-and-Provides-Corporate-Update"
+    }
+   ]
+  },
+  {
+   "name": "Petrelintide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Long-acting amylin analogue",
+    "moa": "Long-acting acylated human amylin analogue; dual amylin and calcitonin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Roche",
+     "url": "https://www.roche.com/media/releases/med-cor-2026-03-05"
+    }
+   ]
+  },
+  {
+   "name": "Survodutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "Glucagon and GLP-1 receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Boehringer Ingelheim",
+     "url": "https://www.boehringer-ingelheim.com/us/human-health/metabolic-diseases/results-phase-iii-synchronize-1-obesity-trial"
+    }
+   ]
+  },
+  {
+   "name": "Cagrilintide + Semaglutide",
+   "fields": {
+    "modality": "Fixed-dose combination (peptides)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin and amylin-based therapy",
+    "therapy_subclass": "Amylin analogue + GLP-1 receptor agonist",
+    "moa": "Cagrilintide (amylin/calcitonin receptor agonist) + semaglutide (GLP-1 receptor agonist)"
+   },
+   "sources": [
+    {
+     "label": "Novo Nordisk"
+    }
+   ]
+  },
+  {
+   "name": "Eloralintide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Selective amylin receptor agonist (SARA)",
+    "moa": "Long-acting selective amylin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Lilly",
+     "url": "https://lilly.gcs-web.com/news-releases/news-release-details/lillys-selective-amylin-agonist-eloralintide-demonstrated"
+    }
+   ]
+  },
+  {
+   "name": "Eloralintide + Tirzepatide",
+   "fields": {
+    "modality": "Combination (peptides)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin and amylin-based therapy",
+    "therapy_subclass": "Amylin agonist + GIP/GLP-1 dual agonist",
+    "moa": "Selective amylin receptor agonist + GIP/GLP-1 receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Lilly",
+     "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-eloratzp-combination-eloralintide-and-tirzepatide"
+    }
+   ]
+  },
+  {
+   "name": "Maridebart Cafraglutide",
+   "fields": {
+    "modality": "Antibody–peptide conjugate",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIPR antagonist / GLP-1 receptor agonist",
+    "moa": "Blocks the GIP receptor (antibody) and activates the GLP-1 receptor (two peptides); monthly or less often"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech",
+     "url": "https://www.fiercebiotech.com/biotech/amgen-adjusts-phase-3-dosing-plan-lead-obesity-candidate-maritide-after-high"
+    }
+   ]
+  },
+  {
+   "name": "Amycretin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Oral, Subcutaneous",
+    "drug_class": "Incretin and amylin-based therapy",
+    "therapy_subclass": "Amylin/GLP-1 dual agonist",
+    "moa": "Unimolecular GLP-1 and amylin receptor co-agonist"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech",
+     "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin"
+    }
+   ]
+  },
+  {
+   "name": "Zenagamtide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Oral, Subcutaneous",
+    "drug_class": "Incretin and amylin-based therapy",
+    "therapy_subclass": "Amylin/GLP-1 dual agonist",
+    "moa": "Unimolecular GLP-1 and amylin receptor co-agonist (amycretin)"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech",
+     "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-plots-phase-3-trials-next-gen-obesity-asset-amycretin"
+    }
+   ]
+  },
+  {
+   "name": "Retatrutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1/glucagon triple agonist",
+    "moa": "GIP, GLP-1 and glucagon receptor triple agonist"
+   },
+   "sources": [
+    {
+     "label": "Lilly",
+     "url": "https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-delivered-powerful-weight-loss"
+    }
+   ]
+  },
+  {
+   "name": "HRS9531",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Oral, Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/GIP dual agonist",
+    "moa": "Dual GLP-1 and GIP receptor agonist (ribupatide)"
+   },
+   "sources": [
+    {
+     "label": "Kailera",
+     "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    }
+   ]
+  },
+  {
+   "name": "Ribupatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Oral, Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/GIP dual agonist",
+    "moa": "Dual GLP-1 and GIP receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Kailera",
+     "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    }
+   ]
+  },
+  {
+   "name": "HRS-7535",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (once daily)"
+   },
+   "sources": [
+    {
+     "label": "Kailera",
+     "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    }
+   ]
+  },
+  {
+   "name": "KAI-7535",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (once daily)"
+   },
+   "sources": [
+    {
+     "label": "Kailera",
+     "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    }
+   ]
+  },
+  {
+   "name": "HRS-4729",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1/glucagon triple agonist",
+    "moa": "GLP-1, GIP and glucagon receptor tri-agonist (once weekly)"
+   },
+   "sources": [
+    {
+     "label": "Kailera",
+     "url": "https://investors.kailera.com/news-releases/news-release-details/kailera-reports-first-quarter-2026-financial-results-and"
+    }
+   ]
+  },
+  {
+   "name": "Brenipatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1 dual agonist",
+    "moa": "GLP-1 and GIP receptor dual agonist (once monthly)"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Brenipatide"
+    }
+   ]
+  },
+  {
+   "name": "LY3537031",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1 dual agonist",
+    "moa": "GLP-1 and GIP receptor dual agonist (brenipatide)"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia",
+     "url": "https://en.wikipedia.org/wiki/Brenipatide"
+    }
+   ]
+  },
+  {
+   "name": "Macupatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP receptor agonist",
+    "moa": "GIP receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "MedChemExpress",
+     "url": "https://www.medchemexpress.com/macupatide.html"
+    }
+   ]
+  },
+  {
+   "name": "LY3532226",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP receptor agonist",
+    "moa": "GIP receptor agonist (macupatide)"
+   },
+   "sources": [
+    {
+     "label": "MedChemExpress",
+     "url": "https://www.medchemexpress.com/macupatide.html"
+    }
+   ]
+  },
+  {
+   "name": "ABBV-295",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Long-acting amylin analogue",
+    "moa": "Long-acting amylin analogue"
+   },
+   "sources": [
+    {
+     "label": "Gubra",
+     "url": "https://mfn.se/a/gubra/gubras-partner-abbvie-presents-detailed-phase-1-data-for-abbv-295-a-long-acting-amylin-analog-demonstrating-favorable-tolerability-and-pharmacokinetic-profile-at-easd-2026"
+    }
+   ]
+  },
+  {
+   "name": "BI 3034701",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/GIP/NPY2 triple agonist",
+    "moa": "GLP-1, GIP and NPY2 receptor triple agonist"
+   },
+   "sources": [
+    {
+     "label": "Boehringer Ingelheim",
+     "url": "https://www.boehringer-ingelheim.com/us/human-health/metabolic-diseases/results-phase-iii-synchronize-1-obesity-trial"
+    }
+   ]
+  },
+  {
+   "name": "MWN109",
+   "fields": {
+    "roa": "Oral, Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov (tablet and injection trials)",
+     "url": "https://clinicaltrials.gov/study/NCT07778693"
+    }
+   ]
+  },
+  {
+   "name": "AZD6234",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Selective amylin receptor agonist",
+    "moa": "Long-acting selective amylin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "AstraZeneca pipeline"
+    }
+   ]
+  },
+  {
+   "name": "AZD9550",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "AstraZeneca pipeline"
+    }
+   ]
+  },
+  {
+   "name": "AZD6234 + AZD9550",
+   "fields": {
+    "modality": "Combination (peptides)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin and amylin-based therapy",
+    "therapy_subclass": "Amylin agonist + GLP-1/glucagon dual agonist",
+    "moa": "Selective amylin receptor agonist + GLP-1/glucagon dual agonist"
+   },
+   "sources": [
+    {
+     "label": "AstraZeneca pipeline"
+    }
+   ]
+  },
+  {
+   "name": "AZD5004",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (elecoglipron)"
+   },
+   "sources": [
+    {
+     "label": "AstraZeneca pipeline"
+    }
+   ]
+  },
+  {
+   "name": "MET097",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "Ultra-long-acting GLP-1 receptor agonist (once monthly; berobenatide)"
+   },
+   "sources": [
+    {
+     "label": "Pfizer (Metsera) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "Berobenatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "Ultra-long-acting GLP-1 receptor agonist (once monthly)"
+   },
+   "sources": [
+    {
+     "label": "Pfizer (Metsera) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "PF-08653944",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "Ultra-long-acting GLP-1 receptor agonist (berobenatide)"
+   },
+   "sources": [
+    {
+     "label": "Pfizer (Metsera) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "MET233",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Long-acting amylin analogue",
+    "moa": "Ultra-long-acting amylin analogue (once monthly)"
+   },
+   "sources": [
+    {
+     "label": "Pfizer (Metsera) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "PF-08653945",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Long-acting amylin analogue",
+    "moa": "Ultra-long-acting amylin analogue (MET-233i)"
+   },
+   "sources": [
+    {
+     "label": "Pfizer (Metsera) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "MET097 + MET233",
+   "fields": {
+    "modality": "Combination (peptides)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin and amylin-based therapy",
+    "therapy_subclass": "GLP-1 RA + amylin analogue",
+    "moa": "Monthly GLP-1 receptor agonist + monthly amylin analogue"
+   },
+   "sources": [
+    {
+     "label": "Pfizer (Metsera) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "UBT251",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "Public company pipeline information"
+    }
+   ]
+  },
+  {
+   "name": "TG103",
+   "fields": {
+    "modality": "Protein / biologic (Fc fusion)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 Fc-fusion protein (long-acting GLP-1 receptor agonist)"
+   },
+   "sources": [
+    {
+     "label": "CSPC pipeline"
+    }
+   ]
+  },
+  {
+   "name": "HS-20094",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1 dual agonist",
+    "moa": "GLP-1 and GIP receptor dual agonist (olatorepatide)"
+   },
+   "sources": [
+    {
+     "label": "Hansoh / Regeneron pipeline"
+    }
+   ]
+  },
+  {
+   "name": "Olatorepatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "Public company pipeline information"
+    }
+   ]
+  },
+  {
+   "name": "VCT220",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (CX11)"
+   },
+   "sources": [
+    {
+     "label": "Vincentage / Corxel pipeline"
+    }
+   ]
+  },
+  {
+   "name": "CX11",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (VCT220)"
+   },
+   "sources": [
+    {
+     "label": "Vincentage / Corxel pipeline"
+    }
+   ]
+  },
+  {
+   "name": "Enicepatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "Public company pipeline information"
+    }
+   ]
+  },
+  {
+   "name": "RO7795081",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "Biased GLP-1 receptor agonist (CT-996)"
+   },
+   "sources": [
+    {
+     "label": "Roche pipeline"
+    }
+   ]
+  },
+  {
+   "name": "CT-996",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "Biased GLP-1 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Roche pipeline"
+    }
+   ]
+  },
+  {
+   "name": "CT-868",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1 dual agonist",
+    "moa": "GLP-1 and GIP receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Roche (Carmot) pipeline"
+    }
+   ]
+  },
+  {
+   "name": "LY3549492",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (naperiglipron)"
+   },
+   "sources": [
+    {
+     "label": "Lilly pipeline"
+    }
+   ]
+  },
+  {
+   "name": "NNC0662-0419",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1/glucagon triple agonist",
+    "moa": "GLP-1, GIP and glucagon receptor triple agonist"
+   },
+   "sources": [
+    {
+     "label": "Novo Nordisk pipeline"
+    }
+   ]
+  },
+  {
+   "name": "HM15275",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1/glucagon triple agonist",
+    "moa": "Long-acting GLP-1, GIP and glucagon receptor triple agonist"
+   },
+   "sources": [
+    {
+     "label": "Hanmi pipeline"
+    }
+   ]
+  },
+  {
+   "name": "HM15211",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1/glucagon triple agonist",
+    "moa": "Long-acting GLP-1, GIP and glucagon receptor triple agonist (efocipegtrutide)"
+   },
+   "sources": [
+    {
+     "label": "Hanmi pipeline"
+    }
+   ]
+  },
+  {
+   "name": "HM11260C",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "Long-acting GLP-1 receptor agonist (efpeglenatide)"
+   },
+   "sources": [
+    {
+     "label": "Hanmi pipeline"
+    }
+   ]
+  },
+  {
+   "name": "HM15136",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Long-acting glucagon analogue",
+    "moa": "Glucagon receptor agonist (efpegerglucagon)"
+   },
+   "sources": [
+    {
+     "label": "Hanmi pipeline"
+    }
+   ]
+  },
+  {
+   "name": "ARO-INHBE",
+   "fields": {
+    "modality": "Oligonucleotide (siRNA)",
+    "roa": "Subcutaneous",
+    "drug_class": "Fat-loss / muscle-preserving",
+    "therapy_subclass": "INHBE silencer",
+    "moa": "siRNA silencing hepatic INHBE (activin E)"
+   },
+   "sources": [
+    {
+     "label": "Arrowhead pipeline"
+    }
+   ]
+  },
+  {
+   "name": "ARO-ALK7",
+   "fields": {
+    "modality": "Oligonucleotide (siRNA)",
+    "roa": "Subcutaneous",
+    "drug_class": "Fat-loss / muscle-preserving",
+    "therapy_subclass": "ALK7 silencer",
+    "moa": "siRNA silencing ALK7 in adipose tissue"
+   },
+   "sources": [
+    {
+     "label": "Arrowhead pipeline"
+    }
+   ]
+  },
+  {
+   "name": "WVE-007",
+   "fields": {
+    "modality": "Oligonucleotide (siRNA)",
+    "roa": "Subcutaneous",
+    "drug_class": "Fat-loss / muscle-preserving",
+    "therapy_subclass": "INHBE silencer",
+    "moa": "GalNAc-siRNA silencing INHBE"
+   },
+   "sources": [
+    {
+     "label": "Wave Life Sciences pipeline"
+    }
+   ]
+  },
+  {
+   "name": "S-309309",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "MGAT2 inhibitor",
+    "moa": "Monoacylglycerol acyltransferase 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Shionogi pipeline"
+    }
+   ]
+  },
+  {
+   "name": "Mazdutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "Innovent",
+     "url": "https://www.prnewswire.com/news-releases/innovent-announces-mazdutide-first-dual-gcgglp-1-receptor-agonist-received-approval-from-chinas-nmpa-for-chronic-weight-management-302493152.html"
+    }
+   ]
+  },
+  {
+   "name": "BGM0504",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous, Oral"
+   },
+   "sources": [
+    {
+     "label": "Public company pipeline information"
+    }
+   ]
+  },
+  {
+   "name": "HDM1005",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "Public company pipeline information"
+    }
+   ]
+  },
+  {
+   "name": "RAY1225",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous"
+   },
+   "sources": [
+    {
+     "label": "Public company pipeline information"
+    }
+   ]
+  },
+  {
+   "name": "Metformin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Biguanide",
+    "moa": "Reduces hepatic glucose production; AMPK activation"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bupropion + Naltrexone",
+   "fields": {
+    "modality": "Fixed-dose combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Opioid antagonist + NDRI combination",
+    "moa": "Bupropion: dopamine/noradrenaline reuptake inhibitor; naltrexone: mu-opioid receptor antagonist (hypothalamic POMC activation)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cagrilintide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Long-acting amylin analogue",
+    "moa": "Dual amylin and calcitonin receptor agonist (DACRA)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Topiramate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Anticonvulsant (used for weight loss)",
+    "moa": "GABA-A enhancement, AMPA/kainate antagonism, carbonic anhydrase inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Phentermine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Sympathomimetic amine",
+    "moa": "Noradrenaline-releasing agent (appetite suppression)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Phentermine + Topiramate",
+   "fields": {
+    "modality": "Fixed-dose combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Sympathomimetic amine + anticonvulsant",
+    "moa": "Phentermine: noradrenaline release; topiramate: GABA-A enhancement / glutamate antagonism"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sibutramine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Serotonin-noradrenaline reuptake inhibitor",
+    "moa": "Serotonin and noradrenaline reuptake inhibitor (withdrawn 2010)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Acetaminophen",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Analgesic (non-opioid)",
+    "therapy_subclass": "Paracetamol",
+    "moa": "Central COX inhibition (analgesic, antipyretic)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Paracetamol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Analgesic (non-opioid)",
+    "therapy_subclass": "Paracetamol",
+    "moa": "Central COX inhibition (analgesic, antipyretic)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tylenol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Analgesic (non-opioid)",
+    "therapy_subclass": "Paracetamol",
+    "moa": "Central COX inhibition (analgesic, antipyretic)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lorcaserin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "5-HT2C receptor agonist",
+    "moa": "Selective serotonin 5-HT2C receptor agonist (withdrawn 2020)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Propofol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Intravenous anaesthetic",
+    "moa": "GABA-A receptor positive allosteric modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Diprivan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Intravenous anaesthetic",
+    "moa": "GABA-A receptor positive allosteric modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dexmedetomidine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Sedative",
+    "therapy_subclass": "Alpha-2 adrenergic agonist",
+    "moa": "Selective alpha-2A adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pioglitazone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Thiazolidinedione",
+    "moa": "PPAR-gamma agonist (insulin sensitiser)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rosuvastatin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Statin",
+    "moa": "HMG-CoA reductase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Atorvastatin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Statin",
+    "moa": "HMG-CoA reductase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Simvastatin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Statin",
+    "moa": "HMG-CoA reductase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pitavastatin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Statin",
+    "moa": "HMG-CoA reductase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lidocaine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Injection, Topical, Intravenous",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Midazolam",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Oral",
+    "drug_class": "Sedative",
+    "therapy_subclass": "Benzodiazepine",
+    "moa": "GABA-A receptor positive allosteric modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ativan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Sedative",
+    "therapy_subclass": "Benzodiazepine",
+    "moa": "GABA-A receptor positive allosteric modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Digoxin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Cardiac glycoside",
+    "moa": "Na+/K+-ATPase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Empagliflozin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dapagliflozin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Forxiga",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Canagliflozin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ertugliflozin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Henagliflozin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Enavogliflozin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ketamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Intramuscular",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Dissociative anaesthetic",
+    "moa": "NMDA receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Esketamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intranasal, Intravenous",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Dissociative anaesthetic",
+    "moa": "NMDA receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Warfarin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Vitamin K antagonist",
+    "moa": "Vitamin K epoxide reductase (VKORC1) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Naltrexone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intramuscular",
+    "drug_class": "Centrally acting agent",
+    "therapy_subclass": "Opioid antagonist",
+    "moa": "Mu-opioid receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pramlintide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Amylin analogue",
+    "moa": "Amylin receptor agonist (slows gastric emptying, reduces glucagon and appetite)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bupropion",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting agent",
+    "therapy_subclass": "Aminoketone antidepressant (NDRI)",
+    "moa": "Dopamine and noradrenaline reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Caffeine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "CNS stimulant",
+    "therapy_subclass": "Methylxanthine",
+    "moa": "Adenosine receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Fentanyl",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Transdermal",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Synthetic opioid",
+    "moa": "Mu-opioid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Remifentanil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Synthetic opioid",
+    "moa": "Mu-opioid receptor agonist (ultra-short-acting)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Remifentanyl",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Synthetic opioid",
+    "moa": "Mu-opioid receptor agonist (ultra-short-acting)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sufentanil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Sublingual",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Synthetic opioid",
+    "moa": "Mu-opioid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Morphine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Opioid",
+    "moa": "Mu-opioid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oxycodone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Opioid",
+    "moa": "Mu-opioid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dilaudid",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Opioid (hydromorphone)",
+    "moa": "Mu-opioid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Buprenorphine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Sublingual, Transdermal, Injection",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Partial opioid agonist",
+    "moa": "Mu-opioid partial agonist, kappa antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oliceridine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "G protein-biased opioid",
+    "moa": "G protein-biased mu-opioid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nalbuphine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Intramuscular",
+    "drug_class": "Opioid analgesic",
+    "therapy_subclass": "Mixed agonist-antagonist opioid",
+    "moa": "Kappa-opioid agonist, mu-opioid antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Naloxone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Intranasal",
+    "drug_class": "Opioid antagonist",
+    "therapy_subclass": "Opioid antagonist",
+    "moa": "Mu-opioid receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Insulin",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous, Intravenous",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Insulin",
+    "moa": "Insulin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Human Insulin",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous, Intravenous, Inhaled",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Insulin",
+    "moa": "Insulin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Insulin Glargine",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Long-acting insulin analogue",
+    "moa": "Insulin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Detemir",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Long-acting insulin analogue",
+    "moa": "Insulin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oxytocin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Intranasal",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Oxytocin",
+    "moa": "Oxytocin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Syntocinon",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Intranasal",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Oxytocin",
+    "moa": "Oxytocin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Carbetocin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Intramuscular",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Oxytocin analogue",
+    "moa": "Oxytocin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Amlodipine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Dihydropyridine calcium channel blocker",
+    "moa": "L-type calcium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "NIFEdipine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Dihydropyridine calcium channel blocker",
+    "moa": "L-type calcium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lercanidipine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Dihydropyridine calcium channel blocker",
+    "moa": "L-type calcium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Beloranib",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "MetAP2 inhibitor",
+    "moa": "Methionine aminopeptidase 2 inhibitor (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ZGN-433",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "MetAP2 inhibitor",
+    "moa": "Methionine aminopeptidase 2 inhibitor (beloranib; development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ZGN-1061",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "MetAP2 inhibitor",
+    "moa": "Methionine aminopeptidase 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Enoxaparin",
+   "fields": {
+    "modality": "Polysaccharide (low-molecular-weight heparin)",
+    "roa": "Subcutaneous, Intravenous",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Low-molecular-weight heparin",
+    "moa": "Antithrombin-mediated factor Xa inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dalteparin",
+   "fields": {
+    "modality": "Polysaccharide (low-molecular-weight heparin)",
+    "roa": "Subcutaneous",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Low-molecular-weight heparin",
+    "moa": "Antithrombin-mediated factor Xa inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nadroparin",
+   "fields": {
+    "modality": "Polysaccharide (low-molecular-weight heparin)",
+    "roa": "Subcutaneous",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Low-molecular-weight heparin",
+    "moa": "Antithrombin-mediated factor Xa inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bemiparin",
+   "fields": {
+    "modality": "Polysaccharide (low-molecular-weight heparin)",
+    "roa": "Subcutaneous",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Low-molecular-weight heparin",
+    "moa": "Antithrombin-mediated factor Xa inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Heparin",
+   "fields": {
+    "modality": "Polysaccharide",
+    "roa": "Intravenous, Subcutaneous",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Unfractionated heparin",
+    "moa": "Antithrombin III activator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Fondaparinux",
+   "fields": {
+    "modality": "Small molecule (synthetic pentasaccharide)",
+    "roa": "Subcutaneous",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Factor Xa inhibitor (indirect)",
+    "moa": "Antithrombin-mediated factor Xa inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Apixaban",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Direct oral anticoagulant",
+    "moa": "Direct factor Xa inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rivaroxaban",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Direct oral anticoagulant",
+    "moa": "Direct factor Xa inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dabigatran Etexilate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticoagulant",
+    "therapy_subclass": "Direct oral anticoagulant",
+    "moa": "Direct thrombin inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Moxonidine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Centrally acting antihypertensive",
+    "moa": "Imidazoline I1 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bupivacaine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Injection",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Marcaine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Injection",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Liposomal Bupivacaine",
+   "fields": {
+    "modality": "Small molecule (liposomal)",
+    "roa": "Injection (infiltration)",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "EXPAREL",
+   "fields": {
+    "modality": "Small molecule (liposomal)",
+    "roa": "Injection (infiltration)",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Levobupivacaine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Injection",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ropivacaine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Injection",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Amide local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Benzocaine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Topical",
+    "drug_class": "Local anaesthetic",
+    "therapy_subclass": "Ester local anaesthetic",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Desflurane",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Inhalation",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Volatile anaesthetic",
+    "moa": "GABA-A potentiation and other ion-channel effects"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sevoflurane",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Inhalation",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Volatile anaesthetic",
+    "moa": "GABA-A potentiation and other ion-channel effects"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Xenon",
+   "fields": {
+    "modality": "Noble gas",
+    "roa": "Inhalation",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Inhaled anaesthetic",
+    "moa": "NMDA receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Thiopental",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Barbiturate",
+    "moa": "GABA-A receptor positive modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Etomidate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "General anaesthetic",
+    "therapy_subclass": "Intravenous anaesthetic",
+    "moa": "GABA-A receptor positive modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Remimazolam",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Sedative",
+    "therapy_subclass": "Benzodiazepine (ultra-short-acting)",
+    "moa": "GABA-A receptor positive allosteric modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Efsubaglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (Fc-fused, once weekly)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Efsubaglutide alfa",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (Fc-fused, once weekly)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ephedrine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Oral",
+    "drug_class": "Sympathomimetic",
+    "therapy_subclass": "Mixed-acting sympathomimetic",
+    "moa": "Adrenergic receptor agonist and noradrenaline releaser"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Glucagon",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Intramuscular, Subcutaneous, Intranasal",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Glucagon",
+    "moa": "Glucagon receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lisdexamfetamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS stimulant",
+    "therapy_subclass": "Amphetamine prodrug",
+    "moa": "Dopamine and noradrenaline releaser"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lis-dexamphetamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS stimulant",
+    "therapy_subclass": "Amphetamine prodrug",
+    "moa": "Dopamine and noradrenaline releaser"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dexamphetamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS stimulant",
+    "therapy_subclass": "Amphetamine",
+    "moa": "Dopamine and noradrenaline releaser"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Methylphenidate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS stimulant",
+    "therapy_subclass": "Phenidate",
+    "moa": "Dopamine and noradrenaline reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Losartan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Angiotensin II receptor blocker",
+    "moa": "AT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Irbesartan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Angiotensin II receptor blocker",
+    "moa": "AT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Valsartan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Angiotensin II receptor blocker",
+    "moa": "AT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Candesartan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Angiotensin II receptor blocker",
+    "moa": "AT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "MICARDIS",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Angiotensin II receptor blocker",
+    "moa": "AT1 receptor antagonist (telmisartan)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Olmesartan Medoxomil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Angiotensin II receptor blocker",
+    "moa": "AT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Enalapril",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "ACE inhibitor",
+    "moa": "Angiotensin-converting enzyme inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ramipril",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "ACE inhibitor",
+    "moa": "Angiotensin-converting enzyme inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Perindopril",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "ACE inhibitor",
+    "moa": "Angiotensin-converting enzyme inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lotiglipron",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Danuglipron",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral small-molecule GLP-1 RA",
+    "moa": "GLP-1 receptor agonist (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rocuronium",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Neuromuscular blocker",
+    "therapy_subclass": "Aminosteroid neuromuscular blocker",
+    "moa": "Nicotinic acetylcholine receptor antagonist (non-depolarising)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rocuronium Bromide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Neuromuscular blocker",
+    "therapy_subclass": "Aminosteroid neuromuscular blocker",
+    "moa": "Nicotinic acetylcholine receptor antagonist (non-depolarising)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Atracurium",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Neuromuscular blocker",
+    "therapy_subclass": "Benzylisoquinolinium neuromuscular blocker",
+    "moa": "Nicotinic acetylcholine receptor antagonist (non-depolarising)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sugammadex",
+   "fields": {
+    "modality": "Small molecule (modified cyclodextrin)",
+    "roa": "Intravenous",
+    "drug_class": "Reversal agent",
+    "therapy_subclass": "Selective relaxant binding agent",
+    "moa": "Encapsulates rocuronium/vecuronium"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bridion",
+   "fields": {
+    "modality": "Small molecule (modified cyclodextrin)",
+    "roa": "Intravenous",
+    "drug_class": "Reversal agent",
+    "therapy_subclass": "Selective relaxant binding agent",
+    "moa": "Encapsulates rocuronium/vecuronium"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Neostigmine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Reversal agent",
+    "therapy_subclass": "Cholinesterase inhibitor",
+    "moa": "Acetylcholinesterase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sitagliptin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "DPP-4 inhibitor",
+    "moa": "Dipeptidyl peptidase-4 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sitagliptan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "DPP-4 inhibitor",
+    "moa": "Dipeptidyl peptidase-4 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tadalafil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urological / vascular",
+    "therapy_subclass": "PDE5 inhibitor",
+    "moa": "Phosphodiesterase-5 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sildenafil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urological / vascular",
+    "therapy_subclass": "PDE5 inhibitor",
+    "moa": "Phosphodiesterase-5 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Testosterone",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Intramuscular, Transdermal, Oral",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Androgen",
+    "moa": "Androgen receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Angiotensin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Vasopressor",
+    "therapy_subclass": "Angiotensin II",
+    "moa": "AT1 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cefazolin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "First-generation cephalosporin",
+    "moa": "Penicillin-binding protein inhibitor (cell wall synthesis)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cefoxitin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Second-generation cephalosporin",
+    "moa": "Penicillin-binding protein inhibitor (cell wall synthesis)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cefuroxime",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Second-generation cephalosporin",
+    "moa": "Penicillin-binding protein inhibitor (cell wall synthesis)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ceftobiprole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Fifth-generation cephalosporin",
+    "moa": "Penicillin-binding protein inhibitor (cell wall synthesis)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Amoxicillin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Aminopenicillin",
+    "moa": "Penicillin-binding protein inhibitor (cell wall synthesis)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Azithromycin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Macrolide",
+    "moa": "50S ribosomal subunit inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Erythromycin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic / prokinetic",
+    "therapy_subclass": "Macrolide",
+    "moa": "50S ribosomal subunit inhibitor; motilin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Moxifloxacin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Fluoroquinolone",
+    "moa": "DNA gyrase / topoisomerase IV inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Levofloxacin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Fluoroquinolone",
+    "moa": "DNA gyrase / topoisomerase IV inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Vancomycin",
+   "fields": {
+    "modality": "Small molecule (glycopeptide)",
+    "roa": "Intravenous, Oral",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Glycopeptide",
+    "moa": "Cell wall synthesis inhibitor (binds D-Ala-D-Ala)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metronidazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Nitroimidazole",
+    "moa": "DNA damage via reactive nitro radicals"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tigecycline",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Glycylcycline",
+    "moa": "30S ribosomal subunit inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tedizolid",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Oxazolidinone",
+    "moa": "50S ribosomal subunit inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Minocycline",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Tetracycline",
+    "moa": "30S ribosomal subunit inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Diazoxide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Potassium channel opener",
+    "moa": "K-ATP channel opener (inhibits insulin release)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ibuprofen",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Analgesic (non-opioid)",
+    "therapy_subclass": "NSAID",
+    "moa": "Non-selective COX inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Diclofenac",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Topical",
+    "drug_class": "Analgesic (non-opioid)",
+    "therapy_subclass": "NSAID",
+    "moa": "Non-selective COX inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Celebrex",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Analgesic (non-opioid)",
+    "therapy_subclass": "COX-2 inhibitor (celecoxib)",
+    "moa": "Selective COX-2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Aspirin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antiplatelet / analgesic",
+    "therapy_subclass": "Salicylate",
+    "moa": "Irreversible COX-1/COX-2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Hydrochlorothiazide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Thiazide diuretic",
+    "moa": "Na-Cl cotransporter inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Mirabegron",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urological agent",
+    "therapy_subclass": "Beta-3 adrenergic agonist",
+    "moa": "Beta-3 adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Vibegron",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urological agent",
+    "therapy_subclass": "Beta-3 adrenergic agonist",
+    "moa": "Beta-3 adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Misoprostol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Vaginal",
+    "drug_class": "Prostaglandin",
+    "therapy_subclass": "Prostaglandin E1 analogue",
+    "moa": "Prostaglandin EP receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Allopurinol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urate-lowering",
+    "therapy_subclass": "Xanthine oxidase inhibitor",
+    "moa": "Xanthine oxidase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Febuxostat",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urate-lowering",
+    "therapy_subclass": "Xanthine oxidase inhibitor",
+    "moa": "Xanthine oxidase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Chenodeoxycholic Acid",
+   "fields": {
+    "modality": "Small molecule (bile acid)",
+    "roa": "Oral",
+    "drug_class": "Bile acid therapy",
+    "therapy_subclass": "Bile acid",
+    "moa": "FXR agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ursodeoxycholic Acid",
+   "fields": {
+    "modality": "Small molecule (bile acid)",
+    "roa": "Oral",
+    "drug_class": "Bile acid therapy",
+    "therapy_subclass": "Bile acid",
+    "moa": "Cytoprotective bile acid (choleretic)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "URSODIOL",
+   "fields": {
+    "modality": "Small molecule (bile acid)",
+    "roa": "Oral",
+    "drug_class": "Bile acid therapy",
+    "therapy_subclass": "Bile acid",
+    "moa": "Cytoprotective bile acid (choleretic)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Obeticholic Acid",
+   "fields": {
+    "modality": "Small molecule (bile acid)",
+    "roa": "Oral",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "FXR agonist",
+    "moa": "Farnesoid X receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Colchicine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anti-inflammatory",
+    "therapy_subclass": "Alkaloid",
+    "moa": "Tubulin polymerisation inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dexamethasone",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Corticosteroid",
+    "therapy_subclass": "Glucocorticoid",
+    "moa": "Glucocorticoid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Hydrocortisone",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Corticosteroid",
+    "therapy_subclass": "Glucocorticoid",
+    "moa": "Glucocorticoid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Methylprednisolone",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Corticosteroid",
+    "therapy_subclass": "Glucocorticoid",
+    "moa": "Glucocorticoid receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dulaglutide",
+   "fields": {
+    "modality": "Peptide (Fc fusion)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (once weekly)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Exenatide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Liraglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (once daily)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ethinyl Estradiol + Levonorgestrel",
+   "fields": {
+    "modality": "Fixed-dose combination",
+    "roa": "Oral",
+    "drug_class": "Hormonal contraceptive",
+    "therapy_subclass": "Combined oral contraceptive",
+    "moa": "Oestrogen and progesterone receptor agonists (ovulation inhibition)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Fenofibrate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Fibrate",
+    "moa": "PPAR-alpha agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "GFT505",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "PPAR agonist",
+    "moa": "Dual PPAR-alpha/delta agonist (elafibranor)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Itraconazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antifungal",
+    "therapy_subclass": "Triazole antifungal",
+    "moa": "Lanosterol 14-alpha-demethylase (CYP51) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Posaconazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antifungal",
+    "therapy_subclass": "Triazole antifungal",
+    "moa": "Lanosterol 14-alpha-demethylase (CYP51) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Anidulafungin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antifungal",
+    "therapy_subclass": "Echinocandin",
+    "moa": "1,3-beta-glucan synthase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Micafungin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antifungal",
+    "therapy_subclass": "Echinocandin",
+    "moa": "1,3-beta-glucan synthase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Caspofungin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antifungal",
+    "therapy_subclass": "Echinocandin",
+    "moa": "1,3-beta-glucan synthase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ixekizumab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous",
+    "drug_class": "Immunology",
+    "therapy_subclass": "IL-17A inhibitor",
+    "moa": "Interleukin-17A neutralising antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Mirikizumab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous, Intravenous",
+    "drug_class": "Immunology",
+    "therapy_subclass": "IL-23 inhibitor",
+    "moa": "Interleukin-23 p19 neutralising antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tocilizumab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous, Subcutaneous",
+    "drug_class": "Immunology",
+    "therapy_subclass": "IL-6 receptor inhibitor",
+    "moa": "Interleukin-6 receptor antagonist antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Infliximab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous",
+    "drug_class": "Immunology",
+    "therapy_subclass": "TNF inhibitor",
+    "moa": "Tumour necrosis factor-alpha neutralising antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "NIVOLUMAB",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous",
+    "drug_class": "Oncology",
+    "therapy_subclass": "PD-1 inhibitor",
+    "moa": "PD-1 immune checkpoint blocking antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metoprolol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antihypertensive / cardiovascular",
+    "therapy_subclass": "Beta-1 selective beta-blocker",
+    "moa": "Beta-1 adrenergic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Atenolol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive / cardiovascular",
+    "therapy_subclass": "Beta-1 selective beta-blocker",
+    "moa": "Beta-1 adrenergic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Propranolol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antihypertensive / cardiovascular",
+    "therapy_subclass": "Non-selective beta-blocker",
+    "moa": "Beta-1/beta-2 adrenergic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Carvedilol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive / cardiovascular",
+    "therapy_subclass": "Alpha/beta-blocker",
+    "moa": "Beta and alpha-1 adrenergic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Labetalol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antihypertensive / cardiovascular",
+    "therapy_subclass": "Alpha/beta-blocker",
+    "moa": "Beta and alpha-1 adrenergic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metreleptin",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Leptin analogue",
+    "moa": "Leptin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Octreotide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous, Intramuscular, Oral",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Somatostatin analogue",
+    "moa": "Somatostatin receptor agonist (SSTR2/5)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sandostatin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous, Intravenous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Somatostatin analogue",
+    "moa": "Somatostatin receptor agonist (SSTR2/5)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sandostatin LAR",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intramuscular",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Somatostatin analogue",
+    "moa": "Somatostatin receptor agonist (SSTR2/5)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Somatostatin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Somatostatin",
+    "moa": "Somatostatin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Omeprazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Gastrointestinal",
+    "therapy_subclass": "Proton pump inhibitor",
+    "moa": "H+/K+-ATPase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Esomeprazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Gastrointestinal",
+    "therapy_subclass": "Proton pump inhibitor",
+    "moa": "H+/K+-ATPase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pantoprazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Gastrointestinal",
+    "therapy_subclass": "Proton pump inhibitor",
+    "moa": "H+/K+-ATPase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lansoprazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Gastrointestinal",
+    "therapy_subclass": "Proton pump inhibitor",
+    "moa": "H+/K+-ATPase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Quinine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antimalarial",
+    "therapy_subclass": "Cinchona alkaloid",
+    "moa": "Inhibits haem detoxification in the parasite"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Primaquine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antimalarial",
+    "therapy_subclass": "8-aminoquinoline",
+    "moa": "Oxidative damage to parasite mitochondria"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tesofensine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Triple monoamine reuptake inhibitor",
+    "moa": "Serotonin, noradrenaline and dopamine reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Trodusquemine",
+   "fields": {
+    "modality": "Small molecule (aminosterol)",
+    "roa": "Intravenous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "PTP1B inhibitor",
+    "moa": "Protein tyrosine phosphatase 1B inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Velneperit",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "NPY Y5 receptor antagonist",
+    "moa": "Neuropeptide Y Y5 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Acarbose",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Alpha-glucosidase inhibitor",
+    "moa": "Intestinal alpha-glucosidase / alpha-amylase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Acetazolamide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Diuretic",
+    "therapy_subclass": "Carbonic anhydrase inhibitor",
+    "moa": "Carbonic anhydrase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Adenosine",
+   "fields": {
+    "modality": "Small molecule (nucleoside)",
+    "roa": "Intravenous",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Antiarrhythmic / diagnostic",
+    "moa": "Adenosine A1/A2A receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Regadenoson",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Cardiovascular diagnostic",
+    "therapy_subclass": "Pharmacological stress agent",
+    "moa": "Adenosine A2A receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Anastrozole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "Aromatase inhibitor",
+    "moa": "Aromatase (CYP19A1) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Anastrazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "Aromatase inhibitor",
+    "moa": "Aromatase (CYP19A1) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Letrozole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "Aromatase inhibitor",
+    "moa": "Aromatase (CYP19A1) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "APD356",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "5-HT2C receptor agonist",
+    "moa": "Selective serotonin 5-HT2C receptor agonist (lorcaserin)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Atomoxetine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS agent",
+    "therapy_subclass": "Noradrenaline reuptake inhibitor",
+    "moa": "Selective noradrenaline reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Betahistine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS agent",
+    "therapy_subclass": "Histamine analogue",
+    "moa": "Histamine H3 receptor antagonist / H1 agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Betahistine Dihydrochloride",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS agent",
+    "therapy_subclass": "Histamine analogue",
+    "moa": "Histamine H3 receptor antagonist / H1 agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bromocriptine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Dopamine agonist",
+    "therapy_subclass": "Ergot-derived dopamine agonist",
+    "moa": "Dopamine D2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bromocriptine-QR",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Dopamine agonist (quick-release)",
+    "moa": "Dopamine D2 receptor agonist (resets circadian metabolic tone)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cabergoline",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Dopamine agonist",
+    "therapy_subclass": "Ergot-derived dopamine agonist",
+    "moa": "Dopamine D2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cetrorelix",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "GnRH antagonist",
+    "moa": "Gonadotropin-releasing hormone receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Degarelix",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "GnRH antagonist",
+    "moa": "Gonadotropin-releasing hormone receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Leuprolide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intramuscular, Subcutaneous",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "GnRH agonist",
+    "moa": "Gonadotropin-releasing hormone receptor agonist (down-regulation)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Clonidine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Transdermal, Intravenous",
+    "drug_class": "Antihypertensive / sedative",
+    "therapy_subclass": "Central alpha-2 agonist",
+    "moa": "Alpha-2 adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Guanfacine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS agent",
+    "therapy_subclass": "Central alpha-2A agonist",
+    "moa": "Alpha-2A adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Colesevelam",
+   "fields": {
+    "modality": "Polymer",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Bile acid sequestrant",
+    "moa": "Binds bile acids in the gut"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cholestyramine",
+   "fields": {
+    "modality": "Polymer",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Bile acid sequestrant",
+    "moa": "Binds bile acids in the gut"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Diethylpropion",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Sympathomimetic amine",
+    "moa": "Noradrenaline-releasing agent (appetite suppression)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Eplerenone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Mineralocorticoid receptor antagonist",
+    "moa": "Mineralocorticoid receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Spironolactone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Mineralocorticoid receptor antagonist",
+    "moa": "Mineralocorticoid receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Finerenone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cardiorenal",
+    "therapy_subclass": "Non-steroidal MRA",
+    "moa": "Mineralocorticoid receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Estradiol",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral, Transdermal",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Oestrogen",
+    "moa": "Oestrogen receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Levonorgestrel",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral, Implant, Intrauterine",
+    "drug_class": "Hormonal contraceptive",
+    "therapy_subclass": "Progestin",
+    "moa": "Progesterone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Progesterone",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral, Vaginal, Intramuscular",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Progestogen",
+    "moa": "Progesterone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Megestrol",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Progestin (appetite stimulant)",
+    "moa": "Progesterone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Drospirenone",
+   "fields": {
+    "modality": "Small molecule (steroid)",
+    "roa": "Oral",
+    "drug_class": "Hormonal contraceptive",
+    "therapy_subclass": "Progestin",
+    "moa": "Progesterone receptor agonist; anti-mineralocorticoid"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Furosemide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Diuretic",
+    "therapy_subclass": "Loop diuretic",
+    "moa": "Na-K-2Cl cotransporter (NKCC2) inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Gabapentin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Analgesic / anticonvulsant",
+    "therapy_subclass": "Gabapentinoid",
+    "moa": "Alpha-2-delta calcium channel subunit ligand"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Neurontin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Analgesic / anticonvulsant",
+    "therapy_subclass": "Gabapentinoid",
+    "moa": "Alpha-2-delta calcium channel subunit ligand"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pregabalin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Analgesic / anticonvulsant",
+    "therapy_subclass": "Gabapentinoid",
+    "moa": "Alpha-2-delta calcium channel subunit ligand"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Galantamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS agent",
+    "therapy_subclass": "Cholinesterase inhibitor",
+    "moa": "Acetylcholinesterase inhibitor; nicotinic receptor modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Hydroxychloroquine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Immunology / antimalarial",
+    "therapy_subclass": "Antimalarial",
+    "moa": "Lysosomal pH elevation; TLR7/9 inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lamotrigine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticonvulsant",
+    "therapy_subclass": "Phenyltriazine",
+    "moa": "Voltage-gated sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Zonisamide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticonvulsant",
+    "therapy_subclass": "Sulfonamide anticonvulsant",
+    "moa": "Sodium and T-type calcium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Zonegran",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anticonvulsant",
+    "therapy_subclass": "Sulfonamide anticonvulsant",
+    "moa": "Sodium and T-type calcium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Valproic Acid",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Anticonvulsant",
+    "therapy_subclass": "Fatty acid derivative",
+    "moa": "Increases GABA; sodium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Levothyroxine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Thyroid hormone",
+    "moa": "Thyroid hormone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Melatonin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Sleep / circadian agent",
+    "therapy_subclass": "Melatonin",
+    "moa": "MT1/MT2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metoclopramide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antiemetic / prokinetic",
+    "therapy_subclass": "Dopamine antagonist",
+    "moa": "Dopamine D2 receptor antagonist; 5-HT4 agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ondansetron",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antiemetic",
+    "therapy_subclass": "5-HT3 antagonist",
+    "moa": "Serotonin 5-HT3 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Zofran",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antiemetic",
+    "therapy_subclass": "5-HT3 antagonist",
+    "moa": "Serotonin 5-HT3 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Aprepitant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antiemetic",
+    "therapy_subclass": "NK1 antagonist",
+    "moa": "Neurokinin-1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tradipitant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antiemetic / GI",
+    "therapy_subclass": "NK1 antagonist",
+    "moa": "Neurokinin-1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Scopolamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Transdermal",
+    "drug_class": "Antiemetic",
+    "therapy_subclass": "Antimuscarinic",
+    "moa": "Muscarinic acetylcholine receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Atropine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Anticholinergic",
+    "therapy_subclass": "Antimuscarinic",
+    "moa": "Muscarinic acetylcholine receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nicotine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Transdermal, Oral, Inhaled",
+    "drug_class": "Smoking cessation",
+    "therapy_subclass": "Nicotinic agonist",
+    "moa": "Nicotinic acetylcholine receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Varenicline",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Smoking cessation",
+    "therapy_subclass": "Nicotinic partial agonist",
+    "moa": "Alpha4beta2 nicotinic receptor partial agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Repaglinide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Meglitinide",
+    "moa": "K-ATP channel blocker (insulin secretagogue)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Glipizide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Sulfonylurea",
+    "moa": "K-ATP channel blocker (insulin secretagogue)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rosiglitazone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "Thiazolidinedione",
+    "moa": "PPAR-gamma agonist (insulin sensitiser)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Roflumilast",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Respiratory / anti-inflammatory",
+    "therapy_subclass": "PDE4 inhibitor",
+    "moa": "Phosphodiesterase-4 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Fluoxetine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidepressant",
+    "therapy_subclass": "SSRI",
+    "moa": "Selective serotonin reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Escitalopram",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidepressant",
+    "therapy_subclass": "SSRI",
+    "moa": "Selective serotonin reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Venlafaxine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidepressant",
+    "therapy_subclass": "SNRI",
+    "moa": "Serotonin-noradrenaline reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Quetiapine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antipsychotic",
+    "therapy_subclass": "Atypical antipsychotic",
+    "moa": "Dopamine D2 and 5-HT2A receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Aripiprazole",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intramuscular",
+    "drug_class": "Antipsychotic",
+    "therapy_subclass": "Atypical antipsychotic",
+    "moa": "Dopamine D2 partial agonist; 5-HT2A antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Modafinil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS stimulant (wakefulness)",
+    "therapy_subclass": "Eugeroic",
+    "moa": "Dopamine reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nuvigil",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "CNS stimulant (wakefulness)",
+    "therapy_subclass": "Eugeroic (armodafinil)",
+    "moa": "Dopamine reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Zolpidem",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Hypnotic",
+    "therapy_subclass": "Non-benzodiazepine hypnotic",
+    "moa": "GABA-A receptor (alpha-1) positive modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sumatriptan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Subcutaneous, Intranasal",
+    "drug_class": "Antimigraine",
+    "therapy_subclass": "Triptan",
+    "moa": "Serotonin 5-HT1B/1D receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Montelukast",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Respiratory",
+    "therapy_subclass": "Leukotriene receptor antagonist",
+    "moa": "CysLT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Niacin",
+   "fields": {
+    "modality": "Small molecule (vitamin B3)",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Nicotinic acid",
+    "moa": "GPR109A agonist; reduces lipolysis"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nicotinic Acid",
+   "fields": {
+    "modality": "Small molecule (vitamin B3)",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Nicotinic acid",
+    "moa": "GPR109A agonist; reduces lipolysis"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Acipimox",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Nicotinic acid derivative",
+    "moa": "GPR109A agonist; reduces lipolysis"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lovaza",
+   "fields": {
+    "modality": "Omega-3 fatty acids",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Omega-3 ethyl esters",
+    "moa": "Lowers hepatic triglyceride synthesis"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nitroglycerin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Sublingual, Intravenous, Transdermal",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Nitrate vasodilator",
+    "moa": "Nitric oxide donor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sodium Nitroprusside",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Vasodilator",
+    "moa": "Nitric oxide donor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nesiritide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Natriuretic peptide",
+    "moa": "Natriuretic peptide receptor A agonist (BNP)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Recombinant Human BNP",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Natriuretic peptide",
+    "moa": "Natriuretic peptide receptor A agonist (BNP)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Norepinephrine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Vasopressor",
+    "therapy_subclass": "Catecholamine",
+    "moa": "Alpha-1 and beta-1 adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Epinephrine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Intramuscular",
+    "drug_class": "Vasopressor",
+    "therapy_subclass": "Catecholamine",
+    "moa": "Alpha and beta adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Adrenaline",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Intramuscular",
+    "drug_class": "Vasopressor",
+    "therapy_subclass": "Catecholamine",
+    "moa": "Alpha and beta adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Isoproterenol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "Catecholamine",
+    "moa": "Non-selective beta adrenergic receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Phentolamine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Injection",
+    "drug_class": "Alpha-blocker",
+    "therapy_subclass": "Non-selective alpha-blocker",
+    "moa": "Alpha-1/alpha-2 adrenergic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pseudoephedrine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Sympathomimetic",
+    "therapy_subclass": "Decongestant",
+    "moa": "Indirect adrenergic agonist (noradrenaline release)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oseltamivir",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antiviral",
+    "therapy_subclass": "Neuraminidase inhibitor",
+    "moa": "Influenza neuraminidase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Acyclovir",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Antiviral",
+    "therapy_subclass": "Nucleoside analogue",
+    "moa": "Herpesvirus DNA polymerase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pegvisomant",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "GH receptor antagonist",
+    "moa": "Growth hormone receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tesamorelin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "GHRH analogue",
+    "moa": "Growth hormone-releasing hormone receptor agonist (reduces visceral fat)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pentoxifylline",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Vascular agent",
+    "therapy_subclass": "Methylxanthine",
+    "moa": "Phosphodiesterase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rapamycin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Immunosuppressant",
+    "therapy_subclass": "mTOR inhibitor",
+    "moa": "mTORC1 inhibitor (sirolimus)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rasburicase",
+   "fields": {
+    "modality": "Protein / biologic (enzyme)",
+    "roa": "Intravenous",
+    "drug_class": "Urate-lowering",
+    "therapy_subclass": "Recombinant urate oxidase",
+    "moa": "Converts uric acid to allantoin"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dutasteride",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urological agent",
+    "therapy_subclass": "5-alpha-reductase inhibitor",
+    "moa": "Type 1 and 2 5-alpha-reductase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Disulfiram",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Addiction therapy",
+    "therapy_subclass": "Aldehyde dehydrogenase inhibitor",
+    "moa": "Aldehyde dehydrogenase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dinoprostone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Vaginal",
+    "drug_class": "Prostaglandin",
+    "therapy_subclass": "Prostaglandin E2",
+    "moa": "Prostaglandin E2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dapsone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Topical",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Sulfone",
+    "moa": "Dihydropteroate synthase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dasatinib",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Oncology / senolytic",
+    "therapy_subclass": "Tyrosine kinase inhibitor",
+    "moa": "BCR-ABL and SRC-family kinase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ethambutol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antibiotic (antituberculosis)",
+    "therapy_subclass": "Antimycobacterial",
+    "moa": "Arabinosyl transferase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Entacapone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antiparkinson",
+    "therapy_subclass": "COMT inhibitor",
+    "moa": "Catechol-O-methyltransferase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Mesna",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous, Oral",
+    "drug_class": "Uroprotectant",
+    "therapy_subclass": "Thiol",
+    "moa": "Detoxifies acrolein in the bladder"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Indocyanine Green",
+   "fields": {
+    "modality": "Small molecule (dye)",
+    "roa": "Intravenous",
+    "drug_class": "Diagnostic agent",
+    "therapy_subclass": "Fluorescent dye",
+    "moa": "Near-infrared fluorescence imaging"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Clomiphene",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Hormonal therapy",
+    "therapy_subclass": "SERM",
+    "moa": "Selective oestrogen receptor modulator (ovulation induction)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bremelanotide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Melanocortin pathway",
+    "therapy_subclass": "Melanocortin receptor agonist",
+    "moa": "MC4R (and MC1R) agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Setmelanotide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Melanocortin pathway",
+    "therapy_subclass": "MC4R agonist",
+    "moa": "Melanocortin-4 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Rimonabant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor inverse agonist (withdrawn 2008)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Orlistat",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "Lipase inhibitor",
+    "moa": "Gastric and pancreatic lipase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cannabidiol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cannabinoid",
+    "therapy_subclass": "Phytocannabinoid",
+    "moa": "Multi-target (5-HT1A agonist, CB1 negative allosteric modulator, TRPV1)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sacubitril + Valsartan",
+   "fields": {
+    "modality": "Fixed-dose combination",
+    "roa": "Oral",
+    "drug_class": "Cardiovascular",
+    "therapy_subclass": "ARNI",
+    "moa": "Neprilysin inhibitor + AT1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Chlorprothixene",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral, Intramuscular",
+    "drug_class": "Antipsychotic",
+    "therapy_subclass": "Typical antipsychotic (thioxanthene)",
+    "moa": "Dopamine D2 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Magnesium Sulfate",
+   "fields": {
+    "modality": "Inorganic salt",
+    "roa": "Intravenous",
+    "drug_class": "Electrolyte / anaesthesia adjunct",
+    "therapy_subclass": "Magnesium",
+    "moa": "NMDA receptor antagonist; calcium antagonism"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sodium Bicarbonate",
+   "fields": {
+    "modality": "Inorganic salt",
+    "roa": "Oral, Intravenous",
+    "drug_class": "Alkalinising agent",
+    "therapy_subclass": "Buffer",
+    "moa": "Neutralises acid"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dextrose",
+   "fields": {
+    "modality": "Carbohydrate",
+    "roa": "Intravenous",
+    "drug_class": "Fluid / nutrition",
+    "therapy_subclass": "Glucose solution",
+    "moa": "Energy substrate"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Intralipid",
+   "fields": {
+    "modality": "Lipid emulsion",
+    "roa": "Intravenous",
+    "drug_class": "Parenteral nutrition",
+    "therapy_subclass": "Lipid emulsion",
+    "moa": "Energy and essential fatty acid source"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Iron Isomaltoside",
+   "fields": {
+    "modality": "Iron complex",
+    "roa": "Intravenous",
+    "drug_class": "Iron replacement",
+    "therapy_subclass": "Intravenous iron",
+    "moa": "Iron repletion"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Talinolol",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cardiovascular / probe drug",
+    "therapy_subclass": "Beta-1 selective beta-blocker",
+    "moa": "Beta-1 adrenergic receptor antagonist; P-glycoprotein probe substrate"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Probenecid",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urate-lowering",
+    "therapy_subclass": "Uricosuric",
+    "moa": "OAT1/URAT1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Trimethaphan",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "Ganglionic blocker",
+    "moa": "Nicotinic ganglionic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Thiethylperazine",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antiemetic",
+    "therapy_subclass": "Phenothiazine",
+    "moa": "Dopamine D2 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Trospium Chloride",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Urological agent",
+    "therapy_subclass": "Antimuscarinic",
+    "moa": "Muscarinic receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Triflusal",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antiplatelet",
+    "therapy_subclass": "Salicylate derivative",
+    "moa": "COX-1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Volixibat",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "IBAT inhibitor",
+    "moa": "Ileal bile acid transporter inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Maralixibat",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "IBAT inhibitor",
+    "moa": "Ileal bile acid transporter inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sodium Phenylbutyrate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Ammonia scavenger / chemical chaperone",
+    "moa": "Nitrogen scavenger; ER-stress chaperone"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Salsalate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anti-inflammatory",
+    "therapy_subclass": "Salicylate",
+    "moa": "NF-kB pathway inhibition"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Raclopride",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous (PET tracer)",
+    "drug_class": "Research tracer",
+    "therapy_subclass": "Dopamine antagonist",
+    "moa": "Dopamine D2/D3 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Fenretinide",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Retinoid",
+    "therapy_subclass": "Synthetic retinoid",
+    "moa": "Retinol-binding protein 4 lowering; retinoic acid receptor effects"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Xeloda",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Oncology",
+    "therapy_subclass": "Antimetabolite",
+    "moa": "Fluoropyrimidine prodrug (thymidylate synthase inhibition)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Elonva",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Fertility",
+    "therapy_subclass": "Long-acting FSH (corifollitropin alfa)",
+    "moa": "FSH receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Flexeril",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Muscle relaxant",
+    "therapy_subclass": "Centrally acting muscle relaxant",
+    "moa": "Brainstem 5-HT2 antagonism (cyclobenzaprine)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nabilone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cannabinoid",
+    "therapy_subclass": "Synthetic cannabinoid",
+    "moa": "CB1/CB2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lomaira",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Sympathomimetic amine",
+    "moa": "Noradrenaline-releasing agent (phentermine 8 mg)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ibipinabant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Taspoglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cotadutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "MEDI0382",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist (cotadutide)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pemvidutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist (1:1)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Efinopegdutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "JNJ-64565111",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Dapiglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/GLP-2 dual agonist",
+    "moa": "GLP-1 and GLP-2 receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Utreglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "Long-acting GLP-1 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Benaglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (recombinant human GLP-1)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Beinaglutide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (recombinant human GLP-1)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bydureon BCise",
+   "fields": {
+    "modality": "Peptide (extended-release)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (exenatide, once weekly)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Exenatide Microspheres",
+   "fields": {
+    "modality": "Peptide (extended-release)",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (exenatide)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Exenatide Implant",
+   "fields": {
+    "modality": "Peptide (implant)",
+    "roa": "Subcutaneous implant",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (exenatide, continuous delivery)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Semaglutide Implant",
+   "fields": {
+    "modality": "Peptide (implant)",
+    "roa": "Subcutaneous implant",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist",
+    "moa": "GLP-1 receptor agonist (semaglutide, continuous delivery)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Otenabant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor antagonist (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "CP-945598",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor antagonist (otenabant)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Taranabant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor inverse agonist",
+    "moa": "Cannabinoid CB1 receptor inverse agonist (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "SR147778",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor antagonist (surinabant)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "AVE1625",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor antagonist (drinabant)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BMS-646256",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antagonist",
+    "moa": "Cannabinoid CB1 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Monlunabant",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor inverse agonist (peripherally restricted)",
+    "moa": "Cannabinoid CB1 receptor inverse agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Nimacimab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor antibody",
+    "moa": "Peripherally restricted CB1 receptor inhibitory antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "JD5037",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "CB1 receptor inverse agonist (peripherally restricted)",
+    "moa": "Cannabinoid CB1 receptor inverse agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tetrahydrocannabivarin",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Cannabinoid",
+    "therapy_subclass": "Phytocannabinoid",
+    "moa": "CB1 receptor neutral antagonist / CB2 partial agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ATL-962",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "Lipase inhibitor",
+    "moa": "Pancreatic lipase inhibitor (cetilistat)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "GSK1521498",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting agent",
+    "therapy_subclass": "Opioid receptor inverse agonist",
+    "moa": "Mu-opioid receptor inverse agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "MK0557",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "NPY Y5 receptor antagonist",
+    "moa": "Neuropeptide Y Y5 receptor antagonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "S-2367",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "NPY Y5 receptor antagonist",
+    "moa": "Neuropeptide Y Y5 receptor antagonist (velneperit)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "LIK066",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT1/2 inhibitor",
+    "moa": "Dual sodium-glucose cotransporter 1 and 2 inhibitor (licogliflozin)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bimagrumab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous",
+    "drug_class": "Muscle-preserving (activin pathway)",
+    "therapy_subclass": "Activin type II receptor antibody",
+    "moa": "Activin type II receptor (ActRIIA/B) blocking antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Garetosmab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous",
+    "drug_class": "Muscle-preserving (activin pathway)",
+    "therapy_subclass": "Activin A antibody",
+    "moa": "Activin A neutralising antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Trevogrumab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous, Subcutaneous",
+    "drug_class": "Muscle-preserving (activin pathway)",
+    "therapy_subclass": "Myostatin antibody",
+    "moa": "Myostatin (GDF-8) neutralising antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Apitegromab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Intravenous",
+    "drug_class": "Muscle-preserving (activin pathway)",
+    "therapy_subclass": "Latent myostatin antibody",
+    "moa": "Inhibits activation of pro/latent myostatin"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Taldefgrobep",
+   "fields": {
+    "modality": "Protein / biologic (fusion protein)",
+    "roa": "Subcutaneous",
+    "drug_class": "Muscle-preserving (activin pathway)",
+    "therapy_subclass": "Myostatin / activin inhibitor",
+    "moa": "Anti-myostatin adnectin (myostatin and activin signalling inhibitor)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "RO7204239",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous",
+    "drug_class": "Muscle-preserving (activin pathway)",
+    "therapy_subclass": "Latent myostatin antibody",
+    "moa": "Anti-latent myostatin antibody (GYM329)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Enobosarm",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Muscle-preserving agent",
+    "therapy_subclass": "SARM",
+    "moa": "Selective androgen receptor modulator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ponsegromab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous",
+    "drug_class": "Appetite / cachexia agent",
+    "therapy_subclass": "GDF-15 antibody",
+    "moa": "Growth differentiation factor 15 neutralising antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Mibavademab",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Leptin receptor agonist antibody",
+    "moa": "Leptin receptor activating antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BMS-986036",
+   "fields": {
+    "modality": "Protein / biologic (PEGylated FGF21)",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "FGF21 analogue",
+    "moa": "FGF21 receptor (FGFR1c/beta-Klotho) agonist (pegbelfermin)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BFKB8488A",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "FGFR1/KLB agonist antibody",
+    "moa": "Bispecific FGFR1c/beta-Klotho agonist antibody"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Azelaprag",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Muscle-preserving agent",
+    "therapy_subclass": "APJ receptor agonist",
+    "moa": "Apelin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bivamelagon",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Melanocortin pathway",
+    "therapy_subclass": "MC4R agonist",
+    "moa": "Oral melanocortin-4 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "LB54640",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Melanocortin pathway",
+    "therapy_subclass": "MC4R agonist",
+    "moa": "Oral melanocortin-4 receptor agonist (bivamelagon)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oxyntomodulin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous, Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "GLP-1/glucagon dual agonist (native)",
+    "moa": "GLP-1 and glucagon receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Peptide YY",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "PYY analogue",
+    "moa": "Neuropeptide Y2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "PYY3-36",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intranasal, Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "PYY analogue",
+    "moa": "Neuropeptide Y2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Peptide YY3-36",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Subcutaneous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "PYY analogue",
+    "moa": "Neuropeptide Y2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Pancreatic Polypeptide",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Pancreatic polypeptide",
+    "moa": "Neuropeptide Y4 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Ghrelin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Ghrelin",
+    "moa": "Growth hormone secretagogue receptor (GHSR1a) agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Human Ghrelin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Ghrelin",
+    "moa": "Growth hormone secretagogue receptor (GHSR1a) agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Desacyl Ghrelin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Unacylated ghrelin",
+    "moa": "Unacylated ghrelin (does not activate GHSR1a)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Exendin-939",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Research tool",
+    "therapy_subclass": "GLP-1 receptor antagonist",
+    "moa": "GLP-1 receptor antagonist (exendin 9-39)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Secretin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Secretin",
+    "moa": "Secretin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Secretin Human",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Secretin",
+    "moa": "Secretin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "GnRH",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "GnRH",
+    "moa": "Gonadotropin-releasing hormone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Gonadotropin-releasing Hormone",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intravenous, Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "GnRH",
+    "moa": "Gonadotropin-releasing hormone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Growth Hormone",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Somatropin",
+    "moa": "Growth hormone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Recombinant Human Growth Hormone",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Somatropin",
+    "moa": "Growth hormone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "LUM-201",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Growth hormone secretagogue",
+    "moa": "Ghrelin receptor agonist (ibutamoren)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Leptin Human",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Leptin",
+    "moa": "Leptin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "CJC 1295",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "GHRH analogue",
+    "moa": "Growth hormone-releasing hormone receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Human Chorionic Gonadotropin",
+   "fields": {
+    "modality": "Protein / biologic",
+    "roa": "Intramuscular, Subcutaneous",
+    "drug_class": "Hormone",
+    "therapy_subclass": "Gonadotropin",
+    "moa": "LH/hCG receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Botox",
+   "fields": {
+    "modality": "Protein / biologic (neurotoxin)",
+    "roa": "Injection",
+    "drug_class": "Neurotoxin",
+    "therapy_subclass": "Botulinum toxin type A",
+    "moa": "Inhibits acetylcholine release (SNAP-25 cleavage)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Botulinum Toxin",
+   "fields": {
+    "modality": "Protein / biologic (neurotoxin)",
+    "roa": "Injection",
+    "drug_class": "Neurotoxin",
+    "therapy_subclass": "Botulinum toxin",
+    "moa": "Inhibits acetylcholine release (SNAP-25 cleavage)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Botulinum Toxin Type A",
+   "fields": {
+    "modality": "Protein / biologic (neurotoxin)",
+    "roa": "Injection (incl. intragastric)",
+    "drug_class": "Neurotoxin",
+    "therapy_subclass": "Botulinum toxin type A",
+    "moa": "Inhibits acetylcholine release (SNAP-25 cleavage)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Denatonium Benzoate",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Bitter taste receptor agonist",
+    "moa": "TAS2R agonist (stimulates gut hormone release)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ARD-101",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Gut-hormone pathway",
+    "therapy_subclass": "Bitter taste receptor agonist",
+    "moa": "TAS2R agonist (denatonium acetate; gut-restricted)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cannabis",
+   "fields": {
+    "modality": "Plant product",
+    "roa": "Inhaled, Oral",
+    "drug_class": "Cannabinoid",
+    "therapy_subclass": "Cannabis",
+    "moa": "CB1/CB2 receptor agonist (THC)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Liraglutide + Metformin",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Subcutaneous, Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist + biguanide",
+    "moa": "GLP-1 receptor agonist + reduced hepatic glucose production"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Liraglutide + Orlistat",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Subcutaneous, Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1 receptor agonist + lipase inhibitor",
+    "moa": "GLP-1 receptor agonist + gastric/pancreatic lipase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "NB32",
+   "fields": {
+    "modality": "Fixed-dose combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Opioid antagonist + NDRI combination",
+    "moa": "Naltrexone SR + bupropion SR (Contrave)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metformin + Sibutramine",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "SNRI + biguanide",
+    "moa": "Serotonin-noradrenaline reuptake inhibitor + biguanide"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sibutramine + Topiramate",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "SNRI + anticonvulsant",
+    "moa": "Serotonin-noradrenaline reuptake inhibitor + GABA-A enhancement / glutamate antagonism"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Orlistat + Sibutramine",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Anti-obesity combination",
+    "therapy_subclass": "Lipase inhibitor + SNRI",
+    "moa": "Lipase inhibitor + serotonin-noradrenaline reuptake inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metreleptin + Pramlintide",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Leptin analogue + amylin analogue",
+    "moa": "Leptin receptor agonist + amylin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Leptin + Pramlintide",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Leptin analogue + amylin analogue",
+    "moa": "Leptin receptor agonist + amylin receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Caffeine + Ephedrine",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Sympathomimetic + methylxanthine",
+    "moa": "Adrenergic stimulation + adenosine receptor antagonism (thermogenesis)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Lorcaserin + phentermine-HCl",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "5-HT2C agonist + sympathomimetic amine",
+    "moa": "Serotonin 5-HT2C agonist + noradrenaline-releasing agent"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bupropion + Zonisamide",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "NDRI + anticonvulsant",
+    "moa": "Dopamine/noradrenaline reuptake inhibitor + sodium/T-type calcium channel blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Metoprolol + Tesofensine",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Triple reuptake inhibitor + beta-blocker",
+    "moa": "Monoamine reuptake inhibitor with beta-1 blockade to offset heart-rate rise (Tesomet)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tesomet",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "Triple reuptake inhibitor + beta-blocker",
+    "moa": "Tesofensine + metoprolol"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Piperacillin + Tazobactam",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Intravenous",
+    "drug_class": "Antibiotic",
+    "therapy_subclass": "Penicillin + beta-lactamase inhibitor",
+    "moa": "Penicillin-binding protein inhibitor + beta-lactamase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Fenofibrate + Metformin",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering / antidiabetic",
+    "therapy_subclass": "Fibrate + biguanide",
+    "moa": "PPAR-alpha agonist + biguanide"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Atorvastatin + Fenofibrate",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Lipid-lowering",
+    "therapy_subclass": "Statin + fibrate",
+    "moa": "HMG-CoA reductase inhibitor + PPAR-alpha agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Candesartan + Hydrochlorothiazide",
+   "fields": {
+    "modality": "Fixed-dose combination",
+    "roa": "Oral",
+    "drug_class": "Antihypertensive",
+    "therapy_subclass": "ARB + thiazide diuretic",
+    "moa": "AT1 receptor antagonist + Na-Cl cotransporter inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Danuglipron + PF-06865571",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Oral",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "Oral GLP-1 RA + DGAT2 inhibitor",
+    "moa": "GLP-1 receptor agonist + diacylglycerol acyltransferase 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "PF-06865571",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "DGAT2 inhibitor",
+    "moa": "Diacylglycerol O-acyltransferase 2 inhibitor (ervogastat)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "PF-04620110",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "DGAT1 inhibitor",
+    "moa": "Diacylglycerol O-acyltransferase 1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "AZD7687",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "DGAT1 inhibitor",
+    "moa": "Diacylglycerol O-acyltransferase 1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "AZD4017",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "11-beta-HSD1 inhibitor",
+    "moa": "11-beta-hydroxysteroid dehydrogenase type 1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "AZD8329",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "11-beta-HSD1 inhibitor",
+    "moa": "11-beta-hydroxysteroid dehydrogenase type 1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "INCB13739",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "11-beta-HSD1 inhibitor",
+    "moa": "11-beta-hydroxysteroid dehydrogenase type 1 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BMS-963272",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "MGAT2 inhibitor",
+    "moa": "Monoacylglycerol acyltransferase 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BMS-986172",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Peripherally acting anti-obesity agent",
+    "therapy_subclass": "MGAT2 inhibitor",
+    "moa": "Monoacylglycerol acyltransferase 2 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BMS-830216",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Centrally acting anti-obesity agent",
+    "therapy_subclass": "MCH1 receptor antagonist",
+    "moa": "Melanin-concentrating hormone receptor 1 antagonist (prodrug)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "MK0493",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Melanocortin pathway",
+    "therapy_subclass": "MC4R agonist",
+    "moa": "Melanocortin-4 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "NT-0796",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anti-inflammatory",
+    "therapy_subclass": "NLRP3 inhibitor",
+    "moa": "NLRP3 inflammasome inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "BGE-102",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anti-inflammatory",
+    "therapy_subclass": "NLRP3 inhibitor",
+    "moa": "Brain-penetrant NLRP3 inflammasome inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oleoyl-estrone",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Oestrone ester",
+    "moa": "Oestrone fatty-acid ester (proposed lipolytic signal)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bardoxolone Methyl",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Anti-inflammatory",
+    "therapy_subclass": "Nrf2 activator",
+    "moa": "Keap1-Nrf2 pathway activator"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ADI-PEG20",
+   "fields": {
+    "modality": "Protein / biologic (enzyme)",
+    "roa": "Intramuscular",
+    "drug_class": "Metabolic / oncology",
+    "therapy_subclass": "Arginine deiminase",
+    "moa": "Depletes circulating arginine"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Amiloride",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Diuretic",
+    "therapy_subclass": "Potassium-sparing diuretic",
+    "moa": "Epithelial sodium channel (ENaC) blocker"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ATR-258",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "Beta-2 adrenergic modulator",
+    "moa": "Biased beta-2 adrenergic receptor agonist (muscle glucose uptake)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ISIS-FGFR4RX",
+   "fields": {
+    "modality": "Oligonucleotide (antisense)",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "FGFR4 antisense",
+    "moa": "Antisense oligonucleotide reducing FGFR4"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "GSK189075",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Antidiabetic",
+    "therapy_subclass": "SGLT2 inhibitor",
+    "moa": "Sodium-glucose cotransporter 2 inhibitor (remogliflozin etabonate)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "MBX-8025",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "PPAR-delta agonist",
+    "moa": "PPAR-delta agonist (seladelpar)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "GW501516",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Oral",
+    "drug_class": "Metabolic agent",
+    "therapy_subclass": "PPAR-delta agonist",
+    "moa": "PPAR-delta agonist (development stopped)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "KBP-336",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Amylin-based therapy",
+    "therapy_subclass": "Dual amylin and calcitonin receptor agonist",
+    "moa": "Dual amylin and calcitonin receptor agonist (DACRA)"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "NGM313",
+   "fields": {
+    "modality": "Monoclonal antibody",
+    "roa": "Subcutaneous",
+    "drug_class": "Metabolic / liver",
+    "therapy_subclass": "FGFR1c/beta-Klotho agonist antibody",
+    "moa": "Activating antibody to the beta-Klotho/FGFR1c receptor complex"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "SAR425899",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1/glucagon dual agonist",
+    "moa": "GLP-1 and glucagon receptor dual agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "SAR441255",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Subcutaneous",
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GIP/GLP-1/glucagon triple agonist",
+    "moa": "GLP-1, GIP and glucagon receptor triple agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "L-NMMA",
+   "fields": {
+    "modality": "Small molecule",
+    "roa": "Intravenous",
+    "drug_class": "Research tool",
+    "therapy_subclass": "NOS inhibitor",
+    "moa": "Nitric oxide synthase inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Bradykinin",
+   "fields": {
+    "modality": "Peptide",
+    "roa": "Intra-arterial",
+    "drug_class": "Research tool",
+    "therapy_subclass": "Kinin",
+    "moa": "Bradykinin B2 receptor agonist"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Exendin 9-39 + Sitagliptin",
+   "fields": {
+    "modality": "Combination",
+    "roa": "Intravenous, Oral",
+    "drug_class": "Research tool",
+    "therapy_subclass": "GLP-1 antagonist + DPP-4 inhibitor",
+    "moa": "GLP-1 receptor antagonist + dipeptidyl peptidase-4 inhibitor"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  }
+ ]
+}
