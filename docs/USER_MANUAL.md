@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.7 |
+| **Manual version** | 1.8 |
 | **Last updated** | 23 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -132,7 +132,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | **Efficacy & safety results** | Key trial results — trial, population and duration, dose, endpoint, result, comparator and source. Tabs: Efficacy, Safety |
 | Trials | Every linked ClinicalTrials.gov trial |
 | Conference abstracts / company reports | Abstracts (e.g. ADA 2026) and company pipeline reports that name the drug |
-| Kind | Mark a product as drug, supplement or not a drug (members and above) |
+| Kind | Mark an entry as a drug, a supplement, not a drug, or **not an obesity drug** (a real medicine with no effect on weight — anaesthetics, antibiotics, blood-pressure drugs, contraceptives in drug-interaction studies …). Only drugs are listed (members and above) |
 | Merge | Merge a duplicate spelling into this drug (members and above) |
 
 ### 7.3 Where the values come from
@@ -314,6 +314,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 27 Oct 2026 | 1.8 | New kind **Not an obesity drug**: 270 medicines with no effect on obesity (anaesthetics, painkillers, antibiotics, anticoagulants, blood-pressure and cholesterol drugs, contraceptives and probe drugs from drug-interaction studies, vaccines, IV fluids …) taken out of the drug list. They stay in the database with their trials | 7 |
 | 27 Oct 2026 | 1.7 | 38 natural hormones (glucagon, ghrelin, PYY, GIP, oxytocin, insulin, growth hormone, testosterone, oestrogen, thyroid hormone …) taken out of the drug list as "not a drug"; engineered analogues (metreleptin, setmelanotide, insulin glargine …) stay. Each can be put back with the Kind selector on its page | 7 |
 | 27 Oct 2026 | 1.6 | 64 duplicate drug pages merged into 56 (code name vs INN, brand vs generic, misspellings — e.g. MET097 and PF-08653944 into Berobenatide, HRS9531 into Ribupatide, Tirzapatide into Tirzepatide). Merges now also carry the development & regulatory fields and rows added on the page | 7 |
 | 26 Oct 2026 | 1.5 | Drug basics research file: modality, route, therapy class, subclass and mechanism filled for 479 drugs that had gaps (and wrong automatic values corrected, e.g. acarbose, metoprolol, pioglitazone) | 15 |

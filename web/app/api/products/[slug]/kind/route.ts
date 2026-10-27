@@ -4,9 +4,9 @@ import { updateProductKind } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
-const KINDS = ["drug", "supplement", "not_drug"] as const;
+const KINDS = ["drug", "supplement", "not_drug", "other_drug"] as const;
 
-/** Keep this entry in the drug list ("drug") or leave it out ("supplement" / "not_drug"). */
+/** Keep this entry in the drug list ("drug") or leave it out ("supplement" / "not_drug" / "other_drug"). */
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   if (!mayEdit(await activeUser(req))) {
     return NextResponse.json({ error: "Guest access is view-only." }, { status: 403 });
@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: "invalid JSON" }, { status: 400 });
   }
   if (!KINDS.includes(kind as (typeof KINDS)[number])) {
-    return NextResponse.json({ error: "kind must be drug, supplement or not_drug" }, { status: 400 });
+    return NextResponse.json({ error: "kind must be drug, supplement, not_drug or other_drug" }, { status: 400 });
   }
   try {
     const p = await updateProductKind(decodeURIComponent(slug), kind as (typeof KINDS)[number]);

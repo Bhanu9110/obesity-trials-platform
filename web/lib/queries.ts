@@ -370,7 +370,7 @@ export async function updateProductInfo(slug: string, info: ProductInfo): Promis
 }
 
 /** Keep a product in the drug list, or leave it out as a supplement / not a drug (a choice the automatic clean-up never changes). */
-export async function updateProductKind(slug: string, kind: "drug" | "supplement" | "not_drug"): Promise<Product | null> {
+export async function updateProductKind(slug: string, kind: "drug" | "supplement" | "not_drug" | "other_drug"): Promise<Product | null> {
   const rows = await query<{ slug: string }>(
     `UPDATE products SET kind = $2, kind_source = 'manual', kind_note = $3 WHERE slug = $1 RETURNING slug`,
     [slug, kind === "drug" ? null : kind, kind === "drug" ? null : "set on the drug page"],
@@ -1184,7 +1184,7 @@ export interface AutofillOverview {
   sources: Record<string, { ok: boolean; detail: string; checkedAt: string; lastOkAt: string | null; failingSince: string | null; skipped?: boolean }>;
   drugs: number;
   coverage: { field: string; manual: number; auto: number; sources: Record<string, number> }[];
-  hidden: { not_drug: number; supplement: number; manual: number };
+  hidden: { not_drug: number; supplement: number; other_drug: number; manual: number };
   review: { slug: string; name: string; kind: string; note: string | null }[]; // hidden by a name rule: worth a look
 }
 
@@ -1226,9 +1226,10 @@ export async function autofillOverview(): Promise<AutofillOverview> {
       [fields],
     ),
     query<{ n: number }>(`SELECT count(*)::int AS n FROM products p WHERE ${listed}`),
-    query<{ not_drug: number; supplement: number; manual: number }>(
+    query<{ not_drug: number; supplement: number; other_drug: number; manual: number }>(
       `SELECT count(*) FILTER (WHERE kind = 'not_drug')::int AS not_drug,
               count(*) FILTER (WHERE kind = 'supplement')::int AS supplement,
+              count(*) FILTER (WHERE kind = 'other_drug')::int AS other_drug,
               count(*) FILTER (WHERE kind_source = 'manual')::int AS manual
          FROM products p
         WHERE EXISTS (SELECT 1 FROM trial_products tp WHERE tp.product_id = p.id) OR kind_source = 'manual'`,
@@ -1252,7 +1253,7 @@ export async function autofillOverview(): Promise<AutofillOverview> {
       const c = cov.find((x) => x.field === f);
       return { field: f, manual: c?.manual ?? 0, auto: c?.auto ?? 0, sources: bySource.get(f) ?? {} };
     }),
-    hidden: hidden[0] ?? { not_drug: 0, supplement: 0, manual: 0 },
+    hidden: hidden[0] ?? { not_drug: 0, supplement: 0, other_drug: 0, manual: 0 },
     review,
   };
 }

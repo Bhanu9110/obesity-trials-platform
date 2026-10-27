@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Kind = "drug" | "supplement" | "not_drug";
+type Kind = "drug" | "supplement" | "not_drug" | "other_drug";
 const LABEL: Record<Kind, string> = {
   drug: "A drug (listed)",
   supplement: "A supplement / natural product (not listed)",
   not_drug: "Not a drug — diet, procedure, test… (not listed)",
+  other_drug: "Not an obesity drug — no effect on weight (not listed)",
 };
 const SOURCE: Record<string, string> = {
   list: "the reviewed clean-up list",
@@ -20,7 +21,7 @@ const SOURCE: Record<string, string> = {
  * stay in the database but are left out of the drug list, dashboard counts, search and the auto-fill.
  */
 export default function ProductKind({ slug, kind, source, note, readOnly }: {
-  slug: string; kind: "supplement" | "not_drug" | null; source: string | null; note: string | null; readOnly?: boolean;
+  slug: string; kind: "supplement" | "not_drug" | "other_drug" | null; source: string | null; note: string | null; readOnly?: boolean;
 }) {
   const router = useRouter();
   const current: Kind = kind ?? "drug";
@@ -53,7 +54,7 @@ export default function ProductKind({ slug, kind, source, note, readOnly }: {
       hidden ? "border-amber-200 bg-amber-50 text-amber-900" : "border-slate-200 bg-white text-slate-600"}`}>
       <span>
         {hidden
-          ? <>Not in the drug list: <b>{current === "supplement" ? "supplement / natural product" : "not a drug"}</b></>
+          ? <>Not in the drug list: <b>{current === "supplement" ? "supplement / natural product" : current === "other_drug" ? "not an obesity drug" : "not a drug"}</b></>
           : <>Counted as a drug</>}
         {source && (
           <span className="text-xs opacity-80"> — by {SOURCE[source] ?? source}{note && source !== "manual" ? ` (${note})` : ""}</span>

@@ -121,7 +121,8 @@ export default function AutofillPanel({ o }: { o: AutofillOverview }) {
       {/* Left out of the drug list */}
       <details className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm">
         <summary className="cursor-pointer text-slate-700">
-          Left out of the drug list: <b>{o.hidden.not_drug.toLocaleString()}</b> not drugs (diets, procedures, tests…) and{" "}
+          Left out of the drug list: <b>{o.hidden.not_drug.toLocaleString()}</b> not drugs (diets, procedures, tests…),{" "}
+          <b>{(o.hidden.other_drug ?? 0).toLocaleString()}</b> medicines with no effect on obesity and{" "}
           <b>{o.hidden.supplement.toLocaleString()}</b> supplements
           {o.review.length > 0 && <> · <span className="text-amber-700">{o.review.length} hidden by a name rule — worth a look</span></>}
         </summary>

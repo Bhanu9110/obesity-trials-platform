@@ -14,10 +14,11 @@ import { readFileSync } from "node:fs";
 import { pool, withTransaction, type Client } from "./db.js";
 import { slugify } from "./products.js";
 
-export type ProductKind = "supplement" | "not_drug";
+export type ProductKind = "supplement" | "not_drug" | "other_drug";
 
 export interface Curation {
   not_drug: Record<string, string>;     // slug -> "Name" or "Name — why"
+  other_drug?: Record<string, string>;  // medicines with no effect on obesity (surgery, background, probe drugs)
   supplement: Record<string, string>;
   drug: string[];                        // slugs that must stay drugs whatever the rules say
   merge: Record<string, { into: string; name: string }>;
@@ -26,9 +27,9 @@ export interface Curation {
 export function loadCuration(): Curation {
   try {
     const j = JSON.parse(readFileSync(new URL("../data/product-curation.json", import.meta.url), "utf8"));
-    return { not_drug: j.not_drug ?? {}, supplement: j.supplement ?? {}, drug: j.drug ?? [], merge: j.merge ?? {} };
+    return { not_drug: j.not_drug ?? {}, supplement: j.supplement ?? {}, other_drug: j.other_drug ?? {}, drug: j.drug ?? [], merge: j.merge ?? {} };
   } catch {
-    return { not_drug: {}, supplement: {}, drug: [], merge: {} };
+    return { not_drug: {}, supplement: {}, other_drug: {}, drug: [], merge: {} };
   }
 }
 
@@ -97,12 +98,12 @@ export async function mergeProductRows(c: Client, fromSlug: string, intoSlug: st
 
 export interface CurationResult {
   merged: number;
-  listed: { not_drug: number; supplement: number };
+  listed: { not_drug: number; supplement: number; other_drug: number };
   byRule: string[];   // names newly hidden by a name rule (worth a look)
 }
 
 export async function applyCuration(cur: Curation = loadCuration(), log: (m: string, o?: unknown) => void = () => {}): Promise<CurationResult> {
-  const res: CurationResult = { merged: 0, listed: { not_drug: 0, supplement: 0 }, byRule: [] };
+  const res: CurationResult = { merged: 0, listed: { not_drug: 0, supplement: 0, other_drug: 0 }, byRule: [] };
   await withTransaction(async (c) => {
     // 1. Duplicates (targets that are themselves merged elsewhere are followed).
     const target = (s: string, seen = new Set<string>()): { into: string; name: string } => {
@@ -118,8 +119,9 @@ export async function applyCuration(cur: Curation = loadCuration(), log: (m: str
     }
 
     // 2. The reviewed list. A choice made on a drug page is never overridden.
-    for (const kind of ["not_drug", "supplement"] as const) {
-      const slugs = Object.keys(cur[kind]);
+    for (const kind of ["not_drug", "supplement", "other_drug"] as const) {
+      const list = cur[kind] ?? {};
+      const slugs = Object.keys(list);
       if (!slugs.length) continue;
       await c.query(
         `UPDATE products p SET kind = $1, kind_source = 'list', kind_note = n.note
@@ -127,12 +129,12 @@ export async function applyCuration(cur: Curation = loadCuration(), log: (m: str
           WHERE p.slug = n.slug AND p.kind_source IS DISTINCT FROM 'manual'
             AND (p.kind IS DISTINCT FROM $1 OR p.kind_source IS DISTINCT FROM 'list' OR p.kind_note IS DISTINCT FROM n.note)`,
         // the file says "Name" or "Name — why": keep the why
-        [kind, slugs, slugs.map((s) => cur[kind][s]?.split(" — ").slice(1).join(" — ") || null)],
+        [kind, slugs, slugs.map((s) => list[s]?.split(" — ").slice(1).join(" — ") || null)],
       );
       res.listed[kind] = (await c.query<{ n: number }>("SELECT count(*)::int AS n FROM products WHERE kind = $1", [kind])).rows[0].n;
     }
     // Taken off the list since: back in the drug list (the name rules below may still apply).
-    const listed = [...Object.keys(cur.not_drug), ...Object.keys(cur.supplement)];
+    const listed = [...Object.keys(cur.not_drug), ...Object.keys(cur.supplement), ...Object.keys(cur.other_drug ?? {})];
     await c.query(
       `UPDATE products SET kind = NULL, kind_source = NULL, kind_note = NULL
         WHERE kind_source = 'list' AND kind IS NOT NULL AND NOT (slug = ANY($1))`,
