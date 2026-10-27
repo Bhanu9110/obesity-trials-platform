@@ -48,6 +48,7 @@ const MANUAL_FIELDS = [
   "modality", "phase", "moa", "roa", "approved", "approval_date", "sponsor", "drug_class", "aliases",
   "brand_names", "candidate", "parent_drug", "therapy_subclass", "indication", "summary",
 ] as const;
+const DEV_FIELDS = ["inn", "api", "regulatory_status", "designations", "patents", "anticipated_launch", "efficacy_signal", "safety_signal"] as const;
 
 /**
  * Merge one drug page into another (creating the target when needed): trial links, conference
@@ -79,6 +80,17 @@ export async function mergeProductRows(c: Client, fromSlug: string, intoSlug: st
     [fromSlug, intoSlug],
   );
   await c.query("DELETE FROM product_abstracts WHERE product_slug = $1", [fromSlug]);
+  // Development & regulatory profile (0024): typed fields the target lacks, and result / milestone rows
+  // typed on the page (research-file rows are re-created on the target by the next import).
+  if ((await c.query("SELECT 1 FROM information_schema.tables WHERE table_name = 'product_results'")).rowCount) {
+    await c.query(
+      `UPDATE products t SET ${DEV_FIELDS.map((f) => `${f} = coalesce(t.${f}, f.${f})`).join(", ")}
+         FROM products f WHERE t.id = $2 AND f.id = $1`,
+      [from.id, into.id],
+    );
+    await c.query("UPDATE product_results SET product_slug = $2 WHERE product_slug = $1 AND origin = 'manual'", [fromSlug, intoSlug]);
+    await c.query("UPDATE product_milestones SET product_slug = $2 WHERE product_slug = $1 AND origin = 'manual'", [fromSlug, intoSlug]);
+  }
   await c.query("DELETE FROM products WHERE id = $1", [from.id]);
   return true;
 }

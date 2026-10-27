@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.5 |
+| **Manual version** | 1.6 |
 | **Last updated** | 23 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -314,6 +314,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 27 Oct 2026 | 1.6 | 64 duplicate drug pages merged into 56 (code name vs INN, brand vs generic, misspellings — e.g. MET097 and PF-08653944 into Berobenatide, HRS9531 into Ribupatide, Tirzapatide into Tirzepatide). Merges now also carry the development & regulatory fields and rows added on the page | 7 |
 | 26 Oct 2026 | 1.5 | Drug basics research file: modality, route, therapy class, subclass and mechanism filled for 479 drugs that had gaps (and wrong automatic values corrected, e.g. acarbose, metoprolol, pioglitazone) | 15 |
 | 25 Oct 2026 | 1.4 | Development & regulatory profile on drug pages: INN, API, regulatory status, designations, patents, anticipated launch, efficacy and safety signals; **Milestones & timeline** and **Efficacy & safety results** sections with editing; regulatory status and next milestone in the Drugs list with a filter; **Upcoming milestones** panel; research file for 13 leading drugs; INN, API and regulatory status also filled automatically | 7, 14, 15 |
 | 23 Oct 2026 | 1.3 | Audit logs page redesigned: headline numbers, 14-day activity chart, most opened pages, People list (click a person to filter), activity log as sentences grouped by day with type tabs, person and text filters, older entries on demand and CSV export | 12 |

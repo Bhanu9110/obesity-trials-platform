@@ -1,6 +1,6 @@
 {
  "about": "Reviewed list of product names that are not drugs. 'not_drug' and 'supplement' entries stay in the database but are left out of the drug list, dashboard counts, search and the auto-fill (products.kind). 'merge' folds duplicate pages of the same drug into one (like 'Merge' on a drug page). 'drug' lists names that must stay in the drug list even if a name rule would hide them. Applied on every auto-fill run (npm run enrich-products) or with npm run curate-products. A choice made on a drug page always wins over this file.",
- "reviewed": "2026-10-08",
+ "reviewed": "2026-10-27",
  "not_drug": {
   "18fdgpet_coldstimulation_ct": "18FDG-PET + Cold Stimulation + CT",
   "abdomen": "Abdomen",
@@ -422,13 +422,25 @@
    "into": "acetazolamide",
    "name": "Acetazolamide"
   },
+  "adrenaline": {
+   "into": "epinephrine",
+   "name": "Epinephrine"
+  },
   "amiloridepill": {
    "into": "amiloride",
    "name": "Amiloride"
   },
+  "anastrazole": {
+   "into": "anastrozole",
+   "name": "Anastrozole"
+  },
   "anidulafunginsingle": {
    "into": "anidulafungin",
    "name": "Anidulafungin"
+  },
+  "antibiotic": {
+   "into": "antibiotics",
+   "name": "Antibiotics"
   },
   "antibioticsexposure": {
    "into": "antibiotics",
@@ -442,6 +454,10 @@
    "into": "antiobesitymedication",
    "name": "Anti-obesity medication"
   },
+  "apd356": {
+   "into": "lorcaserin",
+   "name": "Lorcaserin"
+  },
   "asc": {
    "into": "asc41",
    "name": "ASC41"
@@ -449,6 +465,14 @@
   "assessinggsk1521498": {
    "into": "gsk1521498",
    "name": "GSK1521498"
+  },
+  "azd5004": {
+   "into": "elecoglipron",
+   "name": "Elecoglipron"
+  },
+  "azd6234": {
+   "into": "lenbelintide",
+   "name": "Lenbelintide"
   },
   "bagjinlidatimes": {
    "into": "jinlidagranules",
@@ -474,6 +498,18 @@
    "into": "semaglutide",
    "name": "Semaglutide"
   },
+  "benaglutide": {
+   "into": "beinaglutide",
+   "name": "Beinaglutide"
+  },
+  "beta3adrenergicreceptoragonist": {
+   "into": "mirabegron",
+   "name": "Mirabegron"
+  },
+  "betahistinedihydrochloride": {
+   "into": "betahistine",
+   "name": "Betahistine"
+  },
   "bgm0504bgm0504": {
    "into": "bgm0504",
    "name": "BGM0504"
@@ -490,13 +526,33 @@
    "into": "fentanyl",
    "name": "Fentanyl"
   },
+  "bms646256": {
+   "into": "ibipinabant",
+   "name": "Ibipinabant"
+  },
+  "bofanglutida": {
+   "into": "gzr18",
+   "name": "GZR18"
+  },
+  "botox": {
+   "into": "botulinumtoxintypea",
+   "name": "Botulinum Toxin Type A"
+  },
   "botoxunt": {
    "into": "botox",
    "name": "Botox"
   },
+  "botulinumtoxin": {
+   "into": "botulinumtoxintypea",
+   "name": "Botulinum Toxin Type A"
+  },
   "botulinumtoxintype": {
    "into": "botulinumtoxintypea",
    "name": "Botulinum Toxin Type A"
+  },
+  "bridion": {
+   "into": "sugammadex",
+   "name": "Sugammadex"
   },
   "bsglp": {
    "into": "glp1receptoragonist",
@@ -505,6 +561,14 @@
   "bsglp1ra": {
    "into": "glp1receptoragonist",
    "name": "GLP-1 receptor agonist"
+  },
+  "bta": {
+   "into": "botulinumtoxintypea",
+   "name": "Botulinum Toxin Type A"
+  },
+  "bydureonbcise": {
+   "into": "exenatide",
+   "name": "Exenatide"
   },
   "carbetocinmicrogram": {
    "into": "carbetocin",
@@ -542,6 +606,10 @@
    "into": "cp945598",
    "name": "CP-945598"
   },
+  "cx11": {
+   "into": "vct220",
+   "name": "VCT220"
+  },
   "deepneuromuscularblockade_rocuronium": {
    "into": "rocuronium",
    "name": "Rocuronium"
@@ -558,9 +626,17 @@
    "into": "cannabidiol",
    "name": "Cannabidiol"
   },
+  "dexmedetomidin": {
+   "into": "dexmedetomidine",
+   "name": "Dexmedetomidine"
+  },
   "differenttypeconductiongeneralanesthesia": {
    "into": "generalanestheticagents",
    "name": "General anesthetic agents"
+  },
+  "diprivan": {
+   "into": "propofol",
+   "name": "Propofol"
   },
   "dosagesevelamercarbonate_irbesartan": {
    "into": "irbesartan_sevelamercarbonate",
@@ -582,6 +658,10 @@
    "into": "leap2",
    "name": "LEAP2"
   },
+  "exparel": {
+   "into": "liposomalbupivacaine",
+   "name": "Liposomal Bupivacaine"
+  },
   "fmri_naltrexone": {
    "into": "naltrexone",
    "name": "Naltrexone"
@@ -589,6 +669,10 @@
   "foleyballoon_vaginalmisoprostol": {
    "into": "misoprostol",
    "name": "Misoprostol"
+  },
+  "forxiga": {
+   "into": "dapagliflozin",
+   "name": "Dapagliflozin"
   },
   "furosemidefirst": {
    "into": "furosemide",
@@ -606,6 +690,14 @@
    "into": "glp1receptoragonist",
    "name": "GLP-1 receptor agonist"
   },
+  "gonadorelingnrh": {
+   "into": "gnrh",
+   "name": "GnRH"
+  },
+  "gonadotropinreleasinghormone": {
+   "into": "gnrh",
+   "name": "GnRH"
+  },
   "gzr18gzr18": {
    "into": "gzr18",
    "name": "GZR18"
@@ -622,9 +714,17 @@
    "into": "oliceridine",
    "name": "Oliceridine"
   },
+  "hrs9531": {
+   "into": "ribupatide",
+   "name": "Ribupatide"
+  },
   "hrs9531placebo": {
    "into": "hrs9531",
    "name": "HRS9531"
+  },
+  "hs20094": {
+   "into": "olatorepatide",
+   "name": "Olatorepatide"
   },
   "hs20094ai": {
    "into": "hs20094",
@@ -633,6 +733,10 @@
   "hs20094mdv": {
    "into": "hs20094",
    "name": "HS-20094"
+  },
+  "humanghrelin": {
+   "into": "ghrelin",
+   "name": "Ghrelin"
   },
   "immediatetopiramate": {
    "into": "topiramate",
@@ -690,6 +794,10 @@
    "into": "paracetamol",
    "name": "Paracetamol"
   },
+  "jnj64565111": {
+   "into": "efinopegdutide",
+   "name": "Efinopegdutide"
+  },
   "jnj64565111level": {
    "into": "jnj64565111",
    "name": "JNJ-64565111"
@@ -698,9 +806,17 @@
    "into": "k757_sitagliptin",
    "name": "K-757 + Sitagliptin"
   },
+  "kai7535": {
+   "into": "hrs7535",
+   "name": "HRS-7535"
+  },
   "lae102multiple": {
    "into": "lae102",
    "name": "LAE102"
+  },
+  "lb54640": {
+   "into": "bivamelagon",
+   "name": "Bivamelagon"
   },
   "levonorgestrelemergencycontraception": {
    "into": "levonorgestrel",
@@ -734,9 +850,17 @@
    "into": "liraglutide",
    "name": "Liraglutide"
   },
+  "lisdexamphetamine": {
+   "into": "lisdexamfetamine",
+   "name": "Lisdexamfetamine"
+  },
   "lngiud": {
    "into": "levonorgestrel",
    "name": "Levonorgestrel"
+  },
+  "lomaira": {
+   "into": "phentermine",
+   "name": "Phentermine"
   },
   "lowdoseoliceridine": {
    "into": "oliceridine",
@@ -754,6 +878,14 @@
    "into": "tirzepatide",
    "name": "Tirzepatide"
   },
+  "ly3532226": {
+   "into": "macupatide",
+   "name": "Macupatide"
+  },
+  "ly3537031": {
+   "into": "brenipatide",
+   "name": "Brenipatide"
+  },
   "magnesiumthroughcorrectedidealweight": {
    "into": "magnesiumsulfate",
    "name": "Magnesium Sulfate"
@@ -762,6 +894,14 @@
    "into": "magnesiumsulfate",
    "name": "Magnesium Sulfate"
   },
+  "marcaine": {
+   "into": "bupivacaine",
+   "name": "Bupivacaine"
+  },
+  "medi0382": {
+   "into": "cotadutide",
+   "name": "Cotadutide"
+  },
   "medi0382mid": {
    "into": "medi0382",
    "name": "MEDI0382"
@@ -769,6 +909,10 @@
   "medicalnutrition_metformin": {
    "into": "metformin",
    "name": "Metformin"
+  },
+  "met097": {
+   "into": "berobenatide",
+   "name": "Berobenatide"
   },
   "metfomin": {
    "into": "metformin",
@@ -802,6 +946,10 @@
    "into": "mulberrytwigalkaloids",
    "name": "Mulberry Twig Alkaloids"
   },
+  "nacl": {
+   "into": "sodiumchloride",
+   "name": "Sodium Chloride"
+  },
   "nb": {
    "into": "bupropion_naltrexone",
    "name": "Bupropion + Naltrexone"
@@ -810,7 +958,19 @@
    "into": "neostigmine",
    "name": "Neostigmine"
   },
+  "neurontin": {
+   "into": "gabapentin",
+   "name": "Gabapentin"
+  },
+  "ngmonomethyllarginine": {
+   "into": "lnmma",
+   "name": "L-NMMA"
+  },
   "niacinfirst": {
+   "into": "niacin",
+   "name": "Niacin"
+  },
+  "nicotinicacid": {
    "into": "niacin",
    "name": "Niacin"
   },
@@ -834,6 +994,10 @@
    "into": "omeprazole",
    "name": "Omeprazole"
   },
+  "ondasetron": {
+   "into": "ondansetron",
+   "name": "Ondansetron"
+  },
   "openlabelsitagliptin": {
    "into": "sitagliptin",
    "name": "Sitagliptin"
@@ -842,13 +1006,25 @@
    "into": "oxytocin",
    "name": "Oxytocin"
   },
+  "paracetamol": {
+   "into": "acetaminophen",
+   "name": "Acetaminophen"
+  },
   "paracetamol_ratiopharm": {
    "into": "paracetamol",
    "name": "Paracetamol"
   },
+  "peptideyy336": {
+   "into": "pyy336",
+   "name": "PYY3-36"
+  },
   "peripheralpeptideyy": {
    "into": "peptideyy",
    "name": "Peptide YY"
+  },
+  "pf08653944": {
+   "into": "berobenatide",
+   "name": "Berobenatide"
   },
   "pg102obesity_rt114ranipill": {
    "into": "pg102",
@@ -874,13 +1050,49 @@
    "into": "propofol_remifentanil",
    "name": "Propofol + Remifentanil"
   },
+  "recombinanthumanbnp": {
+   "into": "nesiritide",
+   "name": "Nesiritide"
+  },
+  "recombinanthumangrowthhormone": {
+   "into": "growthhormone",
+   "name": "Growth Hormone"
+  },
+  "remifentanyl": {
+   "into": "remifentanil",
+   "name": "Remifentanil"
+  },
   "reversal_sugammadex": {
    "into": "sugammadex",
    "name": "Sugammadex"
   },
+  "ro7795081": {
+   "into": "ct996",
+   "name": "CT-996"
+  },
+  "rocuroniumbromide": {
+   "into": "rocuronium",
+   "name": "Rocuronium"
+  },
+  "s2367": {
+   "into": "velneperit",
+   "name": "Velneperit"
+  },
   "s2367qd": {
    "into": "s2367",
    "name": "S-2367"
+  },
+  "sandostatin": {
+   "into": "octreotide",
+   "name": "Octreotide"
+  },
+  "sandostatinlar": {
+   "into": "octreotide",
+   "name": "Octreotide"
+  },
+  "secretinhuman": {
+   "into": "secretin",
+   "name": "Secretin"
   },
   "sedation_sevoflurane": {
    "into": "sevoflurane",
@@ -889,6 +1101,10 @@
   "selfhelpcbt_sibutramine": {
    "into": "sibutramine",
    "name": "Sibutramine"
+  },
+  "semagludtide": {
+   "into": "semaglutide",
+   "name": "Semaglutide"
   },
   "semaglutidec": {
    "into": "semaglutide",
@@ -914,6 +1130,14 @@
    "into": "sibutramine",
    "name": "Sibutramine"
   },
+  "sitagliptan": {
+   "into": "sitagliptin",
+   "name": "Sitagliptin"
+  },
+  "syntocinon": {
+   "into": "oxytocin",
+   "name": "Oxytocin"
+  },
   "t3repletion": {
    "into": "t3",
    "name": "T3"
@@ -934,6 +1158,10 @@
    "into": "furosemide",
    "name": "Furosemide"
   },
+  "tirzapatide": {
+   "into": "tirzepatide",
+   "name": "Tirzepatide"
+  },
   "tirzepatideprehabilitation": {
    "into": "tirzepatide",
    "name": "Tirzepatide"
@@ -949,6 +1177,18 @@
   "trevogrumabpartb": {
    "into": "trevogrumab",
    "name": "Trevogrumab"
+  },
+  "tylenol": {
+   "into": "acetaminophen",
+   "name": "Acetaminophen"
+  },
+  "u100humulin": {
+   "into": "humaninsulin",
+   "name": "Human Insulin"
+  },
+  "ursodiol": {
+   "into": "ursodeoxycholicacid",
+   "name": "Ursodeoxycholic Acid"
   },
   "vaginalmisoprostol": {
    "into": "misoprostol",
@@ -969,6 +1209,22 @@
   "waxmatrixniacin": {
    "into": "niacin",
    "name": "Niacin"
+  },
+  "zenagamtide": {
+   "into": "amycretin",
+   "name": "Amycretin"
+  },
+  "zgn433": {
+   "into": "beloranib",
+   "name": "Beloranib"
+  },
+  "zofran": {
+   "into": "ondansetron",
+   "name": "Ondansetron"
+  },
+  "zonegran": {
+   "into": "zonisamide",
+   "name": "Zonisamide"
   },
   "zt003part1": {
    "into": "zt003",
