@@ -15,6 +15,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { pool, withTransaction } from "./db.js";
 import { productNameIndex } from "./abstracts.js";
+import { slugify } from "./products.js";
 
 export const PROFILE_FIELDS = [
   "inn", "api", "regulatory_status", "designations", "patents", "anticipated_launch", "efficacy_signal", "safety_signal",
@@ -81,23 +82,33 @@ export const resultKey = (r: ProfileResult) => keyText(r.kind, r.trial, r.endpoi
 export const milestoneKey = (m: ProfileMilestone) => keyText(m.kind, m.title);
 const clip = (v: unknown, n = 1000) => { const s = String(v ?? "").trim(); return s ? s.slice(0, n) : null; };
 
-export interface ProfileImportResult { files: number; drugs: number; fields: number; results: number; milestones: number; removed: number; unresolved: string[] }
+export interface ProfileImportResult {
+  files: number; drugs: number; fields: number; results: number; milestones: number; removed: number; unresolved: string[];
+  /** alias spellings newly linked to a drug page (so trials that use them land on that page) */
+  aliases: number;
+  /** an alias that is itself another drug page: "alias -> page it should join (other page)" */
+  duplicates: string[];
+}
 
 export async function importProfiles(
   files: ProfileFile[] = loadProfileFiles(), log: (m: string, o?: unknown) => void = () => {},
 ): Promise<ProfileImportResult> {
-  const res: ProfileImportResult = { files: files.length, drugs: 0, fields: 0, results: 0, milestones: 0, removed: 0, unresolved: [] };
+  const res: ProfileImportResult = { files: files.length, drugs: 0, fields: 0, results: 0, milestones: 0, removed: 0, unresolved: [], aliases: 0, duplicates: [] };
   const { resolve } = await productNameIndex();
 
   // Later files win for the same field; results and milestones are added up.
   const info = new Map<string, Record<string, { value: string; source: string; url?: string; curated: true }>>();
   const results: { slug: string; key: string; r: ProfileResult; sort: number }[] = [];
   const milestones: { slug: string; key: string; m: ProfileMilestone }[] = [];
+  const aliasNames = new Map<string, Set<string>>(); // drug page -> every alias a file gives it
   for (const f of files) {
     for (const d of f.drugs) {
       const slug = resolve({ name: d.name, aliases: d.aliases });
       if (!slug) { res.unresolved.push(d.name); continue; }
       res.drugs++;
+      const names = aliasNames.get(slug) ?? new Set<string>();
+      for (const a of [...(d.aliases ?? []), ...(d.fields?.aliases ?? "").split(/\s*[,;]\s*/)]) if (a?.trim()) names.add(a.trim());
+      aliasNames.set(slug, names);
       const src = d.sources?.[0];
       const fieldsOut = info.get(slug) ?? {};
       for (const [k, v] of Object.entries(d.fields ?? {})) {
@@ -189,7 +200,25 @@ export async function importProfiles(
       [[...seenM]],
     );
     res.removed = (delR.rowCount ?? 0) + (delM.rowCount ?? 0);
+
+    // Aliases: every spelling a file gives ("VT-355", "VT 355", "VT355" are one key) points at the
+    // drug page, so a new trial that uses any of them lands on that page. An alias that already is
+    // a separate drug page is reported, not merged (merges go in product-curation.json).
+    for (const [slug, names] of aliasNames) {
+      for (const a of names) {
+        const k = slugify(a);
+        if (!k || k === slug || k.length < 3) continue;
+        const other = await c.query<{ slug: string }>("SELECT slug FROM products WHERE slug = $1", [k]);
+        if (other.rowCount) { res.duplicates.push(`${a} -> ${slug} (is its own drug page)`); continue; }
+        const ins = await c.query(
+          `INSERT INTO product_aliases (alias_slug, product_slug, product_name)
+           SELECT $1, p.slug, p.name FROM products p WHERE p.slug = $2
+           ON CONFLICT (alias_slug) DO NOTHING`, [k, slug]);
+        res.aliases += ins.rowCount ?? 0;
+      }
+    }
   });
+  if (res.duplicates.length) log(`Research files: ${res.duplicates.length} alias(es) that are separate drug pages`, res.duplicates);
 
   if (res.unresolved.length) log(`Research files: ${res.unresolved.length} drug(s) without a drug page (skipped)`, res.unresolved);
   return res;

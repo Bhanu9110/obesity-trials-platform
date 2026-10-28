@@ -11,6 +11,7 @@ import type { HomeStats, ProductLink,
   TrialListItem,
 } from "./types";
 import { CONTINENT_ORDER, phaseRank } from "./format";
+import { cleanNames, splitNames } from "./aliases";
 
 /** Letters and digits only, lower case — "NN-9440" and "nn 9440" both become "nn9440". */
 const squashTerm = (q: string) => q.normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -267,6 +268,7 @@ export const OTHER_NAMES = (p = "p") => `(SELECT string_agg(DISTINCT n, ', ') FR
 export async function listProducts(): Promise<ProductSummary[]> {
   const [rows, next] = await Promise.all([listProductRows(), nextMilestones()]);
   for (const r of rows) {
+    r.other_names = cleanNames(splitNames(r.other_names), r.name).join(", ") || null; // no glued-together junk
     const m = next.get(r.slug);
     r.next_milestone = m ? { title: m.title, date_label: m.date_label, kind: m.kind } : null;
   }
@@ -282,6 +284,11 @@ async function listProductRows(): Promise<ProductSummary[]> {
             CASE WHEN count(t.nct_id) = 0 THEN ${CONF_TRIALS} ELSE count(t.nct_id)::int END AS all_trials,
             count(t.nct_id)::int AS nct_trials,
             CASE WHEN count(t.nct_id) = 0 THEN ${CONF_TRIALS} ELSE 0 END AS conference_trials,
+            -- for "no active development": trials still running, and the newest start year
+            count(t.nct_id) FILTER (WHERE to_jsonb(t) ->> 'overall_status' IN
+              ('RECRUITING', 'NOT_YET_RECRUITING', 'ACTIVE_NOT_RECRUITING', 'ENROLLING_BY_INVITATION', 'AVAILABLE')
+              OR to_jsonb(t) ->> 'overall_status' IS NULL)::int AS active_trials,
+            max(substring(to_jsonb(t) ->> 'start_date' from '^[0-9]{4}')::int) AS last_trial_year,
             coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
             ${HAS_INFO} AS has_info,
             (SELECT count(*)::int FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstracts,

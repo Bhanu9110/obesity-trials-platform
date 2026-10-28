@@ -1,0 +1,859 @@
+{
+ "source": "Status and alias audit (Oct 2026)",
+ "updated": "2026-10-28",
+ "description": "Development / regulatory status checked against company, regulator and news sources, plus the client's data review (Errors.xlsx). Approved in any country, filed and discontinued drugs; aliases in every spelling (with and without hyphen or space).",
+ "drugs": [
+  {
+   "name": "Eloralintide",
+   "aliases": [
+    "LY3841136",
+    "AMY-1176",
+    "J3R-MC-YDAL"
+   ],
+   "fields": {
+    "aliases": "LY3841136, LY-3841136, LY 3841136, AMY-1176, AMY1176, AMY 1176, J3R-MC-YDAL"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov: eloralintide (LY3841136) trials; J3R-MC-YDAL = Lilly protocol code",
+     "url": "https://clinicaltrials.gov/study/NCT07738614"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Berobenatide",
+   "aliases": [
+    "MET-097",
+    "MET-097i",
+    "MET-097o",
+    "PF-08653944",
+    "PF'3944"
+   ],
+   "fields": {
+    "aliases": "MET-097, MET097, MET 097, MET-097i, MET097i, MET 097i, MET-097o, MET097o, MET 097o, PF-08653944, PF08653944, PF 08653944, PF'3944"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech: berobenatide (MET-097i) in Pfizer pipeline, Aug 2026",
+     "url": "https://www.fiercebiotech.com/biotech/pfizer-axes-ex-metsera-obesity-asset-and-gipr-prospect-quarterly-clearout"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Ecnoglutide",
+   "aliases": [
+    "XW003",
+    "XW004",
+    "VRB-101",
+    "IN-B00009",
+    "IN-B0000-9",
+    "DA-63110"
+   ],
+   "fields": {
+    "phase": "Approved (China)",
+    "approved": "Yes",
+    "approval_date": "2026-03-06",
+    "regulatory_status": "Approved — China (NMPA, 6 Mar 2026): chronic weight management in adults with overweight or obesity; also approved in China for type 2 diabetes. Korea: Phase 3 with HK inno.N (IN-B00009)",
+    "aliases": "XW003, XW-003, XW 003, XW004, XW-004, XW 004, VRB-101, VRB101, VRB 101, IN-B00009, IN-B0000-9, DA-63110, DA63110, DA 63110"
+   },
+   "sources": [
+    {
+     "label": "Sciwind: ecnoglutide approved by NMPA for chronic weight management (6 Mar 2026)",
+     "url": "https://www.biospace.com/press-releases/sciwind-biosciences-announces-ecnoglutide-injection-approved-by-chinas-national-medical-products-administration-nmpa-for-chronic-weight-management"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT07192263: IN-B00009 Phase 3 (HK inno.N)",
+     "url": "https://clinicaltrials.gov/study/NCT07192263"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "BGM0504",
+   "aliases": [
+    "Relsipatide",
+    "BG128"
+   ],
+   "fields": {
+    "phase": "Registration / Filed",
+    "approved": "No",
+    "regulatory_status": "Filed — China NDA accepted by NMPA/CDE (11 Jun 2026) for long-term weight management in adults with obesity or overweight; type 2 diabetes: Phase 3",
+    "aliases": "Relsipatide, BG128, BG-128, BG 128"
+   },
+   "sources": [
+    {
+     "label": "FilingReader: BrightGene BGM0504 NDA accepted by China regulator (11 Jun 2026)",
+     "url": "https://filingreader.com/news-wire/shanghai/2026-06-11/brightgene-weight-loss-injection-application-accepted-by-china-regulator"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "HDM1005",
+   "aliases": [
+    "Poterepatide",
+    "P001"
+   ],
+   "fields": {
+    "aliases": "Poterepatide, P001, P-001, P 001"
+   },
+   "sources": [
+    {
+     "label": "MedChemExpress: poterepatide (HDM1005)",
+     "url": "https://www.medchemexpress.com/poterepatide.html"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Otenabant",
+   "aliases": [
+    "CP-945,598",
+    "CP-945598"
+   ],
+   "fields": {
+    "phase": "Discontinued (Phase 3)",
+    "approved": "No",
+    "regulatory_status": "Discontinued — Pfizer stopped the CB1 antagonist programme in Nov 2008 (Phase 3), after regulators' psychiatric-safety concerns with the drug class",
+    "aliases": "CP-945,598, CP-945598, CP945598, CP 945598"
+   },
+   "sources": [
+    {
+     "label": "Pharmaceutical Online: Pfizer discontinues CP-945,598 development (7 Nov 2008)",
+     "url": "https://www.pharmaceuticalonline.com/doc/pfizer-discontinues-development-program-for-0001"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "HRS-7535",
+   "aliases": [
+    "Safiglipron",
+    "KAI-7535"
+   ],
+   "fields": {
+    "inn": "Safiglipron",
+    "aliases": "Safiglipron, KAI-7535, KAI7535, KAI 7535"
+   },
+   "sources": [
+    {
+     "label": "eBiotrade: safiglipron (HRS-7535) Phase 3 vs dapagliflozin (Oct 2026)",
+     "url": "https://www.ebiotrade.com/newsf/2026-10/20261006001043882.htm"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Aleniglipron",
+   "aliases": [
+    "GSBR-1290",
+    "Compound 121a"
+   ],
+   "fields": {
+    "aliases": "GSBR-1290, GSBR1290, GSBR 1290, Compound 121a"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia: aleniglipron (GSBR-1290)",
+     "url": "https://en.wikipedia.org/wiki/Aleniglipron"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Beloranib",
+   "aliases": [
+    "CKD-732",
+    "ZGN-433",
+    "ZGN-440",
+    "HRK-429",
+    "HRK-512"
+   ],
+   "fields": {
+    "phase": "Discontinued (Phase 3)",
+    "approved": "No",
+    "regulatory_status": "Discontinued — Zafgen ended development in 2016 after patient deaths (venous thromboembolism) in the Phase 3 Prader-Willi trial",
+    "aliases": "CKD-732, CKD732, CKD 732, ZGN-433, ZGN433, ZGN 433, ZGN-440, ZGN440, ZGN 440, HRK-429, HRK429, HRK 429, HRK-512, HRK512, HRK 512"
+   },
+   "sources": [
+    {
+     "label": "Zafgen discontinues beloranib development (BioCentury, 2016)",
+     "url": "https://biocentury.com/article/278284/zafgen-discontinues-beloranib-development"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Pramlintide",
+   "aliases": [
+    "AC-137",
+    "AC-0137"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "approved": "Yes",
+    "approval_date": "2005-03-16",
+    "brand_names": "Symlin, SymlinPen 60, SymlinPen 120",
+    "regulatory_status": "Discontinued — US FDA approval Mar 2005 (Symlin vial; SymlinPen 60 / SymlinPen 120 Sep 2007); all formulations since discontinued by AstraZeneca",
+    "aliases": "AC-137, AC137, AC 137, AC-0137, AC0137, AC 0137"
+   },
+   "sources": [
+    {
+     "label": "Drugs.com: Symlin availability — all formulations discontinued",
+     "url": "https://www.drugs.com/availability/generic-symlin.html"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "MWN109",
+   "aliases": [],
+   "fields": {
+    "drug_class": "Incretin-based therapy",
+    "therapy_subclass": "GLP-1, GIP and glucagon receptor agonist",
+    "modality": "Peptide",
+    "moa": "GLP-1, GIP and glucagon receptor triple agonist",
+    "roa": "Subcutaneous (Phase 3), oral tablet (Phase 2)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT07778693: MWN109 injection Phase 3",
+     "url": "https://clinicaltrials.gov/study/NCT07778693"
+    },
+    {
+     "label": "Client data review (Errors.xlsx, 28 Oct 2026)"
+    }
+   ]
+  },
+  {
+   "name": "Mazdutide",
+   "aliases": [
+    "IBI362",
+    "LY3305677"
+   ],
+   "fields": {
+    "phase": "Approved (China)",
+    "approved": "Yes",
+    "approval_date": "2025-06",
+    "brand_names": "Xinermei",
+    "aliases": "IBI362, IBI-362, IBI 362, LY3305677, LY-3305677, LY 3305677"
+   },
+   "sources": [
+    {
+     "label": "Mazdutide: First Approval (Drugs, PubMed)",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/41028652/"
+    }
+   ]
+  },
+  {
+   "name": "Beinaglutide",
+   "aliases": [
+    "Benaglutide"
+   ],
+   "fields": {
+    "phase": "Approved (China)",
+    "approved": "Yes",
+    "approval_date": "2023-08",
+    "regulatory_status": "Approved — China: type 2 diabetes (2016) and weight management in adults with obesity or overweight (Aug 2023, Feisumei)",
+    "brand_names": "Feisumei",
+    "aliases": "Benaglutide"
+   },
+   "sources": [
+    {
+     "label": "The Pharma Letter: first domestic innovative weight-loss drug approved in China (Aug 2023)",
+     "url": "https://thepharmaletter.com/article/first-domestic-innovative-weight-loss-drug-approved-in-china"
+    }
+   ]
+  },
+  {
+   "name": "Efsubaglutide",
+   "aliases": [
+    "Efsubaglutide alfa",
+    "Supaglutide"
+   ],
+   "fields": {
+    "phase": "Approved (China, type 2 diabetes)",
+    "approved": "Yes",
+    "approval_date": "2025-01",
+    "regulatory_status": "Approved — China (NMPA, Jan 2025): adult type 2 diabetes; obesity/overweight: Phase 3 (topline expected end-2026)",
+    "aliases": "Efsubaglutide alfa, Supaglutide"
+   },
+   "sources": [
+    {
+     "label": "Innogen interim report (HKEX, 25 Aug 2026)",
+     "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0825/2026082501007.pdf"
+    }
+   ]
+  },
+  {
+   "name": "Ribupatide",
+   "aliases": [
+    "HRS9531",
+    "KAI-9531"
+   ],
+   "fields": {
+    "phase": "Registration / Filed (China, type 2 diabetes)",
+    "regulatory_status": "Filed — China NDA accepted by NMPA (Sep 2026) for type 2 diabetes; obesity: Phase 3 (China; global KaiNETIC Phase 3 by Kailera)",
+    "aliases": "HRS9531, HRS-9531, HRS 9531, KAI-9531, KAI9531, KAI 9531"
+   },
+   "sources": [
+    {
+     "label": "FLCube: NMPA accepts Hengrui's NDA for ribupatide (Sep 2026)",
+     "url": "https://flcube.com/nmpa-accepts-hengruis-new-drug-application-for-ribupatide-injection-dual-glp-1-gip-receptor-agonist-nears-approval-for-type-2-diabetes-in-china/"
+    }
+   ]
+  },
+  {
+   "name": "Phentermine",
+   "aliases": [],
+   "fields": {
+    "phase": "Approved",
+    "approved": "Yes",
+    "regulatory_status": "Approved — US FDA (1959), marketed (e.g. Adipex-P, Lomaira) for short-term weight management; some older brands withdrawn"
+   },
+   "sources": [
+    {
+     "label": "DailyMed: phentermine labels",
+     "url": "https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=phentermine"
+    }
+   ]
+  },
+  {
+   "name": "Diethylpropion",
+   "aliases": [
+    "Amfepramone"
+   ],
+   "fields": {
+    "phase": "Approved",
+    "approved": "Yes",
+    "regulatory_status": "Approved — US FDA (1959), generic tablets marketed for short-term weight management (brand Tenuate discontinued); withdrawn in the EU",
+    "aliases": "Amfepramone"
+   },
+   "sources": [
+    {
+     "label": "DailyMed: diethylpropion labels",
+     "url": "https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=diethylpropion"
+    }
+   ]
+  },
+  {
+   "name": "Rosiglitazone",
+   "aliases": [],
+   "fields": {
+    "phase": "Approved (US)",
+    "approved": "Yes",
+    "regulatory_status": "Approved — US FDA (1999, Avandia; restrictions lifted 2013); withdrawn in the EU (2010)"
+   },
+   "sources": [
+    {
+     "label": "FDA: Avandia REMS removal (2015)",
+     "url": "https://www.fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication-fda-eliminates-risk-evaluation-and-mitigation-strategy-rems-rosiglitazone"
+    }
+   ]
+  },
+  {
+   "name": "Henagliflozin",
+   "aliases": [
+    "SHR-3824"
+   ],
+   "fields": {
+    "phase": "Approved (China)",
+    "approved": "Yes",
+    "approval_date": "2021",
+    "regulatory_status": "Approved — China (NMPA, 2021): type 2 diabetes",
+    "aliases": "SHR-3824, SHR3824, SHR 3824"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Enavogliflozin",
+   "aliases": [
+    "DWP16001"
+   ],
+   "fields": {
+    "phase": "Approved (Korea)",
+    "approved": "Yes",
+    "approval_date": "2022",
+    "regulatory_status": "Approved — Korea (MFDS, 2022, Envlo): type 2 diabetes",
+    "aliases": "DWP16001, DWP-16001, DWP 16001"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "ATL-962",
+   "aliases": [
+    "Cetilistat"
+   ],
+   "fields": {
+    "phase": "Approved (Japan, not launched)",
+    "approved": "Yes",
+    "approval_date": "2013",
+    "regulatory_status": "Approved — Japan (2013, Oblean, Takeda) for obesity disease; never launched. Development elsewhere stopped",
+    "aliases": "Cetilistat"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Tesofensine",
+   "aliases": [
+    "NS 2330",
+    "NS2330"
+   ],
+   "fields": {
+    "phase": "Registration / Filed (Mexico)",
+    "approved": "No",
+    "regulatory_status": "Filed — Mexico (COFEPRIS, partner Medix): approval withheld Nov 2024, final dossier resubmitted Feb 2025; not approved anywhere",
+    "aliases": "NS 2330, NS2330, NS-2330"
+   },
+   "sources": [
+    {
+     "label": "Saniona: Medix to submit final tesofensine application (Feb 2025)",
+     "url": "https://www.inderes.dk/en/releases/medix-to-submit-final-version-of-tesofensine-application-following-interaction-with-cofepris"
+    }
+   ]
+  },
+  {
+   "name": "ARD-101",
+   "aliases": [
+    "Denatonium acetate"
+   ],
+   "fields": {
+    "phase": "Phase 3",
+    "approved": "No",
+    "approval_date": "Not approved",
+    "regulatory_status": "Investigational — Phase 3 (HERO trial, hyperphagia in Prader-Willi syndrome; Aardvark Therapeutics). Not approved",
+    "aliases": "Denatonium acetate"
+   },
+   "sources": [
+    {
+     "label": "Aardvark Therapeutics: ARD-101 Phase 3 HERO trial",
+     "url": "https://clinicaltrials.gov/search?intr=ARD-101"
+    }
+   ]
+  },
+  {
+   "name": "Denatonium Benzoate",
+   "aliases": [],
+   "fields": {
+    "phase": "Investigational",
+    "approved": "No",
+    "approval_date": "Not approved",
+    "regulatory_status": "Investigational — a bittering agent, not an approved medicine"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Cannabis",
+   "aliases": [],
+   "fields": {
+    "phase": "Investigational",
+    "approved": "No",
+    "approval_date": "Not approved",
+    "regulatory_status": "Not an approved medicine (US FDA); legal status varies by country"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Betahistine",
+   "aliases": [],
+   "fields": {
+    "phase": "Approved (outside the US)",
+    "approved": "Yes",
+    "approval_date": "Outside the US only",
+    "regulatory_status": "Approved — EU and other countries (Ménière's disease), not in the US; obesity development (OBEcure) not continued"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Danuglipron",
+   "aliases": [
+    "PF-06882961"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Pfizer ended development in Apr 2025 after a potential liver-injury case",
+    "approved": "No",
+    "aliases": "PF-06882961, PF06882961, PF 06882961"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: Pfizer provides update on danuglipron (14 Apr 2025)",
+     "url": "https://www.biospace.com/press-releases/pfizer-provides-update-on-oral-glp-1-receptor-agonist-danuglipron"
+    }
+   ]
+  },
+  {
+   "name": "Danuglipron + PF-06865571",
+   "aliases": [],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — danuglipron development ended by Pfizer (Apr 2025)",
+    "approved": "No"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: Pfizer provides update on danuglipron (14 Apr 2025)",
+     "url": "https://www.biospace.com/press-releases/pfizer-provides-update-on-oral-glp-1-receptor-agonist-danuglipron"
+    }
+   ]
+  },
+  {
+   "name": "Lotiglipron",
+   "aliases": [
+    "PF-07081532"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Pfizer stopped development on 26 Jun 2023 (liver enzyme elevations)",
+    "approved": "No",
+    "aliases": "PF-07081532, PF07081532, PF 07081532"
+   },
+   "sources": [
+    {
+     "label": "BioPharma Dive: Pfizer discontinues lotiglipron (Jun 2023)",
+     "url": "https://www.biopharmadive.com/news/pfizer-discontinue-obesity-drug-lotiglipron/653857/"
+    }
+   ]
+  },
+  {
+   "name": "PF-07976016",
+   "aliases": [],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Pfizer dropped this GIPR antagonist with its Q2 2026 results (4 Aug 2026)",
+    "approved": "No"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech: Pfizer axes ex-Metsera asset and GIPR prospect (Aug 2026)",
+     "url": "https://www.fiercebiotech.com/biotech/pfizer-axes-ex-metsera-obesity-asset-and-gipr-prospect-quarterly-clearout"
+    }
+   ]
+  },
+  {
+   "name": "Cotadutide",
+   "aliases": [
+    "MEDI0382",
+    "MEDI-0382"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — AstraZeneca ended the clinical programme (disclosed Apr 2023)",
+    "approved": "No",
+    "aliases": "MEDI0382, MEDI-0382, MEDI 0382"
+   },
+   "sources": [
+    {
+     "label": "Pharmaceutical Technology: AZ to terminate cotadutide (21 Apr 2023)",
+     "url": "https://www.pharmaceutical-technology.com/analyst-comment/az-terminate-cotadutide-coagonist/"
+    }
+   ]
+  },
+  {
+   "name": "CT-868",
+   "aliases": [
+    "Acmopatide"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Roche dropped CT-868 (acmopatide) with its Q2 2026 results (Jul 2026)",
+    "approved": "No",
+    "aliases": "Acmopatide"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: Roche cans one Carmot obesity asset (Jul 2026)",
+     "url": "https://www.biospace.com/business/roche-cans-one-carmot-obesity-asset-as-another-shows-best-in-class-potential"
+    }
+   ]
+  },
+  {
+   "name": "RO7204239",
+   "aliases": [
+    "GYM329",
+    "Emugrobart"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued for obesity — Roche stopped emugrobart after an interim Phase 2 analysis (28 Sep 2026); Chugai continues it in spinal muscular atrophy",
+    "approved": "No",
+    "aliases": "GYM329, GYM-329, GYM 329, Emugrobart"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: Roche cuts muscle-sparing obesity drug (Sep 2026)",
+     "url": "https://www.biospace.com/drug-development/roche-cuts-muscle-sparing-obesity-drug-after-mid-stage-disappointment"
+    }
+   ]
+  },
+  {
+   "name": "Dapiglutide",
+   "aliases": [
+    "ZP7570"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued (paused) — Zealand paused development (disclosed 13 Nov 2025)",
+    "approved": "No",
+    "aliases": "ZP7570, ZP-7570, ZP 7570"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: Zealand freezes mid-stage obesity asset (Nov 2025)",
+     "url": "https://www.biospace.com/drug-development/zealand-freezes-mid-stage-obesity-asset-to-focus-on-more-differentiated-drugs"
+    }
+   ]
+  },
+  {
+   "name": "Monlunabant",
+   "aliases": [
+    "INV-202",
+    "NN9440",
+    "MRI-1891"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Novo Nordisk terminated development (impairment in Q2 2026 results)",
+    "approved": "No",
+    "aliases": "INV-202, INV202, INV 202, NN9440, NN-9440, NN 9440, MRI-1891, MRI1891, MRI 1891"
+   },
+   "sources": [
+    {
+     "label": "Panabee: Novo Nordisk Q2 2026 pipeline impairments",
+     "url": "https://www.panabee.com/news/novo-nordisk-earnings-q1-2026"
+    }
+   ]
+  },
+  {
+   "name": "NNC0519-0130",
+   "aliases": [
+    "NN9519"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Novo Nordisk dropped it for portfolio reasons (Q2 2025 results)",
+    "approved": "No",
+    "aliases": "NN9519, NN-9519, NN 9519"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech: Novo Nordisk drops 2 obesity drugs (Aug 2025)",
+     "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-drops-2-obesity-drugs-part-major-pipeline-clearout"
+    }
+   ]
+  },
+  {
+   "name": "INV-347",
+   "aliases": [],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Novo Nordisk dropped it (pharmacokinetic profile, portfolio; Q2 2025 results)",
+    "approved": "No"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech: Novo Nordisk drops 2 obesity drugs (Aug 2025)",
+     "url": "https://www.fiercebiotech.com/biotech/novo-nordisk-drops-2-obesity-drugs-part-major-pipeline-clearout"
+    }
+   ]
+  },
+  {
+   "name": "TERN-601",
+   "aliases": [],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Terns ended its obesity programme after the Phase 2 readout (2025)",
+    "approved": "No"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: Terns turns away from obesity pill",
+     "url": "https://www.biospace.com/drug-development/terns-turns-away-from-obesity-pill-after-uncompetitive-phase-ii-profile"
+    }
+   ]
+  },
+  {
+   "name": "AMG 786",
+   "aliases": [],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Amgen stopped the Phase 1 molecule (May 2024)",
+    "approved": "No"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech: Amgen drops Phase 1 obesity drug",
+     "url": "https://www.fiercebiotech.com/biotech/amgen-drops-early-stage-obesity-drug-upping-pressure-maritide"
+    }
+   ]
+  },
+  {
+   "name": "BI 1820237",
+   "aliases": [],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Boehringer Ingelheim ended development (Oct 2024; Gubra partnership)",
+    "approved": "No"
+   },
+   "sources": [
+    {
+     "label": "Fierce Biotech: Boehringer drops obesity drug from Gubra partnership",
+     "url": "https://www.fiercebiotech.com/biotech/boehringer-ingelheim-drops-one-obesity-drug-gubra-partnership"
+    }
+   ]
+  },
+  {
+   "name": "Azelaprag",
+   "aliases": [
+    "BGE-105"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — BioAge stopped the Phase 2 STRIDES study (Dec 2024, liver transaminitis) and dropped the molecule (Jan 2025)",
+    "approved": "No",
+    "aliases": "BGE-105, BGE105, BGE 105"
+   },
+   "sources": [
+    {
+     "label": "BioSpace: BioAge axes Phase II obesity study",
+     "url": "https://www.biospace.com/drug-development/bioage-crashes-after-axing-phase-ii-obesity-study"
+    }
+   ]
+  },
+  {
+   "name": "Taranabant",
+   "aliases": [
+    "MK-0364"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Merck stopped Phase 3 development in Oct 2008 (psychiatric side effects)",
+    "approved": "No",
+    "aliases": "MK-0364, MK0364, MK 0364"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia: taranabant",
+     "url": "https://Www.Wikipedia.org/wiki/Taranabant"
+    }
+   ]
+  },
+  {
+   "name": "Taspoglutide",
+   "aliases": [
+    "R1583",
+    "BIM 51077"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Roche/Ipsen halted Phase 3 in Sep 2010 (hypersensitivity and GI tolerability)",
+    "approved": "No",
+    "aliases": "R1583, R-1583, R 1583, BIM 51077, BIM51077, BIM-51077"
+   },
+   "sources": [
+    {
+     "label": "Wikipedia: taspoglutide",
+     "url": "https://en.wikipedia.org/wiki/Taspoglutide"
+    }
+   ]
+  },
+  {
+   "name": "Rimonabant",
+   "aliases": [
+    "SR141716"
+   ],
+   "fields": {
+    "phase": "Withdrawn",
+    "regulatory_status": "Withdrawn — EU marketing authorisation withdrawn Jan 2009 (psychiatric risk); never approved in the US",
+    "approved": "No",
+    "aliases": "SR141716, SR-141716, SR 141716"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "GW501516",
+   "aliases": [
+    "Cardarine",
+    "Endurobol"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — GSK abandoned development in 2007 (cancer in animal studies); never approved",
+    "approved": "No",
+    "aliases": "Cardarine, Endurobol"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Oleoyl-estrone",
+   "aliases": [
+    "MP-101"
+   ],
+   "fields": {
+    "phase": "Discontinued",
+    "regulatory_status": "Discontinued — Manhattan Pharmaceuticals stopped development after Phase 2a (2007); never approved",
+    "approved": "No",
+    "aliases": "MP-101, MP101, MP 101"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  }
+ ]
+}

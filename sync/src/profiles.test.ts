@@ -103,3 +103,25 @@ test("import: fields, results and milestones land on the page found by name or a
   const goneM = await pool.query("SELECT count(*)::int AS n FROM product_milestones WHERE product_slug = 'zzamg133'");
   assert.equal(goneM.rows[0].n, 0);
 });
+
+test("import: every alias spelling links to the drug page; an alias that is its own page is reported", async () => {
+  await pool.query("DELETE FROM product_aliases WHERE product_slug = ANY($1) OR alias_slug IN ('zzvt355', 'zzrelsi')", [SLUGS]);
+  await pool.query("DELETE FROM products WHERE slug = ANY($1)", [SLUGS]);
+  await pool.query("INSERT INTO products (slug, name) VALUES ('zzsemaglutide', 'ZZSemaglutide'), ('zzamg133', 'ZZAMG 133')");
+  const res = await importProfiles([{ source: "Alias test", drugs: [
+    { name: "ZZSemaglutide", aliases: ["ZZVT-355", "ZZVT 355", "ZZAMG133"], fields: { aliases: "ZZVT355, ZZRelsi" } },
+  ] }]);
+  const rows = (await pool.query<{ alias_slug: string }>("SELECT alias_slug FROM product_aliases WHERE product_slug = 'zzsemaglutide' ORDER BY 1")).rows;
+  assert.deepEqual(rows.map((r) => r.alias_slug), ["zzrelsi", "zzvt355"]); // three spellings, one key
+  assert.equal(res.aliases, 2);
+  assert.ok(res.duplicates.some((d) => d.startsWith("ZZAMG133")), "an alias that is its own drug page is reported");
+  await pool.query("DELETE FROM product_aliases WHERE product_slug = 'zzsemaglutide'");
+});
+
+test("auto-fill: glued-together registry spellings are not aliases", () => {
+  const a = deriveAuto({ slug: "ribupatide", name: "Ribupatide", trials: [], lookup: null,
+    aliasKeys: ["hrs9531", "hrs9531placebo", "kai9531"] });
+  const list = (a.aliases?.value ?? "").split(", ");
+  assert.ok(list.includes("HRS9531") && list.includes("KAI9531"), a.aliases?.value);
+  assert.ok(!list.includes("HRS9531PLACEBO"), a.aliases?.value);
+});

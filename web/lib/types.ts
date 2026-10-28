@@ -167,4 +167,6 @@ export interface ProductSummary extends ProductInfo {
   reports_only: boolean; // linked only to company pipeline reports (no conference abstract)
   other_names: string | null; // every other name the database knows (merged spellings, codes, abstract names), for search
   next_milestone: { title: string; date_label: string | null; kind: MilestoneKind } | null; // the next expected milestone
+  active_trials: number;          // trials recruiting, about to start or still running (all classes)
+  last_trial_year: number | null; // start year of its newest trial
 }

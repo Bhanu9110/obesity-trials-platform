@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductSummary } from "@/lib/types";
 import { highestPhase } from "@/lib/format";
+import { devStage, STAGE_META } from "@/lib/devStage";
 import { matchDrug } from "@/lib/drugSearch";
 import { REG_GROUPS, regGroup, shortStatus } from "@/lib/regulatory";
 import { dateText } from "@/lib/milestones";
@@ -99,7 +100,7 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
             <tr>
               <th className="px-4 py-3 font-semibold">Drug</th>
               <th className="px-4 py-3 text-right font-semibold" title="Primary-obesity trials (+ other stored trials)">Trials</th>
-              <th className="px-4 py-3 font-semibold">Most advanced trial</th>
+              <th className="px-4 py-3 font-semibold" title="Approved in any country, filed, discontinued, or the highest trial phase">Development stage</th>
               <th className="px-4 py-3 font-semibold">Modality</th>
               <th className="px-4 py-3 font-semibold">Class</th>
               <th className="px-4 py-3 font-semibold">Regulatory status</th>
@@ -138,7 +139,14 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-slate-700">
-                    {p.trial_phases.length ? highestPhase(p.trial_phases) : p.phase ? <span title="From the drug profile (no trial yet)">{p.phase}</span> : "—"}
+                    {(() => {
+                      const st = devStage(p);
+                      const top = p.trial_phases.length ? highestPhase(p.trial_phases) : null;
+                      return <>
+                        <span title={st.detail} className={`whitespace-nowrap rounded px-1.5 py-px text-[11px] font-medium ring-1 ${STAGE_META[st.key].chip}`}>{st.label}</span>
+                        {top && st.key !== "p1" && st.key !== "p2" && st.key !== "p3" && <div className="mt-0.5 text-[11px] text-slate-400">trials up to {top}</div>}
+                      </>;
+                    })()}
                   </td>
                   <td className="px-4 py-2.5 text-slate-700">{p.modality || <span className="text-slate-300">—</span>}</td>
                   <td className="px-4 py-2.5 text-slate-700">{p.drug_class || <span className="text-slate-300">—</span>}</td>

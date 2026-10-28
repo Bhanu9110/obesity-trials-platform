@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { aliasDisplay } from "@/lib/aliases";
 import type { Product, ProductInfo } from "@/lib/types";
 
 // Drug profile. Blank fields are filled every day from the research files (marked "research",
@@ -84,6 +85,7 @@ function formatValue(key: keyof ProductInfo, v: string): string {
     const d = new Date(`${v}T00:00:00`);
     return isNaN(d.getTime()) ? v : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   }
+  if (key === "aliases" || key === "brand_names") return aliasDisplay(v); // VT355, VT-355, VT 355
   return v;
 }
 

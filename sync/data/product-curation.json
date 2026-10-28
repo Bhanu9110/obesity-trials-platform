@@ -1,6 +1,6 @@
 {
  "about": "Reviewed list of product names that are not drugs. 'not_drug', 'supplement' and 'other_drug' (medicines with no effect on obesity, e.g. anaesthetics, antibiotics, blood-pressure drugs, contraceptives in drug-interaction studies) entries stay in the database but are left out of the drug list, dashboard counts, search and the auto-fill (products.kind). 'merge' folds duplicate pages of the same drug into one (like 'Merge' on a drug page). 'drug' lists names that must stay in the drug list even if a name rule would hide them. Applied on every auto-fill run (npm run enrich-products) or with npm run curate-products. A choice made on a drug page always wins over this file.",
- "reviewed": "2026-10-27",
+ "reviewed": "2026-10-28",
  "not_drug": {
   "18fdgpet_coldstimulation_ct": "18FDG-PET + Cold Stimulation + CT",
   "abdomen": "Abdomen",
@@ -1539,6 +1539,38 @@
   "zt003part1": {
    "into": "zt003",
    "name": "ZT003"
+  },
+  "cp945598": {
+   "into": "otenabant",
+   "name": "Otenabant"
+  },
+  "inb00009": {
+   "into": "ecnoglutide",
+   "name": "Ecnoglutide"
+  },
+  "nb32": {
+   "into": "bupropion_naltrexone",
+   "name": "Bupropion + Naltrexone"
+  },
+  "vi0521": {
+   "into": "phentermine_topiramate",
+   "name": "Phentermine + Topiramate"
+  },
+  "sibutraminehydochloride": {
+   "into": "sibutramine",
+   "name": "Sibutramine"
+  },
+  "efsubaglutidealfa": {
+   "into": "efsubaglutide",
+   "name": "Efsubaglutide"
+  },
+  "tesomet": {
+   "into": "metoprolol_tesofensine",
+   "name": "Metoprolol + Tesofensine"
+  },
+  "exendin": {
+   "into": "exenatide",
+   "name": "Exenatide"
   }
  }
 }

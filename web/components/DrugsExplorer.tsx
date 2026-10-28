@@ -11,29 +11,31 @@ import { KIND_META, dateText } from "@/lib/milestones";
 
 // Drugs: a card grid (default) or the detailed table. Search, stage filter and sort.
 
-const level = (p: string) => (p.includes("PHASE4") ? 4 : p.includes("PHASE3") ? 3 : p.includes("PHASE2") ? 2 : p.includes("PHASE1") ? 1 : 0);
-const topLevel = (phases: string[]) => phases.reduce((m, p) => Math.max(m, level(p)), 0);
-// A drug with no ClinicalTrials.gov trial yet, known from conference abstracts (e.g. ADA 2026);
-// its trial count is the clinical trials those abstracts report.
+import { devStage, STAGE_META, type StageKey } from "@/lib/devStage";
+import { cleanNames, splitNames } from "@/lib/aliases";
+
+// Stage chips: the development stage (lib/devStage.ts), not only the highest trial phase, so a drug
+// approved in any country shows as Approved and a discontinued one as Discontinued.
+const STAGES: { key: "" | StageKey; label: string }[] = [
+  { key: "", label: "All stages" },
+  { key: "approved", label: "Approved" },
+  { key: "filed", label: "Filed" },
+  { key: "p3", label: "Phase 3" },
+  { key: "p2", label: "Phase 2" },
+  { key: "p1", label: "Phase 1" },
+  { key: "early", label: "Preclinical / no NCT yet" },
+  { key: "stopped", label: "Discontinued / withdrawn" },
+  { key: "inactive", label: "No active development" },
+];
+const LADDER = ["P1", "P2", "P3", "Appr."];
+// A drug with no ClinicalTrials.gov trial yet, known from conference abstracts (e.g. ADA 2026).
 const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.nct_trials === 0;
-// Most advanced phase: from its trials, else from its profile ("Phase 1/2" -> 2).
-const topOf = (p: ProductSummary) => p.trial_phases.length ? topLevel(p.trial_phases)
-  : Math.max(0, ...[...(p.phase ?? "").matchAll(/\d/g)].map((m) => Number(m[0])).filter((n) => n <= 4));
-const STAGES = [
-  { key: 0, label: "All stages" },
-  { key: 1, label: "Phase 1" },
-  { key: 2, label: "Phase 2" },
-  { key: 3, label: "Phase 3" },
-  { key: 4, label: "Phase 4" },
-  { key: 5, label: "No NCT yet (conference)" },
-] as const;
-const LADDER = ["P1", "P2", "P3", "P4"];
 const STEP = 24;
 
 export default function DrugsExplorer({ products }: { products: ProductSummary[] }) {
   const [view, setView] = useState<"grid" | "table">("grid");
   const [q, setQ] = useState("");
-  const [stage, setStage] = useState(0);
+  const [stage, setStage] = useState<"" | StageKey>("");
   const [sort, setSort] = useState<"trials" | "phase" | "name">("trials");
   const [limit, setLimit] = useState(STEP);
   const [reg, setReg] = useState<"" | RegGroup | "milestone">("");
@@ -49,12 +51,14 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
     : reg === "milestone" ? listed.filter((p) => p.next_milestone)
       : listed.filter((p) => regGroup(p.regulatory_status, p.approved) === reg), [listed, reg]);
   const forTable = useMemo(() => !reg ? products : products.filter((p) => base.includes(p)), [products, base, reg]);
-  const inStage = (p: ProductSummary, k: number) => (k === 5 ? abstractOnly(p) : !abstractOnly(p) && topOf(p) === k);
+  const stages = useMemo(() => new Map(products.map((p) => [p.slug, devStage(p)])), [products]);
+  const stageOf = (p: ProductSummary) => stages.get(p.slug)!;
+  const inStage = (p: ProductSummary, k: StageKey) => stageOf(p).key === k;
   // Search: name, brand names, every alias / code name the database knows, company, class.
   const { rows, via } = useMemo(() => {
     const via = new Map<string, string>(); // slug -> the alias that matched
     const out = base.filter((p) => {
-      if (stage && !inStage(p, stage)) return false; // most advanced phase is exactly this one
+      if (stage && !inStage(p, stage)) return false;
       const m = matchDrug(p, q);
       if (m.via) via.set(p.slug, m.via);
       return m.hit;
@@ -63,13 +67,13 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
     const exact = (p: ProductSummary) => (q.trim() && [p.name, via.get(p.slug)].some((n) => n?.toLowerCase() === q.trim().toLowerCase()) ? 1 : 0);
     out.sort((a, b) => exact(b) - exact(a) || (
       sort === "name" ? a.name.localeCompare(b.name)
-        : sort === "phase" ? topOf(b) - topOf(a) || b.trials - a.trials
+        : sort === "phase" ? STAGE_META[stageOf(b).key].order - STAGE_META[stageOf(a).key].order || stageOf(b).reached - stageOf(a).reached || b.trials - a.trials
           : b.trials - a.trials || a.name.localeCompare(b.name)));
     return { rows: out, via };
-  }, [base, q, stage, sort]);
+  }, [base, q, stage, sort, stages]);
 
-  const counts = useMemo(() => STAGES.map((s) => (s.key === 0 ? base.length
-    : base.filter((p) => inStage(p, s.key)).length)), [base]);
+  const counts = useMemo(() => STAGES.map((s) => (!s.key ? base.length
+    : base.filter((p) => inStage(p, s.key as StageKey)).length)), [base, stages]);
 
   return (
     <div className="space-y-4">
@@ -101,7 +105,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
       {view === "table" ? <DrugsTable products={forTable} search={q} /> : (
         <>
           <div className="flex flex-wrap items-center gap-2">
-            {STAGES.map((s, i) => (
+            {STAGES.map((s, i) => (s.key && !counts[i] ? null :
               <button key={s.key} type="button" onClick={() => { setStage(s.key); setLimit(STEP); }}
                       className={`rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition ${
                         stage === s.key ? "bg-brand-500/15 text-brand-700 ring-brand-500/40" : "bg-white text-slate-600 ring-slate-200 hover:text-slate-900"}`}>
@@ -131,7 +135,9 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {rows.slice(0, limit).map((p) => {
-                const top = topOf(p);
+                const st = stageOf(p);
+                const top = st.key === "approved" ? 4 : st.reached;
+                const dim = st.key === "stopped" || st.key === "inactive";
                 const onlyAbs = abstractOnly(p);
                 const undisclosed = /^undisclosed/i.test(p.name);
                 return (
@@ -142,7 +148,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                       <div className="min-w-0">
                         <div className={`truncate font-display text-[17px] font-semibold ${undisclosed ? "text-slate-600" : "text-slate-950"} group-hover:text-brand-700`}>{p.name}</div>
                         <div className="mt-0.5 truncate text-xs text-slate-500">
-                          {[p.brand_names, p.aliases].filter(Boolean).join(" · ") || p.sponsor || (undisclosed ? "Drug class only — name not disclosed" : "Profile not filled in yet")}
+                          {[p.brand_names, cleanNames(splitNames(p.aliases), p.name).join(", ")].filter(Boolean).join(" · ") || p.sponsor || (undisclosed ? "Drug class only — name not disclosed" : "Profile not filled in yet")}
                         </div>
                         {via.has(p.slug) && (
                           <div className="mt-1 inline-flex max-w-full items-center gap-1 truncate rounded-md bg-brand-500/10 px-1.5 py-0.5 text-[11px] font-medium text-brand-700">
@@ -171,13 +177,15 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                     <div className="mt-4">
                       <div className="mb-1.5 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                         <span>Development</span>
-                        <span className="text-slate-400">{top ? `up to Phase ${top}` : p.phase && onlyAbs ? p.phase : "phase n/a"}</span>
+                        <span title={st.detail} className={`rounded px-1.5 py-px normal-case tracking-normal ring-1 ${STAGE_META[st.key].chip}`}>
+                          {st.label}{dim && st.reached ? ` · reached P${st.reached}` : ""}
+                        </span>
                       </div>
                       <div className="grid grid-cols-4 gap-1">
                         {LADDER.map((l, i) => (
                           <div key={l} className="space-y-1">
-                            <div className={`h-1.5 rounded-full ${i < top ? "" : "bg-slate-100"}`}
-                                 style={i < top ? { background: `linear-gradient(90deg, #22d3ee, ${["#38bdf8", "#818cf8", "#a78bfa", "#f472b6"][i]})`, boxShadow: "0 0 10px -2px rgb(34 211 238 / 0.6)" } : undefined} />
+                            <div className={`h-1.5 rounded-full ${i < top ? (dim ? "bg-slate-300" : "") : "bg-slate-100"}`}
+                                 style={i < top && !dim ? { background: `linear-gradient(90deg, #22d3ee, ${["#38bdf8", "#818cf8", "#a78bfa", "#34d399"][i]})`, boxShadow: "0 0 10px -2px rgb(34 211 238 / 0.6)" } : undefined} />
                             <div className={`text-center text-[10px] ${i < top ? "text-slate-700" : "text-slate-400"}`}>{l}</div>
                           </div>
                         ))}
@@ -204,10 +212,9 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                       </div>
                     )}
 
-                    {(p.drug_class || p.candidate || p.approved === "Yes" || p.abstracts > 0) && (
+                    {(p.drug_class || p.candidate || p.abstracts > 0) && (
                       <div className="mt-3 flex flex-wrap gap-1">
                         {p.abstracts > 0 && <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 ring-1 ring-amber-200" title={`${p.abstracts} conference abstract${p.abstracts === 1 ? "" : "s"}`}>{p.abstract_sources ?? "Abstracts"}</span>}
-                        {p.approved === "Yes" && <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-emerald-700 ring-1 ring-emerald-200">approved</span>}
                         {p.candidate && <span className="rounded-md bg-accent-50 px-1.5 py-0.5 text-[10px] font-medium text-accent-700 ring-1 ring-accent-200">{p.candidate}</span>}
                         {p.drug_class && <span className="truncate rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 ring-1 ring-slate-200">{p.drug_class}</span>}
                       </div>

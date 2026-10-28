@@ -534,7 +534,12 @@ export function deriveAuto(input: DeriveInput): AutoInfo {
     if (k !== ownSlug && k.includes(ownSlug)) continue;
     if (isCode(k) || INN_STEM_RE.test(k)) codes.push({ v: isCode(k) ? k.toUpperCase() : titleCase(k), src: "Alias list" });
   }
-  const codeList = uniqBy(codes, (c) => slugify(c.v)).filter((c) => slugify(c.v) !== ownSlug && slugify(c.v) !== input.slug).slice(0, 8);
+  // Glued-together junk from registry spellings ("HRS9531PLACEBO", "BGM0504MULTIDOSE"): a name with no
+  // space or hyphen that contains another of the drug's names plus extra letters.
+  const keysSeen = [ownSlug, input.slug, ...codes.map((c) => slugify(c.v))].filter((k) => k.length >= 4);
+  const glued = (v: string) => /^[A-Za-z0-9]+$/.test(v) && keysSeen.some((k) => k !== slugify(v) && slugify(v).includes(k));
+  const codeList = uniqBy(codes.filter((c) => !glued(c.v)), (c) => slugify(c.v))
+    .filter((c) => slugify(c.v) !== ownSlug && slugify(c.v) !== input.slug).slice(0, 8);
   if (codeList.length) {
     // "Company pipeline (Roche) + Company pipeline (Zealand)" -> "Company pipeline (Roche, Zealand)"
     const companies = [...new Set(codeList.map((c) => /^Company pipeline \((.*)\)$/.exec(c.src)?.[1]).filter((x): x is string => !!x))];

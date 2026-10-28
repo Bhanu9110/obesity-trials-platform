@@ -8,6 +8,8 @@ import { KIND_META, dateText } from "@/lib/milestones";
 import ConferenceAbstracts from "@/components/ConferenceAbstracts";
 import ProductKind from "@/components/ProductKind";
 import { highestPhase } from "@/lib/format";
+import { devStage } from "@/lib/devStage";
+import { shortStatus } from "@/lib/regulatory";
 import ProductInfoCard from "@/components/ProductInfoCard";
 import MergeProduct from "@/components/MergeProduct";
 import DrugTrialsTable from "@/components/DrugTrialsTable";
@@ -57,6 +59,15 @@ export default async function DrugPage({ params, searchParams }: {
   // No ClinicalTrials.gov trial yet: the clinical trials its conference abstracts report.
   const confTrials = trials.length === 0 ? product.conference_trials : 0;
   const confSources = [...new Set(abstracts.map((a) => a.source))].join(", ");
+  const ACTIVE = ["RECRUITING", "NOT_YET_RECRUITING", "ACTIVE_NOT_RECRUITING", "ENROLLING_BY_INVITATION", "AVAILABLE"];
+  const years = trials.map((t) => Number((t.start_date ?? "").slice(0, 4))).filter((y) => y > 1900);
+  const stage = devStage({
+    phase: product.phase, approved: product.approved, regulatory_status: product.regulatory_status,
+    trial_phases: [...new Set(primary.map((t) => t.phase).filter((x): x is string => !!x))],
+    abstracts: abstracts.length, nct_trials: trials.length,
+    active_trials: trials.filter((t) => !t.overall_status || ACTIVE.includes(t.overall_status)).length,
+    last_trial_year: years.length ? Math.max(...years) : null,
+  });
 
   return (
     <div className="space-y-5">
@@ -100,7 +111,9 @@ export default async function DrugPage({ params, searchParams }: {
         <div className="relative mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatTile label="Trials" value={(confTrials || primary.length).toLocaleString()}
                     sub={confTrials ? `reported in ${confSources}` : "primary obesity"} tone="cyan" icon={Icon.flask} />
-          <StatTile label="Most advanced" value={primary.length ? highestPhase(primary.map((t) => t.phase)) : trials.length === 0 && product.phase ? product.phase : "—"} tone="pink" icon={Icon.rocket} />
+          <StatTile label="Development stage" value={stage.label}
+                    sub={stage.key === "p1" || stage.key === "p2" || stage.key === "p3" || !primary.length ? shortStatus(stage.detail.replace(/^(investigational)\s*[—-]\s*/i, ""), 70) : `trials up to ${highestPhase(primary.map((t) => t.phase))}`}
+                    tone="pink" icon={Icon.rocket} />
           <StatTile label="Sponsors" value={(confTrials && product.sponsor ? 1 : new Set(primary.map((t) => t.sponsor).filter(Boolean)).size).toLocaleString()}
                     sub={`${primary.filter((t) => t.lead_sponsor_class === "INDUSTRY").length} industry trials`} tone="violet" icon={Icon.building} />
           <StatTile label="Recruiting" value={primary.filter((t) => ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION"].includes(t.overall_status ?? "")).length.toLocaleString()}

@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.8 |
-| **Last updated** | 23 Oct 2026 |
+| **Manual version** | 1.9 |
+| **Last updated** | 28 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
 > This manual lives in GitHub at `docs/USER_MANUAL.md` and is shown inside the website on the **Help & manual** page. It is updated with every change to the website — see [18. Change log](#18-change-log).
@@ -113,10 +113,12 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | Feature | How to use it |
 |---|---|
 | **Upcoming milestones** | The next 8 expected regulatory decisions, readouts and launches across all drugs, soonest first. "date passed" means the expected date has gone by — check whether it happened. Click a drug to open its timeline |
-| Search | Finds a drug by **name, INN, brand, code name or any alias** the database knows, plus company and class. Spaces, hyphens and capitals don't matter (`nn 9440`, `NN-9440` and `nn9440` all work). A match on an alias shows "Also known as …" |
+| Search | Finds a drug by **name, INN, brand, code name or any alias** the database knows, plus company and class. Spaces, hyphens and capitals don't matter (`nn 9440`, `NN-9440` and `nn9440` all work). A match on an alias shows "Also known as …". Code names are listed in every spelling — `VT355, VT-355, VT 355` |
 | **Regulatory status filter** | Approved, Filed / under review, Investigational, Discontinued, or **With an upcoming milestone**. Works in both the cards and the table |
 | Card and table extras | Each drug shows its regulatory status (a coloured tag plus the detail) and its **next milestone** with its date |
-| Stage chips | All stages, Phase 1–4, and **No NCT yet (conference)** for drugs known only from conference abstracts or company reports |
+| Stage chips | The **development stage**, not only the highest trial phase: **Approved** (in *any* country — e.g. mazdutide and ecnoglutide in China, even though their trials only reach Phase 3), **Filed**, **Phase 3 / 2 / 1**, **Preclinical / no NCT yet** (known only from conference abstracts or company reports), **Discontinued / withdrawn**, and **No active development** |
+| How the stage is decided | 1) Discontinued or withdrawn when the regulatory status or phase says so; 2) Approved when approved anywhere (Phase 4 trials also count, unless the status says investigational); 3) Filed; 4) **No active development** when no trial is running and the newest trial started 7+ years ago — a warning, not a confirmed discontinuation; 5) otherwise the highest trial phase. Hover the stage tag for the reason |
+| Development bar on a card | P1 → P2 → P3 → Appr.; grey when the drug was stopped, with "reached P3" for the furthest phase |
 | Sort | Most trials, most advanced, name A–Z |
 | Cards / Table | Switch between the card grid and a detailed table; the main search box filters both |
 | `*` next to a trial count | The trial was reported in a conference abstract or company report and has no ClinicalTrials.gov record yet |
@@ -125,7 +127,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 
 | Section | What it shows |
 |---|---|
-| Header | Trials, phase, sponsors, recruiting; under the name, the **regulatory status** and the **next milestone** (click either to jump to it) |
+| Header | Trials, **development stage** (same rules as the drug list), sponsors, recruiting; under the name, the **regulatory status** and the **next milestone** (click either to jump to it) |
 | Profile | Company, class, sub-class, mechanism, modality, route, phase, code names, brand names, approval — each value shows its source; hand-entered values win |
 | **Development & regulatory** | INN, API (active ingredient), regulatory status, designations (Breakthrough, Fast Track, PRIME, priority vouchers …), patents / exclusivity, anticipated launch, efficacy signal and safety signal. Part of the profile: change them with its **Edit** button |
 | **Milestones & timeline** | Dated events in two columns — **Upcoming** (soonest first) and **Past** (newest first): regulatory steps, readouts, launches, patent expiries and inflection points, each with its source. Tabs: All, Upcoming, Past |
@@ -277,6 +279,8 @@ When a sync finishes, pages that are open show the new numbers within about a mi
 | **Research files** | `sync/data/profiles/*.json` — the researched development, regulatory and commercial profile of the leading obesity drugs: INN, API, regulatory status, designations, patents, launch timing, efficacy and safety signals, results and milestones, each with its source. Loaded on every daily sync |
 | Current file | `obesity-leaders-2026-10.json` (researched 25 Oct 2026): semaglutide, tirzepatide, orforglipron, retatrutide, CagriSema, survodutide, maridebart cafraglutide, amycretin, mazdutide, VK2735, petrelintide, eloralintide, ecnoglutide — 42 results and 65 milestones |
 | `drug-basics-2026-10.json` | Modality, route, therapy class, subclass and mechanism for 479 drugs whose automatic profile left them blank or wrong — standard pharmacology for established drugs, company sources for pipeline drugs (e.g. VK2735, HRS9531, petrelintide, AZD6234, MET-097). Codes with no public information are left blank |
+| `status-audit-2026-10.json` | Researched 28 Oct 2026 after the client data review: approvals outside the US (ecnoglutide, mazdutide, beinaglutide, efsubaglutide, henagliflozin, enavogliflozin, cetilistat), filings (BGM0504, ribupatide, tesofensine, CagriSema), discontinued drugs with the company source (otenabant, beloranib, pramlintide/Symlin, danuglipron, lotiglipron, cotadutide, CT-868, emugrobart, dapiglutide, monlunabant, NNC0519-0130, INV-347, TERN-601, AMG 786, BI 1820237, azelaprag, taranabant, taspoglutide, PF-07976016 …), wrong automatic approvals corrected (phentermine, diethylpropion, ARD-101, cannabis …) and missing aliases (Relsipatide, BG128, Poterepatide, P001, Safiglipron, Compound 121a, CKD-732, HRK-429, HRK-512, J3R-MC-YDAL, MET-097o, IN-B00009, DA-63110) |
+| **Aliases in research files** | Every alias in a research file is linked to the drug page in all its spellings, so a new trial that writes `VT 355` lands on the same page as `VT-355`. An alias that already has its own drug page is reported in the sync log so it can be merged |
 | Updating | Edit the file (or add a newer one) and push; rows that are no longer in a file are removed on the next sync, hidden rows stay hidden, and rows added on the website are never touched. A drug named in a file must already have a drug page (found by its name or any alias) |
 
 ## 16. Settings for the super admin
@@ -307,6 +311,7 @@ Never paste passwords, tokens or connection strings into chats, issues or this m
 | The Sync buttons don't work | Set `GITHUB_DISPATCH_TOKEN` in Vercel (see DEPLOY.md) |
 | A count looks out of date | Wait a minute or switch back to the tab — pages refresh their numbers by themselves. If it still looks wrong, check **Admin → Recent sync runs** for a failed run |
 | Search doesn't find a code name | The alias may not be known yet; add it to the drug's profile (Code names) |
+| An approved drug shows a trial phase, or a stopped drug looks active | Set its **Regulatory status** on the drug page (Edit), starting with *Approved — …*, *Filed — …* or *Discontinued — …*; the stage follows the first word |
 
 ## 18. Change log
 
@@ -314,6 +319,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 28 Oct 2026 | 1.9 | **Development stage** replaces "highest trial phase" on the drug list, table and drug page: drugs approved in any country show **Approved**, discontinued/withdrawn drugs show **Discontinued**, and drugs with no trial for 7+ years show **No active development**. Status audit of 46 drugs with sources; 8 more duplicate pages merged (CP-945598 → otenabant, IN-B00009 → ecnoglutide, NB32 → Contrave, VI-0521 → Qsymia, Tesomet, Exendin, …). Aliases shown in every spelling (VT355, VT-355, VT 355); glued-together junk names (HRS9531PLACEBO …) removed | 7, 15, 17 |
 | 27 Oct 2026 | 1.8 | New kind **Not an obesity drug**: 270 medicines with no effect on obesity (anaesthetics, painkillers, antibiotics, anticoagulants, blood-pressure and cholesterol drugs, contraceptives and probe drugs from drug-interaction studies, vaccines, IV fluids …) taken out of the drug list. They stay in the database with their trials | 7 |
 | 27 Oct 2026 | 1.7 | 38 natural hormones (glucagon, ghrelin, PYY, GIP, oxytocin, insulin, growth hormone, testosterone, oestrogen, thyroid hormone …) taken out of the drug list as "not a drug"; engineered analogues (metreleptin, setmelanotide, insulin glargine …) stay. Each can be put back with the Kind selector on its page | 7 |
 | 27 Oct 2026 | 1.6 | 64 duplicate drug pages merged into 56 (code name vs INN, brand vs generic, misspellings — e.g. MET097 and PF-08653944 into Berobenatide, HRS9531 into Ribupatide, Tirzapatide into Tirzepatide). Merges now also carry the development & regulatory fields and rows added on the page | 7 |

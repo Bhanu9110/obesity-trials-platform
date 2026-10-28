@@ -13,10 +13,14 @@ export const REG_GROUPS: { key: RegGroup; label: string; chip: string }[] = [
 
 export function regGroup(status: string | null | undefined, approved?: string | null): RegGroup {
   const s = (status ?? "").trim().toLowerCase();
-  if (/^approved|^marketed|^launched/.test(s)) return "approved";
-  if (/under (fda |ema )?review|submitted|filed|registration|pdufa|nda|bla|maa/.test(s)) return "review";
+  // The first words decide ("Investigational — Phase 3 … NDA planned" is investigational).
+  if (/^(approved|marketed|launched)/.test(s)) return "approved";
+  if (/^(discontinu|withdrawn|terminated|stopped|abandoned)/.test(s)) return "stopped";
+  if (/^(filed|under (fda |ema |nmpa )?review|submitted|registration|pre-?registration|nda|bla|maa)\b/.test(s)) return "review";
+  if (/^(investigational|phase|preclinical|clinical)/.test(s)) return "investigational";
   if (/discontinu|withdrawn|terminated|stopped/.test(s)) return "stopped";
-  if (/investigational|phase|preclinical|clinical/.test(s)) return "investigational";
+  if (/\b(under (fda |ema |nmpa )?review|submitted|filed|pdufa|nda|bla|maa)\b/.test(s)) return "review";
+  if (/investigational|\bphase\b|preclinical|clinical/.test(s)) return "investigational";
   if (!s && approved === "Yes") return "approved";
   return "unknown";
 }
