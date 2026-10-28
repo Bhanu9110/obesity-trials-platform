@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.10 |
+| **Manual version** | 1.10.1 |
 | **Last updated** | 29 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -116,7 +116,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 |---|---|
 | **Upcoming milestones** | The next 8 expected regulatory decisions, readouts and launches across all drugs, soonest first. "date passed" means the expected date has gone by — check whether it happened. Click a drug to open its timeline |
 | Search | Finds a drug by **name, INN, brand, code name or any alias** the database knows, plus company and class. Spaces, hyphens and capitals don't matter (`nn 9440`, `NN-9440` and `nn9440` all work). A match on an alias shows "Also known as …". Code names are listed in every spelling — `VT355, VT-355, VT 355` |
-| **Search by drug class** | Type a class instead of a drug — `GLP-1 agonists`, `GLP-1 RA`, `amylin analogues`, `incretin`, `dual agonists`, `GIP`, `glucagon`, `SGLT2 inhibitors`, `CB1 blockers`, `MC4R`, `myostatin`, `lipase inhibitors` … (plural, hyphens and capitals don't matter). Every drug of the class is listed with a **Drug class** banner and a tag on each drug: *GLP-1 only*, *Dual: GLP-1 + GIP*, *Triple: GLP-1 + GIP + glucagon*, *GLP-1 agonist + GIPR antagonist* or *Combination: amylin + GLP-1*. Single-target drugs come first. Works in the cards and the table |
+| **Search by drug class** | Type a class instead of a drug — `GLP-1 agonists`, `GLP-1 RA`, `amylin analogues`, `incretin`, `dual agonists`, `GIP`, `glucagon`, `SGLT2 inhibitors`, `CB1 blockers`, `MC4R`, `myostatin`, `lipase inhibitors` … (plural, hyphens and capitals don't matter). Every drug of the class is listed with a **Drug class** banner and a tag on each drug: *GLP-1 only*, *Dual: GLP-1 + GIP*, *Triple: GLP-1 + GIP + glucagon*, *GLP-1 agonist + GIPR antagonist* or *Combination: amylin + GLP-1*. The drugs are **grouped by development stage** (Approved, Filed, Phase 3, 2, 1, Preclinical, Discontinued, No active development) and the stage chips count only the drugs of the class — click one to show just that stage. In the table they are sorted the same way |
 | How a drug's class is found | From its profile — sub-class first, then mechanism, then therapy class; for a drug with no profile, from its name stem (*-glutide*, *-lintide*, *-gliflozin* …). Drugs that only raise the body's own hormone ("increases GLP-1 release") are not counted as agonists. A drug missing from a class usually has an empty profile — fill in its sub-class |
 | **Regulatory status filter** | Approved, Filed / under review, Investigational, Discontinued, or **With an upcoming milestone**. Works in both the cards and the table |
 | Card and table extras | Each drug shows its regulatory status (a coloured tag plus the detail) and its **next milestone** with its date |
@@ -323,6 +323,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 29 Oct 2026 | 1.10.1 | Class search: drugs grouped phase-wise, stage chips count only the class's drugs (and any search's results), and a class search starts from All stages | 7 |
 | 29 Oct 2026 | 1.10 | **Search by drug class** on the Drugs page, the Trials explorer and the top search (Ctrl K): `GLP-1 agonists`, `amylin analogues`, `SGLT2 inhibitors` … list every drug of the class (or all its trials), including dual / triple agonists and combinations, each labelled | 4, 6, 7 |
 | 28 Oct 2026 | 1.9 | **Development stage** replaces "highest trial phase" on the drug list, table and drug page: drugs approved in any country show **Approved**, discontinued/withdrawn drugs show **Discontinued**, and drugs with no trial for 7+ years show **No active development**. Status audit of 46 drugs with sources; 8 more duplicate pages merged (CP-945598 → otenabant, IN-B00009 → ecnoglutide, NB32 → Contrave, VI-0521 → Qsymia, Tesomet, Exendin, …). Aliases shown in every spelling (VT355, VT-355, VT 355); glued-together junk names (HRS9531PLACEBO …) removed | 7, 15, 17 |
 | 27 Oct 2026 | 1.8 | New kind **Not an obesity drug**: 270 medicines with no effect on obesity (anaesthetics, painkillers, antibiotics, anticoagulants, blood-pressure and cholesterol drugs, contraceptives and probe drugs from drug-interaction studies, vaccines, IV fluids …) taken out of the drug list. They stay in the database with their trials | 7 |

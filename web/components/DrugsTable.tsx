@@ -44,6 +44,11 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
       if (m.via) via.set(p.slug, m.via);
       return m.hit;
     });
+    // A class search: phase-wise — approved first, then filed, Phase 3, 2, 1 …
+    if (members) {
+      const st = new Map(out.map((p) => [p, devStage(p)]));
+      out.sort((a, b) => STAGE_META[st.get(b)!.key].order - STAGE_META[st.get(a)!.key].order || b.trials - a.trials);
+    }
     return { rows: out, via };
   }, [visible, q, info, members]);
 

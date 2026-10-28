@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ProductSummary } from "@/lib/types";
 import DrugsTable from "@/components/DrugsTable";
 import { matchDrug } from "@/lib/drugSearch";
@@ -61,15 +61,20 @@ export default function DrugsExplorer({ products, initialQ = "" }: { products: P
   const cls = useMemo(() => classForQuery(q), [q]);
   const members = useMemo(() => (cls ? classMembers(targets, cls) : null), [cls, targets]);
   // Search: name, brand names, every alias / code name the database knows, company, class.
-  const { rows, via } = useMemo(() => {
+  // 1) what the search finds (a class: its drugs), 2) the stage chip narrows it down.
+  // The stage chips count only what the search found.
+  const { matched, via } = useMemo(() => {
     const via = new Map<string, string>(); // slug -> the alias that matched
-    const out = base.filter((p) => {
-      if (stage && !inStage(p, stage)) return false;
+    const matched = base.filter((p) => {
       if (members) return members.has(p);
       const m = matchDrug(p, q);
       if (m.via) via.set(p.slug, m.via);
       return m.hit;
     });
+    return { matched, via };
+  }, [base, q, members]);
+  const rows = useMemo(() => {
+    const out = matched.filter((p) => !stage || inStage(p, stage));
     // In a class: single-target first, then dual, triple, combinations.
     const kind = (p: ProductSummary) => (members ? KIND_ORDER[members.get(p)?.kind ?? "other"] : 0);
     // A drug whose name or code matches the search exactly comes first.
@@ -78,74 +83,18 @@ export default function DrugsExplorer({ products, initialQ = "" }: { products: P
       sort === "name" ? a.name.localeCompare(b.name)
         : sort === "phase" ? STAGE_META[stageOf(b).key].order - STAGE_META[stageOf(a).key].order || stageOf(b).reached - stageOf(a).reached || b.trials - a.trials
           : b.trials - a.trials || a.name.localeCompare(b.name)));
-    return { rows: out, via };
-  }, [base, q, stage, sort, stages, members]);
+    return out;
+  }, [matched, via, q, stage, sort, stages, members]);
 
-  const counts = useMemo(() => STAGES.map((s) => (!s.key ? base.length
-    : base.filter((p) => inStage(p, s.key as StageKey)).length)), [base, stages]);
+  const counts = useMemo(() => STAGES.map((s) => (!s.key ? matched.length
+    : matched.filter((p) => inStage(p, s.key as StageKey)).length)), [matched, stages]);
+  // A class search shows its drugs grouped by development stage, so start from "All stages".
+  useEffect(() => { if (cls) setStage(""); }, [cls]);
+  const groups = useMemo(() => !members ? null
+    : STAGES.filter((s) => s.key).map((s) => ({ key: s.key as StageKey, label: s.label, drugs: rows.filter((p) => inStage(p, s.key as StageKey)) }))
+      .filter((g) => g.drugs.length), [members, rows, stages]);
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[240px] flex-1">
-          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">{icons.search}</span>
-          <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(STEP); }}
-                 placeholder="Find a drug, brand, code name, company — or a class: GLP-1 agonists, amylin analogues…"
-                 className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none" />
-        </div>
-        <select value={reg} onChange={(e) => { setReg(e.target.value as typeof reg); setLimit(STEP); }} aria-label="Regulatory status"
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700">
-          <option value="">Any regulatory status</option>
-          {REG_GROUPS.filter((g) => regCounts[g.key]).map((g) => <option key={g.key} value={g.key}>{g.label} ({regCounts[g.key].toLocaleString()})</option>)}
-          {regCounts.milestone > 0 && <option value="milestone">With an upcoming milestone ({regCounts.milestone.toLocaleString()})</option>}
-        </select>
-        <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1">
-          <button type="button" onClick={() => setView("grid")} title="Cards"
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${view === "grid" ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>
-            {icons.grid} Cards
-          </button>
-          <button type="button" onClick={() => setView("table")} title="Table"
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${view === "table" ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>
-            {icons.list} Table
-          </button>
-        </div>
-      </div>
-
-      {view === "table" ? <DrugsTable products={forTable} search={q} /> : (
-        <>
-          <div className="flex flex-wrap items-center gap-2">
-            {STAGES.map((s, i) => (s.key && !counts[i] ? null :
-              <button key={s.key} type="button" onClick={() => { setStage(s.key); setLimit(STEP); }}
-                      className={`rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition ${
-                        stage === s.key ? "bg-brand-500/15 text-brand-700 ring-brand-500/40" : "bg-white text-slate-600 ring-slate-200 hover:text-slate-900"}`}>
-                {s.label} <span className="ml-1 tabular-nums opacity-70">{counts[i].toLocaleString()}</span>
-              </button>
-            ))}
-            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}
-                    className="ml-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
-              <option value="trials">Most trials</option>
-              <option value="phase">Most advanced</option>
-              <option value="name">Name A–Z</option>
-            </select>
-          </div>
-
-          {cls && members && <ClassBanner label={cls.label} count={rows.length} noun={rows.length === 1 ? "drug" : "drugs"}
-                                           summary={classSummary(rows.map((p) => members.get(p)!).filter(Boolean))} />}
-          <p className="px-1 text-sm text-slate-500">
-            <b className="font-display text-base font-semibold text-slate-950">{rows.length.toLocaleString()}</b> drugs
-            {rows.some((p) => p.conference_trials > 0) && (
-              <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported in a conference abstract or company report, no ClinicalTrials.gov record yet</span>
-            )}
-          </p>
-
-          {rows.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white py-16 text-center">
-              <div className="font-display text-base font-semibold text-slate-900">No drug matches</div>
-              <p className="mt-1 text-sm text-slate-500">Try another name or a broader stage.</p>
-            </div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {rows.slice(0, limit).map((p) => {
+  const card = (p: ProductSummary) => {
                 const st = stageOf(p);
                 const top = st.key === "approved" ? 4 : st.reached;
                 const dim = st.key === "stopped" || st.key === "inactive";
@@ -233,11 +182,89 @@ export default function DrugsExplorer({ products, initialQ = "" }: { products: P
                     )}
                   </Link>
                 );
-              })}
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[240px] flex-1">
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">{icons.search}</span>
+          <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(STEP); }}
+                 placeholder="Find a drug, brand, code name, company — or a class: GLP-1 agonists, amylin analogues…"
+                 className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none" />
+        </div>
+        <select value={reg} onChange={(e) => { setReg(e.target.value as typeof reg); setLimit(STEP); }} aria-label="Regulatory status"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700">
+          <option value="">Any regulatory status</option>
+          {REG_GROUPS.filter((g) => regCounts[g.key]).map((g) => <option key={g.key} value={g.key}>{g.label} ({regCounts[g.key].toLocaleString()})</option>)}
+          {regCounts.milestone > 0 && <option value="milestone">With an upcoming milestone ({regCounts.milestone.toLocaleString()})</option>}
+        </select>
+        <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1">
+          <button type="button" onClick={() => setView("grid")} title="Cards"
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${view === "grid" ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>
+            {icons.grid} Cards
+          </button>
+          <button type="button" onClick={() => setView("table")} title="Table"
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${view === "table" ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>
+            {icons.list} Table
+          </button>
+        </div>
+      </div>
+
+      {view === "table" ? <DrugsTable products={forTable} search={q} /> : (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            {STAGES.map((s, i) => (s.key && !counts[i] && stage !== s.key ? null :
+              <button key={s.key} type="button" onClick={() => { setStage(s.key); setLimit(STEP); }}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition ${
+                        stage === s.key ? "bg-brand-500/15 text-brand-700 ring-brand-500/40" : "bg-white text-slate-600 ring-slate-200 hover:text-slate-900"}`}>
+                {s.label} <span className="ml-1 tabular-nums opacity-70">{counts[i].toLocaleString()}</span>
+              </button>
+            ))}
+            <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}
+                    className="ml-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+              <option value="trials">Most trials</option>
+              <option value="phase">Most advanced</option>
+              <option value="name">Name A–Z</option>
+            </select>
+          </div>
+
+          {cls && members && <ClassBanner label={cls.label} count={matched.length} noun={matched.length === 1 ? "drug" : "drugs"}
+                                           summary={classSummary(matched.map((p) => members.get(p)!).filter(Boolean))}
+                                           note="Grouped by development stage. Dual / triple agonists and combinations are included and labelled on each card; use the stage chips to show one stage." />}
+          <p className="px-1 text-sm text-slate-500">
+            <b className="font-display text-base font-semibold text-slate-950">{rows.length.toLocaleString()}</b> drugs
+            {rows.some((p) => p.conference_trials > 0) && (
+              <span className="ml-3 text-xs text-slate-400"><span className="text-amber-600">*</span> trial reported in a conference abstract or company report, no ClinicalTrials.gov record yet</span>
+            )}
+          </p>
+
+          {rows.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white py-16 text-center">
+              <div className="font-display text-base font-semibold text-slate-900">No drug matches</div>
+              <p className="mt-1 text-sm text-slate-500">Try another name or a broader stage.</p>
             </div>
+          ) : (
+            groups ? (
+              <div className="space-y-5">
+                {groups.map((g) => (
+                  <section key={g.key}>
+                    <h3 className="mb-2 flex items-center gap-2 px-1 text-sm font-semibold text-slate-800">
+                      <span className={`rounded px-1.5 py-px text-[11px] ring-1 ${STAGE_META[g.key].chip}`}>{g.label}</span>
+                      <span className="font-normal text-slate-500">{g.drugs.length} drug{g.drugs.length === 1 ? "" : "s"}</span>
+                    </h3>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">{g.drugs.map(card)}</div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {rows.slice(0, limit).map(card)}
+            </div>
+            )
           )}
 
-          {rows.length > limit && (
+          {!groups && rows.length > limit && (
             <div className="flex justify-center pt-2">
               <button type="button" onClick={() => setLimit((l) => l + STEP * 2)}
                       className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm text-slate-700 transition hover:border-brand-500/50 hover:text-slate-950">
