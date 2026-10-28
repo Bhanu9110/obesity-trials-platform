@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BackToList from "@/components/BackToList";
 import Link from "next/link";
 import Timeline from "@/components/trial/Timeline";
 import { notFound } from "next/navigation";
@@ -177,7 +178,7 @@ export default async function TrialPage({ params, searchParams }: Params) {
 
   return (
     <div className="space-y-4">
-      <Link href="/trials" className="inline-flex items-center gap-1 text-sm text-slate-500 transition hover:text-brand-600">← All trials</Link>
+      <BackToList path="/trials" label="All trials" />
 
       <header className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6">
         <span className="pointer-events-none absolute -right-20 -top-24 h-60 w-60 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true" />

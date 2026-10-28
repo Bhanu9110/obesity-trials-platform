@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { setUrlParams, startParams } from "@/lib/urlState";
 import type { ProductSummary } from "@/lib/types";
 import DrugsTable from "@/components/DrugsTable";
 import { matchDrug } from "@/lib/drugSearch";
@@ -34,13 +35,20 @@ const LADDER = ["P1", "P2", "P3", "Appr."];
 const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.nct_trials === 0;
 const STEP = 24;
 
-export default function DrugsExplorer({ products, initialQ = "" }: { products: ProductSummary[]; initialQ?: string }) {
-  const [view, setView] = useState<"grid" | "table">("grid");
-  const [q, setQ] = useState(initialQ);
-  const [stage, setStage] = useState<"" | StageKey>("");
-  const [sort, setSort] = useState<"trials" | "phase" | "name">("trials");
-  const [limit, setLimit] = useState(STEP);
-  const [reg, setReg] = useState<"" | RegGroup | "milestone">("");
+export default function DrugsExplorer({ products, initial: fromServer = {} }: { products: ProductSummary[]; initial?: Record<string, string> }) {
+  const [initial] = useState(() => startParams(fromServer));
+  // Every filter starts from the address (?q=…&stage=…) and is written back to it, so the browser's
+  // Back button (or "All drugs" on a drug page) returns to the same filtered list.
+  const pick = <T extends string>(v: string | undefined, ok: readonly T[], d: T): T => (ok as readonly string[]).includes(v ?? "") ? (v as T) : d;
+  const [view, setView] = useState<"grid" | "table">(pick(initial.view, ["grid", "table"] as const, "grid"));
+  const [q, setQ] = useState(initial.q ?? "");
+  const [stage, setStage] = useState<"" | StageKey>(pick(initial.stage, STAGES.map((s) => s.key), ""));
+  const [sort, setSort] = useState<"trials" | "phase" | "name">(pick(initial.sort, ["trials", "phase", "name"] as const, "trials"));
+  const [limit, setLimit] = useState(Math.max(STEP, Math.min(2000, Number(initial.n) || STEP)));
+  const [reg, setReg] = useState<"" | RegGroup | "milestone">(pick<"" | RegGroup | "milestone">(initial.reg, ["", "milestone", ...REG_GROUPS.map((g) => g.key)], ""));
+  useEffect(() => {
+    setUrlParams({ q: q.trim(), stage, reg, sort: sort === "trials" ? "" : sort, view: view === "grid" ? "" : view, n: limit > STEP ? limit : "" });
+  }, [q, stage, reg, sort, view, limit]);
 
   const listed = useMemo(() => products.filter((p) => p.trials > 0 || p.abstracts > 0), [products]);
   const regCounts = useMemo(() => {
@@ -89,7 +97,14 @@ export default function DrugsExplorer({ products, initialQ = "" }: { products: P
   const counts = useMemo(() => STAGES.map((s) => (!s.key ? matched.length
     : matched.filter((p) => inStage(p, s.key as StageKey)).length)), [matched, stages]);
   // A class search shows its drugs grouped by development stage, so start from "All stages".
-  useEffect(() => { if (cls) setStage(""); }, [cls]);
+  // (not on first load: a stage chosen before opening a drug is kept when coming back)
+  const lastCls = useRef(cls?.key ?? "");
+  useEffect(() => {
+    const k = cls?.key ?? "";
+    if (k === lastCls.current) return;
+    lastCls.current = k;
+    if (k) setStage("");
+  }, [cls]);
   const groups = useMemo(() => !members ? null
     : STAGES.filter((s) => s.key).map((s) => ({ key: s.key as StageKey, label: s.label, drugs: rows.filter((p) => inStage(p, s.key as StageKey)) }))
       .filter((g) => g.drugs.length), [members, rows, stages]);
@@ -211,7 +226,7 @@ export default function DrugsExplorer({ products, initialQ = "" }: { products: P
         </div>
       </div>
 
-      {view === "table" ? <DrugsTable products={forTable} search={q} /> : (
+      {view === "table" ? <DrugsTable products={forTable} search={q} initial={fromServer} /> : (
         <>
           <div className="flex flex-wrap items-center gap-2">
             {STAGES.map((s, i) => (s.key && !counts[i] && stage !== s.key ? null :

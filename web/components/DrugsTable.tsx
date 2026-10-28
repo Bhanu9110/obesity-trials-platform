@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { setUrlParams, startParams } from "@/lib/urlState";
 import type { ProductSummary } from "@/lib/types";
 import { highestPhase } from "@/lib/format";
 import { devStage, STAGE_META } from "@/lib/devStage";
@@ -14,14 +15,18 @@ import { dateText } from "@/lib/milestones";
 const PAGE = 50;
 
 // `search`: the Drugs page's own search box drives the table (it then shows no box of its own).
-export default function DrugsTable({ products, search }: { products: ProductSummary[]; search?: string }) {
+export default function DrugsTable({ products, search, initial: fromServer = {} }: { products: ProductSummary[]; search?: string; initial?: Record<string, string> }) {
+  const [initial] = useState(() => startParams(fromServer));
   const [ownQ, setQ] = useState("");
   const q = search ?? ownQ;
-  const [info, setInfo] = useState<"" | "filled" | "blank" | "abstracts">("");
-  const [page, setPage] = useState(1);
+  const [info, setInfo] = useState<"" | "filled" | "blank" | "abstracts">(
+    (["filled", "blank", "abstracts"] as const).find((x) => x === initial.info) ?? "");
+  const [page, setPage] = useState(Math.max(1, Number(initial.page) || 1));
   // Drugs that only appear in non-primary trials (comorbidity, weight-related, not obesity)
   // are hidden unless asked for. Drugs known only from conference abstracts (no trial yet) are shown.
-  const [includeOther, setIncludeOther] = useState(false);
+  const [includeOther, setIncludeOther] = useState(initial.other === "1");
+  // kept in the address with the page's other filters (see DrugsExplorer)
+  useEffect(() => { setUrlParams({ info, page: page > 1 ? page : "", other: includeOther ? "1" : "" }); }, [info, page, includeOther]);
   const otherOnly = useMemo(() => products.filter((p) => p.trials === 0 && !p.abstracts).length, [products]);
   const visible = useMemo(
     () => (includeOther ? products : products.filter((p) => p.trials > 0 || p.abstracts > 0)),
@@ -52,7 +57,9 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
     return { rows: out, via };
   }, [visible, q, info, members]);
 
-  useEffect(() => { setPage(1); }, [search]);
+  // a new search starts at page 1 (not on first load: the page number from the address is kept)
+  const lastSearch = useRef(search);
+  useEffect(() => { if (search === lastSearch.current) return; lastSearch.current = search; setPage(1); }, [search]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
   const shown = rows.slice((page - 1) * PAGE, page * PAGE);
   const filled = visible.filter((p) => p.has_info).length;

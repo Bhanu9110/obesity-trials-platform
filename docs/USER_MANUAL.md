@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.10.2 |
+| **Manual version** | 1.10.3 |
 | **Last updated** | 29 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -98,6 +98,8 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 
 ## 6. Trials explorer
 
+> **Filters are kept:** after opening a trial, the browser's Back button or **← All trials** returns to the list with the same filters.
+
 > **Class search:** typing a drug class in the keyword box (e.g. `GLP-1 agonists`, `amylin analogues`) lists the trials of every drug in that class, with a banner showing the class and how many drugs it covers.
 
 | Feature | How to use it |
@@ -125,6 +127,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | Development bar on a card | P1 → P2 → P3 → Appr.; grey when the drug was stopped, with "reached P3" for the furthest phase |
 | Sort | Most trials, most advanced, name A–Z |
 | Cards / Table | Switch between the card grid and a detailed table; the main search box filters both |
+| **Filters are kept** | Search, stage, regulatory status, sort, cards/table, "Show more" and the table's page are kept in the address (e.g. `/drugs?q=GLP-1&stage=p2`). Open a drug and come back with the browser's **Back** button or **← All drugs** and the list is exactly as you left it. You can also bookmark or share the filtered list |
 | `*` next to a trial count | The trial was reported in a conference abstract or company report and has no ClinicalTrials.gov record yet |
 
 ### 7.2 Drug page
@@ -323,6 +326,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 29 Oct 2026 | 1.10.3 | Drugs list keeps its filters (search, stage, status, sort, view, page) in the address, so Back or **← All drugs** returns to the same list; **← All trials** does the same for the Trials explorer | 6, 7 |
 | 29 Oct 2026 | 1.10.2 | Drug pages renamed to their official INN, with the old name kept as an alias: Amycretin → **Zenagamtide**, GZR18 → Bofanglutide, HDM1005 → Poterepatide, HRS-7535 → Safiglipron, LY3549492 → Naperiglipron, CT-868 → Acmopatide, HM15211 → Efocipegtrutide, HM11260C → Efpeglenatide, HM15136 → Efpegerglucagon, RO7204239 → Emugrobart and 11 more. Wrong INNs from combination trials removed (NA-931, PP1420) | 7, 15 |
 | 29 Oct 2026 | 1.10.1 | Class search: drugs grouped phase-wise, stage chips count only the class's drugs (and any search's results), and a class search starts from All stages | 7 |
 | 29 Oct 2026 | 1.10 | **Search by drug class** on the Drugs page, the Trials explorer and the top search (Ctrl K): `GLP-1 agonists`, `amylin analogues`, `SGLT2 inhibitors` … list every drug of the class (or all its trials), including dual / triple agonists and combinations, each labelled | 4, 6, 7 |

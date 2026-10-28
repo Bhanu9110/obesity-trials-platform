@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, authDisabled, isGuest, verifySession } from "@/lib/auth";
 import { notFound } from "next/navigation";
@@ -9,6 +8,7 @@ import ConferenceAbstracts from "@/components/ConferenceAbstracts";
 import ProductKind from "@/components/ProductKind";
 import { highestPhase } from "@/lib/format";
 import { devStage } from "@/lib/devStage";
+import BackToList from "@/components/BackToList";
 import { shortStatus } from "@/lib/regulatory";
 import ProductInfoCard from "@/components/ProductInfoCard";
 import MergeProduct from "@/components/MergeProduct";
@@ -71,9 +71,7 @@ export default async function DrugPage({ params, searchParams }: {
 
   return (
     <div className="space-y-5">
-      <Link href="/drugs" className="inline-flex items-center gap-1 text-sm text-slate-500 transition hover:text-brand-600">
-        ← All drugs
-      </Link>
+      <BackToList path="/drugs" label="All drugs" />
 
       <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 md:p-7">
         <span className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-accent-500/20 blur-3xl" aria-hidden="true" />

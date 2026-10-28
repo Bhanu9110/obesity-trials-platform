@@ -12,6 +12,7 @@ import TrialPreview from "@/components/TrialPreview";
 import { icons } from "@/components/shell/icons";
 import { DATA_UPDATED } from "@/components/LiveRefresh";
 import ClassBanner from "@/components/ClassBanner";
+import { rememberListUrl } from "@/lib/urlState";
 
 // Trials explorer: filters on the left, results on the right, a quick-preview
 // panel on row click. Every filter lives in the URL, so a view can be shared.
@@ -127,6 +128,8 @@ function Explorer() {
       setLoading(false);
     }
   }, [apiQuery]);
+  // remembered for "← All trials" on a trial page (the filters are in the address)
+  useEffect(() => { rememberListUrl(); }, [apiQuery]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (dataTick) load(true); }, [dataTick]); // eslint-disable-line react-hooks/exhaustive-deps
 

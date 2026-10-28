@@ -3,11 +3,15 @@ import { listProducts, upcomingMilestones } from "@/lib/queries";
 import PageHeader from "@/components/PageHeader";
 import DrugsExplorer from "@/components/DrugsExplorer";
 import { KIND_META, dateText, periodEnd } from "@/lib/milestones";
+import { param } from "@/lib/urlState";
 
 export const dynamic = "force-dynamic";
 
-export default async function DrugsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const initialQ = ((await searchParams).q ?? "").slice(0, 80);
+export default async function DrugsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  // Filters live in the address, so coming back from a drug page shows the same list.
+  const sp = await searchParams;
+  const initial = Object.fromEntries(["q", "stage", "reg", "sort", "view", "n", "info", "page", "other"]
+    .map((k) => [k, param(sp[k]).slice(0, 80)]));
   const [products, upcoming] = await Promise.all([listProducts(), upcomingMilestones(8)]);
   const today = Date.now() - 86400000;
   return (
@@ -48,7 +52,7 @@ export default async function DrugsPage({ searchParams }: { searchParams: Promis
         </section>
       )}
 
-      <DrugsExplorer products={products} initialQ={initialQ} />
+      <DrugsExplorer products={products} initial={initial} />
     </div>
   );
 }
