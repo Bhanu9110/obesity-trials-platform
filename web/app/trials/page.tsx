@@ -11,6 +11,7 @@ import PageHeader from "@/components/PageHeader";
 import TrialPreview from "@/components/TrialPreview";
 import { icons } from "@/components/shell/icons";
 import { DATA_UPDATED } from "@/components/LiveRefresh";
+import ClassBanner from "@/components/ClassBanner";
 
 // Trials explorer: filters on the left, results on the right, a quick-preview
 // panel on row click. Every filter lives in the URL, so a view can be shared.
@@ -57,6 +58,8 @@ function Explorer() {
   const [options, setOptions] = useState<FilterOptions | null>(null);
   const [items, setItems] = useState<TrialListItem[]>([]);
   const [total, setTotal] = useState(0);
+  // the drug class the search names ("GLP-1 agonists"): its trials are every trial of its drugs
+  const [drugClass, setDrugClass] = useState<{ label: string; drugs: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [queryInput, setQueryInput] = useState(q);
@@ -115,6 +118,7 @@ function Explorer() {
       if (!r.ok || !Array.isArray(res.items)) throw new Error(res.error ?? `HTTP ${r.status}`);
       setItems(res.items);
       setTotal(res.total);
+      setDrugClass(res.drugClass ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setItems([]);
@@ -254,6 +258,8 @@ function Explorer() {
 
         {/* Results */}
         <div className="min-w-0 space-y-3">
+          {drugClass && <ClassBanner label={drugClass.label} count={total} noun={`trial${total === 1 ? "" : "s"} of ${drugClass.drugs.toLocaleString()} drug${drugClass.drugs === 1 ? "" : "s"}`}
+                                       note="Trials of every drug of the class, including combinations and dual / triple agonists. Open Drugs and search the same words to see each drug labelled." />}
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setFiltersOpen(true)}
                     className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 lg:hidden">

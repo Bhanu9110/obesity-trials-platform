@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
   };
 
   try {
-    const { items, total } = await listTrials(filters);
-    return NextResponse.json({ items, total, page: filters.page, pageSize: filters.pageSize });
+    const { items, total, drugClass } = await listTrials(filters);
+    return NextResponse.json({ items, total, drugClass: drugClass ?? null, page: filters.page, pageSize: filters.pageSize });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "query failed" },

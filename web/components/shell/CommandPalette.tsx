@@ -16,6 +16,7 @@ interface Results {
   trials: { nct_id: string; title: string | null; phase: string | null; sponsor: string | null }[];
   drugs: { slug: string; name: string; trials: number }[];
   sponsors: { name: string; trials: number }[];
+  drugClass?: { label: string; drugs: number } | null;
 }
 
 export default function CommandPalette({
@@ -62,6 +63,14 @@ export default function CommandPalette({
       .map((n) => ({ key: `nav:${n.href}`, group: "Go to", label: n.label, icon: n.icon, href: n.href }));
     if (!res) return pages;
     const out: Item[] = [];
+    // A drug class ("GLP-1 agonists"): every drug of the class, and all their trials.
+    if (res.drugClass && res.drugClass.drugs > 0) {
+      const t = encodeURIComponent(q.trim());
+      out.push({ key: "class:drugs", group: "Drug class", label: `${res.drugClass.label} — all ${res.drugClass.drugs.toLocaleString()} drugs`,
+        hint: "single, dual, triple and combinations", icon: "drugs", href: `/drugs?q=${t}` });
+      if (canTrials) out.push({ key: "class:trials", group: "Drug class", label: `All trials of these ${res.drugClass.drugs.toLocaleString()} drugs`,
+        hint: "Trials explorer", icon: "trials", href: `/trials?q=${t}` });
+    }
     res.drugs.forEach((d) => out.push({
       key: `d:${d.slug}`, group: "Drugs", label: d.name, hint: `${d.trials} trial${d.trials === 1 ? "" : "s"}`,
       icon: "drugs", href: `/drugs/${encodeURIComponent(d.slug)}`,
@@ -144,7 +153,7 @@ export default function CommandPalette({
           <span><kbd className="font-mono">↑↓</kbd> move</span>
           <span><kbd className="font-mono">↵</kbd> open</span>
           <span><kbd className="font-mono">esc</kbd> close</span>
-          <span className="ml-auto">Search covers trial IDs, titles, conditions, drugs, brands and sponsors</span>
+          <span className="ml-auto">Search covers trial IDs, titles, conditions, drugs, brands, sponsors and drug classes</span>
         </div>
       </div>
     </div>

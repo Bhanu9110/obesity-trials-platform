@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { ProductSummary } from "@/lib/types";
 import { highestPhase } from "@/lib/format";
 import { devStage, STAGE_META } from "@/lib/devStage";
+import { classForQuery, classMembers, classSummary, targetsFor } from "@/lib/drugClasses";
+import ClassBanner, { ClassTag } from "@/components/ClassBanner";
 import { matchDrug } from "@/lib/drugSearch";
 import { REG_GROUPS, regGroup, shortStatus } from "@/lib/regulatory";
 import { dateText } from "@/lib/milestones";
@@ -26,6 +28,10 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
     [products, includeOther],
   );
 
+  // A search that names a drug class ("GLP-1 agonists") lists every drug of the class.
+  const targets = useMemo(() => targetsFor(products), [products]);
+  const cls = useMemo(() => classForQuery(q), [q]);
+  const members = useMemo(() => (cls ? classMembers(targets, cls) : null), [cls, targets]);
   // Search: name, brand names, every alias / code name the database knows, company, class, modality.
   const { rows, via } = useMemo(() => {
     const via = new Map<string, string>(); // slug -> the alias that matched
@@ -33,12 +39,13 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
       if (info === "filled" && !p.has_info) return false;
       if (info === "blank" && p.has_info) return false;
       if (info === "abstracts" && !(p.abstracts > 0 && p.nct_trials === 0)) return false;
+      if (members) return members.has(p);
       const m = matchDrug(p, q, [p.modality]);
       if (m.via) via.set(p.slug, m.via);
       return m.hit;
     });
     return { rows: out, via };
-  }, [visible, q, info]);
+  }, [visible, q, info, members]);
 
   useEffect(() => { setPage(1); }, [search]);
   const pages = Math.max(1, Math.ceil(rows.length / PAGE));
@@ -87,6 +94,8 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
         )}
       </div>
 
+      {cls && members && <ClassBanner label={cls.label} count={rows.length} noun={rows.length === 1 ? "drug" : "drugs"}
+                                       summary={classSummary(rows.map((p) => members.get(p)!).filter(Boolean))} />}
       <div className="text-sm text-slate-500">
         {rows.length.toLocaleString()} drugs
         {rows.some((p) => p.conference_trials > 0) && (
@@ -125,6 +134,7 @@ export default function DrugsTable({ products, search }: { products: ProductSumm
                         {p.abstracts} abstract{p.abstracts === 1 ? "" : "s"}
                       </span>
                     )}
+                    {members?.get(p)?.label && <div className="mt-0.5"><ClassTag {...members.get(p)!} /></div>}
                     {via.has(p.slug) && <div className="mt-0.5 text-xs text-slate-500">Also known as <b className="font-medium text-slate-700">{via.get(p.slug)}</b></div>}
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-slate-700">

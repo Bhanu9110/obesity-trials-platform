@@ -12,6 +12,7 @@ import type { HomeStats, ProductLink,
 } from "./types";
 import { CONTINENT_ORDER, phaseRank } from "./format";
 import { cleanNames, splitNames } from "./aliases";
+import { classForQuery, classMembers, targetsFor, type DrugClassDef } from "./drugClasses";
 
 /** Letters and digits only, lower case — "NN-9440" and "nn 9440" both become "nn9440". */
 const squashTerm = (q: string) => q.normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -29,7 +30,12 @@ export interface TrialFilters {
   sort?: TrialSort;
   page?: number;
   pageSize?: number;
+  /** set by listTrials when q names a drug class: the drugs of that class */
+  classIds?: number[];
 }
+
+/** A drug class named in a search, with how many drugs it has (shown above the results). */
+export interface SearchClass { key: string; label: string; drugs: number }
 
 export const TRIAL_SORTS = {
   newest: { label: "Newest registered", sql: "t.nct_id DESC" },
@@ -70,7 +76,11 @@ function buildWhere(f: TrialFilters, params: unknown[]): string {
     params.push(scope);
     clauses.push(`t.obesity_class = $${params.length}`);
   }
-  if (f.q) {
+  if (f.classIds) {
+    // The search names a drug class ("GLP-1 agonists"): trials of every drug in it.
+    params.push(f.classIds);
+    clauses.push(`EXISTS (SELECT 1 FROM trial_products tp WHERE tp.nct_id = t.nct_id AND tp.product_id = ANY($${params.length}::int[]))`);
+  } else if (f.q) {
     // Keyword search across every stored field + drug names.
     params.push(`%${f.q}%`);
     const i = params.length;
@@ -111,13 +121,42 @@ function buildWhere(f: TrialFilters, params: unknown[]): string {
   return "WHERE " + clauses.join(" AND ");
 }
 
+// Drug classes for search ---------------------------------------------------------------
+// The drugs of a class ("GLP-1 receptor agonists"), read from their profiles (lib/drugClasses.ts).
+// Cached for a few minutes: the class of a drug changes only when its profile does.
+let classCache: { at: number; rows: { id: number; slug: string; name: string; inn: string | null; drug_class: string | null; therapy_subclass: string | null; moa: string | null }[] } | null = null;
+
+async function classDrugRows() {
+  if (classCache && Date.now() - classCache.at < 5 * 60_000) return classCache.rows;
+  const rows = await query<NonNullable<typeof classCache>["rows"][number]>(
+    `SELECT p.id, p.slug, p.name,
+            coalesce(to_jsonb(p) ->> 'inn', ${autoVal("inn")}) AS inn,
+            coalesce(p.drug_class, ${autoVal("drug_class")}) AS drug_class,
+            coalesce(p.therapy_subclass, ${autoVal("therapy_subclass")}) AS therapy_subclass,
+            coalesce(p.moa, ${autoVal("moa")}) AS moa
+       FROM products p ${AUTO_JOIN}
+      WHERE p.kind IS NULL`,
+  );
+  classCache = { at: Date.now(), rows };
+  return rows;
+}
+
+export async function classDrugs(c: DrugClassDef): Promise<{ ids: number[]; slugs: string[] }> {
+  const rows = await classDrugRows();
+  const members = classMembers(targetsFor(rows), c);
+  const list = [...members.keys()];
+  return { ids: list.map((r) => r.id), slugs: list.map((r) => r.slug) };
+}
+
 export async function listTrials(
   f: TrialFilters,
-): Promise<{ items: TrialListItem[]; total: number }> {
+): Promise<{ items: TrialListItem[]; total: number; drugClass?: SearchClass }> {
   const page = Math.max(1, f.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, f.pageSize ?? 20));
   const params: unknown[] = [];
-  const where = buildWhere(f, params);
+  const cls = f.q ? classForQuery(f.q) : null;
+  const drugClass = cls ? await classDrugs(cls) : null;
+  const where = buildWhere(drugClass ? { ...f, classIds: drugClass.ids } : f, params);
 
   // Count and page are fetched in parallel (the database may be far away).
   const pageParams = [...params, pageSize, (page - 1) * pageSize];
@@ -135,7 +174,8 @@ export async function listTrials(
       pageParams,
     ),
   ]);
-  return { items, total: countRows[0]?.count ?? 0 };
+  return { items, total: countRows[0]?.count ?? 0,
+    ...(cls && drugClass ? { drugClass: { key: cls.key, label: cls.label, drugs: drugClass.ids.length } } : {}) };
 }
 
 export async function filterOptions(): Promise<FilterOptions> {
@@ -1132,6 +1172,8 @@ export interface SearchResults {
   trials: { nct_id: string; title: string | null; phase: string | null; sponsor: string | null }[];
   drugs: { slug: string; name: string; trials: number }[];
   sponsors: { name: string; trials: number }[];
+  /** the drug class the search names ("GLP-1 agonists"), with how many drugs it has */
+  drugClass?: SearchClass | null;
 }
 
 /** Global search (the Ctrl/⌘ K palette). */
@@ -1170,7 +1212,9 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
         )
       : Promise.resolve([]),
   ]);
-  return { trials, drugs, sponsors };
+  const cls = opts.drugs || opts.trials ? classForQuery(q) : null;
+  const drugClass = cls ? { key: cls.key, label: cls.label, drugs: (await classDrugs(cls)).ids.length } : null;
+  return { trials, drugs, sponsors, drugClass };
 }
 
 // --------------------------------------------------------------------------- #

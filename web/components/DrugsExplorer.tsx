@@ -13,6 +13,8 @@ import { KIND_META, dateText } from "@/lib/milestones";
 
 import { devStage, STAGE_META, type StageKey } from "@/lib/devStage";
 import { cleanNames, splitNames } from "@/lib/aliases";
+import { classForQuery, classMembers, classSummary, targetsFor, KIND_ORDER } from "@/lib/drugClasses";
+import ClassBanner, { ClassTag } from "@/components/ClassBanner";
 
 // Stage chips: the development stage (lib/devStage.ts), not only the highest trial phase, so a drug
 // approved in any country shows as Approved and a discontinued one as Discontinued.
@@ -32,9 +34,9 @@ const LADDER = ["P1", "P2", "P3", "Appr."];
 const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.nct_trials === 0;
 const STEP = 24;
 
-export default function DrugsExplorer({ products }: { products: ProductSummary[] }) {
+export default function DrugsExplorer({ products, initialQ = "" }: { products: ProductSummary[]; initialQ?: string }) {
   const [view, setView] = useState<"grid" | "table">("grid");
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ);
   const [stage, setStage] = useState<"" | StageKey>("");
   const [sort, setSort] = useState<"trials" | "phase" | "name">("trials");
   const [limit, setLimit] = useState(STEP);
@@ -54,23 +56,30 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
   const stages = useMemo(() => new Map(products.map((p) => [p.slug, devStage(p)])), [products]);
   const stageOf = (p: ProductSummary) => stages.get(p.slug)!;
   const inStage = (p: ProductSummary, k: StageKey) => stageOf(p).key === k;
+  // A search that names a drug class ("GLP-1 agonists") lists every drug of the class.
+  const targets = useMemo(() => targetsFor(products), [products]);
+  const cls = useMemo(() => classForQuery(q), [q]);
+  const members = useMemo(() => (cls ? classMembers(targets, cls) : null), [cls, targets]);
   // Search: name, brand names, every alias / code name the database knows, company, class.
   const { rows, via } = useMemo(() => {
     const via = new Map<string, string>(); // slug -> the alias that matched
     const out = base.filter((p) => {
       if (stage && !inStage(p, stage)) return false;
+      if (members) return members.has(p);
       const m = matchDrug(p, q);
       if (m.via) via.set(p.slug, m.via);
       return m.hit;
     });
+    // In a class: single-target first, then dual, triple, combinations.
+    const kind = (p: ProductSummary) => (members ? KIND_ORDER[members.get(p)?.kind ?? "other"] : 0);
     // A drug whose name or code matches the search exactly comes first.
     const exact = (p: ProductSummary) => (q.trim() && [p.name, via.get(p.slug)].some((n) => n?.toLowerCase() === q.trim().toLowerCase()) ? 1 : 0);
-    out.sort((a, b) => exact(b) - exact(a) || (
+    out.sort((a, b) => exact(b) - exact(a) || (sort !== "name" ? kind(a) - kind(b) : 0) || (
       sort === "name" ? a.name.localeCompare(b.name)
         : sort === "phase" ? STAGE_META[stageOf(b).key].order - STAGE_META[stageOf(a).key].order || stageOf(b).reached - stageOf(a).reached || b.trials - a.trials
           : b.trials - a.trials || a.name.localeCompare(b.name)));
     return { rows: out, via };
-  }, [base, q, stage, sort, stages]);
+  }, [base, q, stage, sort, stages, members]);
 
   const counts = useMemo(() => STAGES.map((s) => (!s.key ? base.length
     : base.filter((p) => inStage(p, s.key as StageKey)).length)), [base, stages]);
@@ -81,7 +90,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
         <div className="relative min-w-[240px] flex-1">
           <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">{icons.search}</span>
           <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(STEP); }}
-                 placeholder="Find a drug, brand, code name, company or class…"
+                 placeholder="Find a drug, brand, code name, company — or a class: GLP-1 agonists, amylin analogues…"
                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none" />
         </div>
         <select value={reg} onChange={(e) => { setReg(e.target.value as typeof reg); setLimit(STEP); }} aria-label="Regulatory status"
@@ -120,6 +129,8 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
             </select>
           </div>
 
+          {cls && members && <ClassBanner label={cls.label} count={rows.length} noun={rows.length === 1 ? "drug" : "drugs"}
+                                           summary={classSummary(rows.map((p) => members.get(p)!).filter(Boolean))} />}
           <p className="px-1 text-sm text-slate-500">
             <b className="font-display text-base font-semibold text-slate-950">{rows.length.toLocaleString()}</b> drugs
             {rows.some((p) => p.conference_trials > 0) && (
@@ -150,6 +161,7 @@ export default function DrugsExplorer({ products }: { products: ProductSummary[]
                         <div className="mt-0.5 truncate text-xs text-slate-500">
                           {[p.brand_names, cleanNames(splitNames(p.aliases), p.name).join(", ")].filter(Boolean).join(" · ") || p.sponsor || (undisclosed ? "Drug class only — name not disclosed" : "Profile not filled in yet")}
                         </div>
+                        {members?.get(p)?.label && <div className="mt-1"><ClassTag {...members.get(p)!} /></div>}
                         {via.has(p.slug) && (
                           <div className="mt-1 inline-flex max-w-full items-center gap-1 truncate rounded-md bg-brand-500/10 px-1.5 py-0.5 text-[11px] font-medium text-brand-700">
                             Also known as {via.get(p.slug)}

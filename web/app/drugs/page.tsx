@@ -6,7 +6,8 @@ import { KIND_META, dateText, periodEnd } from "@/lib/milestones";
 
 export const dynamic = "force-dynamic";
 
-export default async function DrugsPage() {
+export default async function DrugsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const initialQ = ((await searchParams).q ?? "").slice(0, 80);
   const [products, upcoming] = await Promise.all([listProducts(), upcomingMilestones(8)]);
   const today = Date.now() - 86400000;
   return (
@@ -47,7 +48,7 @@ export default async function DrugsPage() {
         </section>
       )}
 
-      <DrugsExplorer products={products} />
+      <DrugsExplorer products={products} initialQ={initialQ} />
     </div>
   );
 }
