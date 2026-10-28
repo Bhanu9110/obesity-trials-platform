@@ -511,6 +511,38 @@
    ]
   },
   {
+   "name": "NA-931",
+   "aliases": [
+    "NA-931"
+   ],
+   "fields": {
+    "inn": "Not assigned yet",
+    "aliases": "NA-931, NA931, NA 931"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov: NA-931 trials (Biomed Industries)",
+     "url": "https://clinicaltrials.gov/search?intr=NA-931"
+    }
+   ]
+  },
+  {
+   "name": "PP1420",
+   "aliases": [
+    "PP 1420"
+   ],
+   "fields": {
+    "inn": "Not assigned yet (pancreatic polypeptide analogue)",
+    "aliases": "PP 1420, PP1420, PP-1420"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov: PP1420 trials",
+     "url": "https://clinicaltrials.gov/search?intr=PP1420"
+    }
+   ]
+  },
+  {
    "name": "Danuglipron",
    "aliases": [
     "PF-06882961"

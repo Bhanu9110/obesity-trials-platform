@@ -1,6 +1,6 @@
 {
  "about": "Reviewed list of product names that are not drugs. 'not_drug', 'supplement' and 'other_drug' (medicines with no effect on obesity, e.g. anaesthetics, antibiotics, blood-pressure drugs, contraceptives in drug-interaction studies) entries stay in the database but are left out of the drug list, dashboard counts, search and the auto-fill (products.kind). 'merge' folds duplicate pages of the same drug into one (like 'Merge' on a drug page). 'drug' lists names that must stay in the drug list even if a name rule would hide them. Applied on every auto-fill run (npm run enrich-products) or with npm run curate-products. A choice made on a drug page always wins over this file.",
- "reviewed": "2026-10-28",
+ "reviewed": "2026-10-29",
  "not_drug": {
   "18fdgpet_coldstimulation_ct": "18FDG-PET + Cold Stimulation + CT",
   "abdomen": "Abdomen",
@@ -841,8 +841,8 @@
    "name": "Ibipinabant"
   },
   "bofanglutida": {
-   "into": "gzr18",
-   "name": "GZR18"
+   "into": "bofanglutide",
+   "name": "Bofanglutide"
   },
   "botox": {
    "into": "botulinumtoxintypea",
@@ -989,12 +989,12 @@
    "name": "Furosemide"
   },
   "gft505new": {
-   "into": "gft505",
-   "name": "GFT505"
+   "into": "elafibranor",
+   "name": "Elafibranor"
   },
   "gft505old": {
-   "into": "gft505",
-   "name": "GFT505"
+   "into": "elafibranor",
+   "name": "Elafibranor"
   },
   "glp1reduction": {
    "into": "glp1receptoragonist",
@@ -1009,16 +1009,16 @@
    "name": "GnRH"
   },
   "gzr18gzr18": {
-   "into": "gzr18",
-   "name": "GZR18"
+   "into": "bofanglutide",
+   "name": "Bofanglutide"
   },
   "hdm100212weeks": {
    "into": "hdm1002",
    "name": "HDM1002"
   },
   "hdm1005level": {
-   "into": "hdm1005",
-   "name": "HDM1005"
+   "into": "poterepatide",
+   "name": "Poterepatide"
   },
   "highdoseoliceridine": {
    "into": "oliceridine",
@@ -1117,8 +1117,8 @@
    "name": "K-757 + Sitagliptin"
   },
   "kai7535": {
-   "into": "hrs7535",
-   "name": "HRS-7535"
+   "into": "safiglipron",
+   "name": "Safiglipron"
   },
   "lae102multiple": {
    "into": "lae102",
@@ -1520,10 +1520,6 @@
    "into": "niacin",
    "name": "Niacin"
   },
-  "zenagamtide": {
-   "into": "amycretin",
-   "name": "Amycretin"
-  },
   "zgn433": {
    "into": "beloranib",
    "name": "Beloranib"
@@ -1571,6 +1567,90 @@
   "exendin": {
    "into": "exenatide",
    "name": "Exenatide"
+  },
+  "amycretin": {
+   "into": "zenagamtide",
+   "name": "Zenagamtide"
+  },
+  "gzr18": {
+   "into": "bofanglutide",
+   "name": "Bofanglutide"
+  },
+  "hdm1005": {
+   "into": "poterepatide",
+   "name": "Poterepatide"
+  },
+  "hrs7535": {
+   "into": "safiglipron",
+   "name": "Safiglipron"
+  },
+  "ly3549492": {
+   "into": "naperiglipron",
+   "name": "Naperiglipron"
+  },
+  "lik066": {
+   "into": "licogliflozin",
+   "name": "Licogliflozin"
+  },
+  "bms986036": {
+   "into": "pegbelfermin",
+   "name": "Pegbelfermin"
+  },
+  "ct868": {
+   "into": "acmopatide",
+   "name": "Acmopatide"
+  },
+  "hm15211": {
+   "into": "efocipegtrutide",
+   "name": "Efocipegtrutide"
+  },
+  "ro7204239": {
+   "into": "emugrobart",
+   "name": "Emugrobart"
+  },
+  "atl962": {
+   "into": "cetilistat",
+   "name": "Cetilistat"
+  },
+  "ave1625": {
+   "into": "drinabant",
+   "name": "Drinabant"
+  },
+  "bfkb8488a": {
+   "into": "fazpilodemab",
+   "name": "Fazpilodemab"
+  },
+  "gsk189075": {
+   "into": "remogliflozinetabonate",
+   "name": "Remogliflozin etabonate"
+  },
+  "llf580": {
+   "into": "efimosferminalfa",
+   "name": "Efimosfermin alfa"
+  },
+  "zgn1061": {
+   "into": "aclimostat",
+   "name": "Aclimostat"
+  },
+  "sr147778": {
+   "into": "surinabant",
+   "name": "Surinabant"
+  },
+  "hm11260c": {
+   "into": "efpeglenatide",
+   "name": "Efpeglenatide"
+  },
+  "hm15136": {
+   "into": "efpegerglucagon",
+   "name": "Efpegerglucagon"
+  },
+  "gft505": {
+   "into": "elafibranor",
+   "name": "Elafibranor"
+  },
+  "mbx8025": {
+   "into": "seladelpar",
+   "name": "Seladelpar"
   }
  }
 }

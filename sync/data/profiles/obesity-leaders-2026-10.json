@@ -227,12 +227,12 @@
    ]
   },
   {
-   "name": "Amycretin",
-   "aliases": ["Zenagamtide", "NNC0487-0111", "NN9487"],
+   "name": "Zenagamtide",
+   "aliases": ["Amycretin", "NNC0487-0111", "NN9487", "NN9490"],
    "fields": {
     "phase": "Phase 3",
-    "inn": "Amycretin (development name); zenagamtide reported as its INN",
-    "api": "Amycretin: single-molecule GLP-1 and amylin receptor co-agonist peptide; once-weekly injection and once-daily tablet",
+    "inn": "Zenagamtide (development name: amycretin)",
+    "api": "Zenagamtide (amycretin): single-molecule GLP-1 and amylin receptor co-agonist peptide; once-weekly injection and once-daily tablet",
     "regulatory_status": "Investigational — Phase 3 (AMAZE obesity programme started 2026; AMBITION type 2 diabetes; AMBIENCE cardiovascular outcomes)",
     "anticipated_launch": "Not announced — Phase 3 started 2026",
     "efficacy_signal": "Phase 1b/2a (injection): −22% at 36 wk; Phase 1 (oral): −13.1% at 12 wk; type 2 diabetes Phase 2: up to −14.6% at 36 wk",
