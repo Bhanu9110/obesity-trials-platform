@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.11.2 |
+| **Manual version** | 1.11.3 |
 | **Last updated** | 29 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -127,7 +127,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | Card and table extras | Each drug shows its regulatory status (a coloured tag plus the detail) and its **next milestone** with its date |
 | Stage chips | The **development stage**, not only the highest trial phase: **Approved** (in *any* country — e.g. mazdutide and ecnoglutide in China, even though their trials only reach Phase 3), **Filed**, **Phase 3 / 2 / 1**, **Preclinical / no NCT yet** (known only from conference abstracts or company reports), **Discontinued / withdrawn**, and **No active development** |
 | How the stage is decided | 1) Discontinued or withdrawn when the regulatory status or phase says so; 2) Approved when approved anywhere (Phase 4 trials also count, unless the status says investigational); 3) Filed; 4) **No active development** when no trial is running and the newest trial started 7+ years ago — a warning, not a confirmed discontinuation; 5) otherwise the highest trial phase. **No phase on ClinicalTrials.gov** ("Not applicable" or blank) on an interventional trial: the phase is **estimated from enrollment** — Phase 1 up to ~100 people, Phase 2 ~100–300, Phase 3 more than 300 — and shown as *Phase 2 (est.)*. Hover the stage tag for the reason |
-| What is listed | Specific drugs only. Drug classes and generic names ("Anti-obesity medication", "Incretin therapies", "Biguanide" …) are not drugs and are left out. A trial that names only a class appears as an **Undisclosed <class>** programme — listed only when a **company** sponsors it (academic trials are left out) |
+| What is listed | Specific drugs only. Drug classes and generic names ("Anti-obesity medication", "Incretin therapies", "Biguanide" …) are not drugs and are left out. A trial that names only a class appears as an **Undisclosed <class>** programme — listed only when a **company** runs it as drug development: an industry sponsor that isn't a university, hospital, clinic or research unit (the registry labels some of those "industry"), and a Phase 1–3 trial. Studies of a class given as usual care ("Biguanide, DPP4 inhibitors, SGLT2 inhibitors", phase *Not applicable*) are left out |
 | Development bar on a card | P1 → P2 → P3 → Appr.; grey when the drug was stopped, with "reached P3" for the furthest phase |
 | Sort | Most trials, most advanced, name A–Z |
 | Cards / Table | Switch between the card grid and a detailed table; the main search box filters both |
@@ -352,6 +352,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 29 Oct 2026 | 1.11.3 | Undisclosed programmes: only Phase 1–3 trials of a real company count — academic sponsors the registry calls "industry" (e.g. Metabolic Research Unit) and class-only usual-care studies are left out | 7 |
 | 29 Oct 2026 | 1.11.2 | Drug exports get a **Key trial (NCT ID)** column: the approval trial(s) for approved drugs (new research file, NCT IDs checked on ClinicalTrials.gov), else one highest-phase trial | 7A, 15 |
 | 29 Oct 2026 | 1.11.1 | Drug classes and generic names ("Anti-obesity medication", "Incretin Therapies", "GLP-1 Receptor Agonist e.g", "Biguanide", "Alter" …) are no longer listed as drugs (new name rule + list). **Undisclosed programmes** count only company-sponsored trials — academic-only ones are left out. Trials with no phase on ClinicalTrials.gov get a phase **estimated from enrollment** (marked *est.*) on the Trials explorer, drug pages, stage chips and exports | 6, 7 |
 | 29 Oct 2026 | 1.11 | **Download data**: Export button on Trials and Drugs → choose rows (current filters or everything) and columns, see them as a dashboard with a preview table, download as Excel, PDF, CSV or Word. Admins always; members and guests when allowed on the Admin page. Downloads appear in the Audit logs (new **Downloads** tab) | 3, 7A, 11, 12 |

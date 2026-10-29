@@ -61,6 +61,17 @@ const ENROLL = (t = "t") => `(to_jsonb(${t}) ->> 'enrollment')::int`;
 export const EST_PHASE_SQL = (t = "t") => `CASE WHEN ${ENROLL(t)} > 0 AND ${UNPHASED(t)} THEN
     CASE WHEN ${ENROLL(t)} <= 100 THEN 'PHASE1' WHEN ${ENROLL(t)} <= 300 THEN 'PHASE2' ELSE 'PHASE3' END END`;
 
+/**
+ * A trial that may stand for an "Undisclosed <class>" programme (an unnamed company drug):
+ *   * sponsored by a company — industry on ClinicalTrials.gov AND not an academic-looking name
+ *     (the registry calls some research units and clinics "industry", e.g. "Metabolic Research Unit");
+ *   * a drug-development phase (Early Phase 1 to Phase 3). "Not applicable" and Phase 4 studies of a class
+ *     ("Biguanide, DPP4 inhibitors, SGLT2 inhibitors" given as usual care) name no drug at all.
+ */
+export const UNDISCLOSED_TRIAL_OK = (t = "t") => `(${t}.lead_sponsor_class = 'INDUSTRY'
+    AND coalesce(${t}.sponsor, '') !~* '(universit|hospital|h[oô]pital|ospedale|klinik|clinic|institut|college|school|academ|medical (center|centre)|research (unit|center|centre|institute)|foundation|fundaci|ministry|department|council|health (service|system|board|authority)|nhs|centre hospitalier|cl[ií]nica)'
+    AND ${t}.phase ~ '(EARLY_PHASE1|PHASE1|PHASE2|PHASE3)')`;
+
 // Products of a trial as [{slug, name}], alphabetical.
 const PRODUCTS_JSON = `
   coalesce((SELECT json_agg(json_build_object('slug', p.slug, 'name', p.name) ORDER BY p.name)
@@ -421,8 +432,8 @@ async function listProductRows(): Promise<ProductSummary[]> {
        FROM products p
        ${AUTO_JOIN}
        LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active) ON tp.product_id = p.id
-             -- "Undisclosed <class>" programmes count only company-sponsored trials (academic ones are left out)
-             AND (p.slug NOT LIKE 'undisclosed%' OR t.lead_sponsor_class = 'INDUSTRY')
+             -- "Undisclosed <class>" programmes: only a company's own drug-development trial counts
+             AND (p.slug NOT LIKE 'undisclosed%' OR ${UNDISCLOSED_TRIAL_OK("t")})
       WHERE p.kind IS NULL -- diets, procedures, tests and supplements are not listed (products.kind)
       GROUP BY p.id, x.ai
      -- drugs with trials, and drugs known only from conference abstracts (e.g. preclinical programs)
@@ -1279,6 +1290,7 @@ export async function globalSearch(q: string, opts: { trials: boolean; drugs: bo
           `SELECT p.slug, p.name, count(t.nct_id)::int AS trials
              FROM products p
              LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND ${SHOWN()}) ON tp.product_id = p.id
+                   AND (p.slug NOT LIKE 'undisclosed%' OR ${UNDISCLOSED_TRIAL_OK("t")})
             WHERE p.kind IS NULL
               AND (p.name ILIKE $1 OR coalesce(${OTHER_NAMES("p")}, '') ILIKE $1
                -- "nn 9440" / "NN-9440" find NN9440: compare letters and digits only
