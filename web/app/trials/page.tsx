@@ -61,6 +61,11 @@ function Explorer() {
   const [total, setTotal] = useState(0);
   // the drug class the search names ("GLP-1 agonists"): its trials are every trial of its drugs
   const [drugClass, setDrugClass] = useState<{ label: string; drugs: number } | null>(null);
+  // Export button: shown when this login may download data (admins always; others when allowed)
+  const [canExport, setCanExport] = useState(false);
+  useEffect(() => {
+    fetch("/api/export?check=1", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => setCanExport(Boolean(j?.allowed))).catch(() => {});
+  }, []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [queryInput, setQueryInput] = useState(q);
@@ -273,6 +278,14 @@ function Explorer() {
               <span><b className="font-display text-lg font-semibold text-slate-950">{loading && !total ? "…" : total.toLocaleString()}</b> trials</span>
             </div>
             <div className="ml-auto flex items-center gap-2">
+              {canExport && (
+                <Link href={`/export?${(() => { const p = new URLSearchParams(sp.toString()); p.delete("page"); p.delete("size"); p.set("type", "trials"); return p.toString(); })()}`}
+                      title="Download these trials — Excel, PDF, CSV or Word, with the columns you choose"
+                      className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-brand-500/50 hover:text-brand-700">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" /></svg>
+                  Export
+                </Link>
+              )}
               <label className="flex items-center gap-2 text-xs text-slate-500">
                 <span className="hidden sm:inline">{icons.sort}</span>
                 <select value={sort} onChange={(e) => setParams({ sort: e.target.value === "newest" ? null : e.target.value })}

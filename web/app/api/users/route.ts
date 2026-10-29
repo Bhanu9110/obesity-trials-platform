@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       role: b?.role,
       minutes: b?.minutes === null || b?.minutes === undefined ? null : Number(b.minutes),
       pages: b?.pages,
+      canExport: b?.canExport === true,
       createdBy: me,
     });
     await logAdminAction("user_added", me, req, `${created.user.role} ${created.user.username}`);
@@ -89,7 +90,7 @@ export async function PATCH(req: NextRequest) {
     if (b?.action === "role" && b?.role === "admin" && level !== "super") return onlySuper();
     const r = await updateUser(id, b as UserAction);
     if (!r.user) return NextResponse.json({ error: "not found" }, { status: 404 });
-    const what = b.action === "role" ? `role → ${r.user.role}` : String(b.action);
+    const what = b.action === "role" ? `role → ${r.user.role}` : b.action === "export" ? (r.user.can_export ? "export on" : "export off") : String(b.action);
     await logAdminAction(b.action === "password" ? "password_changed" : "user_changed", me, req, `${check.username}: ${what}`);
     return NextResponse.json(r);
   } catch (err) {

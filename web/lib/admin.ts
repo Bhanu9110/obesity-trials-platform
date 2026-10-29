@@ -84,6 +84,17 @@ export const ROLE_NAMES: Record<ShownRole, string> = {
   super_admin: "Super admin", owner: "Owner", admin: "Admin", member: "Member", guest: "Guest",
 };
 
+/**
+ * Downloading data (Excel, PDF, CSV, Word): the super admin, owners and admins always; members and
+ * guests only when an admin ticked "Can download data" for their login (site_users.can_export).
+ */
+export async function mayExport(user: string | null): Promise<boolean> {
+  if (!user) return false;
+  if (user === "local" || !isSiteUser(user)) return true; // owner accounts (AUTH_USERS), local use
+  const s = await siteUserStatus(user);
+  return s.active && s.canExport;
+}
+
 /** Editing drug info and merging drugs: any signed-in member, never a guest. */
 export function mayEdit(user: string | null): boolean {
   return Boolean(user) && !isGuest(user);

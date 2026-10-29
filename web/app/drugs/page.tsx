@@ -4,6 +4,9 @@ import PageHeader from "@/components/PageHeader";
 import DrugsExplorer from "@/components/DrugsExplorer";
 import { KIND_META, dateText, periodEnd } from "@/lib/milestones";
 import { param } from "@/lib/urlState";
+import { cookies } from "next/headers";
+import { mayExport } from "@/lib/admin";
+import { SESSION_COOKIE, authDisabled, verifySession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +15,8 @@ export default async function DrugsPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const initial = Object.fromEntries(["q", "stage", "reg", "sort", "view", "n", "info", "page", "other"]
     .map((k) => [k, param(sp[k]).slice(0, 80)]));
-  const [products, upcoming] = await Promise.all([listProducts(), upcomingMilestones(8)]);
+  const user = authDisabled() ? "local" : await verifySession((await cookies()).get(SESSION_COOKIE)?.value);
+  const [products, upcoming, canExport] = await Promise.all([listProducts(), upcomingMilestones(8), mayExport(user)]);
   const today = Date.now() - 86400000;
   return (
     <div className="space-y-4">
@@ -52,7 +56,7 @@ export default async function DrugsPage({ searchParams }: { searchParams: Promis
         </section>
       )}
 
-      <DrugsExplorer products={products} initial={initial} />
+      <DrugsExplorer products={products} initial={initial} canExport={canExport} />
     </div>
   );
 }

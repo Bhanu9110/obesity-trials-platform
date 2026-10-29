@@ -35,7 +35,7 @@ const LADDER = ["P1", "P2", "P3", "Appr."];
 const abstractOnly = (p: ProductSummary) => p.abstracts > 0 && p.nct_trials === 0;
 const STEP = 24;
 
-export default function DrugsExplorer({ products, initial: fromServer = {} }: { products: ProductSummary[]; initial?: Record<string, string> }) {
+export default function DrugsExplorer({ products, initial: fromServer = {}, canExport = false }: { products: ProductSummary[]; initial?: Record<string, string>; canExport?: boolean }) {
   const [initial] = useState(() => startParams(fromServer));
   // Every filter starts from the address (?q=…&stage=…) and is written back to it, so the browser's
   // Back button (or "All drugs" on a drug page) returns to the same filtered list.
@@ -214,6 +214,14 @@ export default function DrugsExplorer({ products, initial: fromServer = {} }: { 
           {REG_GROUPS.filter((g) => regCounts[g.key]).map((g) => <option key={g.key} value={g.key}>{g.label} ({regCounts[g.key].toLocaleString()})</option>)}
           {regCounts.milestone > 0 && <option value="milestone">With an upcoming milestone ({regCounts.milestone.toLocaleString()})</option>}
         </select>
+        {canExport && (
+          <Link href={`/export?${new URLSearchParams({ type: "drugs", ...(q.trim() ? { q: q.trim() } : {}), ...(stage ? { stage } : {}), ...(reg ? { reg } : {}) })}`}
+                title="Download this list — Excel, PDF, CSV or Word, with the columns you choose"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-brand-500/50 hover:text-brand-700">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" /></svg>
+            Export
+          </Link>
+        )}
         <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1">
           <button type="button" onClick={() => setView("grid")} title="Cards"
                   className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${view === "grid" ? "bg-brand-500/15 text-brand-700" : "text-slate-500 hover:text-slate-900"}`}>

@@ -47,6 +47,24 @@ const btnBrand = `${btn} bg-brand-600 text-white ring-brand-600 hover:bg-brand-7
 const btnDanger = `${btn} bg-white text-rose-700 ring-rose-200 hover:bg-rose-50`;
 const input = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500";
 
+/** "Can download data": admins always; members and guests only when ticked. */
+function ExportSwitch({ role, value, onChange, disabled }: { role: Role; value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+  const locked = role === "admin";
+  return (
+    <label className={`flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm ${locked ? "opacity-80" : "cursor-pointer"}`}>
+      <input type="checkbox" className="mt-0.5 h-4 w-4 rounded" checked={value} disabled={locked || disabled}
+             onChange={(e) => onChange(e.target.checked)} />
+      <span>
+        <span className="font-medium text-slate-900">Can download data</span>
+        <span className="block text-xs text-slate-500">
+          {locked ? "Admins can always export from the Trials and Drugs pages."
+            : "Export button on the Trials and Drugs pages — Excel, PDF, CSV or Word, with the columns they choose. Every download is recorded in the Audit logs."}
+        </span>
+      </span>
+    </label>
+  );
+}
+
 /** Tick boxes for the pages a guest may open. Admin is shown, locked off. */
 function PagePicker({ value, onChange }: { value: GuestPage[]; onChange: (v: GuestPage[]) => void }) {
   const toggle = (k: GuestPage) => onChange(cleanPages(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]));
@@ -297,6 +315,7 @@ function AddUser({ isSuper, onCancel, onCreated }: { isSuper: boolean; onCancel:
   const [password, setPassword] = useState("");
   const [minutes, setMinutes] = useState<number | null>(10080);
   const [pages, setPages] = useState<GuestPage[]>(DEFAULT_GUEST_PAGES);
+  const [canExport, setCanExport] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -313,6 +332,7 @@ function AddUser({ isSuper, onCancel, onCreated }: { isSuper: boolean; onCancel:
     try {
       const d = await api("POST", "/api/users", {
         role, label, username: username || undefined, password: password || undefined, minutes, pages: role === "guest" ? pages : undefined,
+        canExport: role === "admin" || canExport,
       });
       onCreated(d.user, d.password);
     } catch (err) {
@@ -363,6 +383,7 @@ function AddUser({ isSuper, onCancel, onCreated }: { isSuper: boolean; onCancel:
           <PagePicker value={pages} onChange={setPages} />
         </div>
       )}
+      <ExportSwitch role={role} value={role === "admin" || canExport} onChange={setCanExport} />
       {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={busy || (role === "guest" && !pages.length)} className={btnBrand + " px-4 py-2 text-sm"}>
@@ -398,6 +419,9 @@ function UserRows({
           <span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ${TYPE_TAG[u.role]}`}>{ROLE_LABEL[u.role]}</span>
         </td>
         <td className="px-3 py-2.5">
+          {(u.role === "admin" || u.can_export) && (
+            <span className="mb-1 mr-1 inline-block rounded bg-teal-50 px-1.5 py-0.5 text-[11px] font-medium text-teal-700 ring-1 ring-teal-200" title="Can download data (Excel, PDF, CSV, Word)">Downloads</span>
+          )}
           {u.role === "admin" ? <span className="text-slate-600">Every page, incl. Admin &amp; Audit logs</span>
             : u.role === "member" ? <span className="text-slate-600">Every page except Admin</span> : (
             <div className="flex flex-wrap gap-1">
@@ -614,6 +638,11 @@ function Manage({
             {u.role === "admin" ? "Admins can open every page, including Admin and Audit logs, and manage members and guests." : "Members can open every page except Admin."}
           </p>
         )}
+      </Card>
+
+      <Card title="Download data">
+        <ExportSwitch role={u.role} value={u.role === "admin" || u.can_export} disabled={busy}
+                      onChange={(v) => patch({ action: "export", allowed: v }, v ? "Downloads allowed" : "Downloads turned off")} />
       </Card>
 
       <Card title="Delete">

@@ -42,7 +42,7 @@ export interface AccessStats {
   active7d: number; logins7d: number; loginsToday: number; pages7d: number;
   failed7d: number; failedIps7d: number; admin30d: number;
 }
-export type AccessKind = "all" | "logins" | "pages" | "failed" | "admin";
+export type AccessKind = "all" | "logins" | "pages" | "failed" | "admin" | "exports";
 export interface AccessResponse {
   members: AccessMember[];
   events: AccessEventRow[];
@@ -61,6 +61,7 @@ const KIND_SQL: Record<Exclude<AccessKind, "all">, string> = {
   pages: "event = 'page'",
   failed: "event IN ('login_failed', 'blocked')",
   admin: "event IN ('user_added', 'user_changed', 'user_removed', 'password_changed')",
+  exports: "event = 'export'",
 };
 const isKind = (k: string | null): k is Exclude<AccessKind, "all"> => !!k && Object.prototype.hasOwnProperty.call(KIND_SQL, k);
 const PAGE = 50;
@@ -179,7 +180,7 @@ export async function GET(req: NextRequest) {
     const { today, ...st } = stats[0];
     const body: AccessResponse = {
       members: all, events: events.slice(0, PAGE), hasMore: events.length > PAGE,
-      counts: { all: counts[0].all, logins: counts[0].logins, pages: counts[0].pages, failed: counts[0].failed, admin: counts[0].admin },
+      counts: { all: counts[0].all, logins: counts[0].logins, pages: counts[0].pages, failed: counts[0].failed, admin: counts[0].admin, exports: counts[0].exports },
       stats: st, daily, topPages, today, timeZone: tz, canErase: await isSuperAdmin(user),
     };
     return NextResponse.json(body, { headers: { "Cache-Control": "no-store" } });

@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // pg is a server-only dependency; keep it external to the bundle.
-  serverExternalPackages: ["pg"],
+  // Server-only dependencies, loaded from node_modules instead of bundled: pg, and the export
+  // libraries (Excel, PDF, Word — app/api/export).
+  serverExternalPackages: ["pg", "exceljs", "jspdf", "jspdf-autotable", "docx"],
 };
 
 module.exports = nextConfig;

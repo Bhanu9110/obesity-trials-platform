@@ -5,7 +5,7 @@ import { query } from "./db";
 
 export type AccessEvent = "login" | "login_failed" | "logout" | "page" | "blocked";
 /** What admins do to logins, and password changes (migration 0023). */
-export type AdminEvent = "user_added" | "user_changed" | "user_removed" | "password_changed";
+export type AdminEvent = "user_added" | "user_changed" | "user_removed" | "password_changed" | "export";
 
 /** Failed sign-ins from one IP address within the window before it is blocked. */
 export const MAX_FAILURES = 8;

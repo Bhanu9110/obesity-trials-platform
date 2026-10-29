@@ -32,6 +32,8 @@ export interface SiteUser {
   has_password_copy: boolean;
   password_changed_at: string | null;
   status: UserStatus;
+  /** members and guests: may download data (admins always may) */
+  can_export: boolean;
 }
 
 /** How long access lasts, in minutes (null = no end date, members only). */
@@ -42,6 +44,7 @@ const ALL_PAGES = GUEST_PAGES.map((p) => p.key) as GuestPage[];
 
 const COLS = `id::int AS id, username, label, role, pages, created_by, created_at, expires_at, revoked_at,
   last_login_at, login_count, (password_enc IS NOT NULL) AS has_password_copy, password_changed_at,
+  coalesce((to_jsonb(site_users) ->> 'can_export')::boolean, false) AS can_export,
   CASE WHEN revoked_at IS NOT NULL THEN 'revoked'
        WHEN expires_at IS NOT NULL AND expires_at <= now() THEN 'expired' ELSE 'active' END AS status`;
 
@@ -66,6 +69,7 @@ function checkPassword(pw: string): string {
 /** Creates a login; returns the password (made up unless one was given). */
 export async function createUser(opts: {
   label: string; username?: string; password?: string; role: Role; minutes: number | null; pages?: unknown; createdBy: string | null;
+  canExport?: boolean;
 }) {
   const label = opts.label.trim().slice(0, 120);
   if (!label) throw new UserError("Add a name or who the login is for.");
@@ -86,10 +90,11 @@ export async function createUser(opts: {
   const password = opts.password ? checkPassword(opts.password) : generatePassword(12);
   try {
     const rows = await query<SiteUser>(
-      `INSERT INTO site_users (username, label, role, pages, password_hash, password_enc, created_by, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, CASE WHEN $8::int IS NULL THEN NULL ELSE now() + make_interval(mins => $8::int) END)
+      `INSERT INTO site_users (username, label, role, pages, password_hash, password_enc, created_by, expires_at, can_export)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, CASE WHEN $8::int IS NULL THEN NULL ELSE now() + make_interval(mins => $8::int) END, $9)
        RETURNING ${COLS}`,
-      [username, label, opts.role, pages, await hashPassword(password), await encryptText(password), opts.createdBy, opts.minutes],
+      [username, label, opts.role, pages, await hashPassword(password), await encryptText(password), opts.createdBy, opts.minutes,
+       opts.role === "admin" || Boolean(opts.canExport)],
     );
     forget(username);
     return { user: rows[0], password };
@@ -107,6 +112,7 @@ export type UserAction =
   | { action: "pages"; pages: unknown }
   | { action: "role"; role: Role }
   | { action: "label"; label: string }
+  | { action: "export"; allowed: boolean }
   | { action: "password"; password?: string };
 
 /** Change one login. "password" returns the new password. */
@@ -177,6 +183,12 @@ export async function updateUser(id: number, a: UserAction): Promise<{ user: Sit
       rows = await query<SiteUser>(
         `UPDATE site_users SET password_hash = $2, password_enc = $3, password_changed_at = now() WHERE id = $1 RETURNING ${COLS}`,
         [id, await hashPassword(password), await encryptText(password)],
+      );
+      break;
+    case "export":
+      // Admins always may; the switch is for members and guests.
+      rows = await query<SiteUser>(
+        `UPDATE site_users SET can_export = ($2::boolean OR role = 'admin') WHERE id = $1 RETURNING ${COLS}`, [id, Boolean(a.allowed)],
       );
       break;
     default:
@@ -257,7 +269,7 @@ export async function changeOwnPassword(user: string, current: string, next: str
 }
 
 // Small per-instance cache so pages don't query the table on every request.
-export interface UserState { active: boolean; role: Role | null; expiresAt: number | null; label: string; pages: GuestPage[] }
+export interface UserState { active: boolean; role: Role | null; expiresAt: number | null; label: string; pages: GuestPage[]; canExport: boolean }
 const cache = new Map<string, UserState & { at: number }>();
 const CACHE_MS = 20_000;
 function forget(name: string) { cache.delete(name); }
@@ -275,8 +287,10 @@ export async function siteUserStatus(user: string): Promise<UserState> {
     state = hit;
   } else {
     try {
-      const rows = await query<{ expires_at: Date | null; revoked: boolean; label: string; pages: string[]; role: Role }>(
-        `SELECT expires_at, revoked_at IS NOT NULL AS revoked, label, pages, role FROM site_users WHERE username = $1`,
+      const rows = await query<{ expires_at: Date | null; revoked: boolean; label: string; pages: string[]; role: Role; can_export: boolean }>(
+        `SELECT expires_at, revoked_at IS NOT NULL AS revoked, label, pages, role,
+                coalesce((to_jsonb(site_users) ->> 'can_export')::boolean, false) AS can_export
+           FROM site_users WHERE username = $1`,
         [name],
       );
       const r = rows[0];
@@ -286,10 +300,11 @@ export async function siteUserStatus(user: string): Promise<UserState> {
         expiresAt: r?.expires_at ? new Date(r.expires_at).getTime() : null,
         label: r?.label ?? "",
         pages: r ? (r.role === "guest" ? cleanPages(r.pages) : ALL_PAGES) : [],
+        canExport: Boolean(r && (r.role === "admin" || r.can_export)),
       };
       cache.set(name, { ...state, at: Date.now() });
     } catch {
-      return { active: false, role: null, expiresAt: null, label: "", pages: [] };
+      return { active: false, role: null, expiresAt: null, label: "", pages: [], canExport: false };
     }
   }
   const notExpired = state.expiresAt === null || state.expiresAt > Date.now();

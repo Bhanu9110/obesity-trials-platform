@@ -25,6 +25,7 @@ const EVENT: Record<string, { label: string; dot: string; chip: string; icon: Re
   user_changed: { label: "Login changed", dot: "bg-amber-500", chip: "bg-amber-50 text-amber-700 ring-amber-200", icon: icons.users },
   user_removed: { label: "Login removed", dot: "bg-rose-500", chip: "bg-rose-50 text-rose-700 ring-rose-200", icon: icons.users },
   password_changed: { label: "Password changed", dot: "bg-amber-500", chip: "bg-amber-50 text-amber-800 ring-amber-200", icon: icons.admin },
+  export: { label: "Downloaded data", dot: "bg-teal-500", chip: "bg-teal-50 text-teal-700 ring-teal-200", icon: icons.link },
 };
 const eventStyle = (e: string) => EVENT[e] ?? { label: e, dot: "bg-slate-400", chip: "bg-slate-100 text-slate-600 ring-slate-200", icon: icons.clock };
 
@@ -37,7 +38,7 @@ const ROLE: Record<AccessMember["role"], { label: string; chip: string; avatar: 
 };
 
 const TABS: [AccessKind, string][] = [
-  ["all", "Everything"], ["logins", "Sign-ins"], ["pages", "Page views"], ["failed", "Failed attempts"], ["admin", "Admin actions"],
+  ["all", "Everything"], ["logins", "Sign-ins"], ["pages", "Page views"], ["failed", "Failed attempts"], ["admin", "Admin actions"], ["exports", "Downloads"],
 ];
 
 const plain = (u: string) => u.replace(/^(guest|user|admin):/, "");
@@ -98,6 +99,7 @@ function pageLabel(path: string | null): { label: string; href?: string } {
 const ACTION_TEXT: Record<string, string> = {
   revoke: "revoked access for", extend: "extended access for", set_end: "changed the end date for", no_end: "removed the end date for",
   pages: "changed the pages of", label: "renamed", password: "set a new password for",
+  "export on": "allowed data downloads for", "export off": "stopped data downloads for",
 };
 
 /** One log entry as a sentence. */
@@ -131,6 +133,7 @@ function describe(e: AccessEventRow, nameOf: (u: string) => string): ReactNode {
       if (what.startsWith("role")) return <>{who} changed the role of {target} <span className="text-slate-500">({what.replace(/^role\s*→\s*/, "now ")})</span></>;
       return <>{who} {ACTION_TEXT[what] ?? `changed (${what})`} {target}</>;
     }
+    case "export": return <>{who} downloaded <span className="text-slate-700">{d || "data"}</span></>;
     default: return <>{who} <span className="text-slate-500">{e.event}</span></>;
   }
 }

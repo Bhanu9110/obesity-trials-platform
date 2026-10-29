@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.10.3 |
+| **Manual version** | 1.11 |
 | **Last updated** | 29 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -20,6 +20,7 @@
 | 5 | [Overview](#5-overview) | The dashboard |
 | 6 | [Trials explorer](#6-trials-explorer) | Filtering, previewing and sharing trial lists |
 | 7 | [Drugs](#7-drugs) | Drug list, upcoming milestones, drug pages, development & regulatory profile, results, timeline, editing |
+| 7A | [Downloading data](#7a-downloading-data) | Export from Trials and Drugs: rows, columns, Excel / PDF / CSV / Word, who may download |
 | 8 | [Registry changes](#8-registry-changes) | What changed on ClinicalTrials.gov |
 | 9 | [Data quality](#9-data-quality) | Quality scores, issues and the drug-profile auto-fill |
 | 10 | [Admin page](#10-admin-page) | Pipeline health, syncs, users and access |
@@ -72,6 +73,8 @@ There are five kinds of login. **Owner accounts** are set in Vercel; all other l
 | **Guest** | Created by an admin | Only the pages ticked for them | View only, for a limited time |
 
 Everyone can open **Profile** and **Help & manual**.
+
+**Downloading data** (Export button on Trials and Drugs): the super admin, owners and admins always can; **members and guests only when an admin ticks *Can download data*** for their login (see [7A](#7a-downloading-data)).
 
 > There is always exactly **one** super admin. If `SUPER_ADMIN` is empty, or names an account that is not an owner, the **first owner written in `AUTH_USERS`** is the super admin, and the Admin page shows a reminder to set `SUPER_ADMIN`. Every other owner account is an admin.
 
@@ -166,6 +169,25 @@ Members, admins and the super admin (not guests).
 | Hide a research row | **Hide** — it stays hidden after every sync. "Show them" at the bottom lists hidden rows so you can bring one back |
 | Change a research row | Hide it and add your own row — research rows are rewritten by the sync |
 
+## 7A. Downloading data
+
+The **Export** button on the **Trials explorer** and the **Drugs** page opens the **Download data** page with the list's current filters.
+
+| Step | How |
+|---|---|
+| 1. Data | **Trials** or **Drugs** (guests: only the pages they may open) |
+| 2. Rows | **With my current filters** (search, drug class, phase, status, stage … from the page you came from) or **Everything** |
+| 3. Columns | Tick the columns you need, grouped (Trial, Sponsor, Dates, Location, Links — or Drug, Development, Pharmacology, Results, Trials, Links). **Default**, **All**, **None**. Your choice is remembered in this browser |
+| 4. Check | The page shows the chosen data as a small dashboard: counts, top phase / stage and status, breakdown bars and a **preview table** of exactly the columns you ticked (first 2,000 rows, 50 per page) |
+| 5. Download | **Excel** (.xlsx: formatted, filter row, frozen header, clickable links, plus an *About this export* sheet with the filters and counts), **PDF** (landscape report with title, filters and date), **CSV**, **Word** (.docx table) |
+
+| Detail | |
+|---|---|
+| Size | Excel and CSV take up to 20,000 rows; PDF and Word show the first 3,000 rows (the page tells you when) |
+| Order | Trials: as sorted on the Trials page. Drugs: phase-wise — approved first, then filed, Phase 3, 2, 1 … |
+| Who | Super admin, owners and admins always. Members and guests when an admin ticks **Can download data** (Admin page → add a login, or Manage → **Download data**) |
+| Record | Every download is written to the **Audit logs** (tab **Downloads**: who, what, format, rows and filters) |
+
 ## 8. Registry changes
 
 New trials, field-by-field registry updates, reclassifications and removals, recorded automatically by every sync. Filter by NCT ID or sponsor.
@@ -215,6 +237,7 @@ Admins and the super admin only.
 | Add time, set an end, no end date | Manage → Access time |
 | End access now | Manage → Access time → **End access now** (signs them out) |
 | Change type or guest pages | Manage → Type and pages (changing the type signs them out once) |
+| Allow or stop downloads | Manage → **Download data** → *Can download data* (members and guests; admins always can). Also a tick box when adding a login. Logins that may download show a **Downloads** tag in the list |
 | Delete | Manage → Delete (their history stays in the audit logs) |
 
 Every add, change, removal and new password is recorded in the [Audit logs](#12-audit-logs).
@@ -230,7 +253,7 @@ Admins and the super admin only. Sidebar → **Audit logs**. The page updates it
 | **Most opened pages** | The 8 most opened pages in the last 30 days, with how many people opened each |
 | **People** | Everyone who can sign in, and anyone with activity in the last 180 days: role, *Online now* (active in the last 5 minutes), last active, last sign-in, sign-ins and pages in 30 days, location and device. **Click a person** to see only their activity |
 | **Activity log** | Every entry as a sentence ("Asha opened Drug · Semaglutide"), newest first and grouped by day, with location, device and IP address |
-| Log filters | Tabs: **Everything**, **Sign-ins**, **Page views**, **Failed attempts**, **Admin actions** (each shows its count); a **person** list; a **search** box (page, name, IP address or city). **Clear filters** resets them |
+| Log filters | Tabs: **Everything**, **Sign-ins**, **Page views**, **Failed attempts**, **Admin actions**, **Downloads** (each shows its count); a **person** list; a **search** box (page, name, IP address or city). **Clear filters** resets them |
 | **Load older entries** | The log shows 50 entries at a time; this adds the next 50 |
 | **Export CSV** | Downloads the entries shown as a spreadsheet file |
 | Remove history | Super admin only, on a person who can no longer sign in: deletes their activity history |
@@ -326,6 +349,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 29 Oct 2026 | 1.11 | **Download data**: Export button on Trials and Drugs → choose rows (current filters or everything) and columns, see them as a dashboard with a preview table, download as Excel, PDF, CSV or Word. Admins always; members and guests when allowed on the Admin page. Downloads appear in the Audit logs (new **Downloads** tab) | 3, 7A, 11, 12 |
 | 29 Oct 2026 | 1.10.3 | Drugs list keeps its filters (search, stage, status, sort, view, page) in the address, so Back or **← All drugs** returns to the same list; **← All trials** does the same for the Trials explorer | 6, 7 |
 | 29 Oct 2026 | 1.10.2 | Drug pages renamed to their official INN, with the old name kept as an alias: Amycretin → **Zenagamtide**, GZR18 → Bofanglutide, HDM1005 → Poterepatide, HRS-7535 → Safiglipron, LY3549492 → Naperiglipron, CT-868 → Acmopatide, HM15211 → Efocipegtrutide, HM11260C → Efpeglenatide, HM15136 → Efpegerglucagon, RO7204239 → Emugrobart and 11 more. Wrong INNs from combination trials removed (NA-931, PP1420) | 7, 15 |
 | 29 Oct 2026 | 1.10.1 | Class search: drugs grouped phase-wise, stage chips count only the class's drugs (and any search's results), and a class search starts from All stages | 7 |

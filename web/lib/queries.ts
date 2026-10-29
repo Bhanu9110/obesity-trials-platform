@@ -121,6 +121,44 @@ function buildWhere(f: TrialFilters, params: unknown[]): string {
   return "WHERE " + clauses.join(" AND ");
 }
 
+// Export ---------------------------------------------------------------------------------
+/** One trial with every field the export can offer (lib/exportData.ts picks the columns). */
+export interface TrialExportRow {
+  nct_id: string; title: string | null; drugs: string | null; phase: string | null; overall_status: string | null;
+  sponsor: string | null; lead_sponsor_class: string | null; conditions: string[] | null; countries: string[] | null;
+  continents: string[] | null; start_date: string | null; primary_completion: string | null; completion: string | null;
+  enrollment: number | null; study_type: string | null; obesity_class: string | null; last_update: string | null;
+}
+
+/** Every trial matching the Trials explorer filters (no paging), newest first unless sorted. */
+export async function listTrialsForExport(f: TrialFilters, max = 20000): Promise<{ rows: TrialExportRow[]; drugClass: SearchClass | null }> {
+  const params: unknown[] = [];
+  const cls = f.q ? classForQuery(f.q) : null;
+  const drugClass = cls ? await classDrugs(cls) : null;
+  const where = buildWhere(drugClass ? { ...f, classIds: drugClass.ids } : f, params);
+  params.push(Math.min(Math.max(1, max), 20000));
+  const rows = await query<TrialExportRow>(
+    `SELECT t.nct_id, r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
+            (SELECT string_agg(p.name, ', ' ORDER BY p.name) FROM trial_products tp JOIN products p ON p.id = tp.product_id
+              WHERE tp.nct_id = t.nct_id AND p.kind IS NULL) AS drugs,
+            t.phase, to_jsonb(t) ->> 'overall_status' AS overall_status, t.sponsor, t.lead_sponsor_class,
+            t.conditions, t.countries, t.continents,
+            to_jsonb(t) ->> 'start_date' AS start_date,
+            r.payload #>> '{protocolSection,statusModule,primaryCompletionDateStruct,date}' AS primary_completion,
+            r.payload #>> '{protocolSection,statusModule,completionDateStruct,date}' AS completion,
+            (to_jsonb(t) ->> 'enrollment')::int AS enrollment,
+            r.payload #>> '{protocolSection,designModule,studyType}' AS study_type,
+            t.obesity_class,
+            r.payload #>> '{protocolSection,statusModule,lastUpdatePostDateStruct,date}' AS last_update
+       FROM trials t LEFT JOIN raw_trials r ON r.source = 'CTGOV' AND r.source_id = t.nct_id
+       ${where}
+      ORDER BY ${TRIAL_SORTS[isTrialSort(f.sort) ? f.sort : "newest"].sql}
+      LIMIT $${params.length}`,
+    params,
+  );
+  return { rows, drugClass: cls && drugClass ? { key: cls.key, label: cls.label, drugs: drugClass.ids.length } : null };
+}
+
 // Drug classes for search ---------------------------------------------------------------
 // The drugs of a class ("GLP-1 receptor agonists"), read from their profiles (lib/drugClasses.ts).
 // Cached for a few minutes: the class of a drug changes only when its profile does.
