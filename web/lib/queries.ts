@@ -167,6 +167,39 @@ export async function listTrialsForExport(f: TrialFilters, max = 20000): Promise
   return { rows, drugClass: cls && drugClass ? { key: cls.key, label: cls.label, drugs: drugClass.ids.length } : null };
 }
 
+/** The trial that represents a drug in exports ("Key trial"). */
+export interface KeyTrial {
+  /** research files: the trial(s) the approval was based on, e.g. "NCT03548935 (STEP 1)" */
+  pivotal: string | null;
+  /** otherwise: its highest-phase trial (obesity trials first; company-sponsored, running, largest first) */
+  nct_id: string | null; phase: string | null; est_phase: string | null; sponsor: string | null; status: string | null;
+  enrollment: number | null; start: string | null;
+}
+
+export async function keyTrials(slugs: string[]): Promise<Map<string, KeyTrial>> {
+  if (!slugs.length) return new Map();
+  const rows = await query<KeyTrial & { slug: string }>(
+    `SELECT p.slug, to_jsonb(p) #>> '{curated_info,pivotal_trial,value}' AS pivotal,
+            b.nct_id, b.phase, b.est_phase, b.sponsor, b.status, b.enrollment, b.start
+       FROM products p
+       LEFT JOIN LATERAL (
+         SELECT t.nct_id, t.phase, ${EST_PHASE_SQL()} AS est_phase, t.sponsor, to_jsonb(t) ->> 'overall_status' AS status,
+                ${ENROLL()} AS enrollment, to_jsonb(t) ->> 'start_date' AS start
+           FROM trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
+          WHERE tp.product_id = p.id
+          ORDER BY (t.obesity_class = 'primary') DESC,
+                   CASE WHEN t.phase LIKE '%PHASE4%' THEN 5 WHEN t.phase LIKE '%PHASE3%' THEN 4 WHEN t.phase LIKE '%PHASE2%' THEN 3
+                        WHEN t.phase LIKE '%PHASE1%' THEN 2 ELSE 1 END DESC,
+                   (t.lead_sponsor_class = 'INDUSTRY') DESC,
+                   (to_jsonb(t) ->> 'overall_status' IN ('RECRUITING', 'ACTIVE_NOT_RECRUITING', 'NOT_YET_RECRUITING', 'ENROLLING_BY_INVITATION')) DESC,
+                   ${ENROLL()} DESC NULLS LAST, t.nct_id DESC
+          LIMIT 1) b ON true
+      WHERE p.slug = ANY($1)`,
+    [slugs],
+  );
+  return new Map(rows.map((r) => [r.slug, r]));
+}
+
 // Drug classes for search ---------------------------------------------------------------
 // The drugs of a class ("GLP-1 receptor agonists"), read from their profiles (lib/drugClasses.ts).
 // Cached for a few minutes: the class of a drug changes only when its profile does.

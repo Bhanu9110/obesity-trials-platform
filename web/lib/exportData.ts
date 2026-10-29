@@ -1,7 +1,7 @@
 // Rows for an export (server only): the Trials explorer or the Drugs list, with the same filters
 // the page had ("current filters") or everything, reduced to the chosen columns.
 
-import { listProducts, listTrialsForExport, type TrialFilters } from "@/lib/queries";
+import { keyTrials, listProducts, listTrialsForExport, type KeyTrial, type TrialFilters } from "@/lib/queries";
 import { formatPhase, highestPhase, OBESITY_CLASSES, SPONSOR_GROUPS, TRIAL_STATUS, ctgovUrl } from "@/lib/format";
 import { devStage, STAGE_META, type StageKey } from "@/lib/devStage";
 import { regGroup, type RegGroup } from "@/lib/regulatory";
@@ -141,6 +141,7 @@ export async function drugsTable(sp: URLSearchParams, scope: "filtered" | "all",
   const products = await listProducts();
   const { rows: list, filters, targets, members } = filterDrugs(products, sp, scope);
   const columns = pickColumns("drugs", columnKeys);
+  const keys = columns.some((c) => c.key === "key_trial") ? await keyTrials(list.map((p) => p.slug)) : new Map<string, KeyTrial>();
   const value = (p: ProductSummary, key: string): Cell => {
     switch (key) {
       case "name": return p.name;
@@ -158,6 +159,7 @@ export async function drugsTable(sp: URLSearchParams, scope: "filtered" | "all",
         return names.length ? `${t.combination ? "Combination" : names.length === 1 ? "Single" : names.length === 2 ? "Dual" : "Triple"}: ${names.join(" + ")}` : null;
       }
       case "stage": return devStage(p).label;
+      case "key_trial": return keyTrialText(devStage(p).key, keys.get(p.slug));
       case "top_phase": return p.trial_phases.length ? highestPhase(p.trial_phases) : p.phase;
       case "regulatory_status": return p.regulatory_status;
       case "approved": return p.approved;
@@ -185,6 +187,24 @@ export async function drugsTable(sp: URLSearchParams, scope: "filtered" | "all",
     ],
     truncated: false, total: list.length,
   };
+}
+
+/**
+ * "Key trial" for a drug:
+ *   approved -> the trial(s) the approval was based on (research files), else its highest-phase trial, said so;
+ *   others   -> one trial with its highest phase (obesity trials first; company-sponsored, running, largest first).
+ */
+export function keyTrialText(stage: string, k: KeyTrial | undefined): string | null {
+  if (!k) return null;
+  if (k.pivotal) return stage === "approved" ? `Approval based on: ${k.pivotal}` : k.pivotal;
+  if (!k.nct_id) return stage === "approved" ? "Approved — approval trial not recorded"
+    : "No ClinicalTrials.gov trial yet (known from conference abstracts or company reports)";
+  const ph = k.phase && k.phase !== "NA" ? formatPhase(k.phase) : k.est_phase ? `${formatPhase(k.est_phase)} (est. from enrollment)` : "phase not given";
+  const status = k.status ? TRIAL_STATUS[k.status]?.label ?? k.status : null;
+  const detail = [ph, status, k.sponsor].filter(Boolean).join(", ");
+  return stage === "approved"
+    ? `${k.nct_id} (${detail}) — highest-phase trial; the approval trial isn't recorded`
+    : `${k.nct_id} (${detail})`;
 }
 
 export async function buildTable(dataset: Dataset, sp: URLSearchParams, scope: "filtered" | "all", columns: string[], origin: string) {

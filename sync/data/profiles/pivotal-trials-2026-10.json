@@ -1,0 +1,223 @@
+{
+ "source": "Pivotal trials (Oct 2026)",
+ "updated": "2026-10-29",
+ "description": "The trials each approval was based on (shown as \"Key trial\" in exports). NCT IDs checked on ClinicalTrials.gov. Drugs approved before trial registration have no NCT ID.",
+ "drugs": [
+  {
+   "name": "Semaglutide",
+   "fields": {
+    "pivotal_trial": "NCT03548935 (STEP 1, Phase 3) — with STEP 2 NCT03552757, STEP 3 NCT03611582, STEP 4 NCT03548987 for Wegovy (US, Jun 2021)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT03548935",
+     "url": "https://clinicaltrials.gov/study/NCT03548935"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT03552757",
+     "url": "https://clinicaltrials.gov/study/NCT03552757"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT03611582",
+     "url": "https://clinicaltrials.gov/study/NCT03611582"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT03548987",
+     "url": "https://clinicaltrials.gov/study/NCT03548987"
+    }
+   ]
+  },
+  {
+   "name": "Tirzepatide",
+   "fields": {
+    "pivotal_trial": "NCT04184622 (SURMOUNT-1, Phase 3) — Zepbound chronic weight management (US, Nov 2023)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT04184622",
+     "url": "https://clinicaltrials.gov/study/NCT04184622"
+    }
+   ]
+  },
+  {
+   "name": "Liraglutide",
+   "fields": {
+    "pivotal_trial": "NCT01272219 (SCALE Obesity and Prediabetes, Phase 3) — with SCALE Diabetes NCT01272232 for Saxenda (US, Dec 2014)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT01272219",
+     "url": "https://clinicaltrials.gov/study/NCT01272219"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT01272232",
+     "url": "https://clinicaltrials.gov/study/NCT01272232"
+    }
+   ]
+  },
+  {
+   "name": "Orforglipron",
+   "fields": {
+    "pivotal_trial": "NCT05869903 (ATTAIN-1, Phase 3) — with ATTAIN-2 NCT05872620 for Foundayo (US, Apr 2026)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT05869903",
+     "url": "https://clinicaltrials.gov/study/NCT05869903"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT05872620",
+     "url": "https://clinicaltrials.gov/study/NCT05872620"
+    }
+   ]
+  },
+  {
+   "name": "Mazdutide",
+   "fields": {
+    "pivotal_trial": "NCT05607680 (GLORY-1, Phase 3) — chronic weight management (China, Jun 2025)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT05607680",
+     "url": "https://clinicaltrials.gov/study/NCT05607680"
+    }
+   ]
+  },
+  {
+   "name": "Ecnoglutide",
+   "fields": {
+    "pivotal_trial": "NCT05813795 (SLIMMER, Phase 3) — chronic weight management (China, Mar 2026)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT05813795",
+     "url": "https://clinicaltrials.gov/study/NCT05813795"
+    }
+   ]
+  },
+  {
+   "name": "Setmelanotide",
+   "fields": {
+    "pivotal_trial": "NCT02896192 (POMC/PCSK1 deficiency, Phase 3) and NCT03287960 (LEPR deficiency, Phase 3) — Imcivree (US, Nov 2020); BBS: NCT03746522"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT02896192",
+     "url": "https://clinicaltrials.gov/study/NCT02896192"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT03287960",
+     "url": "https://clinicaltrials.gov/study/NCT03287960"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT03746522",
+     "url": "https://clinicaltrials.gov/study/NCT03746522"
+    }
+   ]
+  },
+  {
+   "name": "Bupropion + Naltrexone",
+   "fields": {
+    "pivotal_trial": "NCT00532779 (COR-I, Phase 3) — with COR-II NCT00567255, COR-BMOD NCT00456521, COR-Diabetes NCT00474630 for Contrave (US, Sep 2014)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT00532779",
+     "url": "https://clinicaltrials.gov/study/NCT00532779"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT00567255",
+     "url": "https://clinicaltrials.gov/study/NCT00567255"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT00456521",
+     "url": "https://clinicaltrials.gov/study/NCT00456521"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT00474630",
+     "url": "https://clinicaltrials.gov/study/NCT00474630"
+    }
+   ]
+  },
+  {
+   "name": "Phentermine + Topiramate",
+   "fields": {
+    "pivotal_trial": "NCT00553787 (CONQUER, Phase 3) and NCT00554216 (EQUIP, Phase 3) — Qsymia (US, Jul 2012)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT00553787",
+     "url": "https://clinicaltrials.gov/study/NCT00553787"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT00554216",
+     "url": "https://clinicaltrials.gov/study/NCT00554216"
+    }
+   ]
+  },
+  {
+   "name": "Lorcaserin",
+   "fields": {
+    "pivotal_trial": "NCT00395135 (BLOOM, Phase 3) — with BLOSSOM NCT00603902 and BLOOM-DM NCT00603291 for Belviq (US, Jun 2012; withdrawn Feb 2020)"
+   },
+   "sources": [
+    {
+     "label": "ClinicalTrials.gov NCT00395135",
+     "url": "https://clinicaltrials.gov/study/NCT00395135"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT00603902",
+     "url": "https://clinicaltrials.gov/study/NCT00603902"
+    },
+    {
+     "label": "ClinicalTrials.gov NCT00603291",
+     "url": "https://clinicaltrials.gov/study/NCT00603291"
+    }
+   ]
+  },
+  {
+   "name": "Orlistat",
+   "fields": {
+    "pivotal_trial": "Approved before trials had to be registered (US 1999) — no NCT ID"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Phentermine",
+   "fields": {
+    "pivotal_trial": "Approved before trials had to be registered (US 1959) — no NCT ID"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Diethylpropion",
+   "fields": {
+    "pivotal_trial": "Approved before trials had to be registered (US 1959) — no NCT ID"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  },
+  {
+   "name": "Sibutramine",
+   "fields": {
+    "pivotal_trial": "Approved before trials had to be registered (US 1997; withdrawn 2010) — no NCT ID"
+   },
+   "sources": [
+    {
+     "label": "Prescribing information / standard pharmacology references"
+    }
+   ]
+  }
+ ]
+}

@@ -22,6 +22,8 @@ export const PROFILE_FIELDS = [
   // existing profile fields a research file may also give (e.g. a phase newer than the databases know)
   "aliases", "brand_names", "candidate", "parent_drug", "sponsor", "drug_class", "therapy_subclass", "indication",
   "modality", "phase", "moa", "roa", "approved", "approval_date",
+  // the trial(s) the approval was based on: "NCT03548935 (STEP 1)" — shown in exports ("Key trial")
+  "pivotal_trial",
 ] as const;
 export type ProfileField = (typeof PROFILE_FIELDS)[number];
 

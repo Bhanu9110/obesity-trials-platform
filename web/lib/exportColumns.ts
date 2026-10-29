@@ -53,6 +53,7 @@ export const DRUG_COLUMNS: ColumnDef[] = [
   { key: "sponsor", label: "Company", core: true, width: 1.6, group: "Drug" },
   { key: "class_tag", label: "Targets (single / dual / triple)", width: 1.8, group: "Drug" },
   { key: "stage", label: "Development stage", core: true, width: 1.3, group: "Development" },
+  { key: "key_trial", label: "Key trial (NCT ID)", core: true, width: 2.4, group: "Development" },
   { key: "top_phase", label: "Highest trial phase", width: 1.1, group: "Development" },
   { key: "regulatory_status", label: "Regulatory status", core: true, width: 3, group: "Development" },
   { key: "approved", label: "Approved", width: 0.8, group: "Development" },

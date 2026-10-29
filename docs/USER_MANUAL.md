@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.11.1 |
+| **Manual version** | 1.11.2 |
 | **Last updated** | 29 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -185,6 +185,7 @@ The **Export** button on the **Trials explorer** and the **Drugs** page opens th
 | Detail | |
 |---|---|
 | Size | Excel and CSV take up to 20,000 rows; PDF and Word show the first 3,000 rows (the page tells you when) |
+| **Key trial (NCT ID)** | Drug exports, ticked by default. **Approved** drugs: the trial(s) the approval was based on, e.g. *Approval based on: NCT03548935 (STEP 1, Phase 3)* — from the research file `pivotal-trials-2026-10.json` (semaglutide, tirzepatide, liraglutide, orforglipron, mazdutide, ecnoglutide, setmelanotide, Contrave, Qsymia, lorcaserin; drugs approved before trial registration say so). Approved drugs not in that file show their highest-phase trial, marked as such. **Other drugs**: one trial with their highest phase — obesity trials first, then company-sponsored, running and largest |
 | Order | Trials: as sorted on the Trials page. Drugs: phase-wise — approved first, then filed, Phase 3, 2, 1 … |
 | Who | Super admin, owners and admins always. Members and guests when an admin ticks **Can download data** (Admin page → add a login, or Manage → **Download data**) |
 | Record | Every download is written to the **Audit logs** (tab **Downloads**: who, what, format, rows and filters) |
@@ -310,6 +311,7 @@ When a sync finishes, pages that are open show the new numbers within about a mi
 | **Research files** | `sync/data/profiles/*.json` — the researched development, regulatory and commercial profile of the leading obesity drugs: INN, API, regulatory status, designations, patents, launch timing, efficacy and safety signals, results and milestones, each with its source. Loaded on every daily sync |
 | Current file | `obesity-leaders-2026-10.json` (researched 25 Oct 2026): semaglutide, tirzepatide, orforglipron, retatrutide, CagriSema, survodutide, maridebart cafraglutide, amycretin, mazdutide, VK2735, petrelintide, eloralintide, ecnoglutide — 42 results and 65 milestones |
 | `drug-basics-2026-10.json` | Modality, route, therapy class, subclass and mechanism for 479 drugs whose automatic profile left them blank or wrong — standard pharmacology for established drugs, company sources for pipeline drugs (e.g. VK2735, HRS9531, petrelintide, AZD6234, MET-097). Codes with no public information are left blank |
+| `pivotal-trials-2026-10.json` | The trial(s) each approval was based on (Key trial in exports) |
 | `status-audit-2026-10.json` | Researched 28 Oct 2026 after the client data review: approvals outside the US (ecnoglutide, mazdutide, beinaglutide, efsubaglutide, henagliflozin, enavogliflozin, cetilistat), filings (BGM0504, ribupatide, tesofensine, CagriSema), discontinued drugs with the company source (otenabant, beloranib, pramlintide/Symlin, danuglipron, lotiglipron, cotadutide, CT-868, emugrobart, dapiglutide, monlunabant, NNC0519-0130, INV-347, TERN-601, AMG 786, BI 1820237, azelaprag, taranabant, taspoglutide, PF-07976016 …), wrong automatic approvals corrected (phentermine, diethylpropion, ARD-101, cannabis …) and missing aliases (Relsipatide, BG128, Poterepatide, P001, Safiglipron, Compound 121a, CKD-732, HRK-429, HRK-512, J3R-MC-YDAL, MET-097o, IN-B00009, DA-63110) |
 | **Aliases in research files** | Every alias in a research file is linked to the drug page in all its spellings, so a new trial that writes `VT 355` lands on the same page as `VT-355`. An alias that already has its own drug page is reported in the sync log so it can be merged |
 | Updating | Edit the file (or add a newer one) and push; rows that are no longer in a file are removed on the next sync, hidden rows stay hidden, and rows added on the website are never touched. A drug named in a file must already have a drug page (found by its name or any alias) |
@@ -350,6 +352,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 29 Oct 2026 | 1.11.2 | Drug exports get a **Key trial (NCT ID)** column: the approval trial(s) for approved drugs (new research file, NCT IDs checked on ClinicalTrials.gov), else one highest-phase trial | 7A, 15 |
 | 29 Oct 2026 | 1.11.1 | Drug classes and generic names ("Anti-obesity medication", "Incretin Therapies", "GLP-1 Receptor Agonist e.g", "Biguanide", "Alter" …) are no longer listed as drugs (new name rule + list). **Undisclosed programmes** count only company-sponsored trials — academic-only ones are left out. Trials with no phase on ClinicalTrials.gov get a phase **estimated from enrollment** (marked *est.*) on the Trials explorer, drug pages, stage chips and exports | 6, 7 |
 | 29 Oct 2026 | 1.11 | **Download data**: Export button on Trials and Drugs → choose rows (current filters or everything) and columns, see them as a dashboard with a preview table, download as Excel, PDF, CSV or Word. Admins always; members and guests when allowed on the Admin page. Downloads appear in the Audit logs (new **Downloads** tab) | 3, 7A, 11, 12 |
 | 29 Oct 2026 | 1.10.3 | Drugs list keeps its filters (search, stage, status, sort, view, page) in the address, so Back or **← All drugs** returns to the same list; **← All trials** does the same for the Trials explorer | 6, 7 |
