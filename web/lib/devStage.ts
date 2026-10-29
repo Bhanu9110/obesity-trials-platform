@@ -8,11 +8,13 @@
 //   3. Filed / under review
 //   4. No active development     — every ClinicalTrials.gov trial has ended, the newest one started
 //      INACTIVE_YEARS or more years ago, and nothing says the drug is still in development.
-//   5. Phase 3 / 2 / 1           — the highest phase of its trials (or of its profile).
+//   5. Phase 3 / 2 / 1           — the highest phase of its trials (or of its profile); with no phase
+//      anywhere, estimated from the enrollment of its largest interventional trial ("Phase 2 (est.)").
 //   6. Preclinical / conference  — known only from conference abstracts or company reports.
 
 import type { ProductSummary } from "@/lib/types";
 import { regGroup } from "@/lib/regulatory";
+import { phaseFromEnrollment } from "@/lib/format";
 
 export type StageKey = "approved" | "filed" | "p3" | "p2" | "p1" | "early" | "stopped" | "inactive";
 
@@ -31,7 +33,7 @@ export const STAGE_META: Record<StageKey, { label: string; chip: string; order: 
 export const INACTIVE_YEARS = 7;
 
 type StageInput = Pick<ProductSummary, "phase" | "approved" | "regulatory_status" | "trial_phases" | "abstracts" | "nct_trials">
-  & Partial<Pick<ProductSummary, "active_trials" | "last_trial_year">>;
+  & Partial<Pick<ProductSummary, "active_trials" | "last_trial_year" | "unphased_enrollment">>;
 
 export interface DevStage {
   key: StageKey;
@@ -92,7 +94,15 @@ export function devStage(p: StageInput, now = new Date()): DevStage {
     return { key: "inactive", label: "No active development", reached,
       detail: `No trial running; the newest trial started in ${last}${reachedText}. Not confirmed as discontinued by the company.` };
   }
-  // 5. Clinical phase.
+  // 5. Clinical phase. No phase on ClinicalTrials.gov (and none in the profile): estimated from the
+  //    enrollment of its largest interventional trial — Phase 1 up to ~100, Phase 2 ~100–300, Phase 3 more.
+  if (!reached && p.nct_trials > 0 && p.unphased_enrollment) {
+    const est = Number(phaseFromEnrollment(p.unphased_enrollment)?.slice(-1) ?? 0);
+    if (est) {
+      return { key: (["p1", "p2", "p3"] as const)[est - 1], label: `Phase ${est} (est.)`, reached: est,
+        detail: `No phase on ClinicalTrials.gov — estimated from enrollment (${p.unphased_enrollment.toLocaleString("en-US")} participants; Phase 1 up to ~100, Phase 2 ~100–300, Phase 3 more than 300)` };
+    }
+  }
   if (reached >= 3) return { key: "p3", label: "Phase 3", reached, detail: status || "Highest trial phase" };
   if (reached === 2) return { key: "p2", label: "Phase 2", reached, detail: status || "Highest trial phase" };
   if (reached === 1) return { key: "p1", label: "Phase 1", reached, detail: status || "Highest trial phase" };

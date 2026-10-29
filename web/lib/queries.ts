@@ -53,6 +53,14 @@ export const isTrialSort = (s: unknown): s is TrialSort => typeof s === "string"
 const TITLE_SQL = `(SELECT r.payload #>> '{protocolSection,identificationModule,briefTitle}'
                       FROM raw_trials r WHERE r.source = 'CTGOV' AND r.source_id = t.nct_id)`;
 
+// Phase estimated from enrollment for interventional trials with no phase (lib/format.ts phaseFromEnrollment).
+const STUDY_TYPE_SQL = (t = "t") => `(SELECT rr.payload #>> '{protocolSection,designModule,studyType}'
+                      FROM raw_trials rr WHERE rr.source = 'CTGOV' AND rr.source_id = ${t}.nct_id)`;
+const UNPHASED = (t = "t") => `coalesce(nullif(${t}.phase, ''), 'NA') = 'NA' AND ${STUDY_TYPE_SQL(t)} = 'INTERVENTIONAL'`;
+const ENROLL = (t = "t") => `(to_jsonb(${t}) ->> 'enrollment')::int`;
+export const EST_PHASE_SQL = (t = "t") => `CASE WHEN ${ENROLL(t)} > 0 AND ${UNPHASED(t)} THEN
+    CASE WHEN ${ENROLL(t)} <= 100 THEN 'PHASE1' WHEN ${ENROLL(t)} <= 300 THEN 'PHASE2' ELSE 'PHASE3' END END`;
+
 // Products of a trial as [{slug, name}], alphabetical.
 const PRODUCTS_JSON = `
   coalesce((SELECT json_agg(json_build_object('slug', p.slug, 'name', p.name) ORDER BY p.name)
@@ -124,7 +132,7 @@ function buildWhere(f: TrialFilters, params: unknown[]): string {
 // Export ---------------------------------------------------------------------------------
 /** One trial with every field the export can offer (lib/exportData.ts picks the columns). */
 export interface TrialExportRow {
-  nct_id: string; title: string | null; drugs: string | null; phase: string | null; overall_status: string | null;
+  nct_id: string; title: string | null; drugs: string | null; phase: string | null; est_phase: string | null; overall_status: string | null;
   sponsor: string | null; lead_sponsor_class: string | null; conditions: string[] | null; countries: string[] | null;
   continents: string[] | null; start_date: string | null; primary_completion: string | null; completion: string | null;
   enrollment: number | null; study_type: string | null; obesity_class: string | null; last_update: string | null;
@@ -141,7 +149,7 @@ export async function listTrialsForExport(f: TrialFilters, max = 20000): Promise
     `SELECT t.nct_id, r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
             (SELECT string_agg(p.name, ', ' ORDER BY p.name) FROM trial_products tp JOIN products p ON p.id = tp.product_id
               WHERE tp.nct_id = t.nct_id AND p.kind IS NULL) AS drugs,
-            t.phase, to_jsonb(t) ->> 'overall_status' AS overall_status, t.sponsor, t.lead_sponsor_class,
+            t.phase, ${EST_PHASE_SQL()} AS est_phase, to_jsonb(t) ->> 'overall_status' AS overall_status, t.sponsor, t.lead_sponsor_class,
             t.conditions, t.countries, t.continents,
             to_jsonb(t) ->> 'start_date' AS start_date,
             r.payload #>> '{protocolSection,statusModule,primaryCompletionDateStruct,date}' AS primary_completion,
@@ -203,6 +211,7 @@ export async function listTrials(
     query<TrialListItem>(
       `SELECT t.nct_id, t.phase, t.sponsor, t.lead_sponsor_class, t.conditions AS indication, t.continents,
               t.obesity_class, t.obesity_reason, ${PRODUCTS_JSON} AS products, ${TITLE_SQL} AS title,
+              ${EST_PHASE_SQL()} AS est_phase,
               to_jsonb(t) ->> 'overall_status' AS overall_status,
               to_jsonb(t) ->> 'start_date' AS start_date,
               (to_jsonb(t) ->> 'enrollment')::int AS enrollment
@@ -367,6 +376,8 @@ async function listProductRows(): Promise<ProductSummary[]> {
               ('RECRUITING', 'NOT_YET_RECRUITING', 'ACTIVE_NOT_RECRUITING', 'ENROLLING_BY_INVITATION', 'AVAILABLE')
               OR to_jsonb(t) ->> 'overall_status' IS NULL)::int AS active_trials,
             max(substring(to_jsonb(t) ->> 'start_date' from '^[0-9]{4}')::int) AS last_trial_year,
+            -- no phase on any trial: the largest interventional trial's enrollment gives an estimate
+            max(${ENROLL()}) FILTER (WHERE t.obesity_class = 'primary' AND ${UNPHASED()}) AS unphased_enrollment,
             coalesce(array_agg(DISTINCT t.phase) FILTER (WHERE t.phase IS NOT NULL AND t.obesity_class = 'primary'), '{}') AS trial_phases,
             ${HAS_INFO} AS has_info,
             (SELECT count(*)::int FROM product_abstracts pa WHERE pa.product_slug = p.slug) AS abstracts,
@@ -377,6 +388,8 @@ async function listProductRows(): Promise<ProductSummary[]> {
        FROM products p
        ${AUTO_JOIN}
        LEFT JOIN (trial_products tp JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active) ON tp.product_id = p.id
+             -- "Undisclosed <class>" programmes count only company-sponsored trials (academic ones are left out)
+             AND (p.slug NOT LIKE 'undisclosed%' OR t.lead_sponsor_class = 'INDUSTRY')
       WHERE p.kind IS NULL -- diets, procedures, tests and supplements are not listed (products.kind)
       GROUP BY p.id, x.ai
      -- drugs with trials, and drugs known only from conference abstracts (e.g. preclinical programs)
@@ -421,7 +434,8 @@ export async function getProductTrials(productId: number): Promise<ProductTrial[
             r.payload #>> '{protocolSection,identificationModule,briefTitle}' AS title,
             to_jsonb(t) ->> 'overall_status' AS overall_status,
             to_jsonb(t) ->> 'start_date' AS start_date,
-            (to_jsonb(t) ->> 'enrollment')::int AS enrollment
+            (to_jsonb(t) ->> 'enrollment')::int AS enrollment,
+            ${EST_PHASE_SQL()} AS est_phase
        FROM trial_products tp
        JOIN trials t ON t.nct_id = tp.nct_id AND t.is_active
        LEFT JOIN raw_trials r ON r.source = 'CTGOV' AND r.source_id = t.nct_id

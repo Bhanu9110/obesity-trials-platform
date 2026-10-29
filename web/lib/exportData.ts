@@ -71,7 +71,7 @@ export async function trialsTable(sp: URLSearchParams, scope: "filtered" | "all"
       case "nct_id": return t.nct_id;
       case "title": return t.title;
       case "drugs": return t.drugs;
-      case "phase": return t.phase ? formatPhase(t.phase) : null;
+      case "phase": return t.phase && t.phase !== "NA" ? formatPhase(t.phase) : t.est_phase ? `${formatPhase(t.est_phase)} (est. from enrollment)` : t.phase ? formatPhase(t.phase) : null;
       case "status": return t.overall_status ? TRIAL_STATUS[t.overall_status]?.label ?? t.overall_status : null;
       case "sponsor": return t.sponsor;
       case "sponsor_type": return Object.values(SPONSOR_GROUPS).find((g) => g.classes.split(",").includes(t.lead_sponsor_class ?? ""))?.label.replace(/ only$/, "") ?? t.lead_sponsor_class;
@@ -91,7 +91,7 @@ export async function trialsTable(sp: URLSearchParams, scope: "filtered" | "all"
   };
   const byPhase = counter(), byStatus = counter(), bySponsor = counter();
   for (const t of rowsIn) {
-    byPhase.add(t.phase ? formatPhase(t.phase) : null);
+    byPhase.add(t.phase && t.phase !== "NA" ? formatPhase(t.phase) : t.est_phase ? `${formatPhase(t.est_phase)} (est.)` : null);
     byStatus.add(t.overall_status ? TRIAL_STATUS[t.overall_status]?.label ?? t.overall_status : null);
     bySponsor.add(value(t, "sponsor_type") as string | null);
   }

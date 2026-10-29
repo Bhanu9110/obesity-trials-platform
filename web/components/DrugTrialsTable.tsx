@@ -22,9 +22,11 @@ const FLAT_PREVIEW = 50;   // trials shown in the ungrouped list before "Show mo
 type SortKey = "title" | "sponsor" | "status" | "start" | "enrollment" | "region";
 type SponsorFilter = "" | "industry" | "academic";
 
-const phaseKey = (t: ProductTrial) => t.phase || NO_PHASE;
-const phaseLabel = (p: string) => (p === NO_PHASE ? "No phase" : formatPhase(p));
-const rankOf = (p: string) => phaseRank(p === NO_PHASE ? null : p);
+// No phase on ClinicalTrials.gov: grouped under the phase estimated from enrollment ("EST:PHASE2").
+const EST = "EST:";
+const phaseKey = (t: ProductTrial) => ((!t.phase || t.phase === "NA") && t.est_phase ? EST + t.est_phase : t.phase || NO_PHASE);
+const phaseLabel = (p: string) => (p === NO_PHASE ? "No phase" : p.startsWith(EST) ? `${formatPhase(p.slice(EST.length))} (est.)` : formatPhase(p));
+const rankOf = (p: string) => (p.startsWith(EST) ? phaseRank(p.slice(EST.length)) - 0.5 : phaseRank(p === NO_PHASE ? null : p));
 const isIndustry = (t: ProductTrial) => t.lead_sponsor_class === "INDUSTRY";
 
 /** Phase-strip colour: the same phase colours as the phase pills everywhere else. */

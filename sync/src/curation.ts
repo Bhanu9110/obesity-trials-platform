@@ -38,9 +38,15 @@ export function loadCuration(): Curation {
 // names, none of which matches.
 const NOT_DRUG_RE = new RegExp(String.raw`\b(placebo|placibo|sham|usual care|standard (of )?care|no (intervention|treatment)|wait-?list|control group|normal control|surgery|surgical procedure|gastrectomy|gastric by-?pass|roux-en-y|gastroplasty|gastric band\w*|intragastric balloon|bariatric|f?mri|dxa|dexa|ultrasound|echocardiography|electroencephalography|calorimetry|biopsy|endoscopy|gastroscopy|gastroduodenoscopy|laryngoscopy|bioimpedance|blood (tests?|analysis|sampling|draw)|questionnaire|interview|diary|scale|monitoring|assessment|evaluation|analysis|measurement|sampling|calibration|exploration|exercise|physical activity|training|coaching|counsel+ing|lifestyle|yoga|acupuncture|mindfulness|cbt|psychotherapy|education|diets?|dietary|fasting|caloric restriction|calorie restriction|energy restriction|meal replacement|time-restricted|transplant(ation)?|cold exposure)\b`, "i");
 
+// The WHOLE name is a drug class or a generic word, not a specific drug ("Anti-obesity medication",
+// "Incretin Therapies", "GLP-1 Receptor Agonist e.g", "Biguanide"). Trials that name only a class
+// are kept as "Undisclosed <class>" programmes (company-sponsored ones are listed).
+const CATEGORY_RE = new RegExp(String.raw`^(anti[- ]?obesity (medications?|drugs?|agents?|therap(y|ies)|pharmacotherapy)|obesity (pharmacotherapy|medications?|drugs?|therap(y|ies))|(non[- ]?glp[- ]?1 )?weight[- ]?loss (medications?|drugs?|agents?)|incretin(s|[- ]based)?( therap(y|ies)| drugs?| agents?)?|anti[- ]?diabetics?( drugs?| agents?| medications?)?|biguanides?|thiazolidinediones?|sulfonylureas?|gnrh (agonists?|antagonists?)|(glp[- ]?1|gip|glucagon|amylin|sglt[- ]?2|dpp[- ]?4) (receptor )?(agonists?|antagonists?|analogues?|analogs?|inhibitors?|ras?)( e\.?g\.?)?|.* e\.g\.?)$`, "i");
+
 /** Kind from the name alone: 'not_drug' for clear cases, else null (= drug). */
 export function kindFromName(name: string): { kind: ProductKind; note: string } | null {
   if (!name || name.includes(" + ")) return null;
+  if (CATEGORY_RE.test(name.trim())) return { kind: "not_drug", note: "name rule: a drug class or generic name, not a specific drug" };
   const m = NOT_DRUG_RE.exec(name);
   return m ? { kind: "not_drug", note: `name rule: "${m[0].toLowerCase()}"` } : null;
 }

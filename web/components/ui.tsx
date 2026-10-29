@@ -20,7 +20,16 @@ export function NctLink({ id }: { id: string }) {
 }
 
 /** Phase as a coloured pill: early phases cool, late phases warm. */
-export function PhaseText({ phase }: { phase: string | null }) {
+export function PhaseText({ phase, est }: { phase: string | null; est?: string | null }) {
+  // No phase on ClinicalTrials.gov: show the phase estimated from enrollment, marked "est."
+  if ((!phase || phase.toUpperCase() === "NA") && est) {
+    return (
+      <span title="No phase on ClinicalTrials.gov — estimated from enrollment (Phase 1 up to ~100 people, Phase 2 ~100–300, Phase 3 more than 300)"
+            className="inline-flex whitespace-nowrap rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+        {formatPhase(est)} <span className="ml-1 font-normal text-slate-400">est.</span>
+      </span>
+    );
+  }
   if (!phase) return <Dash />;
   const p = phase.toUpperCase();
   const tone =

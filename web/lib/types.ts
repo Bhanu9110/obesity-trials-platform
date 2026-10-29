@@ -21,6 +21,8 @@ export interface TrialListItem {
   products: ProductLink[];
   obesity_class: string;
   obesity_reason: string | null;
+  /** no phase on ClinicalTrials.gov: estimated from enrollment (interventional trials) */
+  est_phase?: string | null;
 }
 
 export interface TrialsResponse {
@@ -151,6 +153,7 @@ export interface ProductTrial {
   enrollment: number | null;
   obesity_class: string;
   obesity_reason: string | null;
+  est_phase?: string | null;          // no phase given: estimated from enrollment
 }
 
 export interface ProductSummary extends ProductInfo {
@@ -169,4 +172,5 @@ export interface ProductSummary extends ProductInfo {
   next_milestone: { title: string; date_label: string | null; kind: MilestoneKind } | null; // the next expected milestone
   active_trials: number;          // trials recruiting, about to start or still running (all classes)
   last_trial_year: number | null; // start year of its newest trial
+  unphased_enrollment?: number | null; // no trial phase: enrollment of its largest interventional trial (phase estimate)
 }

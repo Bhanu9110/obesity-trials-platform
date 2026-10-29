@@ -24,6 +24,13 @@ test("name rules: clear non-drugs only, never a drug arm", () => {
   assert.equal(kindFromName("Placebo injection")?.kind, "not_drug");
   assert.equal(kindFromName("Low-calorie Diet")?.kind, "not_drug");
   assert.equal(kindFromName("Behavioral + Orlistat"), null);   // a combination with a drug
+  // a class or a generic word, not a drug
+  for (const cat of ["Anti-obesity medication", "Anti Obesity Drugs", "Incretin Therapies", "Incretin-based therapy", "GLP-1 Receptor Agonist e.g",
+    "GLP-1 receptor agonist", "GLP-1 Receptor Antagonist", "Obesity Pharmacotherapy", "Non-GLP-1 weight-loss medication", "Anti-diabetic",
+    "Biguanide", "Thiazolidinedione", "GnRH Agonist"]) assert.equal(kindFromName(cat)?.kind, "not_drug", cat);
+  for (const drug of ["Undisclosed GLP-1 receptor agonist", "Liraglutide", "Exenatide", "Glucagon-like peptide-1 analogue NN9695", "Amylin 1213"]) {
+    assert.equal(kindFromName(drug), null, drug);
+  }
   for (const drug of ["Semaglutide", "Diethylpropion", "Dietressa", "CT-996", "Metformin", "Glubran Surgical Glue"]) {
     assert.equal(kindFromName(drug), null, drug);
   }

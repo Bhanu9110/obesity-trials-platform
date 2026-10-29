@@ -67,6 +67,7 @@ export default async function DrugPage({ params, searchParams }: {
     abstracts: abstracts.length, nct_trials: trials.length,
     active_trials: trials.filter((t) => !t.overall_status || ACTIVE.includes(t.overall_status)).length,
     last_trial_year: years.length ? Math.max(...years) : null,
+    unphased_enrollment: Math.max(0, ...primary.filter((t) => t.est_phase).map((t) => t.enrollment ?? 0)) || null,
   });
 
   return (

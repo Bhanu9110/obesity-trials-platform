@@ -365,7 +365,7 @@ function Explorer() {
                       </div>
                     </td>
                     <td className="max-w-[180px] px-3 py-3"><ProductChips products={t.products} max={3} /></td>
-                    <td className="px-3 py-3"><PhaseText phase={t.phase} /></td>
+                    <td className="px-3 py-3"><PhaseText phase={t.phase} est={t.est_phase} /></td>
                     <td className="px-3 py-3"><StatusPill status={t.overall_status} compact /></td>
                     <td className="max-w-[200px] px-3 py-3 text-[13px] text-slate-700">
                       <span className="line-clamp-2">{t.sponsor || <Dash />}</span>

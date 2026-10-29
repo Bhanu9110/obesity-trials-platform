@@ -90,3 +90,16 @@ export function formatMonthYear(d: string | null | undefined): string | null {
   const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(m[2]) - 1];
   return mon ? `${mon} ${m[1]}` : m[1];
 }
+
+/**
+ * A phase estimated from enrollment, for interventional trials ClinicalTrials.gov gives no phase
+ * ("Not applicable" / blank). Usual sizes: Phase 1 up to ~100 people, Phase 2 ~100–300,
+ * Phase 3 more than 300. Keep in step with EST_PHASE_SQL in lib/queries.ts.
+ */
+export const EST_PHASE_LIMITS = { phase1: 100, phase2: 300 } as const;
+export function phaseFromEnrollment(n: number | null | undefined): "PHASE1" | "PHASE2" | "PHASE3" | null {
+  if (!n || n <= 0) return null;
+  return n <= EST_PHASE_LIMITS.phase1 ? "PHASE1" : n <= EST_PHASE_LIMITS.phase2 ? "PHASE2" : "PHASE3";
+}
+/** No phase given ("NA", blank)? */
+export const noPhase = (p: string | null | undefined) => !p || p.toUpperCase() === "NA";

@@ -319,7 +319,22 @@
   "withoutobesity": "Without OBesity",
   "wmp": "WMP",
   "wristactimeter": "Wrist Actimeter",
-  "wwclinic": "WW Clinic"
+  "wwclinic": "WW Clinic",
+  "antiobesitymedication": "Anti-obesity medication — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "antiobesitydrugs": "Anti Obesity Drugs — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "incretintherapies": "Incretin Therapies — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "incretinbasedtherapy": "Incretin-based therapy — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "glp1receptoragonisteg": "GLP-1 Receptor Agonist e.g — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "glp1receptoragonist": "GLP-1 receptor agonist — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "glp1receptorantagonist": "GLP-1 Receptor Antagonist — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "obesitypharmacotherapy": "Obesity Pharmacotherapy — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "nonglp1weightlossmedication": "Non-GLP-1 weight-loss medication — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "antidiabetic": "Anti-diabetic — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "biguanide": "Biguanide — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "thiazolidinedione": "Thiazolidinedione — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "gnrhagonist": "GnRH Agonist — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "gnrhantagonist": "GnRH Antagonist — a drug class or generic name, not a specific drug (trials naming only a class are kept as company-sponsored \"Undisclosed\" programmes)",
+  "alter": "Alter — not an identifiable drug (unclear intervention name)"
  },
  "supplement": {
   "5hydroxytryptophan": "5-HYDROXYTRYPTOPHAN",
@@ -1651,6 +1666,10 @@
   "mbx8025": {
    "into": "seladelpar",
    "name": "Seladelpar"
+  },
+  "consultation_liraglutide_upstreamriskfactorsmodificationadvice": {
+   "into": "liraglutide",
+   "name": "Liraglutide"
   }
  }
 }
