@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { FilterOptions, TrialListItem } from "@/lib/types";
 import { SPONSOR_GROUPS, TRIAL_STATUS, TRIAL_STATUS_ORDER, formatMonthYear, formatPhase } from "@/lib/format";
 import { phaseIndex } from "@/lib/chart-colors";
-import { ContinentChips, Dash, PhaseText, ProductChips, StatusPill } from "@/components/ui";
+import { ContinentChips, Dash, HealthyTag, PhaseText, ProductChips, StatusPill } from "@/components/ui";
 import PageHeader from "@/components/PageHeader";
 import TrialPreview from "@/components/TrialPreview";
 import { icons } from "@/components/shell/icons";
@@ -365,7 +365,7 @@ function Explorer() {
                       </div>
                     </td>
                     <td className="max-w-[180px] px-3 py-3"><ProductChips products={t.products} max={3} /></td>
-                    <td className="px-3 py-3"><PhaseText phase={t.phase} est={t.est_phase} /></td>
+                    <td className="px-3 py-3"><PhaseText phase={t.phase} est={t.est_phase} /><HealthyTag reason={t.obesity_reason} /></td>
                     <td className="px-3 py-3"><StatusPill status={t.overall_status} compact /></td>
                     <td className="max-w-[200px] px-3 py-3 text-[13px] text-slate-700">
                       <span className="line-clamp-2">{t.sponsor || <Dash />}</span>

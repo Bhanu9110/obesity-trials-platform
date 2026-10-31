@@ -4,6 +4,7 @@ import { iterateStudies } from "./ctgov-client.js";
 import { PARSER_VERSION, contentHash, mapStudy, studyTitle, trimPayload, type MappedTrial } from "./mapper.js";
 import { pool, withTransaction, type Client } from "./db.js";
 import { CLASSIFIER_VERSION, classifyObesity } from "./obesity-filter.js";
+import { curatedClassification, curatedIds } from "./curated-trials.js";
 import { assessQuality } from "./quality.js";
 import { validateMapped, type ValidationResult } from "./validate.js";
 import { diffMapped, insertChanges, snapshot, type ChangeRow } from "./history.js";
@@ -160,8 +161,9 @@ interface TrialInput {
   title?: string | null;
 }
 
+// Reviewed Phase 1 trials (curated-trials.ts) are primary whatever their conditions say.
 const classify = (m: MappedTrial, title?: string | null) =>
-  classifyObesity(m.conditions, m.lead_sponsor_class, title, m.interventions);
+  curatedClassification(m.nct_id) ?? classifyObesity(m.conditions, m.lead_sponsor_class, title, m.interventions);
 
 /** Version of the "what is stored" rule below; a change triggers a one-off clean-up. */
 export const STORE_SCOPE = "primary-obesity-with-drug-1";
@@ -601,9 +603,20 @@ export async function runSync(
   const days = full ? null : (incrementalDaysOverride ?? config.ctgov.incrementalDays);
   const startDateFrom = config.ctgov.startDateFrom || null;
   let pageCount = 0;
-  const source = iterateStudies({ incrementalDays: days, startDateFrom }, (pageIndex) => {
+  const main = iterateStudies({ incrementalDays: days, startDateFrom }, (pageIndex) => {
     pageCount = pageIndex + 1;
   });
+  // Then the reviewed Phase 1 trials, by NCT ID and with any condition (curated-trials.ts).
+  // Fetched on every run so they are "seen" by a full run and never pruned.
+  const source = (async function* () {
+    const seen = new Set<string>();
+    for await (const s of main) {
+      const id = s?.protocolSection?.identificationModule?.nctId;
+      if (id) seen.add(String(id).toUpperCase());
+      yield s;
+    }
+    yield* fetchCurated(seen);
+  })();
   const { touched: _touched, ...result } = await runSyncCore(
     source, () => pageCount, full ? "full" : "incremental", progressLogger(full ? "full" : "incremental"),
   );
@@ -630,6 +643,14 @@ export async function runSync(
   return result;
 }
 
+/** The reviewed Phase 1 trials not already returned by the obesity search. */
+async function* fetchCurated(skip: Set<string> = new Set()): AsyncGenerator<RawStudy> {
+  const ids = [...curatedIds()].filter((id) => !skip.has(id));
+  for (const group of chunks(ids, 100)) {
+    yield* iterateStudies({ incrementalDays: null, startDateFrom: null, ids: group, anyCondition: true });
+  }
+}
+
 // --------------------------------------------------------------------------- #
 // Retry queue
 // --------------------------------------------------------------------------- #
@@ -651,8 +672,12 @@ export async function retryFailures(fetchIds?: (ids: string[]) => AsyncIterable<
   const out: RetryResult = { due: due.length, retried: 0, resolved: 0, stillFailing: 0, notReturned: 0 };
   if (!due.length) return out;
   const fetcher = fetchIds ?? ((ids: string[]) => (async function* () {
-    for (const group of chunks(ids, 100)) {
+    const curated = curatedIds();
+    for (const group of chunks(ids.filter((id) => !curated.has(id)), 100)) {
       yield* iterateStudies({ incrementalDays: null, startDateFrom: config.ctgov.startDateFrom || null, ids: group });
+    }
+    for (const group of chunks(ids.filter((id) => curated.has(id)), 100)) {
+      yield* iterateStudies({ incrementalDays: null, startDateFrom: null, ids: group, anyCondition: true });
     }
   })());
   // Remember which records CT.gov actually sent back.
@@ -1116,7 +1141,7 @@ export async function reclassifyAll(runId: string | null = null): Promise<Classi
   const changes: ChangeRow[] = [];
   const remove: string[] = [];
   for (const r of rows.rows) {
-    const c = classifyObesity(r.conditions ?? [], r.lead_sponsor_class, r.title, r.interventions ?? []);
+    const c = curatedClassification(r.nct_id) ?? classifyObesity(r.conditions ?? [], r.lead_sponsor_class, r.title, r.interventions ?? []);
     counts[c.class] = (counts[c.class] ?? 0) + 1;
     if (c.class !== "primary") {
       remove.push(r.nct_id); // only primary-obesity trials are stored

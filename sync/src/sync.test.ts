@@ -6,6 +6,7 @@ import { runSyncForStudies, rebuildProducts, reparseFromRaw, trialsMissingLineag
 import { assessQuality } from "./quality.js";
 import { isObesityIndication } from "./obesity-filter.js";
 import { pool, pgConfig } from "./db.js";
+import { CURATED_LABEL, curatedIds, setCuratedIds } from "./curated-trials.js";
 
 // A realistic (trimmed) CT.gov v2 study payload.
 function study(
@@ -367,6 +368,31 @@ test("database connection settings (Supabase SSL handling)", () => {
   const verified = pgConfig("postgresql://u:p@aws-0-x.pooler.supabase.com:5432/postgres?sslmode=require");
   assert.deepEqual(verified.ssl, { ca: "-----BEGIN CERTIFICATE-----\nABC\n-----END CERTIFICATE-----", rejectUnauthorized: true });
   if (prev === undefined) delete process.env.DATABASE_CA_CERT; else process.env.DATABASE_CA_CERT = prev;
+});
+
+test("reviewed Phase 1 healthy-volunteer trials are stored as obesity trials in their own phase", async () => {
+  // The real list loads and holds only NCT IDs.
+  assert.ok(curatedIds().size > 100);
+  assert.ok(curatedIds().has("NCT06635226"));
+  setCuratedIds(["NCT99997001"]);
+  try {
+    await pool.query("DELETE FROM trials WHERE nct_id IN ('NCT99997001','NCT99997002')");
+    const hv = (nct: string) => study(nct, {
+      conditions: ["Healthy Adult Subjects"], phase: ["PHASE1"],
+      interventions: [{ type: "DRUG", name: "Semaglutide" }, { type: "DRUG", name: "Placebo" }],
+    });
+    await runSyncForStudies([hv("NCT99997001"), hv("NCT99997002")] as any);
+    const r = await pool.query("SELECT nct_id, phase, obesity_class, obesity_reason FROM trials WHERE nct_id IN ('NCT99997001','NCT99997002')");
+    // Only the listed trial is kept; the same study off the list is not an obesity trial.
+    assert.equal(r.rowCount, 1);
+    assert.equal(r.rows[0].nct_id, "NCT99997001");
+    assert.equal(r.rows[0].obesity_class, "primary");
+    assert.match(r.rows[0].obesity_reason, new RegExp("^" + CURATED_LABEL));
+    assert.match(String(r.rows[0].phase), /PHASE1/);
+  } finally {
+    setCuratedIds(null);
+    await pool.query("DELETE FROM trials WHERE nct_id IN ('NCT99997001','NCT99997002')");
+  }
 });
 
 test.after(async () => {

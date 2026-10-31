@@ -1,0 +1,859 @@
+{
+  "description": "Phase 1 / clinical-pharmacology trials of obesity drugs that ClinicalTrials.gov does not register under obesity (healthy volunteers, hepatic/renal impairment, drug interactions, formulation, mass balance). Reviewed and kept by the site owner on 31 Oct 2026. The sync fetches these by NCT ID every run and counts them as obesity trials with the label below. Add or remove NCT IDs here to change the list.",
+  "updated": "2026-10-31",
+  "label": "Phase 1 – healthy volunteers / clinical pharmacology",
+  "trials": [
+    {
+      "nct": "NCT00791752",
+      "drug": "AZD4017",
+      "phase": "Phase 1",
+      "study": "Single ascending dose"
+    },
+    {
+      "nct": "NCT00799747",
+      "drug": "AZD4017",
+      "phase": "Phase 1",
+      "study": "Single ascending dose, healthy Japanese males"
+    },
+    {
+      "nct": "NCT00918606",
+      "drug": "LIPO-102",
+      "phase": "Phase 1",
+      "study": "PK/safety in healthy volunteers — local fat reduction, not systemic weight loss"
+    },
+    {
+      "nct": "NCT00935662",
+      "drug": "AZD8329",
+      "phase": "Phase 1",
+      "study": "Single ascending dose"
+    },
+    {
+      "nct": "NCT01046357",
+      "drug": "AZD7687",
+      "phase": "Phase 1",
+      "study": "Single ascending dose"
+    },
+    {
+      "nct": "NCT01064492",
+      "drug": "PF-04620110",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability and food effect"
+    },
+    {
+      "nct": "NCT01093729",
+      "drug": "HM11260C",
+      "phase": "Phase 1",
+      "study": "First-in-human SAD, healthy males"
+    },
+    {
+      "nct": "NCT01166217",
+      "drug": "PF-04620110",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability, fed/fasted"
+    },
+    {
+      "nct": "NCT01332214",
+      "drug": "AZD2820",
+      "phase": "Phase 1",
+      "study": "Single ascending dose, healthy males"
+    },
+    {
+      "nct": "NCT02034071",
+      "drug": "DCCR (diazoxide choline)",
+      "phase": "Phase 1 / Phase 2",
+      "study": "Prader-Willi syndrome dose titration (genetic obesity / hyperphagia)"
+    },
+    {
+      "nct": "NCT02208284",
+      "drug": "PF-06427878",
+      "phase": "Phase 1",
+      "study": "SAD with meal in healthy adults (DGAT2 inhibitor) — check obesity link"
+    },
+    {
+      "nct": "NCT02237742",
+      "drug": "PF-06427878",
+      "phase": "Phase 1",
+      "study": "IV PK microdose in healthy men"
+    },
+    {
+      "nct": "NCT02259179",
+      "drug": "Bupropion + Naltrexone",
+      "phase": "Phase 1",
+      "study": "A Phase 1 Bioequivalence Study of Naltrexone SR/Bupropion SR Combination Trilayer Tablets From Two Manufacturers in healthy Subjects"
+    },
+    {
+      "nct": "NCT02327273",
+      "drug": "BMS-963272",
+      "phase": "Phase 1",
+      "study": "SAD/MAD, healthy subjects"
+    },
+    {
+      "nct": "NCT02391623",
+      "drug": "PF-06427878",
+      "phase": "Phase 1",
+      "study": "MAD with/without food in healthy adults"
+    },
+    {
+      "nct": "NCT02410525",
+      "drug": "PF-06427878",
+      "phase": "Phase 1",
+      "study": "PET tissue distribution in healthy men"
+    },
+    {
+      "nct": "NCT02943239",
+      "drug": "Trevogrumab + garetosmab (REGN1033 / REGN2477)",
+      "phase": "Phase 1",
+      "study": "Myostatin + activin A antibodies in healthy volunteers (now combined with semaglutide for obesity)"
+    },
+    {
+      "nct": "NCT02971722",
+      "drug": "Exendin-4 Fc Fusion Protein",
+      "phase": "Phase 1",
+      "study": "SAD in healthy subjects (GLP-1 agonist)"
+    },
+    {
+      "nct": "NCT03198182",
+      "drug": "BMS-986036",
+      "phase": "Phase 1",
+      "study": "Multiple dose, healthy Japanese / non-Japanese"
+    },
+    {
+      "nct": "NCT03235375",
+      "drug": "Cotadutide",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT03286829",
+      "drug": "Tesofensine",
+      "phase": "Phase 1",
+      "study": "Fixed-dose combination PK"
+    },
+    {
+      "nct": "NCT03309241",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "Single ascending dose, healthy adults"
+    },
+    {
+      "nct": "NCT03375463",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Solution formulation PK in healthy subjects (approved drug)"
+    },
+    {
+      "nct": "NCT03482024",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Renal impairment PK (approved drug)"
+    },
+    {
+      "nct": "NCT03488719",
+      "drug": "Tesofensine",
+      "phase": "Phase 1",
+      "study": "Tesofensine–metoprolol heart-rate interaction"
+    },
+    {
+      "nct": "NCT03492697",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "Formulation / food-effect PK"
+    },
+    {
+      "nct": "NCT03841630",
+      "drug": "Retatrutide",
+      "phase": "Phase 1",
+      "study": "Single ascending dose, healthy subjects"
+    },
+    {
+      "nct": "NCT03940742",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Hepatic impairment PK (approved drug)"
+    },
+    {
+      "nct": "NCT03990090",
+      "drug": "TG103",
+      "phase": "Phase 1",
+      "study": "First-in-human SAD, healthy Chinese adults"
+    },
+    {
+      "nct": "NCT03994549",
+      "drug": "Dapiglutide",
+      "phase": "Early Phase 1",
+      "study": "First-in-human SAD in healthy subjects"
+    },
+    {
+      "nct": "NCT04004988",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Autoinjector vs prefilled syringe PK (approved drug)"
+    },
+    {
+      "nct": "NCT04032782",
+      "drug": "Efpegerglucagon (HM15136)",
+      "phase": "Phase 1",
+      "study": "First-in-human SAD in healthy subjects"
+    },
+    {
+      "nct": "NCT04050670",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Injection-site bioavailability in people with low and high BMI (approved drug)"
+    },
+    {
+      "nct": "NCT04065295",
+      "drug": "BI 1356225",
+      "phase": "Phase 1",
+      "study": "Single rising dose + food effect"
+    },
+    {
+      "nct": "NCT04124003",
+      "drug": "BMS-963272",
+      "phase": "Phase 1",
+      "study": "Drug interaction (rosuvastatin)"
+    },
+    {
+      "nct": "NCT04172987",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Oral-contraceptive interaction in healthy women (approved drug)"
+    },
+    {
+      "nct": "NCT04311424",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Mass balance in healthy men (approved drug)"
+    },
+    {
+      "nct": "NCT04495140",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "Mass balance / absolute bioavailability"
+    },
+    {
+      "nct": "NCT04527250",
+      "drug": "ASC41",
+      "phase": "Phase 1",
+      "study": "SAD/MAD, healthy subjects"
+    },
+    {
+      "nct": "NCT04604496",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT04612517",
+      "drug": "Dapiglutide",
+      "phase": "Early Phase 1",
+      "study": "MAD in healthy subjects (GLP-1/GLP-2)"
+    },
+    {
+      "nct": "NCT04699669",
+      "drug": "CBL-514",
+      "phase": "Phase 1",
+      "study": "Abdominal subcutaneous fat reduction — local fat, not systemic weight loss"
+    },
+    {
+      "nct": "NCT04758234",
+      "drug": "LY3549492",
+      "phase": "Phase 1",
+      "study": "SAD/MAD, healthy subjects"
+    },
+    {
+      "nct": "NCT04839744",
+      "drug": "TG103",
+      "phase": "Phase 1",
+      "study": "Comparability of manufacturing processes"
+    },
+    {
+      "nct": "NCT05021666",
+      "drug": "PB-718",
+      "phase": "Phase 1",
+      "study": "SAD/MAD SC safety/PK/PD in healthy subjects"
+    },
+    {
+      "nct": "NCT05056246",
+      "drug": "Maridebart Cafraglutide",
+      "phase": "Phase 1",
+      "study": "Single dose in healthy Japanese and Caucasian subjects"
+    },
+    {
+      "nct": "NCT05068947",
+      "drug": "GV101",
+      "phase": "Phase 1",
+      "study": "SAD safety/PK in healthy subjects"
+    },
+    {
+      "nct": "NCT05076422",
+      "drug": "BI 3006337",
+      "phase": "Phase 1",
+      "study": "Single rising dose, healthy males"
+    },
+    {
+      "nct": "NCT05093205",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "Drug interaction study"
+    },
+    {
+      "nct": "NCT05118516",
+      "drug": "ASC41",
+      "phase": "Phase 1",
+      "study": "Fixed-dose combination PK"
+    },
+    {
+      "nct": "NCT05347758",
+      "drug": "HRS-7535",
+      "phase": "Phase 1",
+      "study": "First-in-human SAD/MAD, healthy subjects"
+    },
+    {
+      "nct": "NCT05444569",
+      "drug": "LY3537021 (+ liraglutide)",
+      "phase": "Phase 1",
+      "study": "Check: LY3537021 combined with a GLP-1 agonist in healthy participants — mechanism not public"
+    },
+    {
+      "nct": "NCT05447546",
+      "drug": "HT-6184",
+      "phase": "Phase 1",
+      "study": "SAD safety/PK/PD in healthy subjects (NLRP3 inhibitor)"
+    },
+    {
+      "nct": "NCT05517226",
+      "drug": "Cotadutide",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT05564104",
+      "drug": "Cagrilintide",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment + absolute bioavailability (healthy volunteers)"
+    },
+    {
+      "nct": "NCT05611957",
+      "drug": "Retatrutide",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT05667129",
+      "drug": "XEN-101",
+      "phase": "Phase 1",
+      "study": "SAD/MAD safety in healthy subjects"
+    },
+    {
+      "nct": "NCT05810597",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Device bioequivalence in healthy participants (approved drug)"
+    },
+    {
+      "nct": "NCT05882032",
+      "drug": "Orforglipron",
+      "phase": "Phase 1",
+      "study": "Hepatic impairment PK"
+    },
+    {
+      "nct": "NCT05916560",
+      "drug": "Retatrutide",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT05917938",
+      "drug": "NNC0194-0499",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT05959096",
+      "drug": "Retatrutide",
+      "phase": "Phase 1",
+      "study": "Injection-site relative bioavailability in healthy participants with high BMI"
+    },
+    {
+      "nct": "NCT05978713",
+      "drug": "Tirzepatide",
+      "phase": "Phase 1",
+      "study": "Breast-milk concentrations in lactating women (approved drug)"
+    },
+    {
+      "nct": "NCT06003465",
+      "drug": "Retatrutide",
+      "phase": "Phase 1",
+      "study": "Device relative bioavailability"
+    },
+    {
+      "nct": "NCT06063291",
+      "drug": "ID110521156",
+      "phase": "Phase 1",
+      "study": "SAD in healthy subjects"
+    },
+    {
+      "nct": "NCT06106009",
+      "drug": "PF-07976016",
+      "phase": "Phase 1",
+      "study": "SAD/MAD, healthy adults"
+    },
+    {
+      "nct": "NCT06122714",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "SAD/MAD oral, healthy participants"
+    },
+    {
+      "nct": "NCT06141889",
+      "drug": "Azelaprag",
+      "phase": "Phase 1",
+      "study": "PK in older healthy adults"
+    },
+    {
+      "nct": "NCT06153758",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "Immediate vs modified release PK"
+    },
+    {
+      "nct": "NCT06194500",
+      "drug": "LY3549492",
+      "phase": "Phase 1",
+      "study": "Disposition / absolute bioavailability"
+    },
+    {
+      "nct": "NCT06259903",
+      "drug": "MD-18",
+      "phase": "Phase 1",
+      "study": "Single ascending dose, healthy subjects"
+    },
+    {
+      "nct": "NCT06310005",
+      "drug": "BI 3006337",
+      "phase": "Phase 1",
+      "study": "SAD/MAD in healthy Japanese males"
+    },
+    {
+      "nct": "NCT06325930",
+      "drug": "HU6",
+      "phase": "Phase 1",
+      "study": "Absorption, metabolism, excretion"
+    },
+    {
+      "nct": "NCT06352411",
+      "drug": "Survodutide",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT06370728",
+      "drug": "Orforglipron",
+      "phase": "Phase 1",
+      "study": "DDI: carbamazepine on orforglipron PK"
+    },
+    {
+      "nct": "NCT06486558",
+      "drug": "HU6",
+      "phase": "Phase 1",
+      "study": "Formulation PK"
+    },
+    {
+      "nct": "NCT06491550",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "SAD/MAD IV + drug interaction"
+    },
+    {
+      "nct": "NCT06541678",
+      "drug": "Danuglipron",
+      "phase": "Phase 1",
+      "study": "Drug interaction: itraconazole/cyclosporine on danuglipron PK"
+    },
+    {
+      "nct": "NCT06555822",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "A Phase I, Two-Part Study in healthy Volunteers Consisting of a Randomized, Single-blind, Placebo-controlled Multiple Ascending Dose Study to Evaluate"
+    },
+    {
+      "nct": "NCT06562088",
+      "drug": "HDM1002",
+      "phase": "Phase 1",
+      "study": "Drug interaction (rifampicin, itraconazole)"
+    },
+    {
+      "nct": "NCT06576401",
+      "drug": "HDM1002",
+      "phase": "Phase 1",
+      "study": "Mass balance"
+    },
+    {
+      "nct": "NCT06577415",
+      "drug": "RAY1225",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT06577428",
+      "drug": "RAY1225",
+      "phase": "Phase 1",
+      "study": "Injection-site bioavailability, low and high BMI"
+    },
+    {
+      "nct": "NCT06608329",
+      "drug": "HDM1002",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability and food effect"
+    },
+    {
+      "nct": "NCT06613763",
+      "drug": "RAY1225",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT06635226",
+      "drug": "ID110521156",
+      "phase": "Phase 1",
+      "study": "MAD in healthy subjects with BMI >=27 (the trial you flagged)"
+    },
+    {
+      "nct": "NCT06670170",
+      "drug": "PF-07976016",
+      "phase": "Phase 1",
+      "study": "Formulation PK"
+    },
+    {
+      "nct": "NCT06693765",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT06703658",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "A Phase I, Randomised, Single-blind, Placebo-controlled, Single and Repeated Dose-escalation Study to Investigate the Safety, Tolerability, PK and Pha"
+    },
+    {
+      "nct": "NCT06744868",
+      "drug": "THDBH120",
+      "phase": "Phase 1",
+      "study": "SAD/MAD, healthy subjects"
+    },
+    {
+      "nct": "NCT06772532",
+      "drug": "Survodutide",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability of three formulations"
+    },
+    {
+      "nct": "NCT06800729",
+      "drug": "TIX100",
+      "phase": "Phase 1",
+      "study": "Single dose, healthy subjects"
+    },
+    {
+      "nct": "NCT06808802",
+      "drug": "Retatrutide",
+      "phase": "Phase 1",
+      "study": "Drug interaction (metoprolol)"
+    },
+    {
+      "nct": "NCT06809608",
+      "drug": "CT-996",
+      "phase": "Phase 1",
+      "study": "Drug interaction study"
+    },
+    {
+      "nct": "NCT06836037",
+      "drug": "Efinopegdutide",
+      "phase": "Phase 1",
+      "study": "SAD/MAD in healthy Chinese participants"
+    },
+    {
+      "nct": "NCT06890611",
+      "drug": "Bimagrumab",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability, co-formulation with tirzepatide"
+    },
+    {
+      "nct": "NCT06908707",
+      "drug": "LAE102",
+      "phase": "Phase 1",
+      "study": "SAD safety/PK in healthy postmenopausal women (ActRIIA antibody)"
+    },
+    {
+      "nct": "NCT06925854",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "Drug interaction (rosuvastatin)"
+    },
+    {
+      "nct": "NCT06942936",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "An Open-label, Fixed-sequence and Two-part Study to Assess the Impact of Multiple Doses of Itraconazole on the PK of AZD5004 in healthy Participants a"
+    },
+    {
+      "nct": "NCT06948006",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "Formulation, food and omeprazole effect"
+    },
+    {
+      "nct": "NCT06948747",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "An Open-label, Fixed-sequence, Three-part Study to Assess the Effect of AZD5004 on the PK of Rosuvastatin, Atorvastatin, Simvastatin, Repaglinide and "
+    },
+    {
+      "nct": "NCT06985615",
+      "drug": "HDM1002",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT06996886",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "An Open-Label, Randomized, Four-Treatment, Four-Period, Single-Dose Crossover Study in healthy Participants to Assess the Relative Bioavailability of "
+    },
+    {
+      "nct": "NCT07015918",
+      "drug": "PF-07976016",
+      "phase": "Phase 1",
+      "study": "ADME / absolute bioavailability"
+    },
+    {
+      "nct": "NCT07044401",
+      "drug": "Ribupatide",
+      "phase": "Phase 1",
+      "study": "A Phase 1, Randomized, Open-label, Single-Dose, Crossover Study to Investigate the Effect of Injection Site on Relative Bioavailability of KAI-9531 Su"
+    },
+    {
+      "nct": "NCT07071974",
+      "drug": "Survodutide",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability of two formulations"
+    },
+    {
+      "nct": "NCT07076030",
+      "drug": "Petrelintide",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT07120425",
+      "drug": "IBI3032",
+      "phase": "Phase 1",
+      "study": "Single ascending dose, healthy participants"
+    },
+    {
+      "nct": "NCT07134127",
+      "drug": "IBI3032",
+      "phase": "Early Phase 1",
+      "study": "SAD + food effect"
+    },
+    {
+      "nct": "NCT07140055",
+      "drug": "BLX-7006",
+      "phase": "Phase 1",
+      "study": "A Phase 1 Randomized, Double-blind, Placebo-controlled Single-ascending Dose and Multiple-ascending Dose (SAD and MAD) Trial to Assess the Safety, Tol"
+    },
+    {
+      "nct": "NCT07140081",
+      "drug": "BLX-0871",
+      "phase": "Phase 1",
+      "study": "FIH SAD/MAD AMPK activator in healthy adults BMI 20–35 (developed for T2D and obesity)"
+    },
+    {
+      "nct": "NCT07221591",
+      "drug": "Survodutide",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability over 28 weeks"
+    },
+    {
+      "nct": "NCT07300189",
+      "drug": "TLC-1180",
+      "phase": "Phase 1",
+      "study": "SAD/MAD safety/PK/PD in healthy subjects"
+    },
+    {
+      "nct": "NCT07327281",
+      "drug": "TQF3250",
+      "phase": "Phase 1",
+      "study": "SAD in healthy adults (condition listed: hyperglycemia)"
+    },
+    {
+      "nct": "NCT07401862",
+      "drug": "Eloralintide",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT07419698",
+      "drug": "JMT206",
+      "phase": "Phase 1",
+      "study": "SAD safety/PK/PD in healthy subjects"
+    },
+    {
+      "nct": "NCT07426380",
+      "drug": "Eloralintide",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment / ESRD"
+    },
+    {
+      "nct": "NCT07444424",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "An Open-label, Fixed-sequence, Two-part Study to Assess the Effect of AZD5004 on the PK of Mitiglinide and Pioglitazone in healthy Participants"
+    },
+    {
+      "nct": "NCT07455825",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "A Phase I, Randomized, Single-dose, 3-Period, Open-Label Study to Assess the Pharmacokinetic Formulation Bridging, Safety, and Food Effect of Differen"
+    },
+    {
+      "nct": "NCT07460284",
+      "drug": "RAY1225",
+      "phase": "Phase 1",
+      "study": "Mass balance, healthy Chinese participants"
+    },
+    {
+      "nct": "NCT07483437",
+      "drug": "HS-20136-2",
+      "phase": "Phase 1",
+      "study": "Single-dose SC safety/PK in healthy participants"
+    },
+    {
+      "nct": "NCT07518459",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "ADME"
+    },
+    {
+      "nct": "NCT07534592",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "An Open-label, Fixed-sequence Study to Assess the Effect of Elecoglipron on the PK of Rosuvastatin and Atorvastatin in healthy Participants"
+    },
+    {
+      "nct": "NCT07550621",
+      "drug": "MDR-001",
+      "phase": "Phase 1",
+      "study": "Drug interaction study"
+    },
+    {
+      "nct": "NCT07566572",
+      "drug": "BGM0504",
+      "phase": "Phase 1",
+      "study": "Food effect / dosing conditions, oral tablets"
+    },
+    {
+      "nct": "NCT07575945",
+      "drug": "PF-08642534",
+      "phase": "Phase 1",
+      "study": "DDI: itraconazole on single oral doses in healthy adults"
+    },
+    {
+      "nct": "NCT07594847",
+      "drug": "HDM1002",
+      "phase": "Phase 1",
+      "study": "Thorough QT study"
+    },
+    {
+      "nct": "NCT07626515",
+      "drug": "Enicepatide",
+      "phase": "Phase 1",
+      "study": "Safety/PK in Chinese participants with BMI >=23"
+    },
+    {
+      "nct": "NCT07682818",
+      "drug": "Petrelintide",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT07685600",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "Drug interaction (itraconazole)"
+    },
+    {
+      "nct": "NCT07697625",
+      "drug": "MK-4082",
+      "phase": "Phase 1",
+      "study": "Drug interaction (diltiazem)"
+    },
+    {
+      "nct": "NCT07701083",
+      "drug": "Eloralintide",
+      "phase": "Phase 1",
+      "study": "PK of two solutions"
+    },
+    {
+      "nct": "NCT07723833",
+      "drug": "Elecoglipron",
+      "phase": "Phase 1",
+      "study": "A Phase I, Randomized, Single-dose, Crossover, 2-Period, Open-Label Study to Assess the Relative Bioavailability and Safety of Different Oral Formulat"
+    },
+    {
+      "nct": "NCT07741604",
+      "drug": "CT-996",
+      "phase": "Phase 1",
+      "study": "PK in renal impairment"
+    },
+    {
+      "nct": "NCT07783308",
+      "drug": "AZD4144",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    },
+    {
+      "nct": "NCT07787611",
+      "drug": "MWN109",
+      "phase": "Phase 1",
+      "study": "SAD/MAD + meal timing, oral tablet"
+    },
+    {
+      "nct": "NCT07787624",
+      "drug": "MWN109",
+      "phase": "Phase 1",
+      "study": "First-in-human SAD/MAD (injection)"
+    },
+    {
+      "nct": "NCT07827027",
+      "drug": "RAY1225",
+      "phase": "Phase 1",
+      "study": "Bioequivalence, healthy participants"
+    },
+    {
+      "nct": "NCT07837648",
+      "drug": "BI 3034701",
+      "phase": "Phase 1",
+      "study": "Relative bioavailability of two treatments"
+    },
+    {
+      "nct": "NCT07842393",
+      "drug": "IBI3042",
+      "phase": "Phase 1",
+      "study": "Single ascending oral dose, healthy adults"
+    },
+    {
+      "nct": "NCT07857265",
+      "drug": "DA-302168S",
+      "phase": "Phase 1",
+      "study": "Mass balance"
+    },
+    {
+      "nct": "NCT07872033",
+      "drug": "Aleniglipron",
+      "phase": "Phase 1",
+      "study": "PK in hepatic impairment"
+    }
+  ]
+}

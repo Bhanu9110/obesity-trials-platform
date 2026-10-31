@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.11.3 |
-| **Last updated** | 29 Oct 2026 |
+| **Manual version** | 1.12.0 |
+| **Last updated** | 31 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
 > This manual lives in GitHub at `docs/USER_MANUAL.md` and is shown inside the website on the **Help & manual** page. It is updated with every change to the website — see [18. Change log](#18-change-log).
@@ -112,6 +112,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | Preview | Click a row for a quick preview; open the full trial record from there |
 | Sharing | Every view has its own link — copy the address bar to share exactly what you see |
 | Rows per page | Choose how many trials to show per page |
+| **Healthy volunteers** tag | A reviewed Phase 1 trial of an obesity drug run in healthy volunteers or for clinical pharmacology — it is listed under its own phase (see [14](#14-data-sources-and-the-daily-sync)) |
 
 ## 7. Drugs
 
@@ -296,6 +297,9 @@ Changing your password needs your current one. Afterwards admins can no longer s
 | Conference abstract files | ADA 2026 abstracts | On every run, from `sync/data/conference/` |
 | Company reports | e.g. Novo Nordisk Q2 2026 pipeline | On every run, from `sync/data/conference/` |
 | Research files | INN, regulatory status, designations, patents, results, milestones, launch timing of the leading drugs | On every run, from `sync/data/profiles/` |
+| Reviewed Phase 1 list | Early trials of obesity drugs that ClinicalTrials.gov files under "Healthy", liver/kidney impairment or drug interaction instead of obesity | On every run, by NCT ID, from `sync/data/phase1-healthy-volunteers.json` |
+
+**Phase 1 trials in healthy volunteers.** Many first-in-human, drug-interaction, formulation and liver/kidney-impairment studies of obesity drugs do not name obesity as their condition (for example NCT06635226, "Healthy Adult Subjects"), so the obesity search cannot find them. Trials on the reviewed list are fetched by NCT ID on every run and counted as obesity trials, in the phase ClinicalTrials.gov gives them (Phase 1, Early Phase 1, Phase 1/2). They carry a **Healthy volunteers** tag in the Trials explorer and on drug pages, and the trial page shows "Phase 1 – healthy volunteers / clinical pharmacology (reviewed list)" under Classification. To add or remove a trial, edit the NCT IDs in that file.
 
 If a source is down for 3 drugs in a row it is skipped for that run; the health check fails after 47 hours down, and an e-mail alert is sent after 3 days.
 
@@ -352,6 +356,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 31 Oct 2026 | 1.12.0 | Reviewed Phase 1 trials of obesity drugs run in healthy volunteers or for clinical pharmacology (142 trials, checked by the site owner) are now added and counted as obesity trials in their own phase, with a **Healthy volunteers** tag | 6, 7, 14 |
 | 29 Oct 2026 | 1.11.3 | Undisclosed programmes: only Phase 1–3 trials of a real company count — academic sponsors the registry calls "industry" (e.g. Metabolic Research Unit) and class-only usual-care studies are left out | 7 |
 | 29 Oct 2026 | 1.11.2 | Drug exports get a **Key trial (NCT ID)** column: the approval trial(s) for approved drugs (new research file, NCT IDs checked on ClinicalTrials.gov), else one highest-phase trial | 7A, 15 |
 | 29 Oct 2026 | 1.11.1 | Drug classes and generic names ("Anti-obesity medication", "Incretin Therapies", "GLP-1 Receptor Agonist e.g", "Biguanide", "Alter" …) are no longer listed as drugs (new name rule + list). **Undisclosed programmes** count only company-sponsored trials — academic-only ones are left out. Trials with no phase on ClinicalTrials.gov get a phase **estimated from enrollment** (marked *est.*) on the Trials explorer, drug pages, stage chips and exports | 6, 7 |

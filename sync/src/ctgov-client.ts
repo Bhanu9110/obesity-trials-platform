@@ -32,6 +32,8 @@ export interface FetchOptions {
   countTotal?: boolean;
   /** Only these NCT IDs (used to re-fetch records from the retry queue). */
   ids?: string[];
+  /** With ids: do not require the obesity condition search (reviewed Phase 1 trials). */
+  anyCondition?: boolean;
 }
 
 /**
@@ -45,7 +47,7 @@ export interface FetchOptions {
 export async function fetchStudiesPage(opts: FetchOptions): Promise<StudiesPage> {
   const { baseUrl, condition, pageSize, statuses, interventionTypes } = config.ctgov;
   const url = new URL(`${baseUrl}/studies`);
-  url.searchParams.set("query.cond", condition);
+  if (!(opts.anyCondition && opts.ids?.length)) url.searchParams.set("query.cond", condition);
   if (statuses.length) {
     url.searchParams.set("filter.overallStatus", statuses.join(","));
   }
@@ -125,7 +127,7 @@ export async function fetchStudiesPage(opts: FetchOptions): Promise<StudiesPage>
  * Tracks pages consumed via the onPage callback.
  */
 export async function* iterateStudies(
-  opts: { incrementalDays: number | null; startDateFrom?: string | null; ids?: string[] },
+  opts: { incrementalDays: number | null; startDateFrom?: string | null; ids?: string[]; anyCondition?: boolean },
   onPage?: (pageIndex: number, total?: number) => void,
 ): AsyncGenerator<RawStudy> {
   let pageToken: string | undefined;
@@ -135,6 +137,7 @@ export async function* iterateStudies(
       incrementalDays: opts.incrementalDays,
       startDateFrom: opts.startDateFrom ?? null,
       ids: opts.ids,
+      anyCondition: opts.anyCondition,
       pageToken,
       countTotal: pageIndex === 0,
     });

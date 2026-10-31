@@ -7,6 +7,7 @@ import {
   CONTINENT_ORDER, OBESITY_CLASSES, OBESITY_CLASS_ORDER, TRIAL_STATUS_ORDER, formatMonthYear, formatPhase,
   phaseRank, sortContinents, statusInfo, trialUrl,
 } from "@/lib/format";
+import { HealthyTag } from "@/components/ui";
 
 // Trials of one drug: a clickable phase bar, a summary line, one toolbar, and a
 // table of trials grouped by phase. Columns line up (Trial = "NCT ID – title" ·
@@ -100,6 +101,7 @@ function TrialRow({ t }: { t: ProductTrial }) {
           </span>
           <span className="line-clamp-2 min-w-0 text-[14px] font-medium leading-snug text-slate-900 group-hover:text-brand-700" title={t.title ?? undefined}>
             {t.title || <span className="font-normal italic text-slate-400">title appears after the next sync</span>}
+            <HealthyTag reason={t.obesity_reason} />
           </span>
         </div>
         {/* Phones: the other columns as one compact line */}

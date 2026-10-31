@@ -20,6 +20,18 @@ export function NctLink({ id }: { id: string }) {
 }
 
 /** Phase as a coloured pill: early phases cool, late phases warm. */
+/** Reviewed Phase 1 trial run in healthy volunteers / clinical pharmacology (sync curated list). */
+export const HEALTHY_LABEL = "Phase 1 – healthy volunteers / clinical pharmacology";
+export function HealthyTag({ reason }: { reason?: string | null }) {
+  if (!reason || !reason.startsWith(HEALTHY_LABEL)) return null;
+  return (
+    <span title="Early study of an obesity drug in healthy volunteers or for clinical pharmacology (drug interaction, liver/kidney impairment, formulation). ClinicalTrials.gov does not list obesity as its condition; it was reviewed and added to the site."
+          className="ml-1 inline-flex whitespace-nowrap rounded-full bg-teal-50 px-1.5 py-0.5 text-[10px] font-medium text-teal-700 ring-1 ring-teal-200">
+      Healthy volunteers
+    </span>
+  );
+}
+
 export function PhaseText({ phase, est }: { phase: string | null; est?: string | null }) {
   // No phase on ClinicalTrials.gov: show the phase estimated from enrollment, marked "est."
   if ((!phase || phase.toUpperCase() === "NA") && est) {
