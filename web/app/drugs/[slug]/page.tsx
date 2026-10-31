@@ -18,6 +18,8 @@ import { BarList, SplitBar, YearColumns, type Segment } from "@/components/chart
 import { CHART_VIOLET, SERIES, phaseIndex } from "@/lib/chart-colors";
 import { formatPhase } from "@/lib/format";
 import ProductSummaryCard from "@/components/ProductSummaryCard";
+import { drugPublications, resultsPapers } from "@/lib/publications";
+import { DrugPublications } from "@/components/Publications";
 
 const STATUS_GROUPS = [
   { key: "recruiting", label: "Recruiting or opening", codes: ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION"] },
@@ -49,11 +51,15 @@ export default async function DrugPage({ params, searchParams }: {
   const product = await getProduct(decodeURIComponent(slug));
   if (!product) notFound();
   const viewOnly = !authDisabled() && isGuest(await verifySession((await cookies()).get(SESSION_COOKIE)?.value));
-  const [trials, names, abstracts, results, milestones] = await Promise.all([
+  const [trials, names, abstracts, results, milestones, pubs] = await Promise.all([
     getProductTrials(product.id), productNames(), getProductAbstracts(product.slug),
     // editors also get hidden research rows (they can show them again)
     getProductResults(product.slug, !viewOnly), getProductMilestones(product.slug, !viewOnly),
+    drugPublications(product.slug).catch(() => ({ total: null, query: null, checkedAt: null, papers: [] })),
   ]);
+  // Trials with a published results paper (PubMed) — tagged in the trials table.
+  const resultsByTrial = await resultsPapers(trials.map((t) => t.nct_id)).catch(() => new Map<string, string[]>());
+  for (const t of trials) t.results_pmids = resultsByTrial.get(t.nct_id) ?? [];
   const next = milestones.find((m) => !m.hidden && (m.status === "expected" || m.status === "delayed"));
   const primary = trials.filter((t) => t.obesity_class === "primary");
   // No ClinicalTrials.gov trial yet: the clinical trials its conference abstracts report.
@@ -181,6 +187,8 @@ export default async function DrugPage({ params, searchParams }: {
         );
       })()}
 
+
+      <DrugPublications papers={pubs.papers} total={pubs.total} query={pubs.query} checkedAt={pubs.checkedAt} name={product.name} />
 
       <ConferenceAbstracts abstracts={abstracts} />
 

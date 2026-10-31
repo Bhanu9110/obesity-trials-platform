@@ -105,6 +105,18 @@ jobs:
           ENRICH_SKIP_SOURCES: ${{ vars.ENRICH_SKIP_SOURCES }}
         run: npm run enrich-products
 
+      # PubMed papers (NCBI E-utilities): papers citing each trial's NCT ID (results papers
+      # marked) and the newest papers naming each drug. Every trial and drug is re-checked
+      # weekly, stopping after 15 minutes. Optional secret NCBI_API_KEY raises NCBI's limit
+      # from 3 to 10 requests a second. A problem here never fails the daily sync.
+      - name: PubMed papers
+        working-directory: sync
+        continue-on-error: true
+        timeout-minutes: 20
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+        run: npm run pubmed
+
       # Fails the job (GitHub emails you) when something is broken: database,
       # migrations, no successful sync for 3 days, no trials, or a drug-profile source
       # (openFDA, ChEMBL, Inxight Drugs) not working for 3 days in a row. Warnings (e.g. records

@@ -11,6 +11,8 @@ import { ChangeDetail, KIND_LABEL } from "@/components/ChangeDetail";
 import StudyDetails, { DETAIL_SECTIONS, SiteStatus } from "@/components/trial/StudyDetails";
 import ResultsView, { RESULT_SECTIONS } from "@/components/trial/Results";
 import { QUALITY_LABELS, SEV_STYLE } from "@/lib/quality-labels";
+import { trialPublications } from "@/lib/publications";
+import { TrialPublications } from "@/components/Publications";
 
 export const dynamic = "force-dynamic";
 
@@ -156,7 +158,8 @@ export default async function TrialPage({ params, searchParams }: Params) {
   if (!NCT_RE.test(nct)) notFound();
   const sp = await searchParams;
 
-  const [reg, record] = await Promise.all([fetchStudy(nct), trialRecord(nct)]);
+  const [reg, record, papers] = await Promise.all([fetchStudy(nct), trialRecord(nct), trialPublications(nct).catch(() => [])]);
+  const resultsPapers = papers.filter((p) => p.is_results).length;
   const { stored, changes } = record;
   if (!reg.ok && reg.notFound && !stored && !changes.length) notFound();
 
@@ -188,6 +191,7 @@ export default async function TrialPage({ params, searchParams }: Params) {
           {ds?.phases?.length ? <span className="rounded bg-indigo-50 px-1.5 py-0.5 font-medium text-indigo-700">{ds.phases.map(humanize).join(" / ")}</span> : null}
           {ds?.studyType && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">{humanize(ds.studyType)}</span>}
           {hasResults && <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700">Results posted</span>}
+          {resultsPapers > 0 && <a href="#publications" className="rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700 hover:underline">Results published ({resultsPapers} {resultsPapers === 1 ? "paper" : "papers"})</a>}
         </div>
         <h1 className="mt-3 font-display text-2xl font-semibold leading-snug tracking-tight text-slate-950">
           {title}{id?.acronym && <span className="ml-2 text-base font-normal text-slate-500">({id.acronym})</span>}
@@ -216,6 +220,8 @@ export default async function TrialPage({ params, searchParams }: Params) {
       </header>
 
       <DatabasePanel stored={stored} removedAt={removedAt} nct={nct} />
+
+      <TrialPublications papers={papers} nct={nct} />
 
       <div className="flex gap-1 border-b border-slate-200" role="tablist">
         {tabs.map(([t, label]) => (

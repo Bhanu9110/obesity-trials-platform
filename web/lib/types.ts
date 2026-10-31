@@ -154,6 +154,8 @@ export interface ProductTrial {
   obesity_class: string;
   obesity_reason: string | null;
   est_phase?: string | null;          // no phase given: estimated from enrollment
+  /** PubMed papers reporting this trial's results (newest first) */
+  results_pmids?: string[];
 }
 
 export interface ProductSummary extends ProductInfo {

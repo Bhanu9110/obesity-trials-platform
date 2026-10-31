@@ -42,6 +42,7 @@ export const TRIAL_COLUMNS: ColumnDef[] = [
   { key: "last_update", label: "Last update", width: 1, group: "Dates" },
   { key: "continents", label: "Regions", width: 1.5, group: "Location" },
   { key: "countries", label: "Countries", width: 2.2, group: "Location" },
+  { key: "results_paper", label: "Results paper (PubMed)", width: 2.2, group: "Links" },
   { key: "ctgov_link", label: "ClinicalTrials.gov link", width: 2.2, link: true, group: "Links" },
 ];
 
@@ -75,6 +76,7 @@ export const DRUG_COLUMNS: ColumnDef[] = [
   { key: "active_trials", label: "Trials running", width: 0.9, number: true, group: "Trials" },
   { key: "last_trial_year", label: "Newest trial start", width: 0.9, number: true, group: "Trials" },
   { key: "abstracts", label: "Conference abstracts", width: 0.9, number: true, group: "Trials" },
+  { key: "pubmed_papers", label: "PubMed papers", width: 0.9, number: true, group: "Trials" },
   { key: "page_link", label: "Drug page link", width: 2, link: true, group: "Links" },
 ];
 

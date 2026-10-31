@@ -16,6 +16,7 @@ import { enrichProducts } from "./enrich.js";
 import { importAbstracts } from "./abstracts.js";
 import { importProfiles } from "./profiles.js";
 import { applyCuration } from "./curation.js";
+import { linkDrugPapers, linkTrialPapers, syncPubmed } from "./pubmed.js";
 import { closePool, pool } from "./db.js";
 
 function log(msg: string, obj?: unknown) {
@@ -41,6 +42,8 @@ const USAGE = `Commands:
   import-abstracts     load conference abstracts (sync/data/conference/*.json) into drug pages
   import-profiles      load research files (sync/data/profiles/*.json): INN, regulatory status,
                        designations, patents, results, milestones, launch timelines
+  pubmed               PubMed papers: papers citing each trial's NCT ID and the newest papers per drug
+                       [NCT… | slug…] only these trials / drugs (NCBI_API_KEY optional)
   health               pipeline health checks (exit code 1 when a check fails)`;
 
 async function main() {
@@ -148,6 +151,20 @@ async function main() {
       });
       log("Drug profiles auto-filled", r);
       if (r.sourcesDown.length) console.warn(`::warning::Some drug references were unavailable this run: ${r.sourcesDown.join(" | ")}`);
+      break;
+    }
+    case "pubmed": {
+      // PubMed papers (sync/src/pubmed.ts). Never fails the daily job: problems are warnings.
+      if (args.length) {
+        const ncts = args.filter((a) => /^NCT\d{8}$/i.test(a)).map((a) => a.toUpperCase());
+        const slugs = args.filter((a) => !/^NCT\d{8}$/i.test(a));
+        if (ncts.length) await linkTrialPapers({ log, ids: ncts });
+        if (slugs.length) await linkDrugPapers({ log, slugs });
+        break;
+      }
+      const r = await syncPubmed({ log });
+      log("PubMed papers", r);
+      if (r.error) console.warn(`::warning::PubMed was unavailable this run: ${r.error}`);
       break;
     }
     case "health": {

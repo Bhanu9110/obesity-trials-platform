@@ -2,6 +2,7 @@
 // the page had ("current filters") or everything, reduced to the chosen columns.
 
 import { keyTrials, listProducts, listTrialsForExport, type KeyTrial, type TrialFilters } from "@/lib/queries";
+import { drugPaperCounts, pubmedUrl, resultsPapers } from "@/lib/publications";
 import { formatPhase, highestPhase, OBESITY_CLASSES, SPONSOR_GROUPS, TRIAL_STATUS, ctgovUrl } from "@/lib/format";
 import { devStage, STAGE_META, type StageKey } from "@/lib/devStage";
 import { regGroup, type RegGroup } from "@/lib/regulatory";
@@ -66,8 +67,11 @@ export async function trialsTable(sp: URLSearchParams, scope: "filtered" | "all"
   const truncated = data.length > MAX_ROWS;
   const rowsIn = data.slice(0, MAX_ROWS);
   const columns = pickColumns("trials", columnKeys);
+  const papers = columns.some((c) => c.key === "results_paper")
+    ? await resultsPapers(rowsIn.map((t) => t.nct_id)).catch(() => new Map<string, string[]>()) : new Map<string, string[]>();
   const value = (t: (typeof rowsIn)[number], key: string): Cell => {
     switch (key) {
+      case "results_paper": return (papers.get(t.nct_id) ?? []).map(pubmedUrl).join("\n") || null;
       case "nct_id": return t.nct_id;
       case "title": return t.title;
       case "drugs": return t.drugs;
@@ -142,8 +146,11 @@ export async function drugsTable(sp: URLSearchParams, scope: "filtered" | "all",
   const { rows: list, filters, targets, members } = filterDrugs(products, sp, scope);
   const columns = pickColumns("drugs", columnKeys);
   const keys = columns.some((c) => c.key === "key_trial") ? await keyTrials(list.map((p) => p.slug)) : new Map<string, KeyTrial>();
+  const paperCounts = columns.some((c) => c.key === "pubmed_papers")
+    ? await drugPaperCounts(list.map((p) => p.slug)).catch(() => new Map<string, number>()) : new Map<string, number>();
   const value = (p: ProductSummary, key: string): Cell => {
     switch (key) {
+      case "pubmed_papers": return paperCounts.get(p.slug) ?? null;
       case "name": return p.name;
       case "aliases": return cleanNames(splitNames(p.aliases), p.name).join(", ") || null;
       case "brand_names": return p.brand_names;

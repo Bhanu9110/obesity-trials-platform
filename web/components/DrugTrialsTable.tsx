@@ -7,7 +7,7 @@ import {
   CONTINENT_ORDER, OBESITY_CLASSES, OBESITY_CLASS_ORDER, TRIAL_STATUS_ORDER, formatMonthYear, formatPhase,
   phaseRank, sortContinents, statusInfo, trialUrl,
 } from "@/lib/format";
-import { HealthyTag } from "@/components/ui";
+import { HEALTHY_LABEL, HealthyTag } from "@/components/ui";
 
 // Trials of one drug: a clickable phase bar, a summary line, one toolbar, and a
 // table of trials grouped by phase. Columns line up (Trial = "NCT ID – title" ·
@@ -101,8 +101,19 @@ function TrialRow({ t }: { t: ProductTrial }) {
           </span>
           <span className="line-clamp-2 min-w-0 text-[14px] font-medium leading-snug text-slate-900 group-hover:text-brand-700" title={t.title ?? undefined}>
             {t.title || <span className="font-normal italic text-slate-400">title appears after the next sync</span>}
-            <HealthyTag reason={t.obesity_reason} />
           </span>
+          {/* Tags outside the clamped title, so a long title never hides them */}
+          {(t.results_pmids?.length || t.obesity_reason?.startsWith(HEALTHY_LABEL)) ? (
+            <span className="flex shrink-0 flex-col items-start gap-1 sm:flex-row">
+              <HealthyTag reason={t.obesity_reason} />
+              {t.results_pmids?.length ? (
+                <span title={`Results published on PubMed (PMID ${t.results_pmids.join(", ")})`}
+                      className="ml-1 inline-flex whitespace-nowrap rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200">
+                  Results paper
+                </span>
+              ) : null}
+            </span>
+          ) : null}
         </div>
         {/* Phones: the other columns as one compact line */}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 md:hidden">

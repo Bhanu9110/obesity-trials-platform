@@ -169,6 +169,13 @@ web/app/         / (trials) · /drugs · /drugs/[slug] · /changes · /quality �
 - **Drug merges** — use the Merge button, or insert into `product_aliases`
   (`alias_slug` = the lower-case alphanumeric name, `product_slug` = target drug's
   slug) and run `rebuild-products`.
+- **PubMed papers** — `sync/src/pubmed.ts` (`npm run pubmed`), run daily after the drug
+  profiles. Papers citing each trial's NCT ID (PubMed secondary ID or title/abstract; results
+  papers marked) and the newest `PUBMED_DRUG_PAPERS` (100) papers naming each drug, with the
+  total count — stored in `publications`, `trial_publications`, `product_publications`
+  (migration 0027). Each trial and drug is re-checked every `PUBMED_RECHECK_DAYS` (7), within
+  `PUBMED_BUDGET_MIN` (15) minutes. Add the repository secret `NCBI_API_KEY` (free, from an
+  NCBI account → API Key Management) for 10 instead of 3 requests a second. Never commit the key.
 - **Automatic drug profiles** — `sync/src/enrich.ts`, run daily after the sync. Blank
   drug-profile fields are filled from the trial data, [ChEMBL](https://www.ebi.ac.uk/chembl/)
   (modality, mechanism, codes, trade names) and [openFDA](https://open.fda.gov/apis/drug/drugsfda/)

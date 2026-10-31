@@ -18,6 +18,7 @@
     "dismiss": "tsx src/index.ts dismiss",
     "classify": "tsx src/index.ts classify",
     "health": "tsx src/index.ts health",
+    "pubmed": "tsx src/index.ts pubmed",
     "rebuild-products": "tsx src/index.ts rebuild-products",
     "enrich-products": "tsx src/index.ts enrich-products",
     "import-abstracts": "tsx src/index.ts import-abstracts",

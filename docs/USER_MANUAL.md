@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Website** | obesity-trials.vercel.app |
-| **Manual version** | 1.12.0 |
+| **Manual version** | 1.13.0 |
 | **Last updated** | 31 Oct 2026 |
 | **Who this is for** | Everyone who signs in: super admin, admins, members and guests |
 
@@ -112,6 +112,7 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | Preview | Click a row for a quick preview; open the full trial record from there |
 | Sharing | Every view has its own link — copy the address bar to share exactly what you see |
 | Rows per page | Choose how many trials to show per page |
+| **Publications** on a trial page | Papers on PubMed citing the trial's NCT ID — results papers first (green **Results paper** tag, and **Results published** in the page header), then protocol / design papers and other citations; each with authors, journal, date, PMID, DOI and **Show abstract** |
 | **Healthy volunteers** tag | A reviewed Phase 1 trial of an obesity drug run in healthy volunteers or for clinical pharmacology — it is listed under its own phase (see [14](#14-data-sources-and-the-daily-sync)) |
 
 ## 7. Drugs
@@ -145,6 +146,8 @@ The dashboard of every interventional obesity trial: totals, trials by phase, re
 | **Milestones & timeline** | Dated events in two columns — **Upcoming** (soonest first) and **Past** (newest first): regulatory steps, readouts, launches, patent expiries and inflection points, each with its source. Tabs: All, Upcoming, Past |
 | **Efficacy & safety results** | Key trial results — trial, population and duration, dose, endpoint, result, comparator and source. Tabs: Efficacy, Safety |
 | Trials | Every linked ClinicalTrials.gov trial |
+| Trials table tags | **Results paper** — a PubMed paper reports this trial's results (hover for the PMID); **Healthy volunteers** — a reviewed Phase 1 trial (see [14](#14-data-sources-and-the-daily-sync)) |
+| **Publications on PubMed** | The total number of PubMed papers naming the drug, its INN, brand or code names (all topics — clinical, preclinical, reviews), and the newest 100: title (opens PubMed), authors, journal, date, PMID, DOI, type tags (RCT, Phase 3, Review, Meta-analysis, Protocol …) and **Show abstract**. The first 10 are shown — **Show more** lists the rest. **See all on PubMed** opens the same search on PubMed |
 | Conference abstracts / company reports | Abstracts (e.g. ADA 2026) and company pipeline reports that name the drug |
 | Kind | Mark an entry as a drug, a supplement, not a drug, or **not an obesity drug** (a real medicine with no effect on weight — anaesthetics, antibiotics, blood-pressure drugs, contraceptives in drug-interaction studies …). Only drugs are listed (members and above) |
 | Merge | Merge a duplicate spelling into this drug (members and above) |
@@ -187,6 +190,7 @@ The **Export** button on the **Trials explorer** and the **Drugs** page opens th
 |---|---|
 | Size | Excel and CSV take up to 20,000 rows; PDF and Word show the first 3,000 rows (the page tells you when) |
 | **Key trial (NCT ID)** | Drug exports, ticked by default. **Approved** drugs: the trial(s) the approval was based on, e.g. *Approval based on: NCT03548935 (STEP 1, Phase 3)* — from the research file `pivotal-trials-2026-10.json` (semaglutide, tirzepatide, liraglutide, orforglipron, mazdutide, ecnoglutide, setmelanotide, Contrave, Qsymia, lorcaserin; drugs approved before trial registration say so). Approved drugs not in that file show their highest-phase trial, marked as such. **Other drugs**: one trial with their highest phase — obesity trials first, then company-sponsored, running and largest |
+| **PubMed columns** | Trials: **Results paper (PubMed)** — links to the papers reporting the trial's results. Drugs: **PubMed papers** — how many papers name the drug |
 | Order | Trials: as sorted on the Trials page. Drugs: phase-wise — approved first, then filed, Phase 3, 2, 1 … |
 | Who | Super admin, owners and admins always. Members and guests when an admin ticks **Can download data** (Admin page → add a login, or Manage → **Download data**) |
 | Record | Every download is written to the **Audit logs** (tab **Downloads**: who, what, format, rows and filters) |
@@ -297,7 +301,10 @@ Changing your password needs your current one. Afterwards admins can no longer s
 | Conference abstract files | ADA 2026 abstracts | On every run, from `sync/data/conference/` |
 | Company reports | e.g. Novo Nordisk Q2 2026 pipeline | On every run, from `sync/data/conference/` |
 | Research files | INN, regulatory status, designations, patents, results, milestones, launch timing of the leading drugs | On every run, from `sync/data/profiles/` |
+| PubMed (NCBI E-utilities) | Papers citing each trial's NCT ID (results papers marked) and the newest papers naming each drug, with abstracts | Daily; every trial and drug re-checked weekly |
 | Reviewed Phase 1 list | Early trials of obesity drugs that ClinicalTrials.gov files under "Healthy", liver/kidney impairment or drug interaction instead of obesity | On every run, by NCT ID, from `sync/data/phase1-healthy-volunteers.json` |
+
+**PubMed papers.** A paper is linked to a trial when PubMed lists the trial's NCT ID as the paper's registry number, or the NCT ID is written in its title or abstract ("NCT ID in abstract"). It counts as a **results paper** when it is a clinical-trial report (RCT, Phase 1–4, secondary or post-hoc analysis) — not a protocol, design, rationale or baseline paper, review, editorial or letter. Drug papers come from one PubMed search on the drug's names (title and abstract), shown on the drug page as a link. The optional GitHub secret `NCBI_API_KEY` (free from an NCBI account) lets the sync make 10 instead of 3 requests a second; it is never stored in the code. A PubMed problem never stops the daily sync.
 
 **Phase 1 trials in healthy volunteers.** Many first-in-human, drug-interaction, formulation and liver/kidney-impairment studies of obesity drugs do not name obesity as their condition (for example NCT06635226, "Healthy Adult Subjects"), so the obesity search cannot find them. Trials on the reviewed list are fetched by NCT ID on every run and counted as obesity trials, in the phase ClinicalTrials.gov gives them (Phase 1, Early Phase 1, Phase 1/2). They carry a **Healthy volunteers** tag in the Trials explorer and on drug pages, and the trial page shows "Phase 1 – healthy volunteers / clinical pharmacology (reviewed list)" under Classification. To add or remove a trial, edit the NCT IDs in that file.
 
@@ -356,6 +363,7 @@ Newest first. Every change to the website adds a row here and updates the sectio
 
 | Date | Version | Change | Sections updated |
 |---|---|---|---|
+| 31 Oct 2026 | 1.13.0 | **PubMed papers**: trial pages list the papers citing the trial (results papers marked, abstracts), drug pages list the newest papers naming the drug with the total count, drug trial tables tag trials with a results paper, and exports get *Results paper (PubMed)* and *PubMed papers* columns. Daily sync step with optional secret `NCBI_API_KEY` | 6, 7.2, 7A, 14 |
 | 31 Oct 2026 | 1.12.0 | Reviewed Phase 1 trials of obesity drugs run in healthy volunteers or for clinical pharmacology (142 trials, checked by the site owner) are now added and counted as obesity trials in their own phase, with a **Healthy volunteers** tag | 6, 7, 14 |
 | 29 Oct 2026 | 1.11.3 | Undisclosed programmes: only Phase 1–3 trials of a real company count — academic sponsors the registry calls "industry" (e.g. Metabolic Research Unit) and class-only usual-care studies are left out | 7 |
 | 29 Oct 2026 | 1.11.2 | Drug exports get a **Key trial (NCT ID)** column: the approval trial(s) for approved drugs (new research file, NCT IDs checked on ClinicalTrials.gov), else one highest-phase trial | 7A, 15 |
